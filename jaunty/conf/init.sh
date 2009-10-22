@@ -7,7 +7,7 @@
   else {
     ob_start(); // get it all set
     // Update pressflow
-    echo `cd /var/www/pressflow; bzr merge`;
+    echo `cd /var/www/; bzr merge`;
     
     // move mysql start state to /mnt
     // TODO: this should be EBS'ed
