@@ -1,0 +1,1 @@
+This folder is the root dir for Project Mercury files.  Distro-specific files will be in distro-names folders (Ubuntu Jaunty is all we have at the moment).  This folder also has non-distro-specific files, aush as the splash page.
