@@ -51,6 +51,6 @@
 
     // mark incep date
     $stamp = date('Y-m-d H:i');
-    echo `echo $stamp >> /etc/mercury/incep`\n;
+    echo `echo $stamp >> /etc/mercury/incep`;
   }
 ?>
