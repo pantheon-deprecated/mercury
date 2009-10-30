@@ -1,0 +1,10 @@
+MERCURY 0.7-Beta created by Chapter Three (http://chapterthree.com)                                  10/29/09
+
+Thank you for using this AMI.  Please post any question/comments to http://groups.drupal.org/pantheon/
+
+0.7-Beta:
+moved mysql tmpdir from /tmp to /mnt/tmp
+changed default mysql engine type from MyISAM to InnoDB
+changed varnish max cache from 1 GB to 512 MB
+added README.txt and CHANGELOG.txt to splashpage
+
