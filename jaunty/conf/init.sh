@@ -11,7 +11,7 @@
     
     // move mysql start state to /mnt
     // TODO: this should be EBS'ed
-    mkdir /mnt/tmp
+    echo `mkdir /mnt/tmp`;
     echo `chown mysql:mysql /mnt/tmp/`;
     echo `chmod 777 /mnt/tmp`;
     echo `rsync -a /var/lib/mysql /mnt`;
