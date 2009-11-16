@@ -30,6 +30,7 @@
     // Set up postfix
     // get hostname
     $hostname = trim(str_replace('public-hostname: ', '', `/usr/local/bin/ec2-metadata -p`));
+    echo `echo $hostname > /etc/mailname`;
     echo `postconf -e 'myhostname = $hostname'`;
     echo `postconf -e 'mydomain = $hostname'`;
     echo `postconf -e 'mydestination = $hostname, localhost'`;
