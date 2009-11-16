@@ -1,57 +1,42 @@
-#!/usr/bin/php -q
-<?php
-  if (file_exists('/etc/mercury/incep')) {
-    // only run once
-    exit(0);
-  }
-  else {
-    ob_start(); // get it all set
-    // Update pressflow
-    echo `cd /var/www/; bzr merge --force`;
-    
-    // move mysql start state to /mnt
-    // TODO: this should be EBS'ed
-    echo `mkdir /mnt/tmp`;
-    echo `chown mysql:mysql /mnt/tmp/`;
-    echo `chmod 777 /mnt/tmp`;
-    echo `rsync -a /var/lib/mysql /mnt`;
-    echo `/etc/init.d/mysql restart`;
-    // TODO: clean up vestigal /var/lib/mysql
-    
-    // set up varnish area in /mnt
-    echo `rsync -a /var/lib/varnish /mnt`;
-    echo `/etc/init.d/varnish restart`;
-    // TODO: clean up vistigal /var/lib/varnish
+#!/bin/bash
 
-    echo `apt-get update`;    
-    echo `echo Y|apt-get upgrade`;
-    
-    
-    // Set up postfix
-    // get hostname
-    $hostname = trim(str_replace('public-hostname: ', '', `/usr/local/bin/ec2-metadata -p`));
-    echo `echo $hostname > /etc/mailname`;
-    echo `postconf -e 'myhostname = $hostname'`;
-    echo `postconf -e 'mydomain = $hostname'`;
-    echo `postconf -e 'mydestination = $hostname, localhost'`;
-    
-    // Phone home
-    $ami = trim(str_replace('ami-id: ', '', `/usr/local/bin/ec2-metadata -a`));
-    $instance = trim(str_replace('instance-id: ', '', `/usr/local/bin/ec2-metadata -i`));
-    $url = 'http://getpantheon.com/pantheon.php?ami='. $ami .'&instance='. $instance;
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_HEADER, 0);
-    curl_exec($ch);
-    curl_close($ch);
+if [ -e /etc/mercury/incep ]; then
+    exit 0
+fi
 
-    $output = ob_get_flush();
-    $log = fopen('/etc/mercury/bootlog', 'w');
-    fwrite($log, $output);
-    fclose($log);
+exec &> /etc/mercury/bootlog
 
-    // mark incep date
-    $stamp = date('Y-m-d H:i');
-    echo `echo $stamp >> /etc/mercury/incep`;
-  }
-?>
+cd /var/www/; bzr merge --force
+
+# Move mysql to /mnt
+# TODO: this should be EBS'ed
+mkdir /mnt/tmp
+chown mysql:mysql /mnt/tmp/
+chmod 777 /mnt/tmp
+rsync -a /var/lib/mysql /mnt
+/etc/init.d/mysql restart
+# TODO: clean up vestigal /var/lib/mysql
+    
+# Move varnish to /mnt
+rsync -a /var/lib/varnish /mnt
+/etc/init.d/varnish restart
+# TODO: clean up vistigal /var/lib/varnish
+
+apt-get update   
+apt-get -y upgrade
+    
+# Set up postfix
+
+HOSTNAME=$(/usr/local/bin/ec2-metadata -p | sed 's/public-hostname: //')
+echo $HOSTNAME > /etc/mailname
+postconf -e 'myhostname = $hostname'
+postconf -e 'mydomain = $hostname'
+postconf -e 'mydestination = $hostname, localhost'
+    
+# Phone home
+AMI=$(/usr/local/bin/ec2-metadata -a | sed 's/ami-id: //')
+INSTANCE=$(/usr/local/bin/ec2-metadata -i | sed 's/instance-id: //')
+curl "http://getpantheon.com/pantheon.php?ami=$AMI&instance=$INSTANCE"
+
+# Mark incep date
+echo `date` > /etc/mercury/incep
