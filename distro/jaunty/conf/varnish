@@ -33,14 +33,13 @@ INSTANCE=pressflow
 ## Alternative 2, Configuration with VCL
 #
 # Listen on port 80, administration on localhost:6082, and forward to
-# one content server selected by the vcl file, based on the request.  Use a VARNISH_SIZE
+# one content server selected by the vcl file, based on the request.  Use a 256M
 # fixed-size cache file.
 #
 DAEMON_OPTS="-a :80 \
              -T localhost:6082 \
              -f /etc/varnish/default.vcl \
-             -s file,/var/lib/varnish/$INSTANCE/varnish_storage.bin,VARNISH_SIZE"
-
+             -s file,/var/lib/varnish/$INSTANCE/varnish_storage.bin,256M"
 
 ## Alternative 3, Advanced configuration
 #

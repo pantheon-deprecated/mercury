@@ -3,6 +3,11 @@
 # Markers set at 50gb, 25gb, 15gb, 8gb, 4gb, 2gb, 1gb, and 512mb (rounded down)
 # TODO: support for more distributions
 
+DEFAULT_APC_SIZE="128"
+DEFAULT_PHP_SIZE="64M"
+DEFAULT_TOMCAT_MAX_THREADS="50"
+DEFAULT_VARNISH_SIZE="256M"
+
 # Get RAM size:
 RAM=$(grep MemTotal /proc/meminfo | sed 's/[^0-9]*//g')
 
@@ -42,10 +47,10 @@ elif (($RAM>=100000)); then
     TOMCAT_MAX_THREADS="100"
     VARNISH_SIZE="512M"
 elif (($RAM>=50000)); then
-    APC_SIZE="128"
-    PHP_SIZE="64M"
-    TOMCAT_MAX_THREADS="50"
-    VARNISH_SIZE="256M"
+    APC_SIZE=$DEFAULT_APC_SIZE
+    PHP_SIZE=$DEFAULT_PHP_SIZE
+    TOMCAT_MAX_THREADS=$DEFAULT_TOMCAT_MAX_THREADS
+    VARNISH_SIZE=$DEFAULT_VARNISH_SIZE
 else
     echo "under 512mb RAM not supported"
     exit 0
@@ -63,7 +68,7 @@ case $RELEASE in
 	;;
 esac
 
-sed --in-place=.bak s/APC_SIZE/$APC_SIZE/ $APC_DIR
-sed --in-place=.bak s/PHP_SIZE/$PHP_SIZE/ $PHP_DIR
-sed --in-place=.bak s/TOMCAT_MAX_THREADS/$TOMCAT_MAX_THREADS/ $TOMCAT_DIR
-sed --in-place=.bak s/VARNISH_SIZE/$VARNISH_SIZE/ $VARNISH_DIR
+sed --in-place=.bak s/$DEFAULT_APC_SIZE/$APC_SIZE/ $APC_DIR
+sed --in-place=.bak s/$DEFAULT_PHP_SIZE/$PHP_SIZE/ $PHP_DIR
+sed --in-place=.bak s/$DEFAULT_TOMCAT_MAX_THREADS/$TOMCAT_MAX_THREADS/ $TOMCAT_DIR
+sed --in-place=.bak s/$DEFAULT_VARNISH_SIZE/$VARNISH_SIZE/ $VARNISH_DIR
