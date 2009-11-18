@@ -30,13 +30,19 @@ ln -s /mnt/varnish/lib /var/lib/varnish
 apt-get update   
 apt-get -y upgrade
     
+# Config Memory
+/etc/mercury/config_mem.sh
+
 # Set up postfix
 HOSTNAME=$(/usr/local/bin/ec2-metadata -p | sed 's/public-hostname: //')
 echo $HOSTNAME > /etc/mailname
-postconf -e 'myhostname = $hostname'
-postconf -e 'mydomain = $hostname'
-postconf -e 'mydestination = $hostname, localhost'
+postconf -e 'myhostname = $HOSTNAME'
+postconf -e 'mydomain = $HOSTNAME'
+postconf -e 'mydestination = $HOSTNAME, localhost'
     
+# Reset Drupal Admin Account
+echo "DELETE FROM users WHERE uid = 1;ALTER TABLE users AUTO_INCREMENT = 1;" | mysql -u root -D pressflow
+
 # Phone home
 AMI=$(/usr/local/bin/ec2-metadata -a | sed 's/ami-id: //')
 INSTANCE=$(/usr/local/bin/ec2-metadata -i | sed 's/instance-id: //')
