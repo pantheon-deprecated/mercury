@@ -4,9 +4,9 @@
 # TODO: support for more distributions
 
 DEFAULT_APC_SIZE="128"
-DEFAULT_PHP_SIZE="64M"
-DEFAULT_TOMCAT_MAX_THREADS="50"
-DEFAULT_VARNISH_SIZE="256M"
+DEFAULT_PHP_SIZE="16M"
+DEFAULT_TOMCAT_MAX_THREADS="150"
+DEFAULT_VARNISH_SIZE="1G"
 
 # Get RAM size:
 RAM=$(grep MemTotal /proc/meminfo | sed 's/[^0-9]*//g')
@@ -26,31 +26,31 @@ elif (($RAM>=15000000)); then
     PHP_SIZE="2048M"
     TOMCAT_MAX_THREADS="1600"
     VARNISH_SIZE="8192M"
-elif (($RAM>=800000)); then
+elif (($RAM>=8000000)); then
     APC_SIZE="2048"
     PHP_SIZE="1024M"
     TOMCAT_MAX_THREADS="800"
     VARNISH_SIZE="4096M"
-elif (($RAM>=400000)); then
+elif (($RAM>=4000000)); then
     APC_SIZE="1024"
     PHP_SIZE="512M"
     TOMCAT_MAX_THREADS="400"
     VARNISH_SIZE="2048M"
-elif (($RAM>=200000)); then
+elif (($RAM>=2000000)); then
     APC_SIZE="512"
     PHP_SIZE="256M"
     TOMCAT_MAX_THREADS="200"
     VARNISH_SIZE="1024M"
-elif (($RAM>=100000)); then
+elif (($RAM>=1000000)); then
     APC_SIZE="256"
     PHP_SIZE="128M"
     TOMCAT_MAX_THREADS="100"
     VARNISH_SIZE="512M"
-elif (($RAM>=50000)); then
+elif (($RAM>=500000)); then
     APC_SIZE=$DEFAULT_APC_SIZE
-    PHP_SIZE=$DEFAULT_PHP_SIZE
-    TOMCAT_MAX_THREADS=$DEFAULT_TOMCAT_MAX_THREADS
-    VARNISH_SIZE=$DEFAULT_VARNISH_SIZE
+    PHP_SIZE="128"
+    TOMCAT_MAX_THREADS="50"
+    VARNISH_SIZE="256M"
 else
     echo "under 512mb RAM not supported"
     exit 0
@@ -62,7 +62,7 @@ RELEASE=$(grep CODENAME /etc/lsb-release | sed s/DISTRIB_CODENAME=//)
 case $RELEASE in
     jaunty)
 	APC_DIR="/etc/php5/conf.d/apc.ini"
-	PHP_DIR="/etc/php5/php.ini"
+	PHP_DIR="/etc/php5/apache2/php.ini"
 	TOMCAT_DIR="/etc/tomcat6/server.xml"
 	VARNISH_DIR="/etc/default/varnish"
 	;;

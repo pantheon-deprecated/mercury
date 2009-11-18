@@ -39,6 +39,7 @@ echo $HOSTNAME > /etc/mailname
 postconf -e 'myhostname = $HOSTNAME'
 postconf -e 'mydomain = $HOSTNAME'
 postconf -e 'mydestination = $HOSTNAME, localhost'
+/etc/init.d/postfix restart
     
 # Reset Drupal Admin Account
 echo "DELETE FROM users WHERE uid = 1;ALTER TABLE users AUTO_INCREMENT = 1;" | mysql -u root -D pressflow
