@@ -2,6 +2,11 @@ MERCURY 0.7-Beta created by Chapter Three (http://chapterthree.com)             
 
 Thank you for using this AMI.  Please post any question/comments to http://groups.drupal.org/pantheon/
 
+0.8-Beta:
+now using symlinks for moved mysql and varnish files
+delete drupal #1 account so user change choose
+added new memory config script which sets config files based on system RAM
+
 0.7-Beta:
 moved mysql tmpdir from /tmp to /mnt/tmp
 changed default mysql engine type from MyISAM to InnoDB

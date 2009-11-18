@@ -34,11 +34,11 @@ apt-get -y upgrade
 /etc/mercury/config_mem.sh
 
 # Set up postfix
-HOSTNAME=$(/usr/local/bin/ec2-metadata -p | sed 's/public-hostname: //')
-echo $HOSTNAME > /etc/mailname
-postconf -e 'myhostname = $HOSTNAME'
-postconf -e 'mydomain = $HOSTNAME'
-postconf -e 'mydestination = $HOSTNAME, localhost'
+REAL_HOSTNAME=$(/usr/local/bin/ec2-metadata -p | sed 's/public-hostname: //')
+echo $REAL_HOSTNAME > /etc/mailname
+postconf -e "myhostname = ${REAL_HOSTNAME}"
+postconf -e "mydomain = ${REAL_HOSTNAME}"
+postconf -e "mydestination = ${REAL_HOSTNAME}, localhost"
 /etc/init.d/postfix restart
     
 # Reset Drupal Admin Account
