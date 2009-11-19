@@ -1,2 +1,2 @@
 # m h  dom mon dow   command
-0 * * * * /usr/bin/wget -O - -q -t 1 http://localhost/cron.php
+0 * * * * root /usr/bin/wget -O - -q -t 1 http://localhost/cron.php

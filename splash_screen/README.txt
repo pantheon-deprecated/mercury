@@ -1,11 +1,12 @@
-MERCURY 0.7-Beta created by Chapter Three (http://chapterthree.com)                                  10/29/09
+MERCURY 0.8-Beta created by Chapter Three (http://chapterthree.com)                                  11/18/09
 
 Thank you for using this AMI.  Please post any question/comments to http://groups.drupal.org/pantheon/
 
 To finish configuring your Pressflow install:
 
-1) change the default Pressflow administrator password (and add your email address):
-My account -> Edit
+1) the AMI ships with no default drupal username/password.  To set the admin username/password, click on
+"Your Pressflow install" > create new account > create username/email.  A new password will be generated 
+and you will be the admin user.
 
 2) set the mysql root password and create a non-root account (changing user and password to appropriate values):
 mysql -u root

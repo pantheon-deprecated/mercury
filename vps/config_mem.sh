@@ -69,6 +69,6 @@ case $RELEASE in
 esac
 
 sed --in-place=.bak s/$DEFAULT_APC_SIZE/$APC_SIZE/ $APC_DIR
-sed --in-place=.bak s/$DEFAULT_PHP_SIZE/$PHP_SIZE/ $PHP_DIR
+sed --in-place=.bak s/$DEFAULT_PHP_SIZE/$PHP_SIZE/g $PHP_DIR
 sed --in-place=.bak s/$DEFAULT_TOMCAT_MAX_THREADS/$TOMCAT_MAX_THREADS/ $TOMCAT_DIR
-sed --in-place=.bak s/$DEFAULT_VARNISH_SIZE/$VARNISH_SIZE/ $VARNISH_DIR
+sed --in-place=.bak s/$DEFAULT_VARNISH_SIZE/$VARNISH_SIZE/g $VARNISH_DIR
