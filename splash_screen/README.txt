@@ -1,4 +1,4 @@
-MERCURY 0.8-Beta created by Chapter Three (http://chapterthree.com)                                  11/18/09
+MERCURY 0.8-Beta created by Chapter Three (http://chapterthree.com)                                  12/02/09
 
 Thank you for using this AMI.  Please post any question/comments to http://groups.drupal.org/pantheon/
 

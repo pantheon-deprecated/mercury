@@ -44,6 +44,9 @@ postconf -e "mydestination = ${REAL_HOSTNAME}, localhost"
 # Reset Drupal Admin Account
 echo "DELETE FROM users WHERE uid = 1;ALTER TABLE users AUTO_INCREMENT = 1;" | mysql -u root -D pressflow
 
+#unset ssh key gen:
+chmod -x /etc/init.d/ec2-ssh-host-key-gen
+
 # Phone home
 AMI=$(/usr/local/bin/ec2-metadata -a | sed 's/ami-id: //')
 INSTANCE=$(/usr/local/bin/ec2-metadata -i | sed 's/instance-id: //')
