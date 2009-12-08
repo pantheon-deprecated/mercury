@@ -14,23 +14,26 @@ $conf['cacherouter'] = array(
 $conf['reverse_proxy'] = TRUE;           
 $conf['reverse_proxy_addresses'] = array('127.0.0.1'); 
 
-# memcached configuration:
+# memcached configuration - uncomment to use memcached:
 #$conf = array(
 #   'cache_inc' => './sites/all/modules/memcache/memcache.db.inc',
 #   'memcache_servers' => array(
 #      			 '127.0.0.1:11211' => 'default',
-#  			 '127.0.0.1:11212' => 'default',
-#  			 '127.0.0.1:11213' => 'default',
-#  			 '127.0.0.1:11214' => 'default',
-#  			 '127.0.0.1:11215' => 'page',
+#  			 '127.0.0.1:11212' => 'block',
+#  			 '127.0.0.1:11213' => 'filter',
+#  			 '127.0.0.1:11214' => 'form',
+#  			 '127.0.0.1:11215' => 'menu',
 #  			 '127.0.0.1:11216' => 'page',
-#  			 '127.0.0.1:11217' => 'filter',
-#  			 '127.0.0.1:11218' => 'filter',
+#  			 '127.0.0.1:11217' => 'updates',
+#  			 '127.0.0.1:11218' => 'default',
 #			 ),
 #   'memcache_bins' => array(
-#   		   'cache'        => 'default', 
-#		   'cache_menu'   => 'default',
-#		   'cache_page'   => 'page',
-#		   'cache_filter' => 'filter',
+#			    'cache'        => 'default',
+#			    'cache_block'  => 'block',
+#			    'cache_filter' => 'filter',
+#			    'cache_form'   => 'form',
+#			    'cache_menu'   => 'menu',
+#			    'cache_page'   => 'page',
+#			    'cache_update' => 'update',
 #		   ),
 #);
