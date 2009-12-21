@@ -1,0 +1,4 @@
+<Rules priority="0">
+  <Service name='varnish' status='on' type='deb'/>
+  <Service name='varnishlog' status='on' type='deb'/>
+</Rules>
