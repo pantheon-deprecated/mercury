@@ -1,18 +1,22 @@
-MERCURY 0.81-Beta created by Chapter Three (http://chapterthree.com)                                  12/02/09
+MERCURY 0.81-Beta created by Chapter Three (http://chapterthree.com)                                  12/21/09
 
 Thank you for using this AMI.  Please post any question/comments to http://groups.drupal.org/pantheon/
 
-0-81-Beta:
+0.9-Beta:
+Added memcached option
+Added drush
+
+0.81-Beta:
 Fixed bug where APC wasn't being used
 
 0.8-Beta:
-now using symlinks for moved mysql and varnish files
-delete drupal #1 account so user change choose
-added new memory config script which sets config files based on system RAM
+Now using symlinks for moved mysql and varnish files
+Delete drupal #1 account so user change choose
+Added new memory config script which sets config files based on system RAM
 
 0.7-Beta:
-moved mysql tmpdir from /tmp to /mnt/tmp
-changed default mysql engine type from MyISAM to InnoDB
-changed varnish max cache from 1 GB to 512 MB
-added README.txt and CHANGELOG.txt to splashpage
+Moved mysql tmpdir from /tmp to /mnt/tmp
+Changed default mysql engine type from MyISAM to InnoDB
+Changed varnish max cache from 1 GB to 512 MB
+Added README.txt and CHANGELOG.txt to splashpage
 

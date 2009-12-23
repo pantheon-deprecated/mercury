@@ -60,7 +60,7 @@ fi
 RELEASE=$(grep CODENAME /etc/lsb-release | sed s/DISTRIB_CODENAME=//)
 
 case $RELEASE in
-    jaunty)
+    jaunty|karmic)
 	APC_DIR="/etc/php5/conf.d/apc.ini"
 	PHP_DIR="/etc/php5/apache2/php.ini"
 	TOMCAT_DIR="/etc/tomcat6/server.xml"

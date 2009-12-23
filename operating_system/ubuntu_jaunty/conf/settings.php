@@ -1,4 +1,8 @@
-# Cacherouter: use APC for all local caching
+# Varnish reverse proxy on localhost
+$conf['reverse_proxy'] = TRUE;           
+$conf['reverse_proxy_addresses'] = array('127.0.0.1'); 
+
+# Cacherouter: use APC for all local caching.  Comment out to use Memcached instead
 $conf['cache_inc'] = './sites/all/modules/cacherouter/cacherouter.inc';
 $conf['cacherouter'] = array(
   'default' => array(
@@ -10,11 +14,7 @@ $conf['cacherouter'] = array(
   ),
 );
 
-# Varnish reverse proxy on localhost
-$conf['reverse_proxy'] = TRUE;           
-$conf['reverse_proxy_addresses'] = array('127.0.0.1'); 
-
-# memcached configuration - uncomment to use memcached:
+# Memcached configuration - uncomment to use Memcached instead of Cacherouter:
 #$conf = array(
 #   'cache_inc' => './sites/all/modules/memcache/memcache.db.inc',
 #   'memcache_servers' => array(
