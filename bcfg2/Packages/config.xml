@@ -1,13 +1,13 @@
 <Sources>
   <APTSource>
     <Group>ubuntu-jaunty</Group>
-    <URL>http://ec2-us-east-mirror.rightscale.com/ubuntu</URL>
+    <URL>http://us.archive.ubuntu.com/ubuntu</URL>
     <Version>jaunty</Version>
     <Component>main</Component>
-    <Component>universe</Component>
-    <Component>restricted</Component>
     <Component>multiverse</Component>
-    <Arch>i386</Arch>
+    <Component>restricted</Component>
+    <Component>universe</Component>
     <Arch>amd64</Arch>
+    <Arch>i386</Arch>
   </APTSource>
 </Sources>

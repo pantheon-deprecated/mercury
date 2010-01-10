@@ -1,0 +1,12 @@
+<Bundle name='amazon-web-services.xml'>
+  <Package name='alien'/>
+  <Package name='dpkg-dev'/>
+  <Package name='debhelper'/>
+  <Package name='ec2-ami-tools'/>
+  <Package name='ec2-consistent-snapshot'/>
+  <Package name='librpm4.4'/>
+  <Package name='make'/>
+  <Package name='rpm'/>
+  <Service name='ec2-get-credentials'/>
+  <Service name='ec2-run-user-data'/>
+</Bundle>

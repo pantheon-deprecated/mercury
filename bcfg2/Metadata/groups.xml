@@ -1,18 +1,39 @@
 <Groups version='3.0'>
-   <Group profile='true' public='true' default='true' name='ubuntu-jaunty-32'>
-      <Group name='ubuntu'/>
-      <Group name='ubuntu-jaunty'/>
-      <Group name='i386'/>
-      <Bundle name='varnish'/>
-   </Group>
-   <Group name='ubuntu'/>
-   <Group name='debian'/>
-   <Group name='freebsd'/>
-   <Group name='gentoo'/>
-   <Group name='redhat'/>
-   <Group name='suse'/>
-   <Group name='mandrake'/>
-   <Group name='solaris'/>
-   <Group name='i386'/>
-   <Group name='ubuntu-jaunty'/>
+  <Group profile='true' public='true' default='true' name='mercury-ubuntu-jaunty-32'>
+    <Group name='ubuntu-jaunty'/>
+    <Group name='i386'/>
+    <Group name='amazon-web-services'/>
+    <Group name='mercury'/>
+  </Group>
+
+  <!-- Operating systems -->
+  <Group name='ubuntu-jaunty'>
+    <Group name='ubuntu'/>
+    <Bundle name='ubuntu-jaunty'/>
+  </Group>
+  <Group name='ubuntu'/>
+  <Group name='debian'/>
+  <Group name='freebsd'/>
+  <Group name='gentoo'/>
+  <Group name='redhat'/>
+  <Group name='suse'/>
+  <Group name='mandrake'/>
+  <Group name='solaris'/>
+
+  <!-- pantheon options -->
+  <Group name='mercury'>
+    <Bundle name='mercury'/>
+    <Bundle name='memcached'/>
+    <Bundle name='postfix'/>
+    <Bundle name='tomcat6'/>
+    <Bundle name='varnish'/>
+  </Group>
+
+  <!-- hosting providers -->
+  <Group name='amazon-web-services'>
+    <Bundle name='amazon-web-services'/>
+  </Group>
+  
+  <!-- other options -->
+  <Group name='i386'/>
 </Groups>

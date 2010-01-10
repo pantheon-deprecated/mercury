@@ -4,4 +4,5 @@
   <ConfigFile name='/etc/varnish/default.vcl'/>
   <Service name='varnish'/>
   <Service name='varnishlog'/>
+  <Service name='varnishncsa'/>
 </Bundle>

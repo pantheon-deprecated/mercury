@@ -1,0 +1,27 @@
+<Bundle name='tomcat6'>
+  <Package name='ca-certificates-java'/>
+  <Package name='default-jre-headless'/>
+  <Package name='gcj-4.3-base'/>
+  <Package name='icedtea-6-jre-cacao'/>
+  <Package name='java-common'/>
+  <Package name='libaccess-bridge-java'/>
+  <Package name='libcommons-collections-java'/>
+  <Package name='libcommons-dbcp-java'/>
+  <Package name='libcommons-pool-java'/>
+  <Package name='libcups2'/>
+  <Package name='libecj-java'/>
+  <Package name='libecj-java-gcj'/>
+  <Package name='libgcj9-0'/>
+  <Package name='libgcj9-jar'/>
+  <Package name='libgcj-bc'/>
+  <Package name='libgcj-common'/>
+  <Package name='liblcms1'/>
+  <Package name='libservlet2.5-java'/>
+  <Package name='rhino'/>
+  <Package name='tomcat6'/>
+  <Package name='tzdata-java'/>
+  <ConfigFile name='/etc/default/tomcat6'/>
+  <ConfigFile name='/etc/tomcat6/Catalina/localhost/solr.xml'/>
+  <ConfigFile name='/etc/tomcat6/server.xml'/>
+  <Service name='tomcat6'/>
+</Bundle>

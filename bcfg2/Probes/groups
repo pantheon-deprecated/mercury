@@ -1,0 +1,11 @@
+#!/bin/sh
+
+ARCH=`uname -m`
+case "$ARCH" in
+    "x86_64")
+        echo "amd64"
+    ;;
+    "i686")
+        echo "i386"
+    ;;
+esac

@@ -1,0 +1,54 @@
+<Bundle name='mercury'>
+  <Package name='apache2'/>
+  <Package name='autoconf'/>
+  <Package name='automake'/>
+  <Package name='automake1.4'/>
+  <Package name='bzr'/>
+  <Package name='defoma'/>
+  <Package name='fontconfig-config'/>
+  <Package name='libapache2-mod-rpaf'/>
+  <Package name='libfontconfig1'/>
+  <Package name='libltdl7'/>
+  <Package name='libltdl7-dev'/>
+  <Package name='libpng12-0'/>
+  <Package name='libssl-dev'/>
+  <Package name='libt1-5'/>
+  <Package name='libtool'/>
+  <Package name='libxpm4'/>
+  <Package name='mysql-client-5.0'/>
+  <Package name='mysql-server-5.0'/>
+  <Package name='php5'/>
+  <Package name='php5-cli'/>
+  <Package name='php5-curl'/>
+  <Package name='php5-dev'/>
+  <Package name='php5-gd'/>
+  <Package name='php5-mysql'/>
+  <Package name='php5-xmlrpc'/>
+  <Package name='php-apc'/>
+  <Package name='php-pear'/>
+  <Package name='shtool'/>
+  <Package name='subversion'/>
+  <Package name='ttf-dejavu'/>
+  <Package name='ttf-dejavu-core'/>
+  <Package name='ttf-dejavu-extra'/>
+  <Package name='zlib1g-dev'/>
+
+  <!-- mercury config files -->
+  <SymLink name='/etc/apache2/mods-enabled/expires.load' to='/etc/apache2/mods-available/expires.load'/>
+  <SymLink name='/etc/apache2/mods-enabled/rewrite.load' to='/etc/apache2/mods-available/rewrite.load'/>
+  <ConfigFile name='/etc/apache2/ports.conf'/>
+  <ConfigFile name='/etc/apache2/sites-available/default'/>
+  <ConfigFile name='/etc/apt/sources.list'/>
+  <ConfigFile name='/etc/cron.d/drupal'/>
+  <ConfigFile name='/etc/motd.tail'/>
+  <ConfigFile name='/etc/mysql/my.cnf'/>
+  <ConfigFile name='/etc/php5/apache2/php.ini'/>
+  <ConfigFile name='/etc/php5/conf.d/apc.ini'/>
+  <ConfigFile name='/etc/rc.local'/>
+
+  <!-- mercury services -->
+  <Service name='apache2'/>
+  <Service name='mysql'/>
+  <Service name='mysql-ndb'/>
+  <Service name='mysql-ndb-mgm'/>
+</Bundle>

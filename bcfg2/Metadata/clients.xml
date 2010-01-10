@@ -1,4 +1,0 @@
-<Clients version="3.0">
-  <Client profile="ubuntu-jaunty-32" pingable="Y" pingtime="0" name="ip-10-245-203-214.ec2.internal"/>
-  <Client profile="ubuntu-jaunty-32" name="localhost.localdomain"/>
-</Clients>
