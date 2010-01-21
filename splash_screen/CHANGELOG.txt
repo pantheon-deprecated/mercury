@@ -1,9 +1,9 @@
-MERCURY 0.81-Beta created by Chapter Three (http://chapterthree.com)                                  12/21/09
+MERCURY 0.9-Beta created by Chapter Three (http://chapterthree.com)                                  01/21/10
 
 Thank you for using this AMI.  Please post any question/comments to http://groups.drupal.org/pantheon/
 
 0.9-Beta:
-Added memcached option
+Added memcached option and made default over cacherouter
 Added drush
 
 0.81-Beta:
