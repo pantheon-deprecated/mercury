@@ -1,3 +1,4 @@
+
 # Varnish reverse proxy on localhost
 $conf['reverse_proxy'] = TRUE;           
 $conf['reverse_proxy_addresses'] = array('127.0.0.1'); 
