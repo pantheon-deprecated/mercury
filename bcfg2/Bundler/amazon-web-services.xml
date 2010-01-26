@@ -1,4 +1,4 @@
-<Bundle name='amazon-web-services.xml'>
+<Bundle name='amazon-web-services'>
   <Package name='alien'/>
   <Package name='dpkg-dev'/>
   <Package name='debhelper'/>
