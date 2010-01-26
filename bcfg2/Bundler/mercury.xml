@@ -34,8 +34,8 @@
   <Package name='zlib1g-dev'/>
 
   <!-- mercury config files -->
-  <SymLink name='/etc/apache2/mods-enabled/expires.load' to='/etc/apache2/mods-available/expires.load'/>
-  <SymLink name='/etc/apache2/mods-enabled/rewrite.load' to='/etc/apache2/mods-available/rewrite.load'/>
+  <SymLink name='/etc/apache2/mods-enabled/expires.load'/>
+  <SymLink name='/etc/apache2/mods-enabled/rewrite.load'/>
   <ConfigFile name='/etc/apache2/ports.conf'/>
   <ConfigFile name='/etc/apache2/sites-available/default'/>
   <ConfigFile name='/etc/apt/sources.list'/>
