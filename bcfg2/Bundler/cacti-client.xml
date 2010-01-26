@@ -1,0 +1,6 @@
+<Bundle name='cacti-client'>
+  <Package name='snmp'/>
+  <Package name='snmpd'/>
+  <ConfigFile name='/etc/snmp/snmpd.conf'/>
+  <Service name='snmpd'/>
+</Bundle>

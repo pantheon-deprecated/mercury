@@ -27,6 +27,7 @@
     <Bundle name='postfix'/>
     <Bundle name='tomcat6'/>
     <Bundle name='varnish'/>
+    <Bundle name='cacti-client'/>
   </Group>
 
   <!-- hosting providers -->
