@@ -32,8 +32,12 @@
   <!-- hosting providers -->
   <Group name='amazon-web-services'>
     <Bundle name='amazon-web-services'/>
+  </Group>  
+  <Group name='rackspace'>
+    <Bundle name='rackspace'/>
   </Group>
   
   <!-- other options -->
   <Group name='i386'/>
+  <Group name='amd64'/>
 </Groups>
