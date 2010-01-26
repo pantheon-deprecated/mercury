@@ -1,0 +1,9 @@
+Bundle name='rackspace.xml'>
+  <Package name='curl'/>
+  <Package name='language-pack-en-base'/>
+  <Package name='ssh'/>
+  <Package name='ubuntu-minimal'/>
+  <Package name='vim'/>
+  <Package name='vim-runtime'/>
+</Bundle>
+

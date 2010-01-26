@@ -4,11 +4,12 @@
   <Package name='debhelper'/>
   <Package name='ec2-ami-tools'/>
   <Package name='ec2-consistent-snapshot'/>
+  <Package name='libdns46'/>
   <Package name='librpm4.4'/>
+  <Package name='libc6-xen'/>  
   <Package name='make'/>
   <Package name='rpm'/>
+  <Package name='runurl'/>
   <Service name='ec2-get-credentials'/>
   <Service name='ec2-run-user-data'/>
 </Bundle>
-<Package name='libdns46'/>
-<Package name='runurl'/>
