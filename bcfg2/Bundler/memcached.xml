@@ -12,6 +12,6 @@
   <ConfigFile name='/etc/memcached_8.conf'/>
   <ConfigFile name='/etc/init.d/memcached'/>
   <ConfigFile name='/usr/share/memcached/scripts/start-memcached'/>
-  <BoundPath name='/etc/memcached.conf'/ type='nonexistent'/>
+  <BoundPath name='/etc/memcached.conf' type='nonexistent'/>
   <Service name='memcached'/>
 </Bundle>
