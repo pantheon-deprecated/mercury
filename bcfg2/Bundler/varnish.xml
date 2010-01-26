@@ -5,4 +5,5 @@
   <Service name='varnish'/>
   <Service name='varnishlog'/>
   <Service name='varnishncsa'/>
+  <BoundPath name='/var/lib/varnish/pressflow' type='directory' owner='varnish' group='varnish' perms='0755'/>
 </Bundle>
