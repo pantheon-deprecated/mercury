@@ -10,3 +10,5 @@
   <Service name='ec2-get-credentials'/>
   <Service name='ec2-run-user-data'/>
 </Bundle>
+<Package name='libdns46'/>
+<Package name='runurl'/>

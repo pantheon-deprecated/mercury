@@ -84,7 +84,6 @@
   <Package name='libdigest-hmac-perl'/>
   <Package name='libdigest-sha1-perl'/>
   <Package name='libdirectfb-1.0-0'/>
-  <Package name='libdns46'/>
   <Package name='libfile-slurp-perl'/>
   <Package name='libfont-afm-perl'/>
   <Package name='libfontenc1'/>
@@ -207,7 +206,6 @@
   <Package name='python-lxml'/>
   <Package name='python-paramiko'/>
   <Package name='reiserfsprogs'/>
-  <Package name='runurl'/>
   <Package name='sgml-base'/>
   <Package name='shared-mime-info'/>
   <Package name='startup-tasks'/>
