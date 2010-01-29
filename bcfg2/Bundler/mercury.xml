@@ -36,6 +36,7 @@
   <!-- mercury config files -->
   <SymLink name='/etc/apache2/mods-enabled/expires.load'/>
   <SymLink name='/etc/apache2/mods-enabled/rewrite.load'/>
+  <SymLink name='/etc/apache2/sites-enabled/000-default'/>
   <ConfigFile name='/etc/apache2/ports.conf'/>
   <ConfigFile name='/etc/apache2/sites-available/default'/>
   <ConfigFile name='/etc/apt/sources.list'/>
