@@ -11,9 +11,23 @@ backend default {
 .first_byte_timeout = 600s;
 .between_bytes_timeout = 600s;
 }
+
+
 sub vcl_recv {
   // Remove has_js and Google Analytics cookies.
   set req.http.Cookie = regsuball(req.http.Cookie, "(^|;\s*)(__[a-z]+|has_js)=[^;]*", "");
+  
+  // To users: if you have additional cookies being set by your system (e.g.
+  // from a javascript analytics file or similar) you will need to add VCL
+  // at this point to strip these cookies from the req object, otherwise 
+  // Varnish will not cache the response. This is safe for cookies that your
+  // backed (Drupal) doesn't process. 
+  //
+  // Again, the common example is an analytics or other Javascript add-on.
+  // You should do this here, before the other cookie stuff, or by adding
+  // to the regular-expression above.
+  
+  
   // Remove a ";" prefix, if present.
   set req.http.Cookie = regsub(req.http.Cookie, "^;\s*", "");
   // Remove empty cookies.
@@ -21,11 +35,32 @@ sub vcl_recv {
     unset req.http.Cookie;
   }
 
-  // Cache all requests by default, overriding the
-  // standard Varnish behavior.
-  // if (req.request == "GET" || req.request == "HEAD") {
-  //   return (lookup);
-  // }
+  // Normalize the Accept-Encoding header
+  // as per: http://varnish-cache.org/wiki/FAQ/Compression
+  if (req.http.Accept-Encoding) {
+    if (req.url ~ "\.(jpg|png|gif|gz|tgz|bz2|tbz|mp3|ogg)$") {
+      # No point in compressing these
+      remove req.http.Accept-Encoding;
+    } elsif (req.http.Accept-Encoding ~ "gzip") {
+      set req.http.Accept-Encoding = "gzip";
+    } elsif (req.http.Accept-Encoding ~ "deflate") {
+      set req.http.Accept-Encoding = "deflate";
+    } else {
+      # unkown algorithm
+      remove req.http.Accept-Encoding;
+    }
+  }
+
+}
+
+
+// Strip any cookies before an image/js/css is inserted into cache.
+// Also: future-support for ESI.
+sub vcl_fetch {
+  if (req.url ~ "\.(png|gif|jpg|swf|css|js)$") {
+    unset obj.http.set-cookie;
+  }
+  esi;
 }
 
 sub vcl_hash {
