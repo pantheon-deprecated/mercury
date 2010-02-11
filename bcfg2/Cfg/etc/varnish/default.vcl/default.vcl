@@ -50,6 +50,9 @@ sub vcl_recv {
       remove req.http.Accept-Encoding;
     }
   }
+  
+  // Let's have a little grace
+  set req.grace = 30s;
 
 }
 
@@ -68,7 +71,44 @@ sub vcl_hash {
     set req.hash += req.http.Cookie;
   }
 }
-#
+
+sub vcl_error {
+  // Let's deliver a slightly more friedly error page.
+  // You can customize this as you wish.
+  set obj.http.Content-Type = "text/html; charset=utf-8";
+  synthetic {"
+  <?xml version="1.0" encoding="utf-8"?>
+  <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+  <html>
+    <head>
+      <title>"} obj.status " " obj.response {"</title>
+      <style type="text/css">
+      #page {width: 400px; padding: 10px; margin: 20px auto; border: 1px solid black; background-color: #FFF;}
+      p {margin-left:20px;}
+      body {background-color: #DDD; margin: auto;}
+      </style>      
+    </head>
+    <body>
+    <div id="page">
+    <h1>Page Could Not Be Loaded</h1>
+    <p>We're very sorry, but the page could not be loaded properly. This should be fixed very soon, and we apologize for any inconvenience.</p>
+    <hr />
+    <h4>Debug Info:</h4>
+    <pre>
+Status: "} obj.status {"
+Response: "} obj.response {"
+XID: "} req.xid {"
+</pre>
+      <address><a href="http://www.varnish-cache.org/">Varnish</a></address>
+      </div>
+    </body>
+   </html>
+   "};
+   deliver;
+}
+
+
 #Below is a commented-out copy of the default VCL logic.  If you
 #redefine any of these subroutines, the built-in logic will be
 #appended to your code.
