@@ -21,6 +21,7 @@
   <Package name='php5-cli'/>
   <Package name='php5-curl'/>
   <Package name='php5-dev'/>
+  <Package name='php5-gd'/>
   <Package name='php5-imagick'/>
   <Package name='php5-mysql'/>
   <Package name='php5-xmlrpc'/>
