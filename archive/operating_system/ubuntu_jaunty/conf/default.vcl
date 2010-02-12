@@ -11,9 +11,23 @@ backend default {
 .first_byte_timeout = 600s;
 .between_bytes_timeout = 600s;
 }
+
+
 sub vcl_recv {
   // Remove has_js and Google Analytics cookies.
   set req.http.Cookie = regsuball(req.http.Cookie, "(^|;\s*)(__[a-z]+|has_js)=[^;]*", "");
+  
+  // To users: if you have additional cookies being set by your system (e.g.
+  // from a javascript analytics file or similar) you will need to add VCL
+  // at this point to strip these cookies from the req object, otherwise 
+  // Varnish will not cache the response. This is safe for cookies that your
+  // backed (Drupal) doesn't process. 
+  //
+  // Again, the common example is an analytics or other Javascript add-on.
+  // You should do this here, before the other cookie stuff, or by adding
+  // to the regular-expression above.
+  
+  
   // Remove a ";" prefix, if present.
   set req.http.Cookie = regsub(req.http.Cookie, "^;\s*", "");
   // Remove empty cookies.
@@ -21,11 +35,35 @@ sub vcl_recv {
     unset req.http.Cookie;
   }
 
-  // Cache all requests by default, overriding the
-  // standard Varnish behavior.
-  // if (req.request == "GET" || req.request == "HEAD") {
-  //   return (lookup);
-  // }
+  // Normalize the Accept-Encoding header
+  // as per: http://varnish-cache.org/wiki/FAQ/Compression
+  if (req.http.Accept-Encoding) {
+    if (req.url ~ "\.(jpg|png|gif|gz|tgz|bz2|tbz|mp3|ogg)$") {
+      # No point in compressing these
+      remove req.http.Accept-Encoding;
+    } elsif (req.http.Accept-Encoding ~ "gzip") {
+      set req.http.Accept-Encoding = "gzip";
+    } elsif (req.http.Accept-Encoding ~ "deflate") {
+      set req.http.Accept-Encoding = "deflate";
+    } else {
+      # unkown algorithm
+      remove req.http.Accept-Encoding;
+    }
+  }
+  
+  // Let's have a little grace
+  set req.grace = 30s;
+
+}
+
+
+// Strip any cookies before an image/js/css is inserted into cache.
+// Also: future-support for ESI.
+sub vcl_fetch {
+  if (req.url ~ "\.(png|gif|jpg|swf|css|js)$") {
+    unset obj.http.set-cookie;
+  }
+  esi;
 }
 
 sub vcl_hash {
@@ -33,7 +71,44 @@ sub vcl_hash {
     set req.hash += req.http.Cookie;
   }
 }
-#
+
+sub vcl_error {
+  // Let's deliver a slightly more friedly error page.
+  // You can customize this as you wish.
+  set obj.http.Content-Type = "text/html; charset=utf-8";
+  synthetic {"
+  <?xml version="1.0" encoding="utf-8"?>
+  <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+  <html>
+    <head>
+      <title>"} obj.status " " obj.response {"</title>
+      <style type="text/css">
+      #page {width: 400px; padding: 10px; margin: 20px auto; border: 1px solid black; background-color: #FFF;}
+      p {margin-left:20px;}
+      body {background-color: #DDD; margin: auto;}
+      </style>      
+    </head>
+    <body>
+    <div id="page">
+    <h1>Page Could Not Be Loaded</h1>
+    <p>We're very sorry, but the page could not be loaded properly. This should be fixed very soon, and we apologize for any inconvenience.</p>
+    <hr />
+    <h4>Debug Info:</h4>
+    <pre>
+Status: "} obj.status {"
+Response: "} obj.response {"
+XID: "} req.xid {"
+</pre>
+      <address><a href="http://www.varnish-cache.org/">Varnish</a></address>
+      </div>
+    </body>
+   </html>
+   "};
+   deliver;
+}
+
+
 #Below is a commented-out copy of the default VCL logic.  If you
 #redefine any of these subroutines, the built-in logic will be
 #appended to your code.

@@ -42,6 +42,9 @@
   <Service type='deb' status='on' name='varnishlog'/>
   <Service type='deb' status='on' name='varnishncsa'/>
 
+  <!-- cacti services -->
+  <Service type='deb' status='on' name='snmpd'/>
+
   <SymLink name='/etc/apache2/mods-enabled/expires.load' to='/etc/apache2/mods-available/expires.load'/>
   <SymLink name='/etc/apache2/mods-enabled/rewrite.load' to='/etc/apache2/mods-available/rewrite.load'/>
   <SymLink name='/etc/apache2/sites-enabled/000-default' to='/etc/apache2/sites-available/default'/>
