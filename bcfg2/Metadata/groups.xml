@@ -41,4 +41,5 @@
   <!-- other options -->
   <Group name='i386'/>
   <Group name='amd64'/>
+  <Group name='x86_64'/>
 </Groups>
