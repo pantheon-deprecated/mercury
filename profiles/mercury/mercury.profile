@@ -104,8 +104,16 @@ function mercury_profile_tasks(&$task, $url) {
   $theme_settings['toggle_node_info_page'] = FALSE;
   variable_set('theme_settings', $theme_settings);
   
-  // TODO: variable_set()'s for the settings from admin/settings/performance
-  // TODO: variable_set()'s for the settings from admin/settings/apachesolr
+  // Adjust settings on admin/settings/performance.
+  variable_set('cache', CACHE_EXTERNAL);
+  variable_set('page_cache_max_age', 900);
+  variable_set('page_compression', FALSE); // We do this via mod_deflate.
+  variable_set('preprocess_js', TRUE);
+  variable_set('preprocess_css', TRUE);
+  
+  // Set correct ApacheSolr port for Mercury.
+  variable_set('apachesolr_port', 8180);
+  
   // TODO: merge in our additions to settings.php
 
   // Update the menu router information.
