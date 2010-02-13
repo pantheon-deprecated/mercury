@@ -6,7 +6,6 @@
   <Package name='ec2-consistent-snapshot'/>
   <Package name='libdns46'/>
   <Package name='librpm4.4'/>
-  <Package name='libc6-xen'/>  
   <Package name='make'/>
   <Package name='rpm'/>
   <Package name='runurl'/>
