@@ -1,0 +1,3 @@
+<Bundle name='i386'>
+  <Package name='libc6-xen'/>
+</Bundle>

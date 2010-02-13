@@ -66,6 +66,7 @@
   <Package name='libbeecrypt6'/>
   <Package name='libbind9-40'/>
   <Package name='libblkid1'/>
+  <Package name='libc6'/>
   <Package name='libc6-dev'/>
   <Package name='libcairo2'/>
   <Package name='libcap2'/>
