@@ -43,6 +43,8 @@
     <Bundle name='i386'/>
   </Group>
   <Group name='amd64'/>
+    <Bundle name='amd64'/>
+  </Group>
   <Group name='x86_64'>
     <Bundle name='x86_64'/>
   </Group>
