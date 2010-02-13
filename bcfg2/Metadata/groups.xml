@@ -5,7 +5,7 @@
     <Group name='amazon-web-services'/>
     <Group name='mercury'/>
   </Group>
-
+  
   <!-- Operating systems -->
   <Group name='ubuntu-jaunty'>
     <Group name='ubuntu'/>
@@ -19,7 +19,7 @@
   <Group name='suse'/>
   <Group name='mandrake'/>
   <Group name='solaris'/>
-
+  
   <!-- pantheon options -->
   <Group name='mercury'>
     <Bundle name='mercury'/>
@@ -29,7 +29,7 @@
     <Bundle name='varnish'/>
     <Bundle name='cacti-client'/>
   </Group>
-
+  
   <!-- hosting providers -->
   <Group name='amazon-web-services'>
     <Bundle name='amazon-web-services'/>
@@ -42,7 +42,7 @@
   <Group name='i386'>
     <Bundle name='i386'/>
   </Group>
-  <Group name='amd64'/>
+  <Group name='amd64'>
     <Bundle name='amd64'/>
   </Group>
 </Groups>
