@@ -1,5 +1,6 @@
-# Enable file compression by MIME types not covered in mods-enabled/deflate.conf
-# Aka css and js
+# This file includes global tweaks to apache2 config specific to Mercury.
+# Enable deflate for MIME types not covered in mods-enabled/deflate.conf
+# Aka css and js.
 AddOutputFilterByType DEFLATE application/x-javascript 
 AddOutputFilterByType DEFLATE text/javascript 
 AddOutputFilterByType DEFLATE text/css 
