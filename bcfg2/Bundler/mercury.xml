@@ -40,6 +40,7 @@
   <SymLink name='/etc/apache2/sites-enabled/000-default'/>
   <ConfigFile name='/etc/apache2/ports.conf'/>
   <ConfigFile name='/etc/apache2/sites-available/default'/>
+  <ConfigFile name='/etc/apache2/conf.d/mercury'/>
   <ConfigFile name='/etc/apt/sources.list'/>
   <ConfigFile name='/etc/cron.d/drupal'/>
   <ConfigFile name='/etc/motd.tail'/>
