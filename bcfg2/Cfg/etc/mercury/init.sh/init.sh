@@ -38,11 +38,6 @@ apt-get -y upgrade
 # Set up postfix
 if [[-a /usr/local/bin/ec2-metadata ]]; then
     REAL_HOSTNAME=$(/usr/local/bin/ec2-metadata -p | sed 's/public-hostname: //')
-    
-    # Phone home
-    AMI=$(/usr/local/bin/ec2-metadata -a | sed 's/ami-id: //')
-    INSTANCE=$(/usr/local/bin/ec2-metadata -i | sed 's/instance-id: //')
-    curl "http://getpantheon.com/pantheon.php?ami=$AMI&instance=$INSTANCE"
 else
     REAL_HOSTNAME=`hostname`
 fi
@@ -53,6 +48,10 @@ postconf -e "mydomain = ${REAL_HOSTNAME}"
 postconf -e "mydestination = ${REAL_HOSTNAME}, localhost"
 /etc/init.d/postfix restart
     
+# Phone home - helps us to know how many users there are without passing any identifying information to us
+ID=`hostname | md5sum`
+curl "http://getpantheon.com/pantheon.php?id=$ID"
+
 # Reset Drupal Admin Account
 echo "DELETE FROM users WHERE uid = 1;ALTER TABLE users AUTO_INCREMENT = 1;" | mysql -u root -D pressflow
 
