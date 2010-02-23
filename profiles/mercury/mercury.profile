@@ -16,6 +16,7 @@ function mercury_profile_modules() {
     // contrib: varnish, apachesolr, etc
     'varnish', 'apachesolr', 'apachesolr_search'
   );
+
 }
 
 /**
@@ -44,6 +45,22 @@ function mercury_profile_details() {
  *   task list.
  */
 function mercury_profile_task_list() {
+  // Take a swat at settings.php since this is called right before the database
+  // settings are written in. But it also can only be written once.
+  $settings_file = './'. conf_path(FALSE, TRUE) .'/settings.php';
+  if (is_writable($settings_file)) {
+    $array = file($settings_file);
+    $slug = array_pop($array);
+    if (strpos($slug, '### END') === FALSE) {
+      $fp = fopen($settings_file, 'a');  
+      if (fwrite($fp, _mercury_settings()) === FALSE) {
+        drupal_set_message("Settings not written!", 'error');
+      }
+    }
+  }
+  else {
+    drupal_set_message("Settings not written!", 'error');
+  }
 }
 
 /**
@@ -120,3 +137,51 @@ function mercury_profile_tasks(&$task, $url) {
   menu_rebuild();
 }
 
+
+/**
+ * Things we need in settings.php
+ */
+function _mercury_settings() {
+  $slug = '### END Mercury settings written on '. date(DATE_ATOM);
+  $settings = <<<EndTXT
+##########################
+#
+# Mercury Settings
+#
+# Alter With Caution :)
+#
+##########################
+
+# Varnish reverse proxy on localhost
+\$conf['reverse_proxy'] = TRUE;           
+\$conf['reverse_proxy_addresses'] = array('127.0.0.1'); 
+
+# Memcached configuration
+\$conf = array(
+   'cache_inc' => './sites/all/modules/memcache/memcache.db.inc',
+   'memcache_servers' => array(
+         '127.0.0.1:11211' => 'default',
+         '127.0.0.1:11212' => 'block',
+         '127.0.0.1:11213' => 'filter',
+         '127.0.0.1:11214' => 'form',
+         '127.0.0.1:11215' => 'menu',
+         '127.0.0.1:11216' => 'page',
+         '127.0.0.1:11217' => 'updates',
+         '127.0.0.1:11218' => 'views',
+         '127.0.0.1:11219' => 'content',
+       ),
+   'memcache_bins' => array(
+          'cache'        => 'default',
+          'cache_block'  => 'block',
+          'cache_filter' => 'filter',
+          'cache_form'   => 'form',
+          'cache_menu'   => 'menu',
+          'cache_page'   => 'page',
+          'cache_update' => 'update',
+       ),
+);
+$slug
+EndTXT;
+
+  return $settings;
+}
