@@ -6,6 +6,7 @@ if [ -e /etc/mercury/incep ]; then
     exit 0
 fi
 
+# Create a bootlog of all output we run.
 exec &> /etc/mercury/bootlog
 
 # Run the scripts!
