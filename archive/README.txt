@@ -1,1 +1,0 @@
-This folder is the root dir for Project Mercury files.  OS-specific files will be in operating_systems folder (Ubuntu Jaunty is all we have at the moment).  This folder also has non-OS-specific files, such as the splash page.
