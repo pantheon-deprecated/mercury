@@ -43,8 +43,10 @@
   <ConfigFile name='/etc/apache2/conf.d/mercury'/>
   <ConfigFile name='/etc/apt/sources.list'/>
   <ConfigFile name='/etc/cron.d/drupal'/>
-  <ConfigFile name='/etc/mercury/init.sh'/>
+  <ConfigFile name='/etc/mercury/boot.d/S050ec2.sh'/>
+  <ConfigFile name='/etc/mercury/boot.d/S100main.sh'/>
   <ConfigFile name='/etc/mercury/config_mem.sh'/>
+  <ConfigFile name='/etc/mercury/init.sh'/>
   <ConfigFile name='/etc/motd.tail'/>
   <ConfigFile name='/etc/mysql/my.cnf'/>
   <ConfigFile name='/etc/php5/apache2/php.ini'/>
