@@ -3,11 +3,12 @@
 # Main/Global Boot Script
 
 cd /var/www/; bzr merge --force
+cd /var/www/profiles; bzr merge --force
+cd /var/lib/bcfg2; bzr merge --force
 
-# Update packages
-apt-get update   
-apt-get -y upgrade
-    
+#process updates:
+bcfg2 -vq 
+
 # Config Memory
 /etc/mercury/config_mem.sh
 
