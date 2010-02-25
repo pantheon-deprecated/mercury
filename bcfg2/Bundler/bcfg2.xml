@@ -5,5 +5,4 @@
   <Package name='python-gamin'/>
   <Service name='bcfg2'/>
   <Service name='bcfg2-server'/>
-  <Service name='gamin'/>
 </Bundle>

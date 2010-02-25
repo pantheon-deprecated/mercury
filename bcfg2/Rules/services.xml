@@ -18,7 +18,6 @@
   <!-- bcfg2 services -->
   <Service type='deb' status='on' name='bcfg2'/>
   <Service type='deb' status='on' name='bcfg2-server'/>
-  <Service type='deb' status='on' name='gamin'/>
 
   <!-- mercury services -->
   <Service type='deb' status='on' name='apache2'/>
