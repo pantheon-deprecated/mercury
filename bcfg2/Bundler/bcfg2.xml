@@ -1,0 +1,9 @@
+<Bundle name='bcfg2'>
+  <Package name='bcfg2'/>
+  <Package name='bcfg2-server'/>
+  <Package name='gamin'/>
+  <Package name='python-gamin'/>
+  <Service name='bcfg2'/>
+  <Service name='bcfg2-server'/>
+  <Service name='gamin'/>
+</Bundle>

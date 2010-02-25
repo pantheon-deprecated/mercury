@@ -3,8 +3,6 @@
   <Package name='apt-transport-https'/>
   <Package name='apt-utils'/>
   <Package name='bash-completion'/>
-  <Package name='bcfg2'/>
-  <Package name='bcfg2-server'/>
   <Package name='bind9-host'/>
   <Package name='binutils'/>
   <Package name='build-essential'/>
@@ -28,7 +26,6 @@
   <Package name='e2fsprogs'/>
   <Package name='eject'/>
   <Package name='emacs22-nox'/>
-  <Package name='fam'/>
   <Package name='fontconfig'/> 
   <Package name='friendly-recovery'/>
   <Package name='fuse-utils'/>
@@ -200,7 +197,6 @@
   <Package name='python-apt'/>
   <Package name='python-central'/>
   <Package name='python-crypto'/>
-  <Package name='python-fam'/>
   <Package name='python-gdbm'/>
   <Package name='python-gnupginterface'/>
   <Package name='python-lxml'/>
@@ -246,12 +242,9 @@
 
   <!-- basic services -->
   <Service name='atd'/>
-  <Service name='bcfg2'/>
-  <Service name='bcfg2-server'/>
   <Service name='bootlogs.sh'/>
   <Service name='cron'/>
   <Service name='dns-clean'/>
-  <Service name='fam'/>
   <Service name='killprocs'/>
   <Service name='klogd'/>
   <Service name='ondemand'/>
