@@ -1,8 +1,8 @@
 #/bin/bash
 
-#This script updates the /var/www (pressflow) from the pressflow project on launchpad
+#This script updates the /var/www dir (pressflow) from the pressflow project on launchpad
 
-echo "This script updates the /var/www (pressflow) from the pressflow project on launchpad"
+echo "This script updates the /var/www dir (pressflow) from the pressflow project on launchpad"
 echo "Continue? (y/n)"
 
 read -n 1 ANSWER
