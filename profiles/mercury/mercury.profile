@@ -14,7 +14,7 @@ function mercury_profile_modules() {
     'color', 'comment', 'cookie_cache_bypass', 'help', 'menu', 'taxonomy', 'syslog', 'locale', 'search', 'update',
 
     // contrib: varnish, apachesolr, etc
-    'varnish', 'apachesolr', 'apachesolr_search'
+    'varnish', 'apachesolr', 'apachesolr_search', 'memcache_admin'
   );
 
 }
@@ -124,14 +124,23 @@ function mercury_profile_tasks(&$task, $url) {
   // Adjust settings on admin/settings/performance.
   variable_set('cache', CACHE_EXTERNAL);
   variable_set('page_cache_max_age', 900);
+  variable_set('block_cache', TRUE);
   variable_set('page_compression', FALSE); // We do this via mod_deflate.
   variable_set('preprocess_js', TRUE);
   variable_set('preprocess_css', TRUE);
   
   // Set correct ApacheSolr port for Mercury.
   variable_set('apachesolr_port', 8180);
+  variable_set('apachesolr_search_make_default', 1);
+  variable_set('apachesolr_search_spellcheck', TRUE);
   
-  // TODO: merge in our additions to settings.php
+  // Set some permissions in the only ugly way possible
+  // To extend this, just add more 'rid' => 'perms' items to the array
+  $perms = array(0 => 'access content', 'search content', 'use advanced search');
+  foreach($perms as $rid => $perms) {
+    db_query('DELETE FROM {permission} WHERE rid = %d', 0);
+    db_query("INSERT INTO {permission} (rid, perm) VALUES (%d, '%s')", 0, implode(', ', $perms));
+  }
 
   // Update the menu router information.
   menu_rebuild();
