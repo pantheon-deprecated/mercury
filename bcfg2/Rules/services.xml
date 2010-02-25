@@ -1,12 +1,9 @@
 <Rules priority='1'>
   <!-- ubuntu jaunty -->
   <Service type='deb' status='on' name='atd'/>
-  <Service type='deb' status='on' name='bcfg2'/>
-  <Service type='deb' status='on' name='bcfg2-server'/>
   <Service type='deb' status='on' name='bootlogs.sh'/>
   <Service type='deb' status='on' name='cron'/>
   <Service type='deb' status='on' name='dns-clean'/>
-  <Service type='deb' status='on' name='fam'/>
   <Service type='deb' status='on' name='killprocs'/>
   <Service type='deb' status='on' name='klogd'/>
   <Service type='deb' status='on' name='ondemand'/>
@@ -17,6 +14,11 @@
   <Service type='deb' status='on' name='single'/>
   <Service type='deb' status='on' name='ssh'/>
   <Service type='deb' status='on' name='sysklogd'/>
+
+  <!-- bcfg2 services -->
+  <Service type='deb' status='on' name='bcfg2'/>
+  <Service type='deb' status='on' name='bcfg2-server'/>
+  <Service type='deb' status='on' name='gamin'/>
 
   <!-- mercury services -->
   <Service type='deb' status='on' name='apache2'/>
