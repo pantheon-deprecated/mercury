@@ -14,7 +14,7 @@ function mercury_profile_modules() {
     'color', 'comment', 'cookie_cache_bypass', 'help', 'menu', 'taxonomy', 'syslog', 'locale', 'search', 'update',
 
     // contrib: varnish, apachesolr, etc
-    'varnish', 'apachesolr', 'apachesolr_search', 'memcache_admin'
+    'varnish', 'apachesolr', 'apachesolr_search'
   );
 
 }
@@ -135,12 +135,16 @@ function mercury_profile_tasks(&$task, $url) {
   variable_set('apachesolr_search_spellcheck', TRUE);
   
   // Set some permissions in the only ugly way possible
-  // To extend this, just add more 'rid' => 'perms' items to the array
-  $perms = array(0 => 'access content', 'search content', 'use advanced search');
-  foreach($perms as $rid => $perms) {
-    db_query('DELETE FROM {permission} WHERE rid = %d', 0);
-    db_query("INSERT INTO {permission} (rid, perm) VALUES (%d, '%s')", 0, implode(', ', $perms));
+  // To extend this, just add more 'role_id' => array('perms') items to the array
+  $perms = array(0 => array('access content', 'search content', 'use advanced search'));
+  foreach($perms as $role_id => $perms) {
+    db_query('DELETE FROM {permission} WHERE rid = %d', $role_id);
+    db_query("INSERT INTO {permission} (rid, perm) VALUES (%d, '%s')", $role_id, implode(', ', $perms));
   }
+
+  // Enable this late after settings.php has been fixed
+  _drupal_install_module('memcache_admin');
+  module_enable(array('memcache_admin')); 
 
   // Update the menu router information.
   menu_rebuild();
