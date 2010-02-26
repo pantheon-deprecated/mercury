@@ -20,7 +20,7 @@ cd /var/lib/bcfg2; bzr ci -m "commited by mercury"; bzr merge --force
 # Wait for BCGF2 to spin up.
 while [ "$CHECK" == "" ]; do
   CHECK=(`grep 'serving bcfg2-server' /var/log/syslog`)
-  wait 1
+  sleep 1
 done
 
 
