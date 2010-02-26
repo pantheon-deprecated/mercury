@@ -1,8 +1,8 @@
 #/bin/bash
 
-#This script updates the /var/lib/bcfg2 and /var/www/profiles dirs (mercury) from the pantheon project on launchpad
+#This script updates the /var/lib/bcfg2 and /var/www/profiles dirs (mercury) from the pantheon project on launchpad and runs bcfg2 to apply the updates
 
-echo "This script updates the /var/lib/bcfg2 and /var/www/profiles dirs (mercury) from the pantheon project on launchpad"
+echo "This script updates the /var/lib/bcfg2 and /var/www/profiles dirs (mercury) from the pantheon project on launchpad and runs bcfg2 to apply the updates"
 echo "Continue? (y/n)"
 
 read -n 1 ANSWER
