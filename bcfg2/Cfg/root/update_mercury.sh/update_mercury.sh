@@ -12,7 +12,7 @@ if [[ ${ANSWER} != "y" ]]; then
 fi
 
 # Create a log of all output we run.
-echo "Creating a log of the output of this script at /root/update_mercury.log
+echo "Creating a log of the output of this script at /root/update_mercury.log"
 &> /root/update_mercury.log
 
 #get any updates
