@@ -10,9 +10,9 @@ fi
 exec &> /etc/mercury/bootlog
 
 #get any updates
-cd /var/www/; bzr merge --force
-cd /var/www/profiles; bzr merge --force
-cd /var/lib/bcfg2; bzr merge --force
+cd /var/www/; bzr ci -m "commited by mercury"; bzr merge --force
+cd /var/www/profiles; bzr ci -m "commited by mercury"; bzr merge --force
+cd /var/lib/bcfg2; bzr ci -m "commited by mercury"; bzr merge --force
 
 #process updates:
 bcfg2 -vq
