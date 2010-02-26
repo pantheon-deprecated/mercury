@@ -45,6 +45,3 @@ http://chapterthree.com  http://groups.drupal.org/pantheon
 (  (  (  (    )  )  )  )
  (   (   (    )   )   )
 
-Note: on first boot, please give the bcfg2 server up to 2 minutes to spin up - you can monitor the progress with "tail -f /etc/mercury/bootlog".
-
-Thanks and enjoy the speed of Mercury!
