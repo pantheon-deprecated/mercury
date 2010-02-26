@@ -35,11 +35,16 @@ sub vcl_recv {
     unset req.http.Cookie;
   }
 
+  // No varnish for install or update.php
+  if (req.url ~ "install\.php|update\.php") {
+    return (pass);      
+  }
+
   // Normalize the Accept-Encoding header
   // as per: http://varnish-cache.org/wiki/FAQ/Compression
   if (req.http.Accept-Encoding) {
     if (req.url ~ "\.(jpg|png|gif|gz|tgz|bz2|tbz|mp3|ogg)$") {
-      # No point in compressing these
+      # No point in compressing these           
       remove req.http.Accept-Encoding;
     } elsif (req.http.Accept-Encoding ~ "gzip") {
       set req.http.Accept-Encoding = "gzip";
