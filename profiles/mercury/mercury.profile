@@ -11,7 +11,7 @@
 function mercury_profile_modules() {
   return array(
     // core: swab dblog for syslog
-    'color', 'comment', 'cookie_cache_bypass', 'help', 'menu', 'taxonomy', 'syslog', 'locale', 'search', 'update', 'dblog'
+    'color', 'comment', 'cookie_cache_bypass', 'help', 'menu', 'taxonomy', 'syslog', 'locale', 'search', 'update', 'dblog',
 
     // contrib: varnish, apachesolr, etc
     'varnish', 'apachesolr', 'apachesolr_search'
