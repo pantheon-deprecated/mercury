@@ -10,9 +10,9 @@ fi
 exec &> /etc/mercury/bootlog
 
 # Get any updates.
-cd /var/www/; bzr ci -m "commited by mercury"; bzr merge --force
-cd /var/www/profiles; bzr ci -m "commited by mercury"; bzr merge --force
-cd /var/lib/bcfg2; bzr ci -m "commited by mercury"; bzr merge --force
+cd /var/www/; bzr merge --force
+cd /var/www/profiles; bzr merge --force
+cd /var/lib/bcfg2; bzr merge --force
 
 # Be sure we are running.
 /etc/init.d/bcfg2-server start
@@ -23,7 +23,9 @@ while [ "$CHECK" == "" ]; do
   sleep 1
 done
 
-
+#a little more time...
+echo "1 minute: BCFG2 is loading packages and config files\n";
+sleep 60
 
 # Process updates!
 bcfg2 -vq
@@ -36,3 +38,17 @@ done
 
 # Mark incep date. This prevents us from ever running again.
 echo `date` > /etc/mercury/incep
+
+echo '
+
+##############################
+#   Mercury Setup Complete!  #
+##############################
+
+'
+
+echo '
+DEAR SYSADMIN: MERCURY IS READY FOR YOU NOW
+
+Don't forget the README and docs!
+'| wall

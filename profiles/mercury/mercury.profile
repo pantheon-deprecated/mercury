@@ -11,7 +11,7 @@
 function mercury_profile_modules() {
   return array(
     // core: swab dblog for syslog
-    'color', 'comment', 'cookie_cache_bypass', 'help', 'menu', 'taxonomy', 'syslog', 'locale', 'search', 'update',
+    'color', 'comment', 'cookie_cache_bypass', 'help', 'menu', 'taxonomy', 'syslog', 'locale', 'search', 'update', 'dblog'
 
     // contrib: varnish, apachesolr, etc
     'varnish', 'apachesolr', 'apachesolr_search'
@@ -136,7 +136,7 @@ function mercury_profile_tasks(&$task, $url) {
   
   // Set some permissions in the only ugly way possible
   // To extend this, just add more 'role_id' => array('perms') items to the array
-  $perms = array(0 => array('access content', 'search content', 'use advanced search'));
+  $perms = array(1 => array('access content', 'search content', 'use advanced search'));
   foreach($perms as $role_id => $perms) {
     db_query('DELETE FROM {permission} WHERE rid = %d', $role_id);
     db_query("INSERT INTO {permission} (rid, perm) VALUES (%d, '%s')", $role_id, implode(', ', $perms));
