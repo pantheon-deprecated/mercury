@@ -4,6 +4,7 @@ Thank you for using this AMI.  Please post any question/comments to http://group
 
 1.0:
 Full integration with bcfg2 for config file management
+Mercury checks or and incorporates updates from launchpad on first boot
 Added /usr/local/bin/update_mercury.sh to update mercury config from launchpad (and apply changes using bcfg2)
 Added /usr/local/bin/update_pressflow.sh script to update pressflow from launchpad
 Updated drush to 1.0-Beta3

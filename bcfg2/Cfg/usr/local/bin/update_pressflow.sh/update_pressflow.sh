@@ -6,6 +6,7 @@ echo "This script updates the /var/www dir (pressflow) from the pressflow projec
 echo "Continue? (y/n)"
 
 read -n 1 ANSWER
+echo ""
 if [[ ${ANSWER} != "y" ]]; then
     echo "Cancelling....."
     exit 1
