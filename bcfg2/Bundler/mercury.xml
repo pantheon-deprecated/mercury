@@ -52,6 +52,8 @@
   <ConfigFile name='/etc/php5/apache2/php.ini'/>
   <ConfigFile name='/etc/php5/conf.d/apc.ini'/>
   <ConfigFile name='/etc/rc.local'/>
+  <ConfigFile name='/root/update_mercury.sh'/>
+  <ConfigFile name='/root/update_pressflow.sh'/>
 
   <!-- mercury services -->
   <Service name='apache2'/>

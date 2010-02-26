@@ -19,7 +19,6 @@ ln -s /mnt/mysql/lib /var/lib/mysql
 mkdir /mnt/varnish
 mv /var/lib/varnish /mnt/varnish/lib
 ln -s /mnt/varnish/lib /var/lib/varnish
-mkdir /mnt/varnish/lib/pressflow
 chown varnish:varnish /mnt/varnish/lib/pressflow/
 /etc/init.d/varnish start
 

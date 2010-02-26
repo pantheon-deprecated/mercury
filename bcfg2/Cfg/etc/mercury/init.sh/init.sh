@@ -9,12 +9,23 @@ fi
 # Create a bootlog of all output we run.
 exec &> /etc/mercury/bootlog
 
-#get any updates
-cd /var/www/; bzr merge --force
-cd /var/www/profiles; bzr merge --force
-cd /var/lib/bcfg2; bzr merge --force
+# Get any updates.
+cd /var/www/; bzr ci -m "commited by mercury"; bzr merge --force
+cd /var/www/profiles; bzr ci -m "commited by mercury"; bzr merge --force
+cd /var/lib/bcfg2; bzr ci -m "commited by mercury"; bzr merge --force
 
-#process updates:
+# Be sure we are running.
+/etc/init.d/bcfg2-server start
+
+# Wait for BCGF2 to spin up.
+while [ "$CHECK" == "" ]; do
+  CHECK=(`grep 'serving bcfg2-server' /var/log/syslog`)
+  wait 1
+done
+
+
+
+# Process updates!
 bcfg2 -vq
 
 # Run the scripts!
@@ -23,5 +34,5 @@ for script in $( ls /etc/mercury/boot.d/S* ) ; do
 done
 
 
-# Mark incep date
+# Mark incep date. This prevents us from ever running again.
 echo `date` > /etc/mercury/incep
