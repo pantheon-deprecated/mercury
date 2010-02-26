@@ -23,7 +23,7 @@ while [ "$CHECK" == "" ]; do
   sleep 1
 done
 
-#give the bcfg2 server time to spin up
+#a little more time...
 sleep 60
 
 # Process updates!
