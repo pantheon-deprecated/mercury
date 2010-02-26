@@ -24,6 +24,7 @@ while [ "$CHECK" == "" ]; do
 done
 
 #a little more time...
+echo "1 minute: BCFG2 is loading packages and config files\n";
 sleep 60
 
 # Process updates!
@@ -38,4 +39,16 @@ done
 # Mark incep date. This prevents us from ever running again.
 echo `date` > /etc/mercury/incep
 
-echo "Setup Complete!"
+echo '
+
+##############################
+#   Mercury Setup Complete!  #
+##############################
+
+'
+
+echo '
+DEAR SYSADMIN: MERCURY IS READY FOR YOU NOW
+
+Don't forget the README and docs!
+'| wall
