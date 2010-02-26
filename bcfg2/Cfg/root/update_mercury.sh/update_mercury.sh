@@ -11,8 +11,9 @@ if [[ ${ANSWER} != "y" ]]; then
     exit 1
 fi
 
-# Create a bootlog of all output we run.
-exec &> /root/update_mercury.log
+# Create a log of all output we run.
+echo "Creating a log of the output of this script at /root/update_mercury.log
+&> /root/update_mercury.log
 
 #get any updates
 cd /var/www/profiles; bzr merge --force
@@ -21,4 +22,4 @@ cd /var/lib/bcfg2; bzr merge --force
 #process updates:
 bcfg2 -vq
 
-echo "done!'
+echo "done!"
