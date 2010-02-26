@@ -13,7 +13,7 @@ fi
 
 # Create a log of all output we run.
 echo "Creating a log of the output of this script at /root/update_pressflow.log"
-&> /root/update_pressflow.log
+exec &> /root/update_pressflow.log
 
 #get any updates
 cd /var/www/; bzr merge --force
