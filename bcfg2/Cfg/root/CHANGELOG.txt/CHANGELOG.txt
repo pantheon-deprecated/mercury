@@ -1,0 +1,29 @@
+MERCURY 1.0 created by Chapter Three (http://chapterthree.com)                                  02/26/10
+
+Thank you for using this AMI.  Please post any question/comments to http://groups.drupal.org/pantheon/
+
+1.0:
+Full integration with bcfg2 for config file management
+Added /usr/local/bin/update_mercury.sh to update mercury config from launchpad (and apply changes using bcfg2)
+Added /usr/local/bin/update_pressflow.sh script to update pressflow from launchpad
+Updated drush to 1.0-Beta3
+Added mercury profile to auto-populate pressflow with mercury-specific settings
+
+0.9-Beta:
+Added memcached option and made default over cacherouter
+Added drush
+
+0.81-Beta:
+Fixed bug where APC wasn't being used
+
+0.8-Beta:
+Now using symlinks for moved mysql and varnish files
+Delete drupal #1 account so user change choose
+Added new memory config script which sets config files based on system RAM
+
+0.7-Beta:
+Moved mysql tmpdir from /tmp to /mnt/tmp
+Changed default mysql engine type from MyISAM to InnoDB
+Changed varnish max cache from 1 GB to 512 MB
+Added README.txt and CHANGELOG.txt to splashpage
+

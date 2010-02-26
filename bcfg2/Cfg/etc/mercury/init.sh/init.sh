@@ -50,5 +50,5 @@ echo '
 echo '
 DEAR SYSADMIN: MERCURY IS READY FOR YOU NOW
 
-Don't forget the README and docs!
+Don't forget the README.txt, CHANGELOG.txt and docs!
 '| wall
