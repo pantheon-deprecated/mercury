@@ -23,7 +23,8 @@ while [ "$CHECK" == "" ]; do
   sleep 1
 done
 
-
+#give the bcfg2 server time to spin up
+sleep 60
 
 # Process updates!
 bcfg2 -vq
@@ -36,3 +37,5 @@ done
 
 # Mark incep date. This prevents us from ever running again.
 echo `date` > /etc/mercury/incep
+
+echo "Setup Complete!"
