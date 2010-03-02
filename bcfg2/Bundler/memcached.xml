@@ -10,6 +10,7 @@
   <ConfigFile name='/etc/memcached_6.conf'/>
   <ConfigFile name='/etc/memcached_7.conf'/>
   <ConfigFile name='/etc/memcached_8.conf'/>
+  <ConfigFile name='/etc/memcached_9.conf'/>
   <ConfigFile name='/etc/init.d/memcached'/>
   <ConfigFile name='/usr/share/memcached/scripts/start-memcached'/>
   <BoundPath name='/etc/memcached.conf' type='nonexistent'/>
