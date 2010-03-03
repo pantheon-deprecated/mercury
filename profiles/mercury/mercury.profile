@@ -171,7 +171,7 @@ function _mercury_settings() {
 
 # Memcached configuration
 \$conf = array(
-   'cache_inc' => './sites/all/modules/memcache/memcache.db.inc',
+   'cache_inc' => './sites/all/modules/memcache/memcache.inc',
    'memcache_servers' => array(
          '127.0.0.1:11211' => 'default',
          '127.0.0.1:11212' => 'menu',
