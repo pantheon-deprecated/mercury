@@ -125,7 +125,7 @@ function mercury_profile_tasks(&$task, $url) {
   variable_set('cache', CACHE_EXTERNAL);
   variable_set('page_cache_max_age', 900);
   variable_set('block_cache', TRUE);
-  variable_set('page_compression', FALSE); // We do this via mod_deflate.
+  variable_set('page_compression', 0); // We do this via mod_deflate.
   variable_set('preprocess_js', TRUE);
   variable_set('preprocess_css', TRUE);
   
