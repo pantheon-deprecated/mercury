@@ -18,7 +18,7 @@ exec &> /root/update_mercury.log
 
 #get any updates
 cd /var/www/profiles; bzr ci -m "commited by mercury"; bzr merge --force; bzr commit -m "Mercury merged changes from Launchpad";
-cd /var/lib/bcfg2; bzr ci -m "commited by mercury"; bzr merge --force; bzr commit -m "Mercury merged changes from Launchpad"
+cd /var/lib/bcfg2; bzr ci -m "commited by mercury"; bzr merge --force; bzr commit -m "Mercury merged changes from Launchpad";
 
 #process updates:
 bcfg2 -vq
