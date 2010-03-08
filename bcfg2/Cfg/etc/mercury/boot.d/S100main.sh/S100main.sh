@@ -2,10 +2,6 @@
 
 # Main/Global Boot Script
 
-# Update our modules via drush!
-cd /var/www
-drush -y upc
-
 # Config Memory
 /etc/mercury/config_mem.sh
 
