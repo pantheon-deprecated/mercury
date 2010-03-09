@@ -22,5 +22,18 @@ ln -s /mnt/varnish/lib /var/lib/varnish
 chown varnish:varnish /mnt/varnish/lib/pressflow/
 /etc/init.d/varnish start
 
+#postfix
+if [[-a /usr/local/bin/ec2-metadata ]]; then
+    REAL_HOSTNAME=$(/usr/local/bin/ec2-metadata -p | sed 's/public-hostname: //')
+else
+    REAL_HOSTNAME=`hostname`
+fi
+
+echo $REAL_HOSTNAME > /etc/mailname
+postconf -e "myhostname = ${REAL_HOSTNAME}"
+postconf -e "mydomain = ${REAL_HOSTNAME}"
+postconf -e "mydestination = ${REAL_HOSTNAME}, localhost"
+/etc/init.d/postfix restart
+
 # Unset ssh key gen:
 chmod -x /etc/init.d/ec2-ssh-host-key-gen
