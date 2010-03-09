@@ -17,6 +17,6 @@ echo "Creating a log of the output of this script at /root/update_pressflow.log"
 exec &> /root/update_pressflow.log
 
 #get any updates
-cd /var/www/; bzr merge --force
+cd /var/www/; bzr ci -m "commited by mercury"; bzr merge --force; bzr commit -m "Mercury merged changes from Launchpad";
 
 echo "done!"
