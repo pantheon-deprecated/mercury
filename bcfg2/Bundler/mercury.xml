@@ -34,28 +34,29 @@
   <Package name='ttf-dejavu-extra'/>
   <Package name='zlib1g-dev'/>
 
+  <!-- symlinks -->
+  <Path name="/etc/apache2/mods-enabled/expires.load"/>
+  <Path name="/etc/apache2/mods-enabled/rewrite.load"/>
+  <Path name="/etc/apache2/sites-enabled/000-default"/>
   <!-- mercury config files -->
-  <SymLink name='/etc/apache2/mods-enabled/expires.load'/>
-  <SymLink name='/etc/apache2/mods-enabled/rewrite.load'/>
-  <SymLink name='/etc/apache2/sites-enabled/000-default'/>
-  <ConfigFile name='/etc/apache2/ports.conf'/>
-  <ConfigFile name='/etc/apache2/sites-available/default'/>
-  <ConfigFile name='/etc/apache2/conf.d/mercury'/>
-  <ConfigFile name='/etc/apt/sources.list'/>
-  <ConfigFile name='/etc/cron.d/drupal'/>
-  <ConfigFile name='/etc/mercury/boot.d/S050ec2.sh'/>
-  <ConfigFile name='/etc/mercury/boot.d/S100main.sh'/>
-  <ConfigFile name='/etc/mercury/config_mem.sh'/>
-  <ConfigFile name='/etc/mercury/init.sh'/>
-  <ConfigFile name='/etc/motd.tail'/>
-  <ConfigFile name='/etc/mysql/my.cnf'/>
-  <ConfigFile name='/etc/php5/apache2/php.ini'/>
-  <ConfigFile name='/etc/php5/conf.d/apc.ini'/>
-  <ConfigFile name='/etc/rc.local'/>
-  <ConfigFile name='/root/CHANGELOG.txt'/>
-  <ConfigFile name='/root/README.txt'/>
-  <ConfigFile name='/usr/local/bin/update_mercury.sh'/>
-  <ConfigFile name='/usr/local/bin/update_pressflow.sh'/>
+  <Path name="/etc/apache2/ports.conf"/>
+  <Path name="/etc/apache2/sites-available/default"/>
+  <Path name="/etc/apache2/conf.d/mercury"/>
+  <Path name="/etc/apt/sources.list"/>
+  <Path name="/etc/cron.d/drupal"/>
+  <Path name="/etc/mercury/boot.d/S050ec2.sh"/>
+  <Path name="/etc/mercury/boot.d/S100main.sh"/>
+  <Path name="/etc/mercury/config_mem.sh"/>
+  <Path name="/etc/mercury/init.sh"/>
+  <Path name="/etc/motd.tail"/>
+  <Path name="/etc/mysql/my.cnf"/>
+  <Path name="/etc/php5/apache2/php.ini"/>
+  <Path name="/etc/php5/conf.d/apc.ini"/>
+  <Path name="/etc/rc.local"/>
+  <Path name="/root/CHANGELOG.txt"/>
+  <Path name="/root/README.txt"/>
+  <Path name="/usr/local/bin/update_mercury.sh"/>
+  <Path name="/usr/local/bin/update_pressflow.sh"/>
 
   <!-- mercury services -->
   <Service name='apache2'/>

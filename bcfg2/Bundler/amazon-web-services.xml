@@ -9,7 +9,7 @@
   <Package name='make'/>
   <Package name='rpm'/>
   <Package name='runurl'/>
-  <ConfigFile name='/usr/local/bin/ec2-metadata'/>
+  <Path name="/usr/local/bin/ec2-metadata"/>
   <Service name='ec2-get-credentials'/>
   <Service name='ec2-run-user-data'/>
   <BoundPath name='/mnt/mysql/tmp' type='directory' owner='mysql' group='mysql' perms='0755'/>

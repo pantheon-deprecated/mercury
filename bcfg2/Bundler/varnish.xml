@@ -1,7 +1,7 @@
 <Bundle name='varnish'>
   <Package name='varnish'/>
-  <ConfigFile name='/etc/default/varnish'/>
-  <ConfigFile name='/etc/varnish/default.vcl'/>
+  <Path name="/etc/default/varnish"/>
+  <Path name="/etc/varnish/default.vcl"/>
   <Service name='varnish'/>
   <Service name='varnishlog'/>
   <Service name='varnishncsa'/>

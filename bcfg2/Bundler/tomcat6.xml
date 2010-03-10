@@ -20,8 +20,8 @@
   <Package name='rhino'/>
   <Package name='tomcat6'/>
   <Package name='tzdata-java'/>
-  <ConfigFile name='/etc/default/tomcat6'/>
-  <ConfigFile name='/etc/tomcat6/Catalina/localhost/solr.xml'/>
-  <ConfigFile name='/etc/tomcat6/server.xml'/>
+  <Path name="/etc/default/tomcat6"/>
+  <Path name="/etc/tomcat6/Catalina/localhost/solr.xml"/>
+  <Path name="/etc/tomcat6/server.xml"/>
   <Service name='tomcat6'/>
 </Bundle>

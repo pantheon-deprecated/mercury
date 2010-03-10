@@ -2,17 +2,17 @@
   <Package name='memcached'/>
   <Package name='libevent1'/>	
   <Package name='php5-memcache'/>
-  <ConfigFile name='/etc/memcached_1.conf'/>
-  <ConfigFile name='/etc/memcached_2.conf'/>
-  <ConfigFile name='/etc/memcached_3.conf'/>
-  <ConfigFile name='/etc/memcached_4.conf'/>
-  <ConfigFile name='/etc/memcached_5.conf'/>
-  <ConfigFile name='/etc/memcached_6.conf'/>
-  <ConfigFile name='/etc/memcached_7.conf'/>
-  <ConfigFile name='/etc/memcached_8.conf'/>
-  <ConfigFile name='/etc/memcached_9.conf'/>
-  <ConfigFile name='/etc/init.d/memcached'/>
-  <ConfigFile name='/usr/share/memcached/scripts/start-memcached'/>
+  <Path name="/etc/memcached_1.conf"/>
+  <Path name="/etc/memcached_2.conf"/>
+  <Path name="/etc/memcached_3.conf"/>
+  <Path name="/etc/memcached_4.conf"/>
+  <Path name="/etc/memcached_5.conf"/>
+  <Path name="/etc/memcached_6.conf"/>
+  <Path name="/etc/memcached_7.conf"/>
+  <Path name="/etc/memcached_8.conf"/>
+  <Path name="/etc/memcached_9.conf"/>
+  <Path name="/etc/init.d/memcached"/>
+  <Path name="/usr/share/memcached/scripts/start-memcached"/>
   <BoundPath name='/etc/memcached.conf' type='nonexistent'/>
   <Service name='memcached'/>
 </Bundle>
