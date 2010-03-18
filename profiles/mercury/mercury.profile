@@ -169,8 +169,8 @@ function _mercury_settings() {
 \$conf['reverse_proxy_addresses'] = array('127.0.0.1'); 
 
 # Memcached configuration
-\$conf = ['cache_inc'] => './sites/all/modules/memcache/memcache.inc';
-\$conf = ['memcache_servers'] => array(
+\$conf['cache_inc'] = './sites/all/modules/memcache/memcache.inc';
+\$conf['memcache_servers'] = array(
          '127.0.0.1:11211' => 'default',
          '127.0.0.1:11212' => 'menu',
          '127.0.0.1:11213' => 'filter',
@@ -181,7 +181,7 @@ function _mercury_settings() {
          '127.0.0.1:11218' => 'content',
          '127.0.0.1:11219' => 'apachesolr',
       	 );
-\$conf = ['memcache_bins'] => array(
+\$conf['memcache_bins'] = array(
           'cache'        => 'default',
           'cache_menu'   => 'menu',
           'cache_filter' => 'filter',
