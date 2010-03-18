@@ -123,6 +123,7 @@
   <Package name='libparse-debianchangelog-perl'/>
   <Package name='libpcap0.8'/>
   <Package name='libpixman-1-0'/>
+  <Package name='libpython2.6'/>
   <Package name='libsasl2-modules'/>
   <Package name='libscope-guard-perl'/>
   <Package name='libsepol1'/>
@@ -228,7 +229,9 @@
   <Package name='upstart-logd'/>
   <Package name='util-linux'/>
   <Package name='uuid-runtime'/>
+  <Package name='vim'/>
   <Package name='vim-common'/>
+  <Package name='vim-runtime'/>
   <Package name='vim-tiny'/>
   <Package name='w3m'/>
   <Package name='whiptail'/>

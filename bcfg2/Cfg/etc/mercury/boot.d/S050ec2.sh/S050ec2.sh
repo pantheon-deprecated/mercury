@@ -23,7 +23,7 @@ chown varnish:varnish /mnt/varnish/lib/pressflow/
 /etc/init.d/varnish start
 
 #postfix
-if [[-a /usr/local/bin/ec2-metadata ]]; then
+if [[ -a /usr/local/bin/ec2-metadata ]]; then
     REAL_HOSTNAME=$(/usr/local/bin/ec2-metadata -p | sed 's/public-hostname: //')
 else
     REAL_HOSTNAME=`hostname`
