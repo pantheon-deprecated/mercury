@@ -13,6 +13,10 @@
     <Group name='ubuntu'/>
     <Bundle name='ubuntu-jaunty'/>
   </Group>
+  <Group name='ubuntu-karmic'>
+    <Group name='ubuntu'/>
+    <Bundle name='ubuntu-karmic'/>
+  </Group>
   <Group name='ubuntu'/>
   <Group name='debian'/>
   <Group name='freebsd'/>
@@ -21,7 +25,7 @@
   <Group name='suse'/>
   <Group name='mandrake'/>
   <Group name='solaris'/>
-  
+
   <!-- pantheon options -->
   <Group name='mercury'>
     <Bundle name='mercury'/>

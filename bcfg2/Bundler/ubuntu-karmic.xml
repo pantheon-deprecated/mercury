@@ -182,7 +182,7 @@
   <Package name='mtr-tiny'/>
   <Package name='ncurses-base'/>
   <Package name='netcat'/>
-  <Package name='netcat-tradition'/>
+  <Package name='netcat-traditional'/>
   <Package name='nmap'/>
   <Package name='ntfs-3g'/>
   <Package name='ntpdate'/>
