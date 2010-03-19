@@ -1,10 +1,10 @@
 <Groups version='3.0'>
   <!--Note that the ubuntu-karmic option hasn't been tested as thoroughly as the ubuntu-jaunty option-->
-  <Group profile='true' public='true' default='true' name='mercury-ubuntu-jaunty-32'>
-    <Group name='ubuntu-jaunty'/>
-    <Group name='i386'/>
-    <Group name='amazon-web-services'/>
+  <Group profile='true' public='true' default='true' name='mercury-ubuntu-jaunty-aws-32'>
     <Group name='mercury'/>
+    <Group name='ubuntu-jaunty'/>
+    <Group name='amazon-web-services'/>
+    <Group name='i386'/>
     <Group name='bcfg2'/>
   </Group>
   
@@ -26,7 +26,7 @@
   <Group name='mandrake'/>
   <Group name='solaris'/>
 
-  <!-- pantheon options -->
+  <!-- pantheon server types -->
   <Group name='mercury'>
     <Bundle name='mercury'/>
     <Bundle name='memcached'/>
