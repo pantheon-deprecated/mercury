@@ -8,11 +8,12 @@ applicable law.
 To access official Ubuntu documentation, please visit:
 http://help.ubuntu.com/
 
-Amazon EC2 Ubuntu 9.04 jaunty AMI built by Eric Hammond
-http://alestic.com  http://ec2ubuntu-group.notlong.com
-
 Pantheon Mercury AMI buit by Chapter Three
 http://chapterthree.com  http://getpantheon.com
+
+Based on AMI built by Eric Hammond
+http://alestic.com  http://ec2ubuntu-group.notlong.com
+
 
             ^
            / \

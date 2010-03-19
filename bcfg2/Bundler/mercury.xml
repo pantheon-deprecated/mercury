@@ -8,8 +8,6 @@
   <Package name='fontconfig-config'/>
   <Package name='libapache2-mod-rpaf'/>
   <Package name='libfontconfig1'/>
-  <Package name='libltdl7'/>
-  <Package name='libltdl7-dev'/>
   <Package name='libpng12-0'/>
   <Package name='libssl-dev'/>
   <Package name='libt1-5'/>
@@ -33,12 +31,9 @@
   <Package name='ttf-dejavu-core'/>
   <Package name='ttf-dejavu-extra'/>
   <Package name='zlib1g-dev'/>
-
-  <!-- symlinks -->
   <Path name="/etc/apache2/mods-enabled/expires.load"/>
   <Path name="/etc/apache2/mods-enabled/rewrite.load"/>
   <Path name="/etc/apache2/sites-enabled/000-default"/>
-  <!-- mercury config files -->
   <Path name="/etc/apache2/ports.conf"/>
   <Path name="/etc/apache2/sites-available/default"/>
   <Path name="/etc/apache2/conf.d/mercury"/>
@@ -57,8 +52,6 @@
   <Path name="/root/README.txt"/>
   <Path name="/usr/local/bin/update_mercury.sh"/>
   <Path name="/usr/local/bin/update_pressflow.sh"/>
-
-  <!-- mercury services -->
   <Service name='apache2'/>
   <Service name='mysql'/>
   <Service name='mysql-ndb'/>

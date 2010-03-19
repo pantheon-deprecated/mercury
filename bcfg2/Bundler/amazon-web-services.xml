@@ -4,8 +4,6 @@
   <Package name='debhelper'/>
   <Package name='ec2-ami-tools'/>
   <Package name='ec2-consistent-snapshot'/>
-  <Package name='libdns46'/>
-  <Package name='librpm4.4'/>
   <Package name='make'/>
   <Package name='rpm'/>
   <Package name='runurl'/>
