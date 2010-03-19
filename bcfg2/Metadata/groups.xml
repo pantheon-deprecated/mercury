@@ -1,4 +1,5 @@
 <Groups version='3.0'>
+  <!--Note that the ubuntu-karmic option hasn't been tested as thoroughly as the ubuntu-jaunty option-->
   <Group profile='true' public='true' default='true' name='mercury-ubuntu-jaunty-32'>
     <Group name='ubuntu-jaunty'/>
     <Group name='i386'/>

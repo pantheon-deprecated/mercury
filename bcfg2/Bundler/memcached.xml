@@ -1,5 +1,6 @@
 <Bundle name='memcached'>
   <Package name='memcached'/>
+  <Package name='libevent1'/>	
   <Package name='php5-memcache'/>
   <Path name="/etc/memcached_1.conf"/>
   <Path name="/etc/memcached_2.conf"/>

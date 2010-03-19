@@ -4,10 +4,16 @@
   <Package name='automake'/>
   <Package name='automake1.4'/>
   <Package name='bzr'/>
+  <Package name='bzrtools'/>
   <Package name='defoma'/>
   <Package name='fontconfig-config'/>
+  <Package name='ghostscript'/>
   <Package name='libapache2-mod-rpaf'/>
   <Package name='libfontconfig1'/>
+  <Package name='libltdl7'/>
+  <Package name='libltdl7-dev'/>
+  <Package name='libpaper1'/>
+  <Package name='libpaper-utils'/>
   <Package name='libpng12-0'/>
   <Package name='libssl-dev'/>
   <Package name='libt1-5'/>
@@ -25,6 +31,8 @@
   <Package name='php5-xmlrpc'/>
   <Package name='php-apc'/>
   <Package name='php-pear'/>
+  <Package name='psfontmgr'/>
+  <Package name='python-configobj'/>  
   <Package name='shtool'/>
   <Package name='subversion'/>
   <Package name='ttf-dejavu'/>
