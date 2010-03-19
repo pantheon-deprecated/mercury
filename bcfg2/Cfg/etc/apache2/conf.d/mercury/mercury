@@ -2,6 +2,7 @@
 # Enable deflate for MIME types not covered in mods-enabled/deflate.conf
 # Aka css and js.
 AddOutputFilterByType DEFLATE application/x-javascript 
+AddOutputFilterByType DEFLATE application/javascript 
 AddOutputFilterByType DEFLATE text/javascript 
 AddOutputFilterByType DEFLATE text/css 
 
