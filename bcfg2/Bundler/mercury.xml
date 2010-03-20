@@ -11,7 +11,6 @@
   <Package name='libapache2-mod-rpaf'/>
   <Package name='libfontconfig1'/>
   <Package name='libltdl7'/>
-  <Package name='libltdl7-dev'/>
   <Package name='libpaper1'/>
   <Package name='libpaper-utils'/>
   <Package name='libpng12-0'/>

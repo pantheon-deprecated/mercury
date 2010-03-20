@@ -145,7 +145,6 @@
   <Package name='libtimedate-perl'/>
   <Package name='libts-0.0-0'/>
   <Package name='liburi-perl'/>
-  <Package name='libvolume-id1'/>
   <Package name='libwww-perl'/>
   <Package name='libxaw7'/>
   <Package name='libxcb-render0'/>
