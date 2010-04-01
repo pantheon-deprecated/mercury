@@ -15,9 +15,9 @@ mysql> flush privileges;
 mysql> \q
 
 2) update your Pressflow install with the new mysql account information by editing 
-/var/www/pressflow/sites/default/settings.php (again using the appropriate username and password values):
+/var/www/sites/default/settings.php (again using the appropriate username and password values):
 
-nano -w /var/www/pressflow/sites/default/settings.php 
+nano -w /var/www/sites/default/settings.php 
 
 and change: 
 $db_url = 'mysqli://root:@localhost/pressflow';

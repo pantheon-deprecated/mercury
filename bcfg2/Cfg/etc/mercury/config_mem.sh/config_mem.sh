@@ -70,3 +70,8 @@ sed --in-place=.bak "s/memory_limit = .*;/memory_limit = ${PHP_SIZE};/g" $PHP_DI
 sed --in-place=.bak  s/maxThreads=\"[0-9]*\"/maxThreads=\"$TOMCAT_MAX_THREADS\"/ $TOMCAT_DIR
 sed --in-place=.bak "s|-s file.*|-s file,/var/lib/varnish/\$INSTANCE/varnish_storage.bin,$VARNISH_SIZE\"|g" $VARNISH_DIR 
 sed --in-place=.bak "s/memory_limit = .*;/memory_limit = 128M;/g" $CLI_DIR
+
+#restart to get new configs:
+/etc/init.d/apache2 restart
+/etc/init.d/varnish restart
+/etc/init.d/tomcat6 restartcase

@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#exit unless in running on an ec2 environmet:
+if [[ ! -a /usr/local/bin/ec2-metadata ]]; then
+    exit 0;
+fi
+
 # Move mysql and varnish to /mnt
 # TODO support for EBS and RDS
 
