@@ -3,14 +3,10 @@
 # Markers set at 50gb, 25gb, 15gb, 8gb, 4gb, 2gb, 1gb, and 512mb (rounded down)
 # TODO: support for more distributions
 
-DEFAULT_APC_SIZE="128"
-DEFAULT_PHP_SIZE="64M"
-DEFAULT_TOMCAT_MAX_THREADS="150"
-DEFAULT_VARNISH_SIZE="1G"
-
 # Get RAM size:
-RAM=$(grep MemTotal /proc/meminfo | sed 's/[^0-9]*//g')
+#RAM=$(grep MemTotal /proc/meminfo | sed 's/[^0-9]*//g')
 
+RAM=16753487
 if (($RAM>=50000000)); then
     APC_SIZE="16384"
     PHP_SIZE="8192M"
@@ -47,8 +43,8 @@ elif (($RAM>=1000000)); then
     TOMCAT_MAX_THREADS="100"
     VARNISH_SIZE="512M"
 elif (($RAM>=500000)); then
-    APC_SIZE=$DEFAULT_APC_SIZE
-    PHP_SIZE="128"
+    APC_SIZE="128"
+    PHP_SIZE="128M"
     TOMCAT_MAX_THREADS="50"
     VARNISH_SIZE="256M"
 else
@@ -65,10 +61,12 @@ case $RELEASE in
 	PHP_DIR="/etc/php5/apache2/php.ini"
 	TOMCAT_DIR="/etc/tomcat6/server.xml"
 	VARNISH_DIR="/etc/default/varnish"
+	CLI_DIR="/etc/php5/cli/php.ini"
 	;;
 esac
 
-sed --in-place=.bak s/$DEFAULT_APC_SIZE/$APC_SIZE/ $APC_DIR
-sed --in-place=.bak s/$DEFAULT_PHP_SIZE/$PHP_SIZE/g $PHP_DIR
-sed --in-place=.bak s/$DEFAULT_TOMCAT_MAX_THREADS/$TOMCAT_MAX_THREADS/ $TOMCAT_DIR
-sed --in-place=.bak s/$DEFAULT_VARNISH_SIZE/$VARNISH_SIZE/g $VARNISH_DIR
+sed --in-place=.bak "s/apc.shm_size=.*/apc.shm_size=${APC_SIZE}/" $APC_DIR
+sed --in-place=.bak "s/memory_limit = .*;/memory_limit = ${PHP_SIZE};/g" $PHP_DIR
+sed --in-place=.bak  s/maxThreads=\"[0-9]*\"/maxThreads=\"$TOMCAT_MAX_THREADS\"/ $TOMCAT_DIR
+sed --in-place=.bak "s|-s file.*|-s file,/var/lib/varnish/\$INSTANCE/varnish_storage.bin,$VARNISH_SIZE\"|g" $VARNISH_DIR 
+sed --in-place=.bak "s/memory_limit = .*;/memory_limit = 128M;/g" $CLI_DIR
