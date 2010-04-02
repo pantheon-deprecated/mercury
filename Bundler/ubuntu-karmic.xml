@@ -235,7 +235,6 @@
   <Package name='xml-core'/>
   <Package name='x-ttcidfont-conf'/>
   <Service name='atd'/>
-  <Service name='bootlogs.sh'/>
   <Service name='cron'/>
   <Service name='dns-clean'/>
   <Service name='killprocs'/>
@@ -243,7 +242,6 @@
   <Service name='ondemand'/>
   <Service name='pppd-dns'/>
   <Service name='rc.local'/>
-  <Service name='rmnologin'/>
   <Service name='rsync'/>
   <Service name='single'/>
   <Service name='ssh'/>
