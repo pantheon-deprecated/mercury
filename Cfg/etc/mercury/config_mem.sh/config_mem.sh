@@ -74,4 +74,5 @@ sed --in-place=.bak "s/memory_limit = .*;/memory_limit = 128M;/g" $CLI_DIR
 #restart to get new configs:
 /etc/init.d/apache2 restart
 /etc/init.d/varnish restart
-/etc/init.d/tomcat6 restartcase
+/etc/init.d/tomcat6 restart
+/etc/init.d/memcached restart
