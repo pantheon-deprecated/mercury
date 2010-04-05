@@ -1,5 +1,11 @@
 <Groups version='3.0'>
-  <!--Note that the ubuntu-karmic option hasn't been tested as thoroughly as the ubuntu-jaunty option-->
+  <!--
+      Select the Bundles you wish to use in the group profile
+      We've provided several examples - only use one group profile
+      Note that the ubuntu-karmic option hasn't been tested as thoroughly as the ubuntu-jaunty option
+    -->
+
+  <!--Ubuntu Jaunty 32-bit on AWS (DEFAULT)-->
   <Group profile='true' public='true' default='true' name='mercury-ubuntu-jaunty-aws-32'>
     <Group name='mercury'/>
     <Group name='ubuntu-jaunty'/>
@@ -8,6 +14,63 @@
     <Group name='bcfg2'/>
   </Group>
   
+  <!--Ubuntu Jaunty 64-bit on AWS-->
+  <!--
+  <Group profile='true' public='true' default='true' name='mercury-ubuntu-jaunty-aws-64'>
+    <Group name='mercury'/>
+    <Group name='ubuntu-jaunty'/>
+    <Group name='amazon-web-services'/>
+    <Group name='amd64'/>
+    <Group name='bcfg2'/>
+  </Group>
+  -->
+
+  <!--Ubuntu Jaunty 32-bit on Rackspace-->
+  <!--
+  <Group profile='true' public='true' default='true' name='mercury-ubuntu-jaunty-rackspace-32'>
+    <Group name='mercury'/>
+    <Group name='ubuntu-jaunty'/>
+    <Group name='rackspace'/>
+    <Group name='i386'/>
+    <Group name='bcfg2'/>
+  </Group>
+  -->
+
+  <!--Ubuntu Jaunty 64-bit on Rackspace-->
+  <!--
+  <Group profile='true' public='true' default='true' name='mercury-ubuntu-jaunty-rackspace-64'>
+    <Group name='mercury'/>
+    <Group name='ubuntu-jaunty'/>
+    <Group name='rackspace'/>
+    <Group name='amd64'/>
+    <Group name='bcfg2'/>
+  </Group>
+  -->
+
+  <!--Ubuntu Karmic 32-bit on AWS-->
+  <!--
+  <Group profile='true' public='true' default='true' name='mercury-ubuntu-karmic-aws-32'>
+    <Group name='mercury'/>
+    <Group name='ubuntu-karmic'/>
+    <Group name='amazon-web-services'/>
+    <Group name='i386'/>
+    <Group name='bcfg2'/>
+  </Group>
+  -->
+
+  <!--Ubuntu karmic 64-bit on AWS-->
+  <!--
+  <Group profile='true' public='true' default='true' name='mercury-ubuntu-karmic-aws-64'>
+    <Group name='mercury'/>
+    <Group name='ubuntu-karmic'/>
+    <Group name='amazon-web-services'/>
+    <Group name='amd64'/>
+    <Group name='bcfg2'/>
+  </Group>
+  -->
+
+  <!--Shouldn't need to edit below this point unless you're using a distro/VPS we haven't setup yet-->
+
   <!-- Operating systems -->
   <Group name='ubuntu-jaunty'>
     <Group name='ubuntu'/>
