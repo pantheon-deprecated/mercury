@@ -3,6 +3,7 @@
   <Package name='bcfg2-server'/>
   <Package name='gamin'/>
   <Package name='python-gamin'/>
+  <Package name='python-genshi'/>
   <Service name='bcfg2'/>
   <Service name='bcfg2-server'/>
 </Bundle>
