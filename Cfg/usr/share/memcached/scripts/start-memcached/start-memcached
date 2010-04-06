@@ -106,6 +106,8 @@ my $pid = fork();
 if($pid == 0)
 {
 		reopen_logfile($fd_reopened);
+		eval "use POSIX qw(setsid)";
+		setsid() unless $@;
 		exec "$memcached $params";
 		exit(0);
 
