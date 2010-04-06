@@ -1,9 +1,6 @@
 #!/bin/sh
 #set varnish memory usage
 
-#!/bin/bash
-# Get System RAM size for varnish, tomcat, apc, php and memcached Probes
-
 RAM=$(grep MemTotal /proc/meminfo | sed 's/[^0-9]*//g')
 
 if (($RAM>=50000000)); then
