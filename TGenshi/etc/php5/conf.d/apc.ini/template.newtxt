@@ -1,4 +1,4 @@
 extension=apc.so
-apc.shm_size=${metadata.Probes['apc']}
+apc.shm_size=${metadata.Probes['set_apc_memory']}
 apc.include_once_override = 1 
 
