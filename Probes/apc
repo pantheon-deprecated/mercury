@@ -1,0 +1,31 @@
+#!/bin/sh
+#set apc memory usage
+
+MEM = /var/lib/bcfg2/Probes/get_ram.sh
+
+case "$MEM" in
+    50GB)
+        echo "12800"
+	;;
+    25GB)
+        echo "6400"
+	;;
+    15GB)
+	echo "3840"
+	;;
+    8GB)
+	echo "2048"
+	;;
+    4GB)
+	echo "1024"
+	;;
+    2GB)
+	echo "512"
+	;;
+    1GB)
+	echo "256"
+	;;
+    500MB)
+	echo "128"
+	;;
+esac
