@@ -1,7 +1,7 @@
 #!/bin/sh
 #set apc memory usage
 
-RAM=$(grep MemTotal /proc/meminfo | sed 's/[^0-9]*//g')
+RAM=`grep MemTotal /proc/meminfo | sed 's/[^0-9]*//g'`
 
 if (($RAM>=50000000)); then
     echo "3200"
