@@ -45,7 +45,6 @@
   <Path name="/etc/apache2/sites-available/default"/>
   <Path name="/etc/apache2/conf.d/mercury"/>
   <Path name="/etc/cron.d/drupal"/>
-  <Path name="/etc/mercury/boot.d/S050ec2.sh"/>
   <Path name="/etc/mercury/boot.d/S100main.sh"/>
   <Path name="/etc/mercury/config_mem.sh"/>
   <Path name="/etc/mercury/init.sh"/>

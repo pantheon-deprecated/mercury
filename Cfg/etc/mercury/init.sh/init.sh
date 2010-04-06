@@ -15,7 +15,7 @@ cd /var/www/profiles; bzr merge --force
 cd /var/lib/bcfg2; bzr merge --force
 
 # Be sure we are running.
-/etc/init.d/bcfg2-server start
+/etc/init.d/bcfg2-server restart
 
 # Wait for BCGF2 to spin up.
 while [ "$CHECK" == "" ]; do

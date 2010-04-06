@@ -1,10 +1,5 @@
 #!/bin/bash
 
-#exit unless in running on an ec2 environmet:
-if [[ ! -a /usr/local/bin/ec2-metadata ]]; then
-    exit 0;
-fi
-
 # Move mysql and varnish to /mnt
 # TODO support for EBS and RDS
 
@@ -28,7 +23,7 @@ chown varnish:varnish /mnt/varnish/lib/pressflow/
 /etc/init.d/varnish start
 
 #postfix
-if [[ -a /usr/local/bin/ec2-metadata ]]; then
+if [ -a /usr/local/bin/ec2-metadata ]; then
     REAL_HOSTNAME=$(/usr/local/bin/ec2-metadata -p | sed 's/public-hostname: //')
 else
     REAL_HOSTNAME=`hostname`
