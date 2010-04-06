@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #set apc memory usage
 
 RAM=`grep MemTotal /proc/meminfo | sed 's/[^0-9]*//g'`
