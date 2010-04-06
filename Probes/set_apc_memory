@@ -1,0 +1,21 @@
+#!/bin/sh
+#set apc memory usage
+
+if (($RAM>=50000000)); then
+    echo "12800"
+elif (($RAM>=25000000)); then
+    echo "6400"
+elif (($RAM>=15000000)); then
+    echo "3840"
+elif (($RAM>=8000000)); then
+    echo "2048"
+elif (($RAM>=4000000)); then
+    echo "1024"
+elif (($RAM>=2000000)); then
+    echo "512"
+elif (($RAM>=1000000)); then
+    echo "256"
+else
+    echo "128"
+fi
+

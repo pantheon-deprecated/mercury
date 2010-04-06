@@ -1,0 +1,21 @@
+#!/bin/sh
+#set php memory usage
+
+if (($RAM>=50000000)); then
+    echo "12800M"
+elif (($RAM>=25000000)); then
+    echo "6400M"
+elif (($RAM>=15000000)); then
+    echo "3840M"
+elif (($RAM>=8000000)); then
+    echo "2048M"
+elif (($RAM>=4000000)); then
+    echo "1024M"
+elif (($RAM>=2000000)); then
+    echo "512M"
+elif (($RAM>=1000000)); then
+    echo "256M"
+else
+    echo "128M"
+fi
+
