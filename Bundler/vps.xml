@@ -1,6 +1,5 @@
-<Bundle name='rackspace'>
+<Bundle name='vps'>
   <Package name='curl'/>
   <Package name='language-pack-en-base'/>
-  <Package name='ssh'/>
   <Package name='ubuntu-minimal'/>
 </Bundle>
