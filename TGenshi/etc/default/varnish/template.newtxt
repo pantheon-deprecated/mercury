@@ -39,7 +39,7 @@ INSTANCE=pressflow
 DAEMON_OPTS="-a :80 \
              -T localhost:6082 \
              -f /etc/varnish/default.vcl \
-             -s file,/var/lib/varnish/$INSTANCE/varnish_storage.bin,${metadata.Probes['set_varnish_memory']}"
+             -s file,/var/lib/varnish/$$INSTANCE/varnish_storage.bin,${metadata.Probes['set_varnish_memory']}"
 
 ## Alternative 3, Advanced configuration
 #

@@ -363,7 +363,7 @@ report_memleaks = On
 
 ;report_zend_debug = 0
 
-; Store the last error/warning message in $php_errormsg (boolean).
+; Store the last error/warning message in $$php_errormsg (boolean).
 track_errors = Off
 
 ; Disable the inclusion of HTML tags in error messages.
