@@ -417,7 +417,7 @@ variables_order = "EGPCS"
 ; Whether or not to register the EGPCS variables as global variables.  You may
 ; want to turn this off if you don't want to clutter your scripts' global scope
 ; with user data.  This makes most sense when coupled with track_vars - in which
-; case you can access all of the GPC variables through the $HTTP_*_VARS[],
+; case you can access all of the GPC variables through the $$HTTP_*_VARS[],
 ; variables.
 ;
 ; You should do your best to write your scripts so that they do not require
@@ -474,7 +474,7 @@ auto_append_file =
 default_mimetype = "text/html"
 ;default_charset = "iso-8859-1"
 
-; Always populate the $HTTP_RAW_POST_DATA variable.
+; Always populate the $$HTTP_RAW_POST_DATA variable.
 ;always_populate_raw_post_data = On
 
 
@@ -655,8 +655,8 @@ default_socket_timeout = 60
 ;pcre.recursion_limit=100000
 
 [Syslog]
-; Whether or not to define the various syslog variables (e.g. $LOG_PID,
-; $LOG_CRON, etc.).  Turning it off is a good idea performance-wise.  In
+; Whether or not to define the various syslog variables (e.g. $$LOG_PID,
+; $$LOG_CRON, etc.).  Turning it off is a good idea performance-wise.  In
 ; runtime, you can define these variables by calling define_syslog_variables().
 define_syslog_variables  = Off
 
@@ -716,7 +716,7 @@ mysql.max_persistent = -1
 mysql.max_links = -1
 
 ; Default port number for mysql_connect().  If unset, mysql_connect() will use
-; the $MYSQL_TCP_PORT or the mysql-tcp entry in /etc/services or the
+; the $$MYSQL_TCP_PORT or the mysql-tcp entry in /etc/services or the
 ; compile-time value defined MYSQL_PORT (in that order).  Win32 will only look
 ; at MYSQL_PORT.
 mysql.default_port =
@@ -751,7 +751,7 @@ mysql.trace_mode = Off
 mysqli.max_links = -1
 
 ; Default port number for mysqli_connect().  If unset, mysqli_connect() will use
-; the $MYSQL_TCP_PORT or the mysql-tcp entry in /etc/services or the
+; the $$MYSQL_TCP_PORT or the mysql-tcp entry in /etc/services or the
 ; compile-time value defined MYSQL_PORT (in that order).  Win32 will only look
 ; at MYSQL_PORT.
 mysqli.default_port = 3306
