@@ -31,7 +31,7 @@ sub vcl_recv {
   // Remove a ";" prefix, if present.
   set req.http.Cookie = regsub(req.http.Cookie, "^;\s*", "");
   // Remove empty cookies.
-  if (req.http.Cookie ~ "^\s*$") {
+  if (req.http.Cookie ~ "^\s*$$") {
     unset req.http.Cookie;
   }
 
@@ -43,7 +43,7 @@ sub vcl_recv {
   // Normalize the Accept-Encoding header
   // as per: http://varnish-cache.org/wiki/FAQ/Compression
   if (req.http.Accept-Encoding) {
-    if (req.url ~ "\.(jpg|png|gif|gz|tgz|bz2|tbz|mp3|ogg)$") {
+    if (req.url ~ "\.(jpg|png|gif|gz|tgz|bz2|tbz|mp3|ogg)$$") {
       # No point in compressing these           
       remove req.http.Accept-Encoding;
     } elsif (req.http.Accept-Encoding ~ "gzip") {
@@ -59,27 +59,38 @@ sub vcl_recv {
   // Let's have a little grace
   set req.grace = 30s;
 
+${metadata.Probes['set_varnish_vcl_recv']}
+
 }
 
 
 // Strip any cookies before an image/js/css is inserted into cache.
 // Also: future-support for ESI.
 sub vcl_fetch {
-  if (req.url ~ "\.(png|gif|jpg|swf|css|js)$") {
+  if (req.url ~ "\.(png|gif|jpg|swf|css|js)$$") {
     unset obj.http.set-cookie;
   }
   esi;
+
+${metadata.Probes['set_varnish_vcl_fetch']}
+
 }
 
 sub vcl_hash {
   if (req.http.Cookie) {
     set req.hash += req.http.Cookie;
   }
+
+${metadata.Probes['set_varnish_vcl_hash']}
+
 }
 
 sub vcl_error {
   // Let's deliver a slightly more friedly error page.
   // You can customize this as you wish.
+
+${metadata.Probes['set_varnish_vcl_error']}
+
   set obj.http.Content-Type = "text/html; charset=utf-8";
   synthetic {"
   <?xml version="1.0" encoding="utf-8"?>
