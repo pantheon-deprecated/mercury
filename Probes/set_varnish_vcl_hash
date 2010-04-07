@@ -1,7 +1,7 @@
-#!/bin.bash
+#!/bin/bash
 #any output from this script will be added to the vcl_hash subroutine in /etc/varnish/default.vcl.
 #we source a file outside of /var/lib/bcfg2 so that it's not overwritten by /usr/local/bin/update_mercury.sh or an update merge within /var/lib/bcfg2
 
-if [[ -f /etc/varnish/vcl_hash.sh ]]; then
-   `/etc/varnish/vcl_hash.sh`
+if [[ -a /etc/varnish/vcl_hash.sh ]]; then
+   /etc/varnish/vcl_hash.sh
 fi
