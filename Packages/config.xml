@@ -21,4 +21,15 @@
     <Arch>amd64</Arch>
     <Arch>i386</Arch>
   </APTSource>
+  <APTSource>
+    <Group>ubuntu-lucid</Group>
+    <URL>http://us.archive.ubuntu.com/ubuntu</URL>
+    <Version>lucid</Version>
+    <Component>main</Component>
+    <Component>multiverse</Component>
+    <Component>restricted</Component>
+    <Component>universe</Component>
+    <Arch>amd64</Arch>
+    <Arch>i386</Arch>
+  </APTSource>
 </Sources>

@@ -45,7 +45,7 @@
     <Group name='bcfg2'/>
   </Group>
 
-  <!--Ubuntu karmic 64-bit on AWS-->
+  <!--Ubuntu Karmic 64-bit on AWS-->
   <Group profile='true' public='true' default='true' name='mercury-ubuntu-karmic-aws-64'>
     <Group name='mercury'/>
     <Group name='ubuntu-karmic'/>
@@ -63,10 +63,46 @@
     <Group name='bcfg2'/>
   </Group>
 
-  <!--Ubuntu karmic 64-bit on Rackspace/Linode-->
+  <!--Ubuntu Karmic 64-bit on Rackspace/Linode-->
   <Group profile='true' public='true' default='true' name='mercury-ubuntu-karmic-vps-64'>
     <Group name='mercury'/>
     <Group name='ubuntu-karmic'/>
+    <Group name='vps'/>
+    <Group name='amd64'/>
+    <Group name='bcfg2'/>
+  </Group>
+
+  <!--Ubuntu Lucid 32-bit on AWS-->
+  <Group profile='true' public='true' default='true' name='mercury-ubuntu-lucid-aws-32'>
+    <Group name='mercury'/>
+    <Group name='ubuntu-lucid'/>
+    <Group name='amazon-web-services'/>
+    <Group name='i386'/>
+    <Group name='bcfg2'/>
+  </Group>
+
+  <!--Ubuntu Lucid 64-bit on AWS-->
+  <Group profile='true' public='true' default='true' name='mercury-ubuntu-lucid-aws-64'>
+    <Group name='mercury'/>
+    <Group name='ubuntu-lucid'/>
+    <Group name='amazon-web-services'/>
+    <Group name='amd64'/>
+    <Group name='bcfg2'/>
+  </Group>
+
+  <!--Ubuntu Lucid 32-bit on Rackspace/Linode-->
+  <Group profile='true' public='true' default='true' name='mercury-ubuntu-lucid-vps-32'>
+    <Group name='mercury'/>
+    <Group name='ubuntu-lucid'/>
+    <Group name='vps'/>
+    <Group name='i386'/>
+    <Group name='bcfg2'/>
+  </Group>
+
+  <!--Ubuntu Lucid 64-bit on Rackspace/Linode-->
+  <Group profile='true' public='true' default='true' name='mercury-ubuntu-lucid-vps-64'>
+    <Group name='mercury'/>
+    <Group name='ubuntu-lucid'/>
     <Group name='vps'/>
     <Group name='amd64'/>
     <Group name='bcfg2'/>
@@ -80,6 +116,10 @@
   <Group name='ubuntu-karmic'>
     <Group name='ubuntu'/>
     <Bundle name='ubuntu-karmic'/>
+  </Group>
+  <Group name='ubuntu-lucid'>
+    <Group name='ubuntu'/>
+    <Bundle name='ubuntu-lucid'/>
   </Group>
   <Group name='ubuntu'/>
   <Group name='debian'/>
