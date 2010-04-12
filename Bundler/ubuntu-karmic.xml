@@ -25,7 +25,6 @@
   <Package name='e2fslibs'/>
   <Package name='e2fsprogs'/>
   <Package name='eject'/>
-  <Package name='emacs22-nox'/>
   <Package name='fontconfig'/>
   <Package name='friendly-recovery'/>
   <Package name='fuse-utils'/>
