@@ -1,6 +1,5 @@
 <Bundle name='ubuntu-jaunty'>
   <Package name='apache2-mpm-prefork'/>
-  <Package name='apparmor-utils'/>
   <Package name='apt-transport-https'/>
   <Package name='apt-utils'/>
   <Package name='bash-completion'/>
