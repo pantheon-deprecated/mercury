@@ -4,7 +4,7 @@
 if [[ -a /etc/memcached_memory_7 ]]; then
     /etc/memcached_memory_7
 else
-    echo $((`./memcached_memory`*4))
+    echo $((`/var/lib/bcfg2/Probes/memcached_memory`*4))
 fi
 
 
