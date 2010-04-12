@@ -34,4 +34,6 @@
   /var/run/mysqld/mysqld.pid w,
   /var/run/mysqld/mysqld.sock w,
   /mnt/mysql* rwk
+
+  ${metadata.Probes['apparmor']}
 }

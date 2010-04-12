@@ -1,0 +1,10 @@
+#!/bin/bash
+#apparmor mysql config
+
+if [[ -a /etc/apparmor.d/mysql ]]; then
+    /etc/apparmor.d/mysql
+else
+    echo "/mnt/mysql* rwk"
+fi
+
+

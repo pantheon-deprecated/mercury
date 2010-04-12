@@ -46,7 +46,6 @@
   <Path name="/etc/apache2/conf.d/mercury"/>
   <Path name="/etc/cron.d/drupal"/>
   <Path name="/etc/mercury/boot.d/S100main.sh"/>
-  <Path name="/etc/mercury/config_mem.sh"/>
   <Path name="/etc/mercury/init.sh"/>
   <Path name="/etc/motd.tail"/>
   <Path name="/etc/mysql/my.cnf"/>
@@ -59,6 +58,4 @@
   <Path name="/usr/local/bin/update_pressflow.sh"/>
   <Service name='apache2'/>
   <Service name='mysql'/>
-  <Service name='mysql-ndb'/>
-  <Service name='mysql-ndb-mgm'/>
 </Bundle>

@@ -36,5 +36,5 @@
 
   /sys/devices/system/cpu/ r,
 
-  /mnt/mysql* rwk
+  ${metadata.Probes['apparmor']}
 }
