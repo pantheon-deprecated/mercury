@@ -5,6 +5,7 @@
   <Package name='automake1.4'/>
   <Package name='bzr'/>
   <Package name='bzrtools'/>
+  <Package name='curl'/>
   <Package name='defoma'/>
   <Package name='fontconfig-config'/>
   <Package name='ghostscript'/>
