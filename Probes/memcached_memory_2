@@ -4,7 +4,7 @@
 if [[ -a /etc/memcached_memory_2 ]]; then
     /etc/memcached_memory_2
 else
-    ./memcached_memory_high
+    echo $((`./memcached_memory`*8))
 fi
 
 

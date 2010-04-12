@@ -4,7 +4,7 @@
 if [[ -a /etc/memcached_memory_6 ]]; then
     /etc/memcached_memory_6
 else
-    ./memcached_memory_low
+    ./memcached_memory
 fi
 
 
