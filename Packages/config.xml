@@ -10,4 +10,15 @@
     <Arch>amd64</Arch>
     <Arch>i386</Arch>
   </APTSource>
+  <APTSource>
+    <Group>ubuntu-karmic</Group>
+    <URL>http://us.archive.ubuntu.com/ubuntu</URL>
+    <Version>karmic</Version>
+    <Component>main</Component>
+    <Component>multiverse</Component>
+    <Component>restricted</Component>
+    <Component>universe</Component>
+    <Arch>amd64</Arch>
+    <Arch>i386</Arch>
+  </APTSource>
 </Sources>
