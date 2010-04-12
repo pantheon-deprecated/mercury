@@ -18,7 +18,7 @@ logfile /var/log/memcached.log
 # -vv
 
 # Start with a cap of 16 megs. This one is for views, so give it room.
--m ${metadata.Probes['set_memcached_memory_4']}
+-m ${metadata.Probes['memcached_memory_7']}
 
 # Default connection port is 11211
 -p 11217 
