@@ -72,6 +72,11 @@ sub vcl_fetch {
   }
   esi;
 
+if ( obj.status == 500) {
+    set obj.grace = 60s;
+    restart;
+  }
+
 ${metadata.Probes['set_varnish_vcl_fetch']}
 
 }
