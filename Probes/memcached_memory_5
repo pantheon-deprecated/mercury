@@ -1,0 +1,10 @@
+#!/bin/bash
+#memcached bin 5 memory size
+
+if [[ -a /etc/memcached_memory_5 ]]; then
+    /etc/memcached_memory_5
+else
+    ./memcached_memory_low
+fi
+
+

@@ -1,0 +1,10 @@
+#!/bin/bash
+#memcached bin 2 memory size
+
+if [[ -a /etc/memcached_memory_2 ]]; then
+    /etc/memcached_memory_2
+else
+    ./memcached_memory_high
+fi
+
+
