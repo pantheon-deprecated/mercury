@@ -3,7 +3,9 @@
 
 RAM=`grep MemTotal /proc/meminfo | sed 's/[^0-9]*//g'`
 
-if (($RAM>=50000000)); then
+if [[ -a /etc/php5/apache2/memory.sh ]]; then
+   /etc/php5/apache2/memory.sh
+elif (($RAM>=50000000)); then
     echo "12800M"
 elif (($RAM>=25000000)); then
     echo "6400M"
