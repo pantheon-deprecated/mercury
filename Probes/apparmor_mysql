@@ -8,6 +8,8 @@ else
     echo "/mnt/mysql/lib/** rwk,"
     echo "/mnt/mysql/log/ r,"
     echo "/mnt/mysql/log/* rw,"
+    echo "/mnt/mysql/tmp/** rwkl,"
+    echo "/tmp/ rw,"
 fi
 
 
