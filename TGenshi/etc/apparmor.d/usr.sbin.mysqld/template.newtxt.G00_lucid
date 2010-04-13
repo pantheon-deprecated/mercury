@@ -36,5 +36,5 @@
 
   /sys/devices/system/cpu/ r,
 
-  ${metadata.Probes['apparmor']}
+  ${metadata.Probes['apparmor_mysql']}
 }
