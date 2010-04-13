@@ -23,6 +23,7 @@
   <Package name='dmsetup'/>
   <Package name='e2fslibs'/>
   <Package name='e2fsprogs'/>
+  <Package name='ec2-init'/>
   <Package name='eject'/>
   <Package name='fontconfig'/>
   <Package name='friendly-recovery'/>
