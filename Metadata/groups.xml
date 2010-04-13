@@ -1,110 +1,50 @@
 <Groups version='3.0'>
 
-  <!--Ubuntu Jaunty 32-bit on AWS-->
-  <Group profile='true' public='true' default='true' name='mercury-ubuntu-jaunty-aws-32'>
+  <!--Ubuntu Jaunty on AWS-->
+  <Group profile='true' public='true' default='true' name='mercury-ubuntu-jaunty-aws'>
     <Group name='mercury'/>
     <Group name='ubuntu-jaunty'/>
     <Group name='amazon-web-services'/>
-    <Group name='i386'/>
     <Group name='bcfg2'/>
   </Group>
   
-  <!--Ubuntu Jaunty 64-bit on AWS-->
-  <Group profile='true' public='true' default='true' name='mercury-ubuntu-jaunty-aws-64'>
-    <Group name='mercury'/>
-    <Group name='ubuntu-jaunty'/>
-    <Group name='amazon-web-services'/>
-    <Group name='amd64'/>
-    <Group name='bcfg2'/>
-  </Group>
-
-  <!--Ubuntu Jaunty 32-bit on Rackspace/Linode-->
-  <Group profile='true' public='true' default='true' name='mercury-ubuntu-jaunty-vps-32'>
+  <!--Ubuntu Jaunty on Rackspace/Linode-->
+  <Group profile='true' public='true' default='true' name='mercury-ubuntu-jaunty-vps'>
     <Group name='mercury'/>
     <Group name='ubuntu-jaunty'/>
     <Group name='vps'/>
-    <Group name='i386'/>
     <Group name='bcfg2'/>
   </Group>
 
-  <!--Ubuntu Jaunty 64-bit on Rackspace/Linode-->
-  <Group profile='true' public='true' default='true' name='mercury-ubuntu-jaunty-vps-64'>
-    <Group name='mercury'/>
-    <Group name='ubuntu-jaunty'/>
-    <Group name='vps'/>
-    <Group name='amd64'/>
-    <Group name='bcfg2'/>
-  </Group>
-
-  <!--Ubuntu Karmic 32-bit on AWS-->
-  <Group profile='true' public='true' default='true' name='mercury-ubuntu-karmic-aws-32'>
+  <!--Ubuntu Karmic on AWS-->
+  <Group profile='true' public='true' default='true' name='mercury-ubuntu-karmic-aws'>
     <Group name='mercury'/>
     <Group name='ubuntu-karmic'/>
     <Group name='amazon-web-services'/>
-    <Group name='i386'/>
     <Group name='bcfg2'/>
   </Group>
 
-  <!--Ubuntu Karmic 64-bit on AWS-->
-  <Group profile='true' public='true' default='true' name='mercury-ubuntu-karmic-aws-64'>
-    <Group name='mercury'/>
-    <Group name='ubuntu-karmic'/>
-    <Group name='amazon-web-services'/>
-    <Group name='amd64'/>
-    <Group name='bcfg2'/>
-  </Group>
-
-  <!--Ubuntu Karmic 32-bit on Rackspace/Linode-->
-  <Group profile='true' public='true' default='true' name='mercury-ubuntu-karmic-vps-32'>
+  <!--Ubuntu Karmic on Rackspace/Linode-->
+  <Group profile='true' public='true' default='true' name='mercury-ubuntu-karmic-vps'>
     <Group name='mercury'/>
     <Group name='ubuntu-karmic'/>
     <Group name='vps'/>
-    <Group name='i386'/>
     <Group name='bcfg2'/>
   </Group>
 
-  <!--Ubuntu Karmic 64-bit on Rackspace/Linode-->
-  <Group profile='true' public='true' default='true' name='mercury-ubuntu-karmic-vps-64'>
-    <Group name='mercury'/>
-    <Group name='ubuntu-karmic'/>
-    <Group name='vps'/>
-    <Group name='amd64'/>
-    <Group name='bcfg2'/>
-  </Group>
-
-  <!--Ubuntu Lucid 32-bit on AWS-->
-  <Group profile='true' public='true' default='true' name='mercury-ubuntu-lucid-aws-32'>
+  <!--Ubuntu Lucid on AWS-->
+  <Group profile='true' public='true' default='true' name='mercury-ubuntu-lucid-aws'>
     <Group name='mercury'/>
     <Group name='ubuntu-lucid'/>
     <Group name='amazon-web-services'/>
-    <Group name='i386'/>
     <Group name='bcfg2'/>
   </Group>
 
-  <!--Ubuntu Lucid 64-bit on AWS-->
-  <Group profile='true' public='true' default='true' name='mercury-ubuntu-lucid-aws-64'>
-    <Group name='mercury'/>
-    <Group name='ubuntu-lucid'/>
-    <Group name='amazon-web-services'/>
-    <Group name='amd64'/>
-    <Group name='bcfg2'/>
-  </Group>
-
-  <!--Ubuntu Lucid 32-bit on Rackspace/Linode-->
-  <Group profile='true' public='true' default='true' name='mercury-ubuntu-lucid-vps-32'>
+  <!--Ubuntu Lucid on Rackspace/Linode-->
+  <Group profile='true' public='true' default='true' name='mercury-ubuntu-lucid-vps'>
     <Group name='mercury'/>
     <Group name='ubuntu-lucid'/>
     <Group name='vps'/>
-    <Group name='i386'/>
-    <Group name='bcfg2'/>
-  </Group>
-
-  <!--Ubuntu Lucid 64-bit on Rackspace/Linode-->
-  <Group profile='true' public='true' default='true' name='mercury-ubuntu-lucid-vps-64'>
-    <Group name='mercury'/>
-    <Group name='ubuntu-lucid'/>
-    <Group name='vps'/>
-    <Group name='amd64'/>
     <Group name='bcfg2'/>
   </Group>
 
