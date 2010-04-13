@@ -15,18 +15,15 @@
   </Group>
 
   <!-- Operating systems -->
-  <Group name='ubuntu-jaunty'>
-    <Group name='jaunty'> 
+  <Group name='jaunty'> 
     <Group name='ubuntu'/>
     <Bundle name='ubuntu-jaunty'/>
   </Group>
-  <Group name='ubuntu-karmic'>
-    <Group name='karmic'> 
+  <Group name='karmic'> 
     <Group name='ubuntu'/>
     <Bundle name='ubuntu-karmic'/>
   </Group>
-  <Group name='ubuntu-lucid'>
-    <Group name='lucid'>
+  <Group name='lucid'>
     <Group name='ubuntu'/>
     <Bundle name='ubuntu-lucid'/>
   </Group>
