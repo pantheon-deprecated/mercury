@@ -1,4 +1,4 @@
-MERCURY 1.0 created by Chapter Three (http://chapterthree.com)                                  02/26/10
+MERCURY 1.1 Beta created by Chapter Three (http://chapterthree.com)                                  04/13/10
 
 On first boot, please give the bcfg2 server up to 2 minutes to spin up and make sure the system is up to date.
 You can monitor the progress with "tail -f /etc/mercury/bootlog".
