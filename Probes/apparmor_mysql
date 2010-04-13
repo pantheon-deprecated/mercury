@@ -4,7 +4,10 @@
 if [[ -a /etc/apparmor.d/mysql ]]; then
     /etc/apparmor.d/mysql
 else
-    echo "/mnt/mysql* rwk"
+    echo "/mnt/mysql/lib/ r,"
+    echo "/mnt/mysql/lib/** rwk,"
+    echo "/mnt/mysql/log/ r,"
+    echo "/mnt/mysql/log/* rw,"
 fi
 
 
