@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 #This script updates the /var/lib/bcfg2 and /var/www/profiles dirs (mercury) from the pantheon project on launchpad and runs bcfg2 to apply the updates
 
