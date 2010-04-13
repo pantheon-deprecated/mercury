@@ -1,6 +1,6 @@
 <Sources>
   <APTSource>
-    <Group>ubuntu-jaunty</Group>
+    <Group>jaunty</Group>
     <URL>http://us.archive.ubuntu.com/ubuntu</URL>
     <Version>jaunty</Version>
     <Component>main</Component>
@@ -11,7 +11,7 @@
     <Arch>i386</Arch>
   </APTSource>
   <APTSource>
-    <Group>ubuntu-karmic</Group>
+    <Group>karmic</Group>
     <URL>http://us.archive.ubuntu.com/ubuntu</URL>
     <Version>karmic</Version>
     <Component>main</Component>
@@ -22,7 +22,7 @@
     <Arch>i386</Arch>
   </APTSource>
   <APTSource>
-    <Group>ubuntu-lucid</Group>
+    <Group>lucid</Group>
     <URL>http://us.archive.ubuntu.com/ubuntu</URL>
     <Version>lucid</Version>
     <Component>main</Component>
