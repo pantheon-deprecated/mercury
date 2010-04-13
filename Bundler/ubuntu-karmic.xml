@@ -8,7 +8,6 @@
   <Package name='build-essential'/>
   <Package name='busybox-initramfs'/>
   <Package name='bzip2'/>
-  <Package name='bzrtools'/>
   <Package name='command-not-found'/>
   <Package name='command-not-found-data'/>
   <Package name='console-setup'/>
