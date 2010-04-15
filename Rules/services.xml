@@ -32,7 +32,7 @@
   <Service type='deb' status='on' name='postfix'/>
 
   <!-- tomcat6 services -->
-  <Service type='deb' status='on' name='tomcat6'/>
+  <Service type='deb' status='on' name='tomcat6-wrapper'/>
 
   <!-- ec2 services -->
   <Service type='deb' status='on' name='ec2-get-credentials'/>
