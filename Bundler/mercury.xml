@@ -57,6 +57,7 @@
   <Path name="/root/README.txt"/>
   <Path name="/usr/local/bin/update_mercury.sh"/>
   <Path name="/usr/local/bin/update_pressflow.sh"/>
+  <Path name="/var/www/profiles/mercury/mercury.profile"/>
   <Service name='apache2'/>
   <Service name='mysql'/>
 </Bundle>

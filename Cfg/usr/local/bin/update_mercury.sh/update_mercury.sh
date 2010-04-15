@@ -1,11 +1,11 @@
 #!/bin/bash
 
-#This script updates the /var/lib/bcfg2 and /var/www/profiles dirs (mercury) from the pantheon project on launchpad and runs bcfg2 to apply the updates
+#This script updates the /var/lib/bcfg2 rom the pantheon project on launchpad and runs bcfg2 to apply the updates
 
-echo "This script updates the /var/lib/bcfg2 and /var/www/profiles dirs (mercury) from the pantheon project on launchpad and runs bcfg2 to apply the updates"
-echo "Continue? (y/n)"
+echo "This script updates the /var/lib/bcfg2 from the pantheon project on launchpad and runs bcfg2 to apply the updates"
+echo -n "Continue? (y/n)"
 
-read -n 1 ANSWER
+read ANSWER
 echo ""
 if [[ ${ANSWER} != "y" ]]; then
     echo "Cancelling....."
@@ -17,8 +17,7 @@ echo "Creating a log of the output of this script at /root/update_mercury.log"
 exec &> /root/update_mercury.log
 
 #get any updates
-cd /var/www/profiles; bzr ci -m "commited by mercury"; bzr merge --force; bzr commit -m "Mercury merged changes from Launchpad";
-cd /var/lib/bcfg2; bzr ci -m "commited by mercury"; bzr merge --force; bzr commit -m "Mercury merged changes from Launchpad";
+cd /var/lib/bcfg2; bzr ci -m "updates automatically commited by update_mercury.sh"; bzr merge --force; bzr commit -m "changes from Launchpad downloaded";
 
 #process updates:
 bcfg2 -vq
