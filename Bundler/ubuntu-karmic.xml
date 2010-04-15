@@ -53,7 +53,6 @@
   <Package name='iso-codes'/>
   <Package name='kbd'/>
   <Package name='klibc-utils'/>
-  <Package name='klogd'/>
   <Package name='laptop-detect'/>
   <Package name='less'/>
   <Package name='libalgorithm-c3-perl'/>
@@ -200,10 +199,10 @@
   <Package name='python-lxml'/>
   <Package name='python-paramiko'/>
   <Package name='reiserfsprogs'/>
+  <Package name='rsyslog'/>
   <Package name='sgml-base'/>
   <Package name='shared-mime-info'/>
   <Package name='sudo'/>
-  <Package name='sysklogd'/>
   <Package name='sysvinit-utils'/>
   <Package name='sysv-rc'/>
   <Package name='tar'/>
@@ -238,12 +237,11 @@
   <Service name='cron'/>
   <Service name='dns-clean'/>
   <Service name='killprocs'/>
-  <Service name='klogd'/>
   <Service name='ondemand'/>
   <Service name='pppd-dns'/>
   <Service name='rc.local'/>
   <Service name='rsync'/>
+  <Service name='rsyslog'/>
   <Service name='single'/>
   <Service name='ssh'/>
-  <Service name='sysklogd'/>
 </Bundle>
