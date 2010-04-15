@@ -21,7 +21,8 @@
   <Package name='tomcat6'/>
   <Package name='tzdata-java'/>
   <Path name="/etc/default/tomcat6"/>
+  <Path name="/etc/init.d/tomcat6-wrapper"/>
   <Path name="/etc/tomcat6/Catalina/localhost/solr.xml"/>
   <Path name="/etc/tomcat6/server.xml"/>
-  <Service name='tomcat6'/>
+  <Service name='tomcat6-wrapper'/>
 </Bundle>
