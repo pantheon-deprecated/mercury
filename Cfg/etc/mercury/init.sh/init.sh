@@ -11,7 +11,6 @@ exec &> /etc/mercury/bootlog
 
 # Get any updates.
 cd /var/www/; bzr merge --force
-cd /var/www/profiles; bzr merge --force
 cd /var/lib/bcfg2; bzr merge --force
 
 # Be sure we are running.
