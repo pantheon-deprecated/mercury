@@ -55,14 +55,17 @@
   </Group>
   
   <!-- other options -->
+  <Group name='bcfg2'>
+    <Bundle name='bcfg2'/>
+  </Group>
+
+<!--
   <Group name='i386'>
     <Bundle name='i386'/>
   </Group>
   <Group name='amd64'>
     <Bundle name='amd64'/>
   </Group>
+-->
 
-  <Group name='bcfg2'>
-    <Bundle name='bcfg2'/>
-  </Group>
 </Groups>
