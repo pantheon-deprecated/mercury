@@ -1,5 +1,0 @@
-#!/bin/bash
-#wrapper around tomcat6 init script to get aorund bug in interaction between BCFG2 and jsvc
-
-/etc/init.d/tomcat6 "$@" &
-
