@@ -1,24 +1,24 @@
 #!/bin/bash
-#set apc memory usage
+#set tomcat6 memory usage
 
 RAM=`grep MemTotal /proc/meminfo | sed 's/[^0-9]*//g'`
 
-if [[ -a /etc/php5/conf.d/memory.sh ]]; then
-   /etc/php5/conf.d/memory.sh
+if [[ -a /etc/default/tomcat6_memory.sh ]]; then
+   /etc/default/tomcat6_memory.sh
 elif (($RAM>=50000000)); then
-    echo "128"
+    echo "8192"
 elif (($RAM>=25000000)); then
-    echo "128"
+    echo "4096"
 elif (($RAM>=15000000)); then
-    echo "128"
+    echo "2048"
 elif (($RAM>=8000000)); then
-    echo "128"
+    echo "1024"
 elif (($RAM>=4000000)); then
-    echo "128"
+    echo "512"
 elif (($RAM>=2000000)); then
-    echo "128"
+    echo "256"
 elif (($RAM>=1000000)); then
-    echo "96"
+    echo "128"
 else
     echo "64"
 fi
