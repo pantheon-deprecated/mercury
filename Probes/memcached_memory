@@ -3,7 +3,9 @@
 
 RAM=`grep MemTotal /proc/meminfo | sed 's/[^0-9]*//g'`
 
-if (($RAM>=50000000)); then
+if [[ -a /etc/memcached_memory ]]; then
+    /etc/memcached_memory
+elif (($RAM>=50000000)); then
     echo "400"
 elif (($RAM>=25000000)); then
     echo "200"
