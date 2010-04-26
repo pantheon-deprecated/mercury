@@ -1,0 +1,21 @@
+#!/bin/bash
+#If you wish to replace our default value for key buffer size in /etc/mysql/my.cnf,
+#edit the KEY_BUFFER variable in /root/TUNEABLE_CONFIGS.sh
+
+. /root/TUNEABLE_CONFIGS.sh
+
+RAM=`grep MemTotal /proc/meminfo | sed 's/[^0-9]*//g'`
+
+if [[ -n "$KEY_BUFFER" ]]; then
+   echo "$KEY_BUFFER"
+elif (($RAM>=4000000)); then
+    echo "32"
+elif (($RAM>=2000000)); then
+    echo "16"
+elif (($RAM>=1000000)); then
+    echo "8"
+else
+    echo "4"
+fi
+
+

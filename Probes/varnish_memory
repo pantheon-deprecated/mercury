@@ -1,10 +1,13 @@
 #!/bin/bash
-#set varnish memory usage
+#If you wish to replace our default value for varnish memory in /etc/default/varnish,
+#edit the VARNISH_MEMORY variable in /root/TUNEABLE_CONFIGS.sh
+
+. /root/TUNEABLE_CONFIGS.sh
 
 RAM=`grep MemTotal /proc/meminfo | sed 's/[^0-9]*//g'`
 
-if [[ -a /etc/varnish/memory.sh ]]; then
-   /etc/varnish/memory.sh
+if [[ -n "$VARNISH_MEMORY" ]]; then
+   echo "$VARNISH_MEMORY"
 elif (($RAM>=1000000)); then
     echo "256"
 else

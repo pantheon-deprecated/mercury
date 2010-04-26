@@ -1,9 +1,9 @@
 #!/bin/bash
-#any output from this script will be added to the vcl_hash subroutine in /etc/varnish/default.vcl
-#add any additions to /etc/varnish/vcl_hash.sh
-#we source a file outside of /var/lib/bcfg2 so that it's not overwritten by /usr/local/bin/update_mercury.sh
-#or an bzr merge within /var/lib/bcfg2
+#If you wish to replace our default value for vcl_hash in /etc/varnish/default.vlc,
+#edit the VARNISH_VCL_RECV variable in /root/TUNEABLE_CONFIGS.sh
 
-if [[ -a /etc/varnish/vcl_hash.sh ]]; then
-   /etc/varnish/vcl_hash.sh
+. /root/TUNEABLE_CONFIGS.sh
+
+if [[ -n "$VARNISH_VCL_HASH" ]]; then
+   echo "$VARNISH_VCL_HASH"
 fi

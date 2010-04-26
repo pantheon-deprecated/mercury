@@ -13,6 +13,7 @@
 #CATALINA_BASE=/var/lib/tomcat6
 
 # Arguments to pass to the Java virtual machine (JVM).
+#PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /root/TUNEABLE_CONFIGS.sh
 JAVA_OPTS="-Djava.awt.headless=true -Xmx${metadata.Probes['tomcat_memory']}"
 
 # Java compiler to use for translating JavaServer Pages (JSPs). You can use all

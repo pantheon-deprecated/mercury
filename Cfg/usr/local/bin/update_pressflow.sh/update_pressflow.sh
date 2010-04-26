@@ -17,6 +17,6 @@ echo "Creating a log of the output of this script at /root/update_pressflow.log"
 exec &> /root/update_pressflow.log
 
 #get any updates
-cd /var/www/; bzr ci -m "updates automatically commited by update_pressflow.sh"; bzr merge --force; bzr commit -m "changes from pressflow repo downloaded";
+cd /var/www/; bzr ci -m "updates automatically commited by update_pressflow.sh"; bzr merge; bzr commit -m "changes from pressflow repo downloaded";
 
 echo "done!"

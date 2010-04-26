@@ -1,10 +1,13 @@
 #!/bin/bash
-#set tomcat6 memory usage
+#If you wish to replace our default value for tomcat memory in /etc/default/tomcat6,
+#edit the TOMCAT_MEMORY variable in /root/TUNEABLE_CONFIGS.sh
+
+. /root/TUNEABLE_CONFIGS.sh
 
 RAM=`grep MemTotal /proc/meminfo | sed 's/[^0-9]*//g'`
 
-if [[ -a /etc/default/tomcat6_memory.sh ]]; then
-   /etc/default/tomcat6_memory.sh
+if [[ -n "$TOMCAT_MEMORY" ]]; then
+   echo "$TOMCAT_MEMORY"
 elif (($RAM>=8000000)); then
     echo "1024"
 elif (($RAM>=4000000)); then

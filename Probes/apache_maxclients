@@ -1,0 +1,21 @@
+#!/bin/bash
+#If you wish to replace our default value for apache maxclients in /etc/apache2/apache.conf,
+#edit the APACHE_MAXCLIENTS variable in /root/TUNEABLE_CONFIGS.sh
+
+. /root/TUNEABLE_CONFIGS.sh
+
+RAM=`grep MemTotal /proc/meminfo | sed 's/[^0-9]*//g'`
+
+if [[ -n "$APACHE_MAXCLIENTS" ]]; then
+   echo "$APACHE_MAXCLIENTS"
+elif (($RAM>=8000000)); then
+    echo "150"
+elif (($RAM>=4000000)); then
+    echo "75"
+elif (($RAM>=2000000)); then
+    echo "37"
+elif (($RAM>=1000000)); then
+    echo "18"
+else
+    echo "10"
+fi

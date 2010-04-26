@@ -1,10 +1,13 @@
 #!/bin/bash
-#set tomcat max threads
+#If you wish to replace our default value for tomcat max threads in /etc/tomcat/server.xml,
+#edit the TOMCAT_MAX_THREADS variable in /root/TUNEABLE_CONFIGS.sh
+
+. /root/TUNEABLE_CONFIGS.sh
 
 RAM=`grep MemTotal /proc/meminfo | sed 's/[^0-9]*//g'`
 
-if [[ -a /etc/tomcat6/max_threads.sh ]]; then
-   /etc/tomcat6/max_threads.sh
+if [[ -n "$TOMCAT_MAX_THREADS" ]]; then
+   echo "$TOMCAT_MAX_THREADS"
 elif (($RAM>=2000000)); then
     echo "200"
 elif (($RAM>=1000000)); then

@@ -1,10 +1,13 @@
 #!/bin/bash
-#set php memory usage
+#If you wish to replace our default value for php memory in /etc/php5/apache2/php.conf,
+#edit the PHP_MEMORY variable in /root/TUNEABLE_CONFIGS.sh
+
+. /root/TUNEABLE_CONFIGS.sh
 
 RAM=`grep MemTotal /proc/meminfo | sed 's/[^0-9]*//g'`
 
-if [[ -a /etc/php5/apache2/memory.sh ]]; then
-   /etc/php5/apache2/memory.sh
+if [[ -n "$PHP_MEMORY" ]]; then
+   echo "$PHP_MEMORY"
 elif (($RAM>=2000000)); then
     echo "512"
 elif (($RAM>=1000000)); then

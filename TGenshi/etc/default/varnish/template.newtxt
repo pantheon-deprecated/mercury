@@ -35,7 +35,8 @@ INSTANCE=pressflow
 # Listen on port 80, administration on localhost:6082, and forward to
 # one content server selected by the vcl file, based on the request.  Use a 512M
 # fixed-size cache file.
-#
+
+#PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /root/TUNEABLE_CONFIGS.sh
 DAEMON_OPTS="-a :80 \
              -T localhost:6082 \
              -f /etc/varnish/default.vcl \

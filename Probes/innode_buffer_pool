@@ -1,0 +1,23 @@
+#!/bin/bash
+#If you wish to replace our default value for innode buffer pool in /etc/mysql/my.cnf,
+#edit the INNODB_BUFFER_POOL variable in /root/TUNEABLE_CONFIGS.sh
+
+. /root/TUNEABLE_CONFIGS.sh
+
+RAM=`grep MemTotal /proc/meminfo | sed 's/[^0-9]*//g'`
+
+if [[ -n "$INNODB_BUFFER_POOL" ]]; then
+   echo "$INNODB_BUFFER_POOL"
+elif (($RAM>=8000000)); then
+    echo "2048"
+elif (($RAM>=4000000)); then
+    echo "1024"
+elif (($RAM>=2000000)); then
+    echo "512"
+elif (($RAM>=1000000)); then
+    echo "256"
+else
+    echo "128"
+fi
+
+
