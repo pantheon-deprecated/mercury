@@ -1,0 +1,21 @@
+#!/bin/bash
+#If you wish to replace our default value for apache maxclients in /etc/apache2/apache.conf,
+#edit the MYSQL_MAX_CONNECTIONS variable in /root/TUNEABLE_CONFIGS.sh
+
+. /root/TUNEABLE_CONFIGS.sh
+
+RAM=`grep MemTotal /proc/meminfo | sed 's/[^0-9]*//g'`
+
+if [[ -n "$MYSQL_MAX_CONNECTIONS" ]]; then
+   echo "$MYSQL_MAX_CONNECTIONS"
+elif (($RAM>=8000000)); then
+    echo "155"
+elif (($RAM>=4000000)); then
+    echo "80"
+elif (($RAM>=2000000)); then
+    echo "42"
+elif (($RAM>=1000000)); then
+    echo "23"
+else
+    echo "15"
+fi

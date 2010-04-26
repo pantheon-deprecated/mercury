@@ -6,9 +6,10 @@
 
 export APACHE_MAXCLIENTS=""
 export APC_MEMORY=""
-export INNODB_BUFFER_POOL=""
-export KEY_BUFFER=""
+export INNODB_BUFFER_POOL_SIZE=""
+export KEY_BUFFER_SIZE=""
 export MEMCACHED_MEMORY=""
+export MYSQL_MAX_CONNECTIONS=""
 export PHP_MEMORY=""
 export TOMCAT_MAX_THREADS=""
 export TOMCAT_MEMORY=""
