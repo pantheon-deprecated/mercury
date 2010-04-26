@@ -1,5 +1,5 @@
 #!/bin/bash
-#If you wish to replace our default value for apc memory in /etc/php5/apache2/apc.conf,
+#If you wish to replace our default value for apc memory in /etc/php5/conf.d/apc.ini,
 #edit the APC_MEMORY variable in /root/TUNEABLE_CONFIGS.sh
 
 . /root/TUNEABLE_CONFIGS.sh

@@ -1,5 +1,5 @@
 #!/bin/bash
-#If you wish to replace our default value for apache maxclients in /etc/apache2/apache.conf,
+#If you wish to replace our default value for apache maxclients in /etc/mysql/my.cnf,
 #edit the MYSQL_MAX_CONNECTIONS variable in /root/TUNEABLE_CONFIGS.sh
 
 . /root/TUNEABLE_CONFIGS.sh

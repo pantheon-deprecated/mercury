@@ -1,5 +1,5 @@
 #!/bin/bash
-#If you wish to replace our default value for memcached memory in /etc/memcached,
+#If you wish to replace our default value for memcached memory in /etc/memcached.conf,
 #edit the MEMCACHED_MEMORY variable in /root/TUNEABLE_CONFIGS.sh
 
 . /root/TUNEABLE_CONFIGS.sh

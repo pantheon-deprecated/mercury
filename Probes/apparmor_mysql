@@ -1,8 +1,11 @@
 #!/bin/bash
-#apparmor mysql config
+#If you wish to replace our default value for mysql paths in /etc/apparmor.d/usr.sbin.mysqld,
+#edit the APPARMOR_MYSQLD variable in /root/TUNEABLE_CONFIGS.sh
 
-if [[ -a /etc/apparmor.d/mysql ]]; then
-    /etc/apparmor.d/mysql
+. /root/TUNEABLE_CONFIGS.sh
+
+if [[ -n "APPARMOR_MYSQLD" ]]; then
+    echo $APPARMOR_MYSQLD
 else
     echo "/mnt/mysql/lib/ r,"
     echo "/mnt/mysql/lib/** rwk,"
