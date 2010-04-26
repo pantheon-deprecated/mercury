@@ -5,22 +5,16 @@ RAM=`grep MemTotal /proc/meminfo | sed 's/[^0-9]*//g'`
 
 if [[ -a /etc/memcached_memory ]]; then
     /etc/memcached_memory
-elif (($RAM>=50000000)); then
-    echo "400"
-elif (($RAM>=25000000)); then
-    echo "200"
-elif (($RAM>=15000000)); then
-    echo "120"
 elif (($RAM>=8000000)); then
-    echo "64"
+    echo "512"
 elif (($RAM>=4000000)); then
-    echo "32"
+    echo "512"
 elif (($RAM>=2000000)); then
-    echo "16"
+    echo "256"
 elif (($RAM>=1000000)); then
-    echo "8"
+    echo "128"
 else
-    echo "4"
+    echo "64"
 fi
 
 

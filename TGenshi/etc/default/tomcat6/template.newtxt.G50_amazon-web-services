@@ -29,4 +29,4 @@ TOMCAT6_SECURITY=no
 
 # Location of the JVM temporary directory
 # WARNING: This directory will be destroyed and recreated at every startup !
-JVM_TMP=/tmp
+JVM_TMP=/mnt/tomcat6/tmp
