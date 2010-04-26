@@ -4,7 +4,7 @@
 RAM=`grep MemTotal /proc/meminfo | sed 's/[^0-9]*//g'`
 
 if (($RAM>=50000000)); then
-    echo "4000"
+    echo "400"
 elif (($RAM>=25000000)); then
     echo "200"
 elif (($RAM>=15000000)); then

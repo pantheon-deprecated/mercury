@@ -3,7 +3,7 @@
 
 if [[ -a /etc/default/tomcat6_tmp_path ]]; then
     /etc/default/tomcat6_tmp_path
-else
+elif [[ ]]; then
     echo "/mnt/tomcat6/tmp"
 fi
 

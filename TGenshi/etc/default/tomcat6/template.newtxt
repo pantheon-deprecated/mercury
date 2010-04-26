@@ -29,4 +29,4 @@ TOMCAT6_SECURITY=no
 
 # Location of the JVM temporary directory
 # WARNING: This directory will be destroyed and recreated at every startup !
-JVM_TMP=${metadata.Probes['set_tomcat6_tmp_path']}
+JVM_TMP=${metadata.Probes['tomcat_tmp_path']}

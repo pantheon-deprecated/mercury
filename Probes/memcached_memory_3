@@ -4,7 +4,7 @@
 if [[ -a /etc/memcached_memory_3 ]]; then
     /etc/memcached_memory_3
 else
-    /var/lib/bcfg2/Probes/memcached_memory
+    /var/lib/bcfg2/Probes/memcached_memory_base
 fi
 
 

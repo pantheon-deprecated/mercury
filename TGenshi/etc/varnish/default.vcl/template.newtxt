@@ -59,7 +59,7 @@ sub vcl_recv {
   // Let's have a little grace
   set req.grace = 30s;
 
-${metadata.Probes['set_varnish_vcl_recv']}
+${metadata.Probes['varnish_vcl_recv']}
 
 }
 
@@ -77,7 +77,7 @@ if ( obj.status == 500) {
     restart;
   }
 
-${metadata.Probes['set_varnish_vcl_fetch']}
+${metadata.Probes['varnish_vcl_fetch']}
 
 }
 
@@ -86,7 +86,7 @@ sub vcl_hash {
     set req.hash += req.http.Cookie;
   }
 
-${metadata.Probes['set_varnish_vcl_hash']}
+${metadata.Probes['varnish_vcl_hash']}
 
 }
 
@@ -94,7 +94,7 @@ sub vcl_error {
   // Let's deliver a slightly more friedly error page.
   // You can customize this as you wish.
 
-${metadata.Probes['set_varnish_vcl_error']}
+${metadata.Probes['varnish_vcl_error']}
 
   set obj.http.Content-Type = "text/html; charset=utf-8";
   synthetic {"
