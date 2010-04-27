@@ -27,8 +27,6 @@ socket		= /var/run/mysqld/mysqld.sock
 [mysqld_safe]
 socket		= /var/run/mysqld/mysqld.sock
 nice		= 0
-log-error	= /var/log/mysqld.log
-pid-file	= /var/run/mysqld/mysqld.pid
 
 [mysqld]
 #
@@ -83,8 +81,8 @@ query_cache_size        = 128M
 log_error                = /var/log/mysql/error.log
 
 # Here you can see queries with especially long duration
-#log_slow_queries	= /var/log/mysql/mysql-slow.log
-#long_query_time = 2
+log_slow_queries	= /var/log/mysql/mysql-slow.log
+long_query_time = 1
 #log-queries-not-using-indexes
 #
 # The following can be used as easy to replay backup logs or for replication.
@@ -102,8 +100,6 @@ max_binlog_size         = 100M
 # InnoDB is enabled by default with a 10MB datafile in /var/lib/mysql/.
 # Read the manual for more InnoDB related options. There are many!
 
-ignore-builtin-innodb
-plugin-load=innodb	= ha_innodb_plugin.so
 innodb_buffer_pool_size	= ${metadata.Probes['innodb_buffer_pool_size']}M
 default_storage_engine	= innodb
 default_character_set	= utf8
@@ -127,7 +123,6 @@ key_buffer_size	        = ${metadata.Probes['key_buffer_size']}M
 
 #set to a little greater than max clients
 max_connections  	= ${metadata.Probes['mysql_max_connections']}
-slow_query_log		= 1
 sort_buffer_size	= 2M
 read_buffer_size	= 200k
 join_buffer_size	= 1M
