@@ -6,7 +6,7 @@ if [[ -a /root/MERCURY_TUNEABLES ]]; then
 . /root/MERCURY_TUNEABLES
 fi
 
-if [[ -n "APPARMOR_MYSQLD" ]]; then
+if [[ -n "$APPARMOR_MYSQLD" ]]; then
     echo "$APPARMOR_MYSQLD"
 else
     echo "/mnt/mysql/lib/ r,"
