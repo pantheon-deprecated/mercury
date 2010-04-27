@@ -40,6 +40,7 @@
   <Package name='ttf-dejavu-extra'/>
   <Package name='vnstat'/>
   <Package name='zlib1g-dev'/>
+  <Path name="/etc/apache2/apache2.conf"/>
   <Path name="/etc/apache2/mods-enabled/expires.load"/>
   <Path name="/etc/apache2/mods-enabled/rewrite.load"/>
   <Path name="/etc/apache2/sites-enabled/000-default"/>
