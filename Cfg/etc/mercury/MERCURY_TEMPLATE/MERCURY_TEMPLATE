@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#Use this file to set variables in config files rather than editing the config file directly.  
+#Use this file (/root/MERCURY_TUNEABLES) to set variables in config files rather than editing the config file directly.  
 #This allows BCFG2 to use your values rather than replacing the file with our defaults.
 #Any variable not set in this file (ie, left empty) receives the default value (often based on system memory size)
 
