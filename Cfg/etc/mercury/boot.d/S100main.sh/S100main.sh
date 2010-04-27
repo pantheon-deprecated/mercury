@@ -2,7 +2,7 @@
 
 # Main/Global Boot Script
 
-#copy template to root
+#copy template to root, rename and make executable
 cp /etc/mercury/MERCURY_TEMPLATE /root/MERCURY_TUNEABLES
 chown 755 /root/MERCURY_TUNEABLES
 
