@@ -78,7 +78,7 @@ query_cache_size        = 128M
 #general_log_file        = /var/log/mysql/mysql.log
 #general_log             = 1
 
-log_error                = /var/log/mysql/error.log
+log_error                = /var/log/mysql.err
 
 # Here you can see queries with especially long duration
 log_slow_queries	= /var/log/mysql/mysql-slow.log
