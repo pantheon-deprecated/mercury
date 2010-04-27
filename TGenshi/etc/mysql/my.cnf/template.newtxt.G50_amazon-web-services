@@ -104,7 +104,7 @@ max_binlog_size         = 100M
 
 ignore-builtin-innodb
 plugin-load=innodb	= ha_innodb_plugin.so
-innodb_buffer_pool_size	= 1G #TOSET
+innodb_buffer_pool_size	= ${metadata.Probes['innodb_buffer_pool_size']}M
 default_storage_engine	= innodb
 default_character_set	= utf8
 collation_server	= utf8_general_ci
@@ -123,10 +123,10 @@ innodb_file_per_table	       = 1
 table_cache	 	= 150
 
 #only for MyISAM but temp tables are MyISAM
-key_buffer_size	        = 20M #TOSET
+key_buffer_size	        = ${metadata.Probes['key_buffer_size']}M
 
 #set to a little greater than max clients
-max_connections  	= 100 #TOSET
+max_connections  	= ${metadata.Probes['mysql_max_connections']}
 slow_query_log		= 1
 sort_buffer_size	= 2M
 read_buffer_size	= 200k
