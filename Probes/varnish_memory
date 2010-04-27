@@ -17,5 +17,5 @@ elif (($RAM>=2000000)); then
 elif (($RAM>=1000000)); then
     echo "128"
 else
-    echo "64"
+    echo "32"
 fi

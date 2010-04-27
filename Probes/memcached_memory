@@ -9,7 +9,7 @@ RAM=`grep MemTotal /proc/meminfo | sed 's/[^0-9]*//g'`
 if [[ -n "$MEMCACHED_MEMORY" ]]; then
    echo "$MEMCACHED_MEMORY"
 elif (($RAM>=8000000)); then
-    echo "512"
+    echo "1024"
 elif (($RAM>=4000000)); then
     echo "512"
 elif (($RAM>=2000000)); then
@@ -17,7 +17,7 @@ elif (($RAM>=2000000)); then
 elif (($RAM>=1000000)); then
     echo "128"
 else
-    echo "64"
+    echo "32"
 fi
 
 
