@@ -1,8 +1,10 @@
 #!/bin/bash
 #If you wish to replace our default value for apache maxclients in /etc/apache2/apache.conf,
-#edit the APACHE_MAXCLIENTS variable in /root/MERCURY_CONFIG
+#edit the APACHE_MAXCLIENTS variable in /root/MERCURY_TUNEABLES
 
-. /root/MERCURY_CONFIG
+if [[ -a /root/MERCURY_TUNEABLES ]]; then
+. /root/MERCURY_TUNEABLES
+fi
 
 RAM=`grep MemTotal /proc/meminfo | sed 's/[^0-9]*//g'`
 

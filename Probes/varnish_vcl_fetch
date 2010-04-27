@@ -1,8 +1,10 @@
 #!/bin/bash
 #If you wish to replace our default value for vcl_fetch in /etc/varnish/default.vlc,
-#edit the VARNISH_VCL_FETCH variable in /root/MERCURY_CONFIG
+#edit the VARNISH_VCL_FETCH variable in /root/MERCURY_TUNEABLES
 
-. /root/MERCURY_CONFIG
+if [[ -a /root/MERCURY_TUNEABLES ]]; then
+. /root/MERCURY_TUNEABLES
+fi
 
 if [[ -n "$VARNISH_VCL_FETCH" ]]; then
    echo "$VARNISH_VCL_FETCH"
