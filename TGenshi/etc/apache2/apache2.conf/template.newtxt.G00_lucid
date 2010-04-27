@@ -64,7 +64,7 @@ LockFile /var/lock/apache2/accept.lock
 # identification number when it starts.
 # This needs to be set in /etc/apache2/envvars
 #
-PidFile ${APACHE_PID_FILE}
+PidFile $${APACHE_PID_FILE}
 
 #
 # Timeout: The number of seconds before receives and sends time out.
@@ -143,8 +143,8 @@ KeepAliveTimeout 15
 </IfModule>
 
 # These need to be set in /etc/apache2/envvars
-User ${APACHE_RUN_USER}
-Group ${APACHE_RUN_GROUP}
+User $${APACHE_RUN_USER}
+Group $${APACHE_RUN_GROUP}
 
 #
 # AccessFileName: The name of the file to look for in each directory
