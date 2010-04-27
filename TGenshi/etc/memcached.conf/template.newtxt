@@ -3,6 +3,8 @@
 # This configuration file is read by the start-memcached script provided as
 # part of the Debian GNU/Linux distribution. 
 
+#PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /root/MERCURY_TUNEABLES
+
 # Run memcached as a daemon. This command is implied, and is not needed for the
 # daemon to run. See the README.Debian that comes with this package for more
 # information.
@@ -20,7 +22,6 @@ logfile /var/log/memcached.log
 # Start with a cap of 64 megs of memory. It's reasonable, and the daemon default
 # Note that the daemon will grow to this size, but does not start out holding this much
 # memory
-#PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /root/MERCURY_CONFIG.sh
 -m ${metadata.Probes['memcached_memory']}
 
 # Default connection port is 11211

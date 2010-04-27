@@ -1,5 +1,7 @@
 # Configuration file for varnish
-#
+
+#PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /root/MERCURY_TUNEABLES
+
 # /etc/init.d/varnish expects the variables $$DAEMON_OPTS, $$NFILES and $$MEMLOCK
 # to be set from this shell script fragment.
 #
@@ -36,7 +38,6 @@ INSTANCE=pressflow
 # one content server selected by the vcl file, based on the request.  Use a 512M
 # fixed-size cache file.
 
-#PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /root/MERCURY_CONFIG.sh
 DAEMON_OPTS="-a :80 \
              -T localhost:6082 \
              -f /etc/varnish/default.vcl \

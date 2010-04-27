@@ -1,4 +1,4 @@
-#
+
 # Based upon the NCSA server configuration files originally by Rob McCool.
 #
 # This is the main Apache server configuration file.  It contains the
@@ -27,7 +27,8 @@
 # with "/", the value of ServerRoot is prepended -- so "/var/log/apache2/foo.log"
 # with ServerRoot set to "" will be interpreted by the
 # server as "//var/log/apache2/foo.log".
-#
+
+#PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /root/MERCURY_TUNEABLES
 
 ### Section 1: Global Environment
 #

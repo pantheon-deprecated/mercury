@@ -1,3 +1,5 @@
+#PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /root/MERCURY_TUNEABLES
+
 # Run Tomcat as this user ID. Not setting this or leaving it blank will use the
 # default of tomcat6.
 #TOMCAT6_USER=tomcat6
@@ -13,7 +15,7 @@
 #CATALINA_BASE=/var/lib/tomcat6
 
 # Arguments to pass to the Java virtual machine (JVM).
-#PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /root/MERCURY_CONFIG.sh
+#PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /root/MERCURY_TUNEABLES
 JAVA_OPTS="-Djava.awt.headless=true -Xmx${metadata.Probes['tomcat_memory']}"
 
 # Java compiler to use for translating JavaServer Pages (JSPs). You can use all

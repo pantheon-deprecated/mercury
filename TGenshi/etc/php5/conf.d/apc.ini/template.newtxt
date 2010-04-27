@@ -1,5 +1,5 @@
+#PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /root/MERCURY_TUNEABLES
 extension=apc.so
-#PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /root/MERCURY_CONFIG.sh
 apc.shm_size=${metadata.Probes['apc_memory']}
 apc.include_once_override = 1 
 

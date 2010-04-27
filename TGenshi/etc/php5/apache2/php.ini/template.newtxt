@@ -10,6 +10,7 @@
 ; before going online with your site, please consult php.ini-recommended
 ; and http://php.net/manual/en/security.php.
 
+;PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /root/MERCURY_TUNEABLES
 
 ;;;;;;;;;;;;;;;;;;;
 ; About php.ini   ;
@@ -267,7 +268,6 @@ expose_php = On
 max_execution_time = 30     ; Maximum execution time of each script, in seconds
 max_input_time = 60 ; Maximum amount of time each script may spend parsing request data
 ;max_input_nesting_level = 64 ; Maximum input variable nesting level
-;PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /root/MERCURY_CONFIG.sh
 memory_limit = ${metadata.Probes['php_memory']}M      ; Maximum amount of memory a script may consume (16MB)
 
 

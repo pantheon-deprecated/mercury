@@ -1,6 +1,7 @@
-#
 # The MySQL database server configuration file.
-#
+
+#PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /root/MERCURY_TUNEABLES
+
 # You can copy this to one of:
 # - "/etc/mysql/my.cnf" to set global options,
 # - "~/.my.cnf" to set user-specific options.

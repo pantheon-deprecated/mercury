@@ -24,7 +24,7 @@ export INNODB_BUFFER_POOL_SIZE=""
 export KEY_BUFFER_SIZE=""
 export MYSQL_MAX_CONNECTIONS=""
 
-#/etc/php5/apache2/php.conf
+#/etc/php5/apache2/php.ini
 export PHP_MEMORY=""
 
 #/etc/php5/conf.d/apc.ini
