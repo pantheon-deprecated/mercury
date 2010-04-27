@@ -20,7 +20,7 @@
      Documentation at /docs/config/server.html
  -->
 
-<~--PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /root/TUNEABLE_CONFIGS.sh-->
+<~--PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /root/MERCURY_CONFIG.sh-->
 
 <Server port="8005" shutdown="SHUTDOWN">
 

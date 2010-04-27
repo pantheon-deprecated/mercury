@@ -28,7 +28,7 @@
 # with ServerRoot set to "" will be interpreted by the
 # server as "//var/log/apache2/foo.log".
 
-#PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /root/TUNEABLE_CONFIGS.sh
+#PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /root/MERCURY_CONFIG.sh
 
 ### Section 1: Global Environment
 #

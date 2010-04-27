@@ -1,7 +1,7 @@
 #This is a basic VCL configuration file for varnish.  See the vcl(7)
 #man page for details on VCL syntax and semantics.
 #
-#PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /root/TUNEABLE_CONFIGS.sh
+#PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /root/MERCURY_CONFIG.sh
 #
 #Default backend definition.  Set this to point to your content
 #server.

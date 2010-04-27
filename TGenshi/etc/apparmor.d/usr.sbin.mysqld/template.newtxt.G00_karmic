@@ -1,7 +1,7 @@
 # vim:syntax=apparmor
 # Last Modified: Tue Jun 19 17:37:30 2007
 #include <tunables/global>
-#PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /root/TUNEABLE_CONFIGS.sh
+#PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /root/MERCURY_CONFIG.sh
 
 /usr/sbin/mysqld {
   #include <abstractions/base>
