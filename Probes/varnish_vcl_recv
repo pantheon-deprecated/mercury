@@ -1,8 +1,8 @@
 #!/bin/bash
 #If you wish to replace our default value for vcl_recv in /etc/varnish/default.vlc,
-#edit the VARNISH_VCL_RECV variable in /root/TUNEABLE_CONFIGS.sh
+#edit the VARNISH_VCL_RECV variable in /root/MERCURY_CONFIG
 
-. /root/TUNEABLE_CONFIGS.sh
+. /root/MERCURY_CONFIG
 
 if [[ -n "$VARNISH_VCL_RECV" ]]; then
    echo "$VARNISH_VCL_RECV"

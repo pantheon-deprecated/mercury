@@ -1,8 +1,8 @@
 #!/bin/bash
 #If you wish to replace our default value for tomcat memory in /etc/default/tomcat6,
-#edit the TOMCAT_MEMORY variable in /root/TUNEABLE_CONFIGS.sh
+#edit the TOMCAT_MEMORY variable in /root/MERCURY_CONFIG
 
-. /root/TUNEABLE_CONFIGS.sh
+. /root/MERCURY_CONFIG
 
 RAM=`grep MemTotal /proc/meminfo | sed 's/[^0-9]*//g'`
 

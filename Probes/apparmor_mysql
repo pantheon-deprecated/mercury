@@ -1,8 +1,8 @@
 #!/bin/bash
 #If you wish to replace our default value for mysql paths in /etc/apparmor.d/usr.sbin.mysqld,
-#edit the APPARMOR_MYSQLD variable in /root/TUNEABLE_CONFIGS.sh
+#edit the APPARMOR_MYSQLD variable in /root/MERCURY_CONFIG
 
-. /root/TUNEABLE_CONFIGS.sh
+. /root/MERCURY_CONFIG
 
 if [[ -n "APPARMOR_MYSQLD" ]]; then
     echo $APPARMOR_MYSQLD

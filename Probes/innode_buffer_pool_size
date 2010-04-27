@@ -1,8 +1,8 @@
 #!/bin/bash
 #If you wish to replace our default value for innode buffer pool size in /etc/mysql/my.cnf,
-#edit the INNODB_BUFFER_POOL_SIZE variable in /root/TUNEABLE_CONFIGS.sh
+#edit the INNODB_BUFFER_POOL_SIZE variable in /root/MERCURY_CONFIG
 
-. /root/TUNEABLE_CONFIGS.sh
+. /root/MERCURY_CONFIG
 
 RAM=`grep MemTotal /proc/meminfo | sed 's/[^0-9]*//g'`
 

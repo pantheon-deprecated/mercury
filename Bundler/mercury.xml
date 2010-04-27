@@ -56,6 +56,7 @@
   <Path name="/etc/rc.local"/>
   <Path name="/root/CHANGELOG.txt"/>
   <Path name="/root/README.txt"/>
+  <Path name="/root/MERCURY_CONFIG"/>
   <Path name="/usr/local/bin/update_mercury.sh"/>
   <Path name="/usr/local/bin/update_pressflow.sh"/>
   <Path name="/var/www/profiles/mercury/mercury.profile"/>
