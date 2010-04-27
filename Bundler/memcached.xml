@@ -1,17 +1,6 @@
 <Bundle name='memcached'>
   <Package name='memcached'/>
   <Package name='php5-memcache'/>
-  <Path name="/etc/memcached_1.conf"/>
-  <Path name="/etc/memcached_2.conf"/>
-  <Path name="/etc/memcached_3.conf"/>
-  <Path name="/etc/memcached_4.conf"/>
-  <Path name="/etc/memcached_5.conf"/>
-  <Path name="/etc/memcached_6.conf"/>
-  <Path name="/etc/memcached_7.conf"/>
-  <Path name="/etc/memcached_8.conf"/>
-  <Path name="/etc/memcached_9.conf"/>
-  <Path name="/etc/init.d/memcached"/>
-  <Path name="/usr/share/memcached/scripts/start-memcached"/>
-  <BoundPath name='/etc/memcached.conf' type='nonexistent'/>
+  <Path name="/etc/memcached.conf"/>
   <Service name='memcached'/>
 </Bundle>
