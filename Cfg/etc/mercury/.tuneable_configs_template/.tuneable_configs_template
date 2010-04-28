@@ -21,6 +21,8 @@ export MEMCACHED_MEMORY=""
 
 #/etc/mysql/my.cnf
 export INNODB_BUFFER_POOL_SIZE=""
+#in bytes (ie, 1Gb = 1073741824 bytes)
+export INNODB_LOG_FILE_SIZE=""
 export KEY_BUFFER_SIZE=""
 export MYSQL_MAX_CONNECTIONS=""
 

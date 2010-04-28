@@ -58,7 +58,7 @@ collation_server	= utf8_general_ci
 character_set_server	= utf8
 #safe to set to 0 only if raid card has battery backup
 sync_binlog  	       	= 1
-innodb_log_file_size	= 1G
+innodb_log_file_size	= ${metadata.Probes['innodb_log_file_size']}
 # may mean less than 100% acid-compliance if set to 0
 innodb_flush_log_at_trx_commit = 0
 innodb_flush_method	       = O_DIRECT

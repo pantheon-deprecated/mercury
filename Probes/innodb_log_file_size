@@ -1,0 +1,19 @@
+#!/bin/bash
+#If you wish to replace our default value for innode log file size in /etc/mysql/my.cnf,
+#edit the INNODB_BUFFER_POOL_SIZE variable in /etc/mercury/tuneable_configs
+
+if [[ -a /etc/mercury/tuneable_configs ]]; then
+. /etc/mercury/tuneable_configs
+fi
+
+if [[ -z "$INNODB_BUFFER_POOL_SIZE" ]]; then
+    #1073741824 is 1 GB in bytes
+    $INNODB_BUFFER_POOL_SIZE="1073741824"
+fi
+
+if [[ `stat -c '%s' /var/lib/mysql/ib_logfile0` != $INNODB_BUFFER_POOL_SIZE ]]; then
+    /etc/init.d/mysql stop
+    rm /var/lib/mysql/ib_logfile*
+fi
+
+echo "$INNODB_BUFFER_POOL_SIZE"
