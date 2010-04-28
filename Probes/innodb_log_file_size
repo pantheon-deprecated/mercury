@@ -8,7 +8,7 @@ fi
 
 if [[ -z "$INNODB_BUFFER_POOL_SIZE" ]]; then
     #1073741824 is 1 GB in bytes
-    $INNODB_BUFFER_POOL_SIZE="1073741824"
+    INNODB_BUFFER_POOL_SIZE="1073741824"
 fi
 
 if [[ -a /var/lib/mysql/ib_logfile0 && `stat -c '%s' /var/lib/mysql/ib_logfile0` != $INNODB_BUFFER_POOL_SIZE ]]; then
