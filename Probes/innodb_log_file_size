@@ -13,7 +13,7 @@ fi
 
 if [[ `stat -c '%s' /var/lib/mysql/ib_logfile0` != $INNODB_BUFFER_POOL_SIZE ]]; then
     /etc/init.d/mysql stop
-    rm /var/lib/mysql/ib_logfile*
+    rm -f /var/lib/mysql/ib_logfile* 
 fi
 
 echo "$INNODB_BUFFER_POOL_SIZE"
