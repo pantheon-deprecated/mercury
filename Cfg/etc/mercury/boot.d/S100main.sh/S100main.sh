@@ -2,9 +2,22 @@
 
 # Main/Global Boot Script
 
-#copy template to root, rename and make executable
+# Copy template to root, rename and make executable
 cp /etc/mercury/.tuneable_configs_template /etc/mercury/server_tuneables
 chown 755 /etc/mercury/server_tuneables
+
+# Postfix
+if [ -a /usr/local/bin/ec2-metadata ]; then
+    REAL_HOSTNAME=$(/usr/local/bin/ec2-metadata -p | sed 's/public-hostname: //')
+else
+    REAL_HOSTNAME=`hostname`
+fi
+
+echo $REAL_HOSTNAME > /etc/mailname
+postconf -e "myhostname = ${REAL_HOSTNAME}"
+postconf -e "mydomain = ${REAL_HOSTNAME}"
+postconf -e "mydestination = ${REAL_HOSTNAME}, localhost"
+/etc/init.d/postfix restart
 
 # Phone home - helps us to know how many users there are without passing any 
 # identifying or personal information to us.
