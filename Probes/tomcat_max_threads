@@ -1,9 +1,9 @@
 #!/bin/bash
 #If you wish to replace our default value for tomcat max threads in /etc/tomcat/server.xml,
-#edit the TOMCAT_MAX_THREADS variable in /root/MERCURY_TUNEABLES
+#edit the TOMCAT_MAX_THREADS variable in /etc/mercury/tuneable_configs
 
-if [[ -a /root/MERCURY_TUNEABLES ]]; then
-. /root/MERCURY_TUNEABLES
+if [[ -a /etc/mercury/tuneable_configs ]]; then
+. /etc/mercury/tuneable_configs
 fi
 
 RAM=`grep MemTotal /proc/meminfo | sed 's/[^0-9]*//g'`
