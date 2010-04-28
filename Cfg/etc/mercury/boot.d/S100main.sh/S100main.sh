@@ -3,7 +3,7 @@
 # Main/Global Boot Script
 
 # Copy template to root, rename and make executable
-cp /etc/mercury/.tuneable_configs_template /etc/mercury/server_tuneables
+cp /etc/mercury/template /etc/mercury/server_tuneables
 chown 755 /etc/mercury/server_tuneables
 
 # Postfix
