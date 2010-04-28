@@ -1,9 +1,9 @@
 #!/bin/bash
 #If you wish to replace our default value for memcached memory in /etc/memcached.conf,
-#edit the MEMCACHED_MEMORY variable in /etc/mercury/tuneable_configs
+#edit the MEMCACHED_MEMORY variable in /etc/mercury/server_tuneables
 
-if [[ -a /etc/mercury/tuneable_configs ]]; then
-. /etc/mercury/tuneable_configs
+if [[ -a /etc/mercury/server_tuneables ]]; then
+. /etc/mercury/server_tuneables
 fi
 
 RAM=`grep MemTotal /proc/meminfo | sed 's/[^0-9]*//g'`

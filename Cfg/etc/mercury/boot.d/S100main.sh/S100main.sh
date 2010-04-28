@@ -3,8 +3,8 @@
 # Main/Global Boot Script
 
 #copy template to root, rename and make executable
-cp /etc/mercury/.tuneable_configs_template /etc/mercury/tuneables_configs
-chown 755 /etc/mercury/tuneables_configs
+cp /etc/mercury/.tuneable_configs_template /etc/mercury/server_tuneables
+chown 755 /etc/mercury/server_tuneables
 
 # Phone home - helps us to know how many users there are without passing any 
 # identifying or personal information to us.
