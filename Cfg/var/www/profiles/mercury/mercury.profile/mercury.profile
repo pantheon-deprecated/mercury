@@ -172,26 +172,9 @@ function _mercury_settings() {
 \$conf['cache_inc'] = './sites/all/modules/memcache/memcache.inc';
 \$conf['memcache_servers'] = array(
          '127.0.0.1:11211' => 'default',
-         '127.0.0.1:11212' => 'menu',
-         '127.0.0.1:11213' => 'filter',
-         '127.0.0.1:11214' => 'form',
-         '127.0.0.1:11215' => 'block',
-         '127.0.0.1:11216' => 'update',
-         '127.0.0.1:11217' => 'views',
-         '127.0.0.1:11218' => 'content',
-         '127.0.0.1:11219' => 'apachesolr',
       	 );
 \$conf['memcache_bins'] = array(
           'cache'        => 'default',
-          'cache_menu'   => 'menu',
-          'cache_filter' => 'filter',
-          'cache_form'   => 'form',
-          'cache_block'  => 'block',
-          'cache_update' => 'update',
-          'cache_views'  => 'views',
-          'cache_views_data'  => 'views',
-          'cache_content'  => 'content',
-          'cache_apachesolr'  => 'apachesolr',
 	  );
 $slug
 EndTXT;
