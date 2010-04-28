@@ -48,7 +48,7 @@
   <Path name="/etc/apache2/sites-available/default"/>
   <Path name="/etc/apache2/conf.d/mercury"/>
   <Path name="/etc/cron.d/drupal"/>
-  <Path name="/etc/mercury/.tuneables_configs_template"/>
+  <Path name="/etc/mercury/.tuneable_configs_template"/>
   <Path name="/etc/mercury/boot.d/S100main.sh"/>
   <Path name="/etc/mercury/init.sh"/>
   <Path name="/etc/motd.tail"/>
