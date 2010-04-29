@@ -1,6 +1,6 @@
 <Bundle name='memcached'>
   <Package name='memcached'/>
-  <Package name='php5-memcache'/>
+  <Package name='php5-memcached'/>
   <Path name="/etc/memcached.conf"/>
   <Service name='memcached'/>
 </Bundle>
