@@ -315,7 +315,7 @@ memory_limit = ${metadata.Probes['php_memory']}M      ; Maximum amount of memory
 ;
 ;   - Show all errors except for notices and coding standards warnings
 ;
-error_reporting  =  E_ALL & ~E_NOTICE
+error_reporting  =  E_ALL & ~E_NOTICE & ~E_DEPRECATED
 
 ; Print out errors (as a part of the output).  For production web sites,
 ; you're strongly encouraged to turn this feature off, and use error logging
