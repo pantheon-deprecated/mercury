@@ -30,7 +30,7 @@ bcfg2 -vq
 
 # Run the scripts!
 for script in $( ls /etc/mercury/boot.d/S* ) ; do
-  sh $script $*
+  bash $script $*
 done
 
 
