@@ -303,7 +303,7 @@ memory_limit = ${metadata.Probes['php_memory']}M      ; Maximum amount of memory
 ;
 ;   - Show all errors, except for notices and coding standards warnings
 ;
-;error_reporting = E_ALL & ~E_NOTICE
+;error_reporting = E_ALL & ~E_NOTICE & ~E_DEPRECATED
 ;
 ;   - Show all errors, except for notices
 ;
