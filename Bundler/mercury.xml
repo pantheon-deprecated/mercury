@@ -53,7 +53,6 @@
   <Path name="/etc/mercury/boot.d/S100main.sh"/>
   <Path name="/etc/mercury/init.sh"/>
   <Path name="/etc/motd.tail"/>
-  <Path name="/etc/mysql/my.cnf"/>
   <Path name="/etc/php5/apache2/php.ini"/>
   <!--<Path name="/etc/php5/cli/php.ini"/>-->
   <Path name="/etc/php5/conf.d/apc.ini"/>
@@ -64,5 +63,5 @@
   <Path name="/usr/local/bin/update_pressflow.sh"/>
   <Path name="/var/www/profiles/mercury/mercury.profile"/>
   <Service name='apache2'/>
-  <Service name='mysql'/>
+  <Action name='clear_ib_logfiles'/>
 </Bundle>

@@ -44,6 +44,7 @@
     <Bundle name='tomcat6'/>
     <Bundle name='varnish'/>
     <Bundle name='cacti-client'/>
+    <Bundle name='mysql'/>
   </Group>
   
   <!-- hosting providers -->
