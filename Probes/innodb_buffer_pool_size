@@ -1,5 +1,5 @@
 #!/bin/bash
-#If you wish to replace our default value for innode buffer pool size in /etc/mysql/my.cnf,
+#If you wish to replace our default value for innodb buffer pool size in /etc/mysql/my.cnf,
 #edit the INNODB_BUFFER_POOL_SIZE variable in /etc/mercury/server_tuneables
 
 if [[ -a /etc/mercury/server_tuneables ]]; then
