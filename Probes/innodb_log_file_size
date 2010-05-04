@@ -14,6 +14,7 @@ fi
 if [[ -a /var/lib/mysql/ib_logfile0 && `stat -c '%s' /var/lib/mysql/ib_logfile0` != $INNODB_BUFFER_POOL_SIZE ]]; then
     service mysql stop >/dev/null
     rm /var/lib/mysql/ib_logfile* >/dev/null
+    service mysql start >/dev/null
 fi
 
 echo "$INNODB_LOG_FILE_SIZE"
