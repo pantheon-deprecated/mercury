@@ -1,5 +1,4 @@
 <Bundle name='ubuntu-lucid'>
-  <Package name='apache2-mpm-prefork'/>
   <Package name='apt-transport-https'/>
   <Package name='apt-utils'/>
   <Package name='bash-completion'/>
@@ -55,7 +54,6 @@
   <Package name='laptop-detect'/>
   <Package name='less'/>
   <Package name='libalgorithm-c3-perl'/>
-  <Package name='libapache2-mod-php5'/>
   <Package name='libatm1'/>
   <Package name='libbeecrypt7'/>
   <Package name='libbind9-50'/>

@@ -1,0 +1,15 @@
+<Bundle name='mercury'>
+  <Package name='apache2'/>
+  <Package name='apache2-mpm-prefork'/>
+  <Package name='libapache2-mod-php5'/>
+  <Package name='libapache2-mod-rpaf'/>
+  <Path name="/etc/apache2/apache2.conf"/>
+  <Path name="/etc/apache2/mods-enabled/expires.load"/>
+  <Path name="/etc/apache2/mods-enabled/rewrite.load"/>
+  <Path name="/etc/apache2/sites-enabled/000-default"/>
+  <Path name="/etc/apache2/ports.conf"/>
+  <Path name="/etc/apache2/sites-available/default"/>
+  <Path name="/etc/apache2/conf.d/mercury"/>
+  <Path name="/etc/php5/apache2/php.ini"/>
+  <Service name='apache2'/>
+</Bundle>

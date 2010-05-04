@@ -1,5 +1,4 @@
 <Bundle name='mercury'>
-  <Package name='apache2'/>
   <Package name='autoconf'/>
   <Package name='automake'/>
   <Package name='automake1.4'/>
@@ -9,7 +8,6 @@
   <Package name='defoma'/>
   <Package name='fontconfig-config'/>
   <Package name='ghostscript'/>
-  <Package name='libapache2-mod-rpaf'/>
   <Package name='libfontconfig1'/>
   <Package name='libltdl7'/>
   <Package name='libpaper1'/>
@@ -41,19 +39,11 @@
   <Package name='unzip'/>
   <Package name='vnstat'/>
   <Package name='zlib1g-dev'/>
-  <Path name="/etc/apache2/apache2.conf"/>
-  <Path name="/etc/apache2/mods-enabled/expires.load"/>
-  <Path name="/etc/apache2/mods-enabled/rewrite.load"/>
-  <Path name="/etc/apache2/sites-enabled/000-default"/>
-  <Path name="/etc/apache2/ports.conf"/>
-  <Path name="/etc/apache2/sites-available/default"/>
-  <Path name="/etc/apache2/conf.d/mercury"/>
   <Path name="/etc/cron.d/drupal"/>
   <Path name="/etc/mercury/template"/>
   <Path name="/etc/mercury/boot.d/S100main.sh"/>
   <Path name="/etc/mercury/init.sh"/>
   <Path name="/etc/motd.tail"/>
-  <Path name="/etc/php5/apache2/php.ini"/>
   <!--<Path name="/etc/php5/cli/php.ini"/>-->
   <Path name="/etc/php5/conf.d/apc.ini"/>
   <Path name="/etc/rc.local"/>
@@ -62,6 +52,5 @@
   <Path name="/usr/local/bin/update_mercury.sh"/>
   <Path name="/usr/local/bin/update_pressflow.sh"/>
   <Path name="/var/www/profiles/mercury/mercury.profile"/>
-  <Service name='apache2'/>
   <Action name='clear_ib_logfiles'/>
 </Bundle>

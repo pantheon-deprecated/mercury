@@ -27,24 +27,25 @@
     <Group name='ubuntu'/>
     <Bundle name='ubuntu-lucid'/>
   </Group>
-  <Group name='ubuntu'/>
   <Group name='debian'/>
   <Group name='freebsd'/>
   <Group name='gentoo'/>
-  <Group name='redhat'/>
-  <Group name='suse'/>
   <Group name='mandrake'/>
+  <Group name='redhat'/>
   <Group name='solaris'/>
+  <Group name='suse'/>
+  <Group name='ubuntu'/>
 
   <!-- pantheon server types -->
   <Group name='mercury'>
-    <Bundle name='mercury'/>
+    <Bundle name='apache2'/>
+    <Bundle name='cacti-client'/>
     <Bundle name='memcached'/>
+    <Bundle name='mercury'/>
+    <Bundle name='mysql'/>
     <Bundle name='postfix'/>
     <Bundle name='tomcat6'/>
     <Bundle name='varnish'/>
-    <Bundle name='cacti-client'/>
-    <Bundle name='mysql'/>
   </Group>
   
   <!-- hosting providers -->
@@ -59,14 +60,5 @@
   <Group name='bcfg2'>
     <Bundle name='bcfg2'/>
   </Group>
-
-<!--
-  <Group name='i386'>
-    <Bundle name='i386'/>
-  </Group>
-  <Group name='amd64'>
-    <Bundle name='amd64'/>
-  </Group>
--->
 
 </Groups>
