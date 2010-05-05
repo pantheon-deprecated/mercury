@@ -6,7 +6,7 @@
   <Package name='base-files'/>
   <Package name='base-passwd'/>
   <Package name='bash'/>
-  <Package name='bsdmainutil'/>
+  <Package name='bsdmainutils'/>
   <Package name='bsdutils'/>
   <Package name='busybox-initramfs'/>
   <Package name='bzip2'/>
