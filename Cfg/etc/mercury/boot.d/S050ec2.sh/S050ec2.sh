@@ -12,11 +12,9 @@ ln -s /mnt/mysql/lib /var/lib/mysql
 /etc/init.d/mysql start
 
 # Varnish:
-/etc/init.d/varnish stop
 mv /var/lib/varnish /mnt/varnish/lib
 ln -s /mnt/varnish/lib /var/lib/varnish
 chown varnish:varnish /mnt/varnish/lib/pressflow/
-/etc/init.d/varnish start
 
 # Unset ssh key gen:
 chmod -x /etc/init.d/ec2-ssh-host-key-gen

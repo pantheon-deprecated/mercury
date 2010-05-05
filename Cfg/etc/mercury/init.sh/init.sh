@@ -28,11 +28,16 @@ sleep 60
 # Process updates!
 bcfg2 -vq
 
+#making sure varnish get's restarted...
+/etc/init.d/varnish stop
+
 # Run the scripts!
 for script in $( ls /etc/mercury/boot.d/S* ) ; do
   bash $script $*
 done
 
+#making sure varnish get's restarted...
+/etc/init.d/varnish start
 
 # Mark incep date. This prevents us from ever running again.
 echo `date` > /etc/mercury/incep
