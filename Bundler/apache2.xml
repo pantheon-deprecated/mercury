@@ -10,6 +10,5 @@
   <Path name="/etc/apache2/ports.conf"/>
   <Path name="/etc/apache2/sites-available/default"/>
   <Path name="/etc/apache2/conf.d/mercury"/>
-  <Path name="/etc/php5/apache2/php.ini"/>
   <Service name='apache2'/>
 </Bundle>
