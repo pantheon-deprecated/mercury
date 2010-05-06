@@ -48,16 +48,9 @@
   <Path name="/etc/php5/cli/php.ini"/>
   <Path name="/etc/php5/conf.d/apc.ini"/>
   <Path name="/etc/rc.local"/>
-  <py:if test="group.amazon-web-services">
-    <Path name="/home/ubuntu/CHANGELOG.txt"/>
-    <Path name="/home/ubuntu/mercury.make"/>
-    <Path name="//home/ubuntu/README.txt"/>
-  </py:if>
-  <py:if test="group.vps">
-    <Path name="/root/CHANGELOG.txt"/>
-    <Path name="/root/mercury.make"/>
-    <Path name="/root/README.txt"/>
-  </py:if>
+  <Path name="/root/CHANGELOG.txt"/>
+  <Path name="/root/mercury.make"/>
+  <Path name="/root/README.txt"/>
   <Path name="/usr/local/bin/update_mercury.sh"/>
   <Path name="/usr/local/bin/update_pressflow.sh"/>
   <Action name='clear_ib_logfiles'/>
