@@ -214,4 +214,9 @@
   <Package name='xml-core'/>                                        
   <Package name='zlib1g'/>           
   <Path name="/etc/apparmor.d/usr.sbin.mysqld"/>
+  <Service name='bootlogd'/>
+  <Service name='cron'/>
+  <Service name='dmesg'/>
+  <Service name='postfix'/>
+  <Service name='rsyslog'/>
 </Bundle>
