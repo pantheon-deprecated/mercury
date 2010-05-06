@@ -52,6 +52,6 @@
   <Path name="/usr/local/bin/update_mercury.sh"/>
   <Path name="/usr/local/bin/update_pressflow.sh"/>
   <Path name="/var/www/profiles/mercury/mercury.profile"/>
-  <BoundPath name='/var/www/sites/default/files' type='directory' owner='root' group='www-data' perms='0776'/>
+  <BoundPath name='/var/www/sites/default/files' type='directory' owner='root' group='www-data' perms='0775'/>
   <Action name='clear_ib_logfiles'/>
 </Bundle>
