@@ -1,4 +1,3 @@
 <Bundle name='vps'>
-  <Package name='language-pack-en-base'/>
   <Package name='ubuntu-minimal'/>
 </Bundle>
