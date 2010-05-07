@@ -7,10 +7,10 @@ projects[pressflow][download][type] = bzr
 projects[pressflow][download][url] = lp:pressflow
 
 ; Mercury
-
-projects[mercury][type] = profile
-projects[mercury][download][type] = get
-projects[mercury][download][url] = http://pantheon-storage.chapterthree.com/mercury.profile.tgz
+projects[mercury][type] = "profile"
+projects[mercury][download][type] = "cvs"
+projects[mercury][download][module] = "contributions/profiles/mercury/"
+projects[mercury][download][revision] = "HEAD"
 
 ; Modules
 

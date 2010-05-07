@@ -1,10 +1,11 @@
-<Bundle name='mercury'>
+<Bundle name='mercury' xmlns:py="http://genshi.edgewall.org/">
   <Package name='autoconf'/>
   <Package name='automake'/>
   <Package name='automake1.4'/>
   <Package name='bzr'/>
   <Package name='bzrtools'/>
   <Package name='curl'/>
+  <Package name='cvs'/>
   <Package name='defoma'/>
   <Package name='fontconfig-config'/>
   <Package name='ghostscript'/>
@@ -61,4 +62,5 @@
   <Path name="/usr/local/bin/update_mercury.sh"/>
   <Path name="/usr/local/bin/update_pressflow.sh"/>
   <Action name='clear_ib_logfiles'/>
+  <Action name='vnstat_db_eth0'/>
 </Bundle>
