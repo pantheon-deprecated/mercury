@@ -1,4 +1,4 @@
-<Bundle name='mercury'>
+<Bundle name='mercury' xmlns:py="http://genshi.edgewall.org/">
   <Package name='autoconf'/>
   <Package name='automake'/>
   <Package name='automake1.4'/>
