@@ -5,6 +5,7 @@
   <Package name='bzr'/>
   <Package name='bzrtools'/>
   <Package name='curl'/>
+  <Package name='cvs'/>
   <Package name='defoma'/>
   <Package name='fontconfig-config'/>
   <Package name='ghostscript'/>
