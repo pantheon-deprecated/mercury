@@ -14,7 +14,6 @@
   <Package name='dash'/>
   <Package name='debconf-i18n'/>
   <Package name='deborphan'/>
-  <Package name='debsums'/>
   <Package name='dhcp3-client'/>
   <Package name='dhcp3-common'/>
   <Package name='dialog'/>
@@ -148,7 +147,6 @@
   <Package name='libxext6'/>
   <Package name='libxfont1'/>
   <Package name='libxft2'/>
-  <Package name='libxml2-utils'/>
   <Package name='libxml-namespacesupport-perl'/>
   <Package name='libxml-parser-perl'/>
   <Package name='libxml-sax-expat-perl'/>
@@ -157,7 +155,6 @@
   <Package name='libxmu6'/>
   <Package name='libxmuu1'/>
   <Package name='libxrender1'/>
-  <Package name='libxslt1.1'/>
   <Package name='libxt6'/>
   <Package name='linux-libc-dev'/>
   <Package name='locales'/>
@@ -189,12 +186,10 @@
   <Package name='ppp'/>
   <Package name='pppconfig'/>
   <Package name='pppoeconf'/>
-  <Package name='python-apt'/>
   <Package name='python-central'/>
   <Package name='python-crypto'/>
   <Package name='python-gdbm'/>
   <Package name='python-gnupginterface'/>
-  <Package name='python-lxml'/>
   <Package name='python-paramiko'/>
   <Package name='reiserfsprogs'/>
   <Package name='rsyslog'/>

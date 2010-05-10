@@ -217,6 +217,10 @@
   <Service name='bootlogd'/>
   <Service name='cron'/>
   <Service name='dmesg'/>
+  <Service name='killprocs'/>
+  <Service name='ondemand'/>
   <Service name='postfix'/>
+  <Service name='rc.local'/>
   <Service name='rsyslog'/>
+  <Service name='single'/>
 </Bundle>

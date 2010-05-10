@@ -19,7 +19,11 @@
   <Package name='libtool'/>
   <Package name='libxpm4'/>
   <Package name='mysql-client'/>
+  <Package name='mysql-client-5.1'/>
+  <Package name='mysql-client-core-5.1'/>
   <Package name='mysql-server'/>
+  <Package name='mysql-server-5.1'/>
+  <Package name='mysql-server-core-5.1'/>
   <Package name='php5'/>
   <Package name='php5-cli'/>
   <Package name='php5-curl'/>
@@ -32,6 +36,7 @@
   <Package name='php-pear'/>
   <Package name='psfontmgr'/>
   <Package name='python-configobj'/>  
+  <Package name='python-support'/>
   <Package name='shtool'/>
   <Package name='subversion'/>
   <Package name='ttf-dejavu'/>
@@ -63,4 +68,5 @@
   <Path name="/usr/local/bin/update_pressflow.sh"/>
   <Action name='clear_ib_logfiles'/>
   <Action name='vnstat_db_eth0'/>
+  <Service name='vnstat'/>
 </Bundle>

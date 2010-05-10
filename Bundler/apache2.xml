@@ -3,6 +3,7 @@
   <Package name='apache2-mpm-prefork'/>
   <Package name='libapache2-mod-php5'/>
   <Package name='libapache2-mod-rpaf'/>
+  <Package name='libaprutil1-dbd-sqlite3'/> 
   <Path name="/etc/apache2/apache2.conf"/>
   <Path name="/etc/apache2/mods-enabled/expires.load"/>
   <Path name="/etc/apache2/mods-enabled/rewrite.load"/>

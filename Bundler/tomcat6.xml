@@ -1,5 +1,6 @@
 <Bundle name='tomcat6'>
   <Package name='ca-certificates-java'/>
+  <Package name='default-jre'/>
   <Package name='default-jre-headless'/>
   <Package name='gcj-4.3-base'/>
   <Package name='icedtea-6-jre-cacao'/>
