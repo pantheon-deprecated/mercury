@@ -1,6 +1,7 @@
 <Rules priority='1'>
   <Action timing='post' when='always' name='clear_ib_logfiles' command='bash /var/lib/bcfg2/Probes/innodb_log_file_size' status='ignore'/>
   <Action timing='post' when='always' name='vnstat_db_eth0' command='vnstat -u -i eth0' status='ignore'/>
+  <Action timing='post' when='always' name='restart_apparmor' command='service apparmor restart' status='ignore'/>
 
   <!-- apache -->
   <Service type='deb' status='on' name='apache2'/>
