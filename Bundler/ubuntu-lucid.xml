@@ -214,7 +214,6 @@
   <Package name='xml-core'/>                                        
   <Package name='zlib1g'/>           
   <Path name="/etc/apparmor.d/usr.sbin.mysqld"/>
-  <Action name='restart_apparmor'/>
   <Service name='bootlogd'/>
   <Service name='cron'/>
   <Service name='dmesg'/>

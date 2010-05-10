@@ -66,6 +66,7 @@
   </py:if>
   <Path name="/usr/local/bin/update_mercury.sh"/>
   <Path name="/usr/local/bin/update_pressflow.sh"/>
+  <Action name='restart_apparmor'/>
   <Action name='clear_ib_logfiles'/>
   <Action name='vnstat_db_eth0'/>
   <Service name='vnstat'/>
