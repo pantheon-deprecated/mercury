@@ -44,7 +44,6 @@
   <Package name='landscape-client'/>
   <Package name='landscape-common'/>
   <Package name='language-selector-common'/>
-  <Package name='libc6-xen'/>
   <Package name='libfont-afm-perl'/>
   <Package name='libhtml-format-perl'/>
   <Package name='libjs-jquery'/>
