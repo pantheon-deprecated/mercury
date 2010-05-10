@@ -44,6 +44,18 @@
   <Package name='landscape-client'/>
   <Package name='landscape-common'/>
   <Package name='language-selector-common'/>
+  <Package name='libc6-xen'/>
+  <Package name='libfont-afm-perl'/>
+  <Package name='libhtml-format-perl'/>
+  <Package name='libjs-jquery'/>
+  <Package name='libmailtools-perl'/>
+  <Package name='libpam-ck-connector'/>
+  <Package name='libxml-sax-expat-perl'/>
+  <Package name='linux-ec2'/>
+  <Package name='linux-firmware'/>
+  <Package name='linux-image-ec2'/>
+  <Package name='linux-image-virtual'/>
+  <Package name='linux-virtual'/>
   <Package name='lshw'/>
   <Package name='lsof'/>
   <Package name='ltrace'/>
@@ -126,4 +138,9 @@
   <BoundPath name='/mnt/mysql/tmp' type='directory' owner='mysql' group='mysql' perms='1777'/>
   <BoundPath name='/mnt/tomcat6/tmp' type='directory' owner='tomcat6' group='tomcat6' perms='1777'/>
   <BoundPath name='/mnt/varnish' type='directory' owner='varnish' group='varnish' perms='0755'/>
+  <Service name='dns-clean'/>
+  <Service name='grub-common'/>
+  <Service name='landscape-client'/>
+  <Service name='pppd-dns'/>
+  <Service name='rsync'/>
 </Bundle>

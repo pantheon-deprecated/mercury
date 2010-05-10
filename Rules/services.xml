@@ -3,6 +3,13 @@
   <Action timing='post' when='always' name='vnstat_db_eth0' command='vnstat -u -i eth0' status='ignore'/>
   <Action timing='post' when='always' name='restart_apparmor' command='service apparmor restart' status='ignore'/>
 
+  <!-- amazon web services -->
+  <Service type='deb' status='off' name='dns-clean'/>
+  <Service type='deb' status='off' name='grub-common'/>
+  <Service type='deb' status='on' name='landscape-client'/>
+  <Service type='deb' status='off' name='pppd-dns'/>
+  <Service type='deb' status='off' name='rsync'/>
+
   <!-- apache -->
   <Service type='deb' status='on' name='apache2'/>
 
