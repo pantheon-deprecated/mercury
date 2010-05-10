@@ -9,12 +9,7 @@ fi
 if [[ -n "$APPARMOR_MYSQLD" ]]; then
     echo "$APPARMOR_MYSQLD"
 else
-    echo "/mnt/mysql/lib/ r,"
-    echo "/mnt/mysql/lib/** rwk,"
-    echo "/mnt/mysql/log/ r,"
-    echo "/mnt/mysql/log/* rw,"
-    echo "/mnt/mysql/tmp/ rw,"
-    echo "/mnt/mysql/tmp/** rwkl,"
+    echo "/mnt/mysql/** rwkl,"
 fi
 
 
