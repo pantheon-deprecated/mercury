@@ -16,5 +16,4 @@
   <Package name='update-inetd'/>
   <Service name='bcfg2'/>
   <Service name='bcfg2-server'/>
-  <Service name='fam'/>
 </Bundle>
