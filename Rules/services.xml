@@ -15,6 +15,9 @@
   <!-- memcached -->
   <Service type='deb' status='on' name='memcached'/>
 
+  <!-- mercury -->
+  <Service type='deb' status='on' name='vnstat'/>
+
   <!-- mysql -->
   <Service type='deb' status='on' name='mysql'/>
 
