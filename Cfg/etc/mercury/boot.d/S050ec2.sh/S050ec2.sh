@@ -5,15 +5,12 @@ set -x
 # Move mysql and varnish to /mnt
 # TODO support for EBS and RDS
 
-exit 0;
-
 # Mysql:
-/etc/init.d/mysql stop
 mv /var/log/mysql /mnt/mysql/log
 ln -s /mnt/mysql/log /var/log/mysql
 mv /var/lib/mysql /mnt/mysql/lib
 ln -s /mnt/mysql/lib /var/lib/mysql
-/etc/init.d/mysql start
+/etc/init.d/mysql restart
 
 # Varnish:
 mv /var/lib/varnish /mnt/varnish/lib
