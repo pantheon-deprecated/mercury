@@ -1,9 +1,9 @@
 #!/bin/bash
 
-set -x
-
 # Move mysql and varnish to /mnt
 # TODO support for EBS and RDS
+
+exit 0;
 
 # Mysql:
 service mysql stop
