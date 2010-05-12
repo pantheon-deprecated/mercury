@@ -45,25 +45,25 @@
   <Package name='unzip'/>
   <Package name='vnstat'/>
   <Package name='zlib1g-dev'/>
-  <Path name="/etc/cron.d/drupal"/>
-  <Path name="/etc/mercury/template"/>
-  <Path name="/etc/mercury/boot.d/S100main.sh"/>
-  <Path name="/etc/mercury/init.sh"/>
-  <Path name="/etc/motd.tail"/>
-  <Path name="/etc/php5/apache2/php.ini"/>
-  <Path name="/etc/php5/cli/php.ini"/>
-  <Path name="/etc/php5/conf.d/apc.ini"/>
-  <Path name="/etc/rc.local"/>
-  <py:if test="'amazon-web-services' in metadata.groups">
+  <Path name='/etc/cron.d/drupal'/>
+  <Path name='/etc/mercury/template'/>
+  <Path name='/etc/mercury/boot.d/S100main.sh'/>
+  <Path name='/etc/mercury/init.sh'/>
+  <Path name='/etc/motd.tail'/>
+  <Path name='/etc/php5/apache2/php.ini'/>
+  <Path name='/etc/php5/cli/php.ini'/>
+  <Path name='/etc/php5/conf.d/apc.ini'/>
+  <Path name='/etc/rc.local'/>
+  <Group name='amazon-web-services'>
     <Path name="/home/ubuntu/CHANGELOG.txt" altsrc='/root/CHANGELOG.txt'/>
     <Path name="/home/ubuntu/mercury.make" altsrc='/root/mercury.make'/>
     <Path name="/home/ubuntu/README.txt" altsrc='/root/README.txt'/>
-  </py:if>
-  <py:if test="'vps' in metadata.groups">
-    <Path name="/root/CHANGELOG.txt"/>
-    <Path name="/root/mercury.make"/>
-    <Path name="/root/README.txt"/>
-  </py:if>
+  </Group>
+  <Group name='vps'>
+    <Path name='/root/CHANGELOG.txt'/>
+    <Path name='/root/mercury.make'/>
+    <Path name='/root/README.txt'/>
+  </Group>
   <Path name="/usr/local/bin/update_mercury.sh"/>
   <Path name="/usr/local/bin/update_pressflow.sh"/>
   <Action name='restart_apparmor'/>
