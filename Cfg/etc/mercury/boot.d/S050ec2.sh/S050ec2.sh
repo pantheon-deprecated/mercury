@@ -3,10 +3,11 @@
 # Move mysql and varnish to /mnt
 # TODO support for EBS and RDS
 
-set -x
-
 # Mysql:
-service mysql stop
+#service mysql stop hangs if the service isn't running...
+if [[  `service mysql status | grep start` ]]; then
+    service mysql stop
+fi
 mv /var/log/mysql /mnt/mysql/log
 ln -s /mnt/mysql/log /var/log/mysql
 mv /var/lib/mysql /mnt/mysql/lib
