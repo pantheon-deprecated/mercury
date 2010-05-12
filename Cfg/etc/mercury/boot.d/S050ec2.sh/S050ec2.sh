@@ -5,7 +5,7 @@
 
 # Mysql:
 #service mysql stop hangs if the service isn't running...
-if [[  `service mysql status | grep start` ]]; then
+if service mysql status; then
     service mysql stop
 fi
 mv /var/log/mysql /mnt/mysql/log
