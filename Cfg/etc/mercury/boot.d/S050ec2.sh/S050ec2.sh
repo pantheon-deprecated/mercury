@@ -3,6 +3,8 @@
 # Move mysql and varnish to /mnt
 # TODO support for EBS and RDS
 
+set -x
+
 # Mysql:
 service mysql stop
 mv /var/log/mysql /mnt/mysql/log
