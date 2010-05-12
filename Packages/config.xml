@@ -33,7 +33,7 @@
     <Arch>i386</Arch>
   </APTSource>
   <YUMSource>
-    <Group>centos-5.4</Group>
+    <Group>centos5.4</Group>
     <URL>http://mirror.centos.org/centos/</URL>
     <Version>5.4</Version>
     <Component>os</Component>

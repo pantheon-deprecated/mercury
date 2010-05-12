@@ -6,7 +6,6 @@
 exit 0;
 
 # Mysql:
-service mysql stop
 mv /var/log/mysql /mnt/mysql/log
 ln -s /mnt/mysql/log /var/log/mysql
 mv /var/lib/mysql /mnt/mysql/lib
