@@ -4,15 +4,10 @@
 # TODO support for EBS and RDS
 
 # Mysql:
-#service mysql stop hangs if the service isn't running...
-#if service mysql status; then
-#    service mysql stop
-#fi
 mv /var/log/mysql /mnt/mysql/log
 ln -s /mnt/mysql/log /var/log/mysql
 mv /var/lib/mysql /mnt/mysql/lib
 ln -s /mnt/mysql/lib /var/lib/mysql
-service mysql restart
 
 # Varnish:
 mv /var/lib/varnish /mnt/varnish/lib
