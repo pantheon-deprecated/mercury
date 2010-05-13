@@ -161,5 +161,19 @@
   <Package name='yum-fastestmirror'/>
   <Package name='yum-metadata-parser'/>
   <Package name='zlib'/>
+
+  <!-- Services -->
+  <Service name='crond'/> 
+  <Service name='iptables'/>
+  <Service name='lvm2-monitor'/>
+  <Service name='mcstrans'/>
+  <Service name='messagebus'/>
+  <Service name='netfs'/>
+  <Service name='network'/>
+  <Service name='rawdevices'/>
+  <Service name='restorecond'/>
+  <Service name='sshd'/>
+  <Service name='syslog'/>
+
 </Bundle>
 
