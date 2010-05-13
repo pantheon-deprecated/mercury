@@ -42,4 +42,19 @@
     <Arch>i386</Arch>
     <Arch>x86_64</Arch>
   </YUMSource>
+  <YUMSource>
+    <Group>centos5.4</Group>
+    <RawURL>http://download.fedora.redhat.com/pub/epel/5/x86_64</RawURL>
+    <Arch>x86_64</Arch>
+  </YUMSource>
+  <YUMSource>
+    <Group>centos5.4</Group>
+    <RawURL>http://yum.fourkitchens.com/pub/centos/5/noarch</RawURL>
+    <Arch>x86_64</Arch>
+  </YUMSource> 
+  <YUMSource>
+    <Group>centos5.4</Group>
+    <RawURL>http://rpms.famillecollet.com/enterprise/5/remi/x86_64</RawURL>
+    <Arch>x86_64</Arch>
+  </YUMSource>
 </Sources>
