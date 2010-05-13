@@ -1,7 +1,7 @@
 <Groups version='3.0'>
 
   <!--Ubuntu on AWS-->
-  <Group profile='true' public='true' default='true' name='mercury-ubuntu-aws'>
+  <Group profile='true' public='true' name='mercury-ubuntu-aws'>
     <Group name='mercury'/>
     <Group name='amazon-web-services'/>
     <Group name='bcfg2'/>
