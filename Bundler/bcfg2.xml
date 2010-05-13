@@ -1,4 +1,5 @@
 <Bundle name='bcfg2'>
+
   <Package name='bcfg2'/>
   <Package name='bcfg2-server'/>
   <Package name='gamin'/>
@@ -21,4 +22,15 @@
     <Package name='update-inetd'/>
   </Group>
 
+  <!-- CentOS Only -->
+  <Group name='centos'>
+    <Package name='gamin-python'/>
+    <Package name='libxslt' pkg_checks='false'/>
+    <Package name='python-crypto'/>
+    <Package name='python-paramiko'/>
+    <Package name='python-pycurl'/>
+    <Package name='python-ssl'/>
+  </Group>
+
 </Bundle>
+
