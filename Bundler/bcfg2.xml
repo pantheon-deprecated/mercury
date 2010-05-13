@@ -6,19 +6,19 @@
   <Package name='libgamin0'/>
   <Package name='libxml2-utils'/>
   <Package name='libxslt1.1'/>
-  <Package name='portmap'/>
   <Package name='python-fam'/>
   <Package name='python-gamin'/>
   <Package name='python-genshi'/>
   <Package name='python-lxml'/>
-  <Package name='update-inetd'/>
   <Service name='bcfg2'/>
   <Service name='bcfg2-server'/>
 
   <!-- Ubuntu/Debian Only -->
   <Group name='deb'>
     <Package name='debsums'/>
+    <Package name='portmap'/>
     <Package name='python-apt'/>
+    <Package name='update-inetd'/>
   </Group>
 
 </Bundle>
