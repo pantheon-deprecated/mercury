@@ -2,12 +2,6 @@
   <Package name='bcfg2'/>
   <Package name='bcfg2-server'/>
   <Package name='gamin'/>
-  <Package name='libfile-copy-recursive-perl'/>
-  <Package name='libgamin0'/>
-  <Package name='libxml2-utils'/>
-  <Package name='libxslt1.1'/>
-  <Package name='python-fam'/>
-  <Package name='python-gamin'/>
   <Package name='python-genshi'/>
   <Package name='python-lxml'/>
   <Service name='bcfg2'/>
@@ -16,8 +10,14 @@
   <!-- Ubuntu/Debian Only -->
   <Group name='deb'>
     <Package name='debsums'/>
+    <Package name='libfile-copy-recursive-perl'/>
+    <Package name='libgamin0'/>
+    <Package name='libxml2-utils'/>
+    <Package name='libxslt1.1'/>
     <Package name='portmap'/>
     <Package name='python-apt'/>
+    <Package name='python-fam'/>
+    <Package name='python-gamin'/>
     <Package name='update-inetd'/>
   </Group>
 
