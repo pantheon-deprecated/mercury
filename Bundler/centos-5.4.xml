@@ -12,56 +12,66 @@
   <Package name='checkpolicy'/>
   <Package name='chkconfig'/>
   <Package name='coreutils'/>
-  <Package name='cracklib'/>
+  <Package name='cpio'/>
+  <Package name='cracklib' pkg_checks='false'/>
   <Package name='cracklib-dicts'/>
   <Package name='crontabs'/>
   <Package name='cryptsetup-luks'/>
+  <Package name='curl'/>
   <Package name='cyrus-sasl'/>
   <Package name='cyrus-sasl-lib'/>
   <Package name='db4'/>
   <Package name='dbus'/>
   <Package name='dbus-glib'/>
   <Package name='dbus-libs'/>
-  <Package name='device-mapper'/>
+  <Package name='device-mapper' pkg_checks='false'/>
   <Package name='device-mapper-event'/>
+  <Package name='device-mapper-multipath'/>
   <Package name='diffutils'/>
+  <Package name='dmraid'/>
+  <Package name='dmraid-events'/>
   <Package name='e2fsprogs'/>
   <Package name='e2fsprogs-libs'/>
   <Package name='ed'/>
   <Package name='elfutils-libelf'/>
+  <Package name='epel-release'/>
   <Package name='ethtool'/>
   <Package name='expat'/>
   <Package name='file'/>
-  <Package name='filesystem'/>
+  <Package name='filesystem' pkg_checks='false'/>
   <Package name='findutils'/>
   <Package name='fipscheck'/>
   <Package name='fipscheck-lib'/>
+  <Package name='fourkitchens-release'/>
   <Package name='gawk'/>
   <Package name='gdbm'/>
-  <Package name='glib2'/>
+  <Package name='glib2' pkg_checks='false'/>
   <Package name='glibc'/>
   <Package name='glibc-common'/>
-  <Package name='gnutls'/>
+  <Package name='gmp'/>
+  <Package name='gnutls' pkg_checks='false'/>
   <Package name='grep'/>
   <Package name='groff'/>
   <Package name='gzip'/>
   <Package name='hmaccalc'/>
   <Package name='hwdata'/>
   <Package name='info'/>
-  <Package name='initscripts'/>
+  <Package name='initscripts' pkg_checks='false'/>
   <Package name='iproute'/>
-  <Package name='iptables'/>
+  <Package name='iptables' pkg_checks='false'/>
   <Package name='iputils'/>
   <Package name='keyutils'/>
   <Package name='keyutils-libs'/>
-  <Package name='krb5-libs'/>
+  <Package name='kpartx'/>
+  <Package name='krb5-libs' pkg_checks='false'/>
   <Package name='less'/>
   <Package name='libacl'/>
   <Package name='libattr'/>
   <Package name='libcap'/>
   <Package name='libgcc'/>
   <Package name='libgcrypt'/>
-  <Package name='libgpg-error'/>
+  <Package name='libgpg-error' pkg_checks='false'/>
+  <Package name='libidn'/>
   <Package name='libselinux'/>
   <Package name='libselinux-python'/>
   <Package name='libselinux-utils'/>
@@ -73,14 +83,15 @@
   <Package name='libusb'/>
   <Package name='libuser'/>
   <Package name='libvolume_id'/>
-  <Package name='libxml2'/>
-  <Package name='logrotate'/>
+  <Package name='libxml2' pkg_checks='false'/>
+  <Package name='logrotate' pkg_checks='false'/>
   <Package name='lvm2'/>
   <Package name='m2crypto'/>
   <Package name='MAKEDEV'/>
   <Package name='man'/>
   <Package name='mcstrans'/>
   <Package name='mingetty'/>
+  <Package name='mkinitrd'/>
   <Package name='mktemp'/>
   <Package name='module-init-tools'/>
   <Package name='nano'/>
@@ -90,12 +101,12 @@
   <Package name='newt'/>
   <Package name='nspr'/>
   <Package name='nss'/>
-  <Package name='openldap'/>
+  <Package name='openldap' pkg_checks='false'/>
   <Package name='openssh'/>
   <Package name='openssh-clients'/>
   <Package name='openssh-server'/>
-  <Package name='openssl'/>
-  <Package name='pam'/>
+  <Package name='openssl' pkg_checks='false'/>
+  <Package name='pam' pkg_checks='false'/>
   <Package name='passwd'/>
   <Package name='pcre'/>
   <Package name='perl'/>
@@ -109,7 +120,8 @@
   <Package name='python-iniparse'/>
   <Package name='python-sqlite'/>
   <Package name='python-urlgrabber'/>
-  <Package name='readline'/>
+  <Package name='readline' pkg_checks='false'/>
+  <Package name='remi-release' pkg_checks='false'/>
   <Package name='rhpl'/>
   <Package name='rootfiles'/>
   <Package name='rpm'/>
@@ -122,7 +134,7 @@
   <Package name='setserial'/>
   <Package name='setup'/>
   <Package name='sgpio'/>
-  <Package name='shadow-utils'/>
+  <Package name='shadow-utils' pkg_checks="false"/>
   <Package name='slang'/>
   <Package name='sqlite'/>
   <Package name='sudo'/>
@@ -150,3 +162,4 @@
   <Package name='yum-metadata-parser'/>
   <Package name='zlib'/>
 </Bundle>
+
