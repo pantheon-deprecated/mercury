@@ -19,6 +19,10 @@
 
   <!-- Centos Only -->
   <Group name='centos'>
+    <Package name='apr'/>
+    <Package name='apr-util'/>
+    <Package name='mailcap'/>
+    <Package name='postgresql-libs'/>
     <Package name='httpd'/>
     <Service name='httpd'/>
   </Group>
