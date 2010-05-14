@@ -3,6 +3,9 @@
 # Move mysql and varnish to /mnt
 # TODO support for EBS and RDS
 
+#fix /tmp
+chmod 1777 /tmp
+
 # Mysql:
 mv /var/log/mysql /mnt/mysql/log
 ln -s /mnt/mysql/log /var/log/mysql
