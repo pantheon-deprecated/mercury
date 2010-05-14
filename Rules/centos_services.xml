@@ -1,0 +1,28 @@
+<Rules priority='1'>
+
+  <Group name='centos'>
+    
+    <!-- Httpd -->
+    <Service type='chkconfig' status='on' name='httpd'/>
+
+    <!-- BCFG2 -->
+    <Service type='chkconfig' status='on' name='bcfg2'/>
+    <Service type='chkconfig' status='on' name='bcfg2-server'/>
+
+    <!-- CentOS -->
+    <Service type='chkconfig' status='on' name='crond'/>
+    <Service type='chkconfig' status='off' name='iptables'/>
+    <Service type='chkconfig' status='on' name='lvm2-monitor'/>
+    <Service type='chkconfig' status='on' name='mcstrans'/>
+    <Service type='chkconfig' status='on' name='messagebus'/>
+    <Service type='chkconfig' status='on' name='netfs'/>
+    <Service type='chkconfig' status='on' name='network'/>
+    <Service type='chkconfig' status='on' name='rawdevices'/>
+    <Service type='chkconfig' status='on' name='restorecond'/>
+    <Service type='chkconfig' status='on' name='sshd'/>
+    <Service type='chkconfig' status='on' name='syslog'/>
+
+  </Group>
+
+</Rules>
+
