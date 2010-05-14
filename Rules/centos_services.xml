@@ -2,6 +2,9 @@
 
   <Group name='centos'>
     
+    <!-- Httpd -->
+    <Service type='chkconfig' status='on' name='httpd'/>
+
     <!-- BCFG2 -->
     <Service type='chkconfig' status='on' name='bcfg2'/>
     <Service type='chkconfig' status='on' name='bcfg2-server'/>
