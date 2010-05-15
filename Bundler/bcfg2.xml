@@ -25,7 +25,7 @@
   <!-- CentOS Only -->
   <Group name='centos'>
     <Package name='gamin-python'/>
-    <Package name='libxslt' pkg_checks='false'/>
+    <Package name='libxslt'/>
     <Package name='python-crypto'/>
     <Package name='python-paramiko'/>
     <Package name='python-pycurl'/>
