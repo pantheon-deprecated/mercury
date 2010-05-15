@@ -76,6 +76,7 @@
   <Package name='linux-firmware'/>
   <Package name='linux-image-ec2'/>
   <Package name='linux-image-virtual'/>
+  <Package name='linux-image-2.6.32-22-virtual'/>
   <Package name='linux-virtual'/>
   <Package name='lshw'/>
   <Package name='lsof'/>
