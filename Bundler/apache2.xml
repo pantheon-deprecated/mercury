@@ -28,10 +28,6 @@
     <Path name='/etc/httpd/conf/vhosts/default.conf'/>
     <Path name='/etc/httpd/conf/conf.d/ports.conf'/>
     <Path name='/etc/httpd/conf/conf.d/mercury.conf'/>
-    <Path name=''/>
-    <Path name=''/>
-    <Path name=''/>
-    <Path name=''/>
     <Service name='httpd'/>
   </Group>
 
