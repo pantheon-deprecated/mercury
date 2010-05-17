@@ -27,9 +27,8 @@
     <Group name='ubuntu'/>
     <Bundle name='ubuntu-lucid'/>
   </Group>
-  <Group name='centos5.4'>
-    <Group name='centos'/>
-    <Bundle name='centos-5.4'/>
+  <Group name='centos'>
+    <Bundle name='centos'/>
   </Group>
   <Group name='debian'/>
   <Group name='freebsd'/>
