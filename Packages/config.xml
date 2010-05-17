@@ -23,12 +23,58 @@
   </APTSource>
   <APTSource>
     <Group>lucid</Group>
-    <URL>http://us.archive.ubuntu.com/ubuntu</URL>
+    <URL>http://archive.ubuntu.com/ubuntu</URL>
     <Version>lucid</Version>
     <Component>main</Component>
     <Component>multiverse</Component>
     <Component>restricted</Component>
     <Component>universe</Component>
+    <Arch>amd64</Arch>
+    <Arch>i386</Arch>
+  </APTSource>
+  <APTSource>
+    <Group>lucid</Group>
+    <URL>http://archive.ubuntu.com/ubuntu</URL>
+    <Version>lucid-updates</Version>
+    <Component>main</Component>
+    <Component>multiverse</Component>
+    <Component>restricted</Component>
+    <Component>universe</Component>
+    <Arch>amd64</Arch>
+    <Arch>i386</Arch>
+  </APTSource>
+  <APTSource>
+    <Group>lucid</Group>
+    <URL>http://security.ubuntu.com/ubuntu</URL>
+    <Version>lucid-security</Version>
+    <Component>main</Component>
+    <Component>multiverse</Component>
+    <Component>restricted</Component>
+    <Component>universe</Component>
+    <Arch>amd64</Arch>
+    <Arch>i386</Arch>
+  </APTSource>
+  <APTSource>
+    <Group>lucid</Group>
+    <URL>http://ppa.launchpad.net/bzr/ppa/ubuntu</URL>
+    <Version>lucid</Version>
+    <Component>main</Component>
+    <Arch>amd64</Arch>
+    <Arch>i386</Arch>
+  </APTSource>
+  <APTSource>
+    <Group>lucid</Group>
+    <URL>http://ppa.launchpad.net/bcfg2/ppa/ubuntu</URL>
+    <Version>lucid</Version>
+    <Component>main</Component>
+    <Arch>amd64</Arch>
+    <Arch>i386</Arch>
+  </APTSource>
+  <APTSource>
+    <Group>lucid</Group>
+    <URL>http://ppa.launchpad.net/alestic/ppa/ubuntu</URL>
+    <Version>lucid</Version>
+    <Component>main</Component>
     <Arch>amd64</Arch>
     <Arch>i386</Arch>
   </APTSource>
