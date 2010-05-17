@@ -24,6 +24,10 @@
     <Package name='mailcap'/>
     <Package name='postgresql-libs'/>
     <Package name='httpd'/>
+    <Path name='/etc/httpd/conf/httpd.conf'/>
+    <Path name='/etc/httpd/conf/vhosts/default.conf'/>
+    <Path name='/etc/httpd/conf.d/ports.conf'/>
+    <Path name='/etc/httpd/conf.d/mercury.conf'/>
     <Service name='httpd'/>
   </Group>
 

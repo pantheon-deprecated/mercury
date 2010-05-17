@@ -212,6 +212,10 @@ LoadModule version_module modules/mod_version.so
 #
 Include conf.d/*.conf
 
+# Load vhosts configs
+
+Include conf/vhosts/*.conf
+
 #
 # ExtendedStatus controls whether Apache will generate "full" status
 # information (ExtendedStatus On) or just basic information (ExtendedStatus
