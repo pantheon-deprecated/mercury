@@ -3,6 +3,7 @@
 # These scripts run once on boot.
 
 if [ -e /etc/mercury/incep ]; then
+    service mysql start
     exit 0
 fi
 
@@ -28,16 +29,20 @@ sleep 60
 # Process updates!
 bcfg2 -vq
 
-#making sure varnish get's restarted...
-/etc/init.d/varnish stop
+#making sure varnish and mysql get's restarted...
+service mysql stop
+service varnish stop
 
 # Run the scripts!
 for script in $( ls /etc/mercury/boot.d/S* ) ; do
   bash $script $*
 done
 
-#making sure varnish get's restarted...
-/etc/init.d/varnish start
+#making sure varnish and mysql get's restarted...
+service mysql start
+service varnish start
+
+echo "create database pressflow;" | mysql -u root
 
 # Mark incep date. This prevents us from ever running again.
 echo `date` > /etc/mercury/incep

@@ -19,10 +19,6 @@ postconf -e "mydomain = ${REAL_HOSTNAME}"
 postconf -e "mydestination = ${REAL_HOSTNAME}, localhost"
 /etc/init.d/postfix restart
 
-# MYSQL:
-
-echo "create database pressflow;" | mysql -u root
-
 # Phone home - helps us to know how many users there are without passing any 
 # identifying or personal information to us.
 ID=`hostname -f | md5sum | sed 's/[^a-zA-Z0-9]//g'`
