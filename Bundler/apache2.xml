@@ -24,6 +24,7 @@
     <Package name='mailcap'/>
     <Package name='postgresql-libs'/>
     <Package name='httpd'/>
+    <Path name='/etc/httpd/conf/httpd.conf'/>
     <Service name='httpd'/>
   </Group>
 
