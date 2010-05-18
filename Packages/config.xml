@@ -22,6 +22,28 @@
     <Arch>i386</Arch>
   </APTSource>
   <APTSource>
+    <Group>karmic</Group>
+    <URL>http://archive.ubuntu.com/ubuntu</URL>
+    <Version>karmic-updates</Version>
+    <Component>main</Component>
+    <Component>multiverse</Component>
+    <Component>restricted</Component>
+    <Component>universe</Component>
+    <Arch>amd64</Arch>
+    <Arch>i386</Arch>
+  </APTSource>
+  <APTSource>
+    <Group>karmic</Group>
+    <URL>http://security.ubuntu.com/ubuntu</URL>
+    <Version>karmic-security</Version>
+    <Component>main</Component>
+    <Component>multiverse</Component>
+    <Component>restricted</Component>
+    <Component>universe</Component>
+    <Arch>amd64</Arch>
+    <Arch>i386</Arch>
+  </APTSource>
+  <APTSource>
     <Group>lucid</Group>
     <URL>http://archive.ubuntu.com/ubuntu</URL>
     <Version>lucid</Version>
