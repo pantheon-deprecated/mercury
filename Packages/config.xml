@@ -79,9 +79,9 @@
     <Arch>i386</Arch>
   </APTSource>
   <YUMSource>
-    <Group>centos5.4</Group>
+    <Group>centos5.5</Group>
     <URL>http://mirror.centos.org/centos/</URL>
-    <Version>5.4</Version>
+    <Version>5.5</Version>
     <Component>os</Component>
     <Component>updates</Component>
     <Component>extras</Component>
@@ -89,17 +89,17 @@
     <Arch>x86_64</Arch>
   </YUMSource>
   <YUMSource>
-    <Group>centos5.4</Group>
+    <Group>centos5.5</Group>
     <RawURL>http://download.fedora.redhat.com/pub/epel/5/x86_64</RawURL>
     <Arch>x86_64</Arch>
   </YUMSource>
   <YUMSource>
-    <Group>centos5.4</Group>
+    <Group>centos5.5</Group>
     <RawURL>http://yum.fourkitchens.com/pub/centos/5/noarch</RawURL>
     <Arch>x86_64</Arch>
   </YUMSource> 
   <YUMSource>
-    <Group>centos5.4</Group>
+    <Group>centos5.5</Group>
     <RawURL>http://rpms.famillecollet.com/enterprise/5/remi/x86_64</RawURL>
     <Arch>x86_64</Arch>
   </YUMSource>

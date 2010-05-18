@@ -5,6 +5,9 @@
     <!-- Httpd -->
     <Service type='chkconfig' status='on' name='httpd'/>
 
+    <!-- Memcached -->
+    <Service type='chkconfig' status='on' name='memcached'/>
+
     <!-- BCFG2 -->
     <Service type='chkconfig' status='on' name='bcfg2'/>
     <Service type='chkconfig' status='on' name='bcfg2-server'/>
