@@ -1,4 +1,5 @@
 <Bundle name='mercury' xmlns:py="http://genshi.edgewall.org/">
+  <Group name='deb'>
   <Package name='autoconf'/>
   <Package name='automake'/>
   <Package name='automake1.4'/>
@@ -70,4 +71,5 @@
   <Action name='clear_ib_logfiles'/>
   <Action name='vnstat_db_eth0'/>
   <Service name='vnstat'/>
+  </Group>
 </Bundle>
