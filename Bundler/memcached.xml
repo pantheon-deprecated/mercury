@@ -5,7 +5,7 @@
   
   <!-- Ubuntu/Debian only -->
   <Group name='deb'>
-    <Package name='php5-memcached'/>
+    <Package name='php5-memcache'/>
     <Path name="/etc/memcached.conf"/>
   </Group>
 

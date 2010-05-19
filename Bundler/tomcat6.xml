@@ -20,6 +20,7 @@
   <Package name='libservlet2.5-java'/>
   <Package name='rhino'/>
   <Package name='tomcat6'/>
+  <Package name='tomcat6-common'/>
   <Package name='tzdata-java'/>
   <Path name="/etc/default/tomcat6"/>
   <Path name="/etc/tomcat6/Catalina/localhost/solr.xml"/>

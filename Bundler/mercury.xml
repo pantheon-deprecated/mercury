@@ -22,6 +22,7 @@
   <Package name='mysql-client'/>
   <Package name='mysql-client-5.1'/>
   <Package name='mysql-client-core-5.1'/>
+  <Package name='mysql-common'/>
   <Package name='mysql-server'/>
   <Package name='mysql-server-5.1'/>
   <Package name='mysql-server-core-5.1'/>

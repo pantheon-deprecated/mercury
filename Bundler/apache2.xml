@@ -4,6 +4,8 @@
   <Group name='deb'>
     <Package name='apache2'/>
     <Package name='apache2-mpm-prefork'/>
+    <Package name='apache2-utils'/>
+    <Package name='apache2.2-bin'/>
     <Package name='libapache2-mod-php5'/>
     <Package name='libapache2-mod-rpaf'/>
     <Package name='libaprutil1-dbd-sqlite3'/>
