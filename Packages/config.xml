@@ -102,8 +102,8 @@
   </APTSource>
   <YUMSource>
     <Group>centos5.5</Group>
-    <URL>http://mirror.centos.org/centos/</URL>
-    <Version>5.5</Version>
+    <URL>http://mirror.rackspace.com/CentOS</URL>
+    <Version>5</Version>
     <Component>os</Component>
     <Component>updates</Component>
     <Component>extras</Component>
