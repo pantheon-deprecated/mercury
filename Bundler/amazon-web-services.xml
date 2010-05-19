@@ -52,7 +52,7 @@
   <Package name='libalgorithm-c3-perl'/>
   <Package name='libapparmor-perl'/>
   <Package name='libapparmor1'/>
-  <Package name='libbind9-6'/>
+  <Package name='libbind9-60'/>
   <Package name='libclass-c3-perl'/>
   <Package name='libclass-mop-perl'/>
   <Package name='libdata-optlist-perl'/>
