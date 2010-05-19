@@ -1,6 +1,7 @@
 <Bundle name='mercury' xmlns:py="http://genshi.edgewall.org/">
   <Group name='deb'>
   <Package name='autoconf'/>
+  <Package name='autoconf2.13'/>
   <Package name='automake'/>
   <Package name='automake1.4'/>
   <Package name='bzr'/>
@@ -8,9 +9,7 @@
   <Package name='curl'/>
   <Package name='cvs'/>
   <Package name='defoma'/>
-  <Package name='fontconfig-config'/>
   <Package name='ghostscript'/>
-  <Package name='libfontconfig1'/>
   <Package name='libltdl7'/>
   <Package name='libpaper1'/>
   <Package name='libpaper-utils'/>
@@ -36,7 +35,7 @@
   <Package name='php5-xmlrpc'/>
   <Package name='php-apc'/>
   <Package name='php-pear'/>
-  <Package name='psfontmgr'/>
+  <Package name='psmisc'/>
   <Package name='python-configobj'/>  
   <Package name='python-support'/>
   <Package name='shtool'/>

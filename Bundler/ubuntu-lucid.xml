@@ -6,6 +6,7 @@
   <Package name='base-files'/>
   <Package name='base-passwd'/>
   <Package name='bash'/>
+  <Package name='binutils'/>
   <Package name='bsdmainutils'/>
   <Package name='bsdutils'/>
   <Package name='busybox-initramfs'/>
@@ -25,6 +26,7 @@
   <Package name='debianutils'/>
   <Package name='dhcp3-client'/>
   <Package name='dhcp3-common'/>
+  <Package name='diff'/>
   <Package name='diffutils'/>
   <Package name='dmidecode'/>
   <Package name='dmsetup'/>
