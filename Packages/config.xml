@@ -103,7 +103,7 @@
   <YUMSource>
     <Group>centos5.5</Group>
     <URL>http://mirror.sanctuaryhost.com/centos</URL>
-    <Version>5.5</Version>
+    <Version>5.4</Version>
     <Component>os</Component>
     <Component>updates</Component>
     <Component>extras</Component>
