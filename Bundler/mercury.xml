@@ -10,9 +10,15 @@
   <Package name='cvs'/>
   <Package name='defoma'/>
   <Package name='ghostscript'/>
+  <Package name='libdb4.7'/>
+  <Package name='libdbd-mysql-perl'/>
+  <Package name='libdbi-perl'/>
+  <Package name='libgd2-xpm'/>
   <Package name='libltdl7'/>
+  <Package name='libnet-daemon-perl'/>
   <Package name='libpaper1'/>
   <Package name='libpaper-utils'/>
+  <Package name='libplrpc-perl'/>
   <Package name='libpng12-0'/>
   <Package name='libssl-dev'/>
   <Package name='libt1-5'/>
