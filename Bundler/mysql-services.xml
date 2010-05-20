@@ -1,5 +1,5 @@
 <Bundle name='mysql-services'>
-  <Group name='deb'/>
+  <Group name='deb'>
     <Path name="/etc/mysql/my.cnf"/>
     <Service name='mysql'/>
   </Group>
