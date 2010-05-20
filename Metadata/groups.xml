@@ -46,7 +46,7 @@
     <Bundle name='php'/>
     <Bundle name='memcached'/>
     <Bundle name='mercury'/>
-    <Bundle name='mysql'/>
+    <Bundle name='mysql-services'/>
     <Bundle name='postfix'/>
     <Bundle name='tomcat6'/>
     <Bundle name='varnish'/>
