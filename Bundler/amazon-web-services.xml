@@ -27,6 +27,7 @@
   <Package name='dpkg-dev'/>
   <Package name='debhelper'/>
   <Package name='ec2-ami-tools'/>
+  <Package name='ec2-api-tools'/>
   <Package name='ec2-consistent-snapshot'/>
   <Package name='ed'/>
   <Package name='euca2ools'/>

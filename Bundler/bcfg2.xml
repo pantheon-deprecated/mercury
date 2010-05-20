@@ -15,9 +15,7 @@
     <Package name='libgamin0'/>
     <Package name='libxml2-utils'/>
     <Package name='libxslt1.1'/>
-    <Package name='portmap'/>
     <Package name='python-apt'/>
-    <Package name='python-fam'/>
     <Package name='python-gamin'/>
     <Package name='update-inetd'/>
   </Group>
