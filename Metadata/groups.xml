@@ -43,9 +43,11 @@
   <Group name='mercury'>
     <Bundle name='apache2'/>
     <Bundle name='cacti-client'/>
+    <Bundle name='php'/>
     <Bundle name='memcached'/>
     <Bundle name='mercury'/>
-    <Bundle name='mysql'/>
+    <Bundle name='mysql-packages'/>
+    <Bundle name='mysql-services'/>
     <Bundle name='postfix'/>
     <Bundle name='tomcat6'/>
     <Bundle name='varnish'/>

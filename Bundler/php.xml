@@ -1,0 +1,13 @@
+<Bundle name='php'>
+  <Group name='centos'>
+    <Package name='php'/>
+    <Package name='php-common'/>
+    <Package name='php-cli'/>
+    <Package name='php-devel'/>
+    <Package name='php-mbstring'/>
+    <Package name='php-pear'/>
+    <Package name='php-pecl-apc'/>
+    <Package name='libedit'/>
+  </Group>
+</Bundle>
+

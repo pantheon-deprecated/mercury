@@ -8,6 +8,9 @@
     <!-- Memcached -->
     <Service type='chkconfig' status='on' name='memcached'/>
 
+    <!-- MySQL -->
+    <Service type='chkconfig' status='on' name='mysqld'/>
+
     <!-- BCFG2 -->
     <Service type='chkconfig' status='on' name='bcfg2'/>
     <Service type='chkconfig' status='on' name='bcfg2-server'/>

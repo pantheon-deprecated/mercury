@@ -1,4 +1,0 @@
-<Bundle name='mysql'>
-  <Path name="/etc/mysql/my.cnf"/>
-  <Service name='mysql'/>
-</Bundle>

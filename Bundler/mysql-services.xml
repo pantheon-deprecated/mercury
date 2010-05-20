@@ -1,0 +1,14 @@
+<Bundle name='mysql-services'>
+
+  <!-- Ubuntu/Deb Only -->
+  <Group name='deb'>
+    <Path name="/etc/mysql/my.cnf"/>
+    <Service name='mysql'/>
+  </Group>
+
+  <!-- CentOS Only -->
+  <Group name='centos'>
+    <Service name='mysqld'/>
+  </Group>
+
+</Bundle>
