@@ -8,6 +8,7 @@
 
   <!-- CentOS Only -->
   <Group name='centos'>
+    <Path name='/etc/my.cnf'/>
     <Service name='mysqld'/>
   </Group>
 
