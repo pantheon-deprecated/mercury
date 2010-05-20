@@ -43,6 +43,7 @@
   <Group name='mercury'>
     <Bundle name='apache2'/>
     <Bundle name='cacti-client'/>
+    <Bundle name='php'/>
     <Bundle name='memcached'/>
     <Bundle name='mercury'/>
     <Bundle name='mysql'/>

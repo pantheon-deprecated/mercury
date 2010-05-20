@@ -11,11 +11,7 @@
 
   <!-- CentOS only -->
   <Group name='centos'>
-    <Package name='libedit'/>
     <Package name='libevent'/>
-    <Package name='php-cli'/>
-    <Package name='php-common'/>
-    <Package name='php-pear'/>
     <Package name='php-pecl-memcache'/>
     <Path name='/etc/sysconfig/memcached'/>
   </Group>
