@@ -1,5 +1,11 @@
 <Bundle name='postfix'>
+
   <Package name='postfix'/>
-  <Package name='ssl-cert'/>
   <Service name='postfix'/>
+
+   <!-- Ubuntu/Deb Only -->
+   <Group name='deb'>
+    <Package name='ssl-cert'/>
+  </Group>
+
 </Bundle>
