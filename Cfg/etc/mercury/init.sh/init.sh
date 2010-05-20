@@ -27,9 +27,10 @@ echo "1 minute: BCFG2 is loading packages and config files";
 sleep 60
 
 # Process updates!
-bcfg2 -vq
+bcfg2-admin xcmd Packages.Refresh
+bcfg2 -vqe
 
-#making sure varnish and mysql get's restarted...
+#get ready for possiby changing the mysql and varnish storage paths 
 service mysql stop
 service varnish stop
 
