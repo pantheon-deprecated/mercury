@@ -1,12 +1,30 @@
 <Bundle name='varnish'>
-  <Package name='libc6-dev'/>
-  <Package name='libc-dev-bin'/>
-  <Package name='linux-libc-dev'/>
+
   <Package name='varnish'/>
-  <Path name="/etc/default/varnish"/>
   <Path name="/etc/varnish/default.vcl"/>
   <Service name='varnish'/>
   <Service name='varnishlog'/>
   <Service name='varnishncsa'/>
   <BoundPath name='/var/lib/varnish/pressflow' type='directory' owner='varnish' group='varnish' perms='0755'/>
+
+  <!-- Ubuntu/Deb Only -->
+  <Group name='deb'>
+    <Package name='libc6-dev'/>
+    <Package name='libc-dev-bin'/>
+    <Package name='linux-libc-dev'/>
+    <Path name="/etc/default/varnish"/>
+  </Group>
+
+  <!-- CentOS Only -->
+  <Group name='centos'>
+    <Package name='cpp'/>
+    <Package name='gcc'/>
+    <Package name='glibc-devel'/>
+    <Package name='glibc-headers'/>
+    <Package name='kernel-headers'/>
+    <Package name='libgomp'/>
+    <Package name='varnish-libs'/>
+    <Path name='/etc/sysconfig/varnish'/>
+  </Group>
 </Bundle>
+

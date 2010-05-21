@@ -18,6 +18,11 @@
     <!-- Postfix -->
     <Service type='chkconfig' status='on' name='postfix'/>
 
+    <!-- Varnish -->
+    <Service type='chkconfig' status='on' name='varnish'/>
+    <Service type='chkconfig' status='on' name='varnishlog'/>
+    <Service type='chkconfig' status='on' name='varnishncsa'/>
+
     <!-- CentOS -->
     <Service type='chkconfig' status='on' name='crond'/>
     <Service type='chkconfig' status='off' name='iptables'/>
