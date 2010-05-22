@@ -42,7 +42,6 @@
   <Package name='findutils'/>
   <Package name='fipscheck'/>
   <Package name='fipscheck-lib'/>
-  <Package name='fourkitchens-release'/>
   <Package name='gawk'/>
   <Package name='gdbm'/>
   <Package name='glib2'/>
