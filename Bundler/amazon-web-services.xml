@@ -177,9 +177,9 @@
   <Package name='wpasupplicant'/>
   <Package name='xfsprogs'/>
   <Package name='xz-utils'/>
-  <Path name="/usr/local/bin/ec2-metadata"/>
-  <Path name="/etc/mercury/boot.d/S050ec2.sh"/>
-  <Path name="/etc/init/mysql.conf"/>
+  <Path name='/usr/local/bin/ec2-metadata'/>
+  <Path name='/etc/mercury/boot.d/S050ec2.sh'/>
+  <Path name='/etc/init/mysql.conf' altsrc='/mysql/conf'/>
   <BoundPath name='/mnt/mysql/tmp' type='directory' owner='mysql' group='mysql' perms='1777'/>
   <BoundPath name='/mnt/tomcat6/tmp' type='directory' owner='tomcat6' group='tomcat6' perms='1777'/>
   <BoundPath name='/mnt/varnish' type='directory' owner='varnish' group='varnish' perms='0755'/>

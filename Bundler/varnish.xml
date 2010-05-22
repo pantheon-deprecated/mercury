@@ -1,7 +1,7 @@
 <Bundle name='varnish'>
 
   <Package name='varnish'/>
-  <Path name="/etc/varnish/default.vcl"/>
+  <Path name='/etc/varnish/default.vcl' altsrc='/varnish/vlc'/>
   <Service name='varnish'/>
   <Service name='varnishlog'/>
   <Service name='varnishncsa'/>
@@ -12,7 +12,7 @@
     <Package name='libc6-dev'/>
     <Package name='libc-dev-bin'/>
     <Package name='linux-libc-dev'/>
-    <Path name="/etc/default/varnish"/>
+    <Path name='/etc/default/varnish' altsrc='/varnish/conf'/>
   </Group>
 
   <!-- CentOS Only -->
@@ -24,7 +24,7 @@
     <Package name='kernel-headers'/>
     <Package name='libgomp'/>
     <Package name='varnish-libs'/>
-    <Path name='/etc/sysconfig/varnish'/>
+    <Path name='/etc/sysconfig/varnish' altsrc='/varnish/conf'/>
   </Group>
 </Bundle>
 

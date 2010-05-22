@@ -215,7 +215,7 @@
   <Package name='xkb-data'/>                                        
   <Package name='xml-core'/>                                        
   <Package name='zlib1g'/>           
-  <Path name="/etc/apparmor.d/usr.sbin.mysqld"/>
+  <Path name='/etc/apparmor.d/usr.sbin.mysqld' altsrc='/mysql/apparmor'/>
   <Service name='bootlogd'/>
   <Service name='cron'/>
   <Service name='dmesg'/>

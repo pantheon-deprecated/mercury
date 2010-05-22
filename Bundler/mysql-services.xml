@@ -2,13 +2,13 @@
 
   <!-- Ubuntu/Deb Only -->
   <Group name='deb'>
-    <Path name="/etc/mysql/my.cnf"/>
+    <Path name='/etc/mysql/my.cnf' altsrc='/mysql/conf'/>
     <Service name='mysql'/>
   </Group>
 
   <!-- CentOS Only -->
   <Group name='centos'>
-    <Path name='/etc/my.cnf'/>
+    <Path name='/etc/my.cnf' altsrc='/mysql/conf'/>
     <Service name='mysqld'/>
   </Group>
 
