@@ -6,14 +6,14 @@
   <!-- Ubuntu/Debian only -->
   <Group name='deb'>
     <Package name='php5-memcache'/>
-    <Path name='/etc/memcached.conf' altsrc='/etc/memcached.conf'/>
+    <Path name='/etc/memcached.conf' altsrc='memcached'/>
   </Group>
 
   <!-- CentOS only -->
   <Group name='centos'>
     <Package name='libevent'/>
     <Package name='php-pecl-memcache'/>
-    <Path name='/etc/sysconfig/memcached' altsrc='/etc/memcached.conf'/>
+    <Path name='/etc/sysconfig/memcached' altsrc='memcached'/>
   </Group>
 </Bundle>
 
