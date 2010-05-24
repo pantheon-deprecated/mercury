@@ -24,13 +24,6 @@
   <Package name='libt1-5'/>
   <Package name='libtool'/>
   <Package name='libxpm4'/>
-  <Package name='mysql-client'/>
-  <Package name='mysql-client-5.1'/>
-  <Package name='mysql-client-core-5.1'/>
-  <Package name='mysql-common'/>
-  <Package name='mysql-server'/>
-  <Package name='mysql-server-5.1'/>
-  <Package name='mysql-server-core-5.1'/>
   <Package name='psmisc'/>
   <Package name='python-configobj'/>  
   <Package name='python-support'/>
@@ -62,7 +55,6 @@
   <Path name='/usr/local/bin/update_mercury.sh'/>
   <Path name='/usr/local/bin/update_pressflow.sh'/>
   <Action name='restart_apparmor'/>
-  <Action name='clear_ib_logfiles'/>
   <Action name='vnstat_db_eth0'/>
   <Service name='vnstat'/>
   </Group>
