@@ -6,6 +6,9 @@
 cp /etc/mercury/template /etc/mercury/server_tuneables
 chown 755 /etc/mercury/server_tuneables
 
+# Setup cron:
+crontab /etc/mercury/default_cron
+
 # Postfix
 if [[ -a /usr/local/bin/ec2-metadata ]]; then
     REAL_HOSTNAME=$(/usr/local/bin/ec2-metadata -p | sed 's/public-hostname: //')
