@@ -155,7 +155,6 @@
   <Package name='rpm'/>
   <Package name='rsync'/>
   <Package name='runurl'/>
-  <Package name='screen'/>
   <Package name='smartdimmer'/>
   <Package name='ssh-import'/>
   <Package name='strace'/>

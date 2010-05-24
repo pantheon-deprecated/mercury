@@ -44,6 +44,7 @@
   <Package name='psmisc'/>
   <Package name='python-configobj'/>  
   <Package name='python-support'/>
+  <Package name='screen'/>
   <Package name='shtool'/>
   <Package name='subversion'/>
   <Package name='ttf-dejavu'/>
