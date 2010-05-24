@@ -1,4 +1,24 @@
 <Bundle name='php'>
+
+  <!-- Ubuntu/Deb Only -->
+  <Group name='deb'>
+    <Package name='php5'/>
+    <Package name='php5-cli'/>
+    <Package name='php5-curl'/>
+    <Package name='php5-dev'/>
+    <Package name='php5-gd'/>
+    <Package name='php5-imagick'/>
+    <Package name='php5-mysql'/>
+    <Package name='php5-xmlrpc'/>
+    <Package name='php-apc'/>
+    <Package name='php-pear'/>
+
+    <Path name='/etc/php5/apache2/php.ini' altsrc='/php5/apache2/php.ini'/>
+    <Path name='/etc/php5/cli/php.ini' altsrc='/php5/cli/php.ini'/>
+    <Path name='/etc/php5/conf.d/apc.ini' altsrc='/php5/conf.d/apc.ini'/>
+  </Group>
+
+  <!-- CentOS Only -->
   <Group name='centos'>
     <Package name='php'/>
     <Package name='php-common'/>

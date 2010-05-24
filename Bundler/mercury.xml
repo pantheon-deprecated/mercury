@@ -31,16 +31,6 @@
   <Package name='mysql-server'/>
   <Package name='mysql-server-5.1'/>
   <Package name='mysql-server-core-5.1'/>
-  <Package name='php5'/>
-  <Package name='php5-cli'/>
-  <Package name='php5-curl'/>
-  <Package name='php5-dev'/>
-  <Package name='php5-gd'/>
-  <Package name='php5-imagick'/>
-  <Package name='php5-mysql'/>
-  <Package name='php5-xmlrpc'/>
-  <Package name='php-apc'/>
-  <Package name='php-pear'/>
   <Package name='psmisc'/>
   <Package name='python-configobj'/>  
   <Package name='python-support'/>
@@ -58,9 +48,6 @@
   <Path name='/etc/mercury/boot.d/S100main.sh'/>
   <Path name='/etc/mercury/init.sh'/>
   <Path name='/etc/motd.tail'/>
-  <Path name='/etc/php5/apache2/php.ini' altsrc='/php5/apache2/php.ini'/>
-  <Path name='/etc/php5/cli/php.ini' altsrc='/php5/cli/php.ini'/>
-  <Path name='/etc/php5/conf.d/apc.ini' altsrc='/php5/conf.d/apc.ini'/>
   <Path name='/etc/rc.local'/>
   <Group name='amazon-web-services'>
     <Path name='/home/ubuntu/CHANGELOG.txt' altsrc='/root/CHANGELOG.txt'/>
