@@ -53,7 +53,6 @@
   <Package name='unzip'/>
   <Package name='vnstat'/>
   <Package name='zlib1g-dev'/>
-  <Path name='/etc/cron.d/drupal' altsrc='/cron/drupal'/>
   <Path name='/etc/mercury/template'/>
   <Path name='/etc/mercury/boot.d/S100main.sh'/>
   <Path name='/etc/mercury/init.sh'/>
