@@ -36,9 +36,10 @@
   <Package name='unzip'/>
   <Package name='vnstat'/>
   <Package name='zlib1g-dev'/>
-  <Path name='/etc/mercury/template'/>
   <Path name='/etc/mercury/boot.d/S100main.sh'/>
+  <Path name='/etc/mercury/default_cron'/>
   <Path name='/etc/mercury/init.sh'/>
+  <Path name='/etc/mercury/template'/>
   <Path name='/etc/motd.tail'/>
   <Path name='/etc/rc.local'/>
   <Group name='amazon-web-services'>
