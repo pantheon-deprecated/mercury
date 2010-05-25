@@ -20,6 +20,10 @@
 
   <!-- CentOS Only -->
   <Group name='centos'>
+    <Package name='autoconf'/>
+    <Package name='automake'/>
+    <Package name='freetype'/>
+    <Package name='imake'/>
     <Package name='php'/>
     <Package name='php-common'/>
     <Package name='php-cli'/>
@@ -29,6 +33,20 @@
     <Package name='php-pear'/>
     <Package name='php-pecl-apc'/>
     <Package name='libedit'/>
+    <Package name='libICE'/>
+    <Package name='libSM'/>
+    <Package name='libX11'/>
+    <Package name='libXau'/>
+    <Package name='libXaw'/>
+    <Package name='libXdmcp'/>
+    <Package name='libXext'/>
+    <Package name='libXmu'/>
+    <Package name='libXpm'/>
+    <Package name='libXt'/>
+    <Package name='libjpeg'/>
+    <Package name='libpng'/>
+    <Package name='m4'/>
+    <Package name='t1lib'/>
   </Group>
 </Bundle>
 
