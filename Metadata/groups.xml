@@ -4,43 +4,31 @@
   <Group profile='true' public='true' name='mercury-aws'>
     <Group name='mercury'/>
     <Group name='amazon-web-services'/>
-    <Group name='bcfg2'/>
   </Group>
   
   <!--Ubuntu on Rackspace/Linode-->
   <Group profile='true' public='true' default='true' name='mercury-vps'>
     <Group name='mercury'/>
     <Group name='vps'/>
-    <Group name='bcfg2'/>
   </Group>
 
   <!-- Operating systems -->
   <Group name='jaunty'> 
-    <Group name='ubuntu'/>
     <Bundle name='ubuntu-jaunty'/>
   </Group>
   <Group name='karmic'> 
-    <Group name='ubuntu'/>
     <Bundle name='ubuntu-karmic'/>
   </Group>
   <Group name='lucid'>
-    <Group name='ubuntu'/>
     <Bundle name='ubuntu-lucid'/>
   </Group>
   <Group name='centos'>
     <Bundle name='centos'/>
   </Group>
-  <Group name='debian'/>
-  <Group name='freebsd'/>
-  <Group name='gentoo'/>
-  <Group name='mandrake'/>
-  <Group name='redhat'/>
-  <Group name='solaris'/>
-  <Group name='suse'/>
-  <Group name='ubuntu'/>
 
   <!-- pantheon server types -->
   <Group name='mercury'>
+    <Bundle name='bcfg2'/>
     <Bundle name='apache2'/>
     <Bundle name='cacti-client'/>
     <Bundle name='php'/>
@@ -62,9 +50,4 @@
     <Bundle name='vps'/>
   </Group>
   
-  <!-- other options -->
-  <Group name='bcfg2'>
-    <Bundle name='bcfg2'/>
-  </Group>
-
 </Groups>
