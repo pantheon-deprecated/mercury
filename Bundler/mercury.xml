@@ -1,61 +1,53 @@
-<Bundle name='mercury' xmlns:py="http://genshi.edgewall.org/">
+<Bundle name='mercury'>
+
+   <Path name='/usr/local/bin/update_mercury.sh'/>
+   <Path name='/usr/local/bin/update_pressflow.sh'/>
+   <Path name='/etc/mercury/boot.d/S100main.sh'/>
+   <Path name='/etc/mercury/default_cron'/>
+   <Path name='/etc/mercury/init.sh'/>
+   <Path name='/etc/mercury/template'/>
+
+   <!-- AWS Only -->
+   <Group name='amazon-web-services'>      
+     <Path name='/home/ubuntu/CHANGELOG.txt' altsrc='/root/CHANGELOG.txt'/>
+     <Path name='/home/ubuntu/mercury.make' altsrc='/root/mercury.make'/>
+     <Path name='/home/ubuntu/README.txt' altsrc='/root/README.txt'/>
+   </Group>
+  
+   <!-- VPS (Generic Host) -->
+   <Group name='vps'>
+     <Path name='/root/CHANGELOG.txt'/>
+     <Path name='/root/mercury.make'/>
+     <Path name='/root/README.txt'/>
+   </Group>
+
+  <!-- Ubuntu/Deb Only -->
   <Group name='deb'>
-  <Package name='autoconf'/>
-  <Package name='autoconf2.13'/>
-  <Package name='automake'/>
-  <Package name='automake1.4'/>
-  <Package name='bzr'/>
-  <Package name='bzrtools'/>
-  <Package name='curl'/>
-  <Package name='cvs'/>
-  <Package name='defoma'/>
-  <Package name='ghostscript'/>
-  <Package name='libdb4.7'/>
-  <Package name='libdbd-mysql-perl'/>
-  <Package name='libdbi-perl'/>
-  <Package name='libgd2-xpm'/>
-  <Package name='libltdl7'/>
-  <Package name='libnet-daemon-perl'/>
-  <Package name='libpaper1'/>
-  <Package name='libpaper-utils'/>
-  <Package name='libplrpc-perl'/>
-  <Package name='libpng12-0'/>
-  <Package name='libssl-dev'/>
-  <Package name='libt1-5'/>
-  <Package name='libtool'/>
-  <Package name='libxpm4'/>
-  <Package name='psmisc'/>
-  <Package name='python-configobj'/>  
-  <Package name='python-support'/>
-  <Package name='screen'/>
-  <Package name='shtool'/>
-  <Package name='subversion'/>
-  <Package name='ttf-dejavu'/>
-  <Package name='ttf-dejavu-core'/>
-  <Package name='ttf-dejavu-extra'/>
-  <Package name='unzip'/>
-  <Package name='vnstat'/>
-  <Package name='zlib1g-dev'/>
-  <Path name='/etc/mercury/boot.d/S100main.sh'/>
-  <Path name='/etc/mercury/default_cron'/>
-  <Path name='/etc/mercury/init.sh'/>
-  <Path name='/etc/mercury/template'/>
-  <Path name='/etc/motd.tail'/>
-  <Path name='/etc/rc.local'/>
-  <Group name='amazon-web-services'>
-    <Path name='/home/ubuntu/CHANGELOG.txt' altsrc='/root/CHANGELOG.txt'/>
-    <Path name='/home/ubuntu/mercury.make' altsrc='/root/mercury.make'/>
-    <Path name='/home/ubuntu/README.txt' altsrc='/root/README.txt'/>
-  </Group>
-  <Group name='vps'>
-    <Path name='/root/CHANGELOG.txt'/>
-    <Path name='/root/mercury.make'/>
-    <Path name='/root/README.txt'/>
-  </Group>
-  <Path name='/usr/local/bin/update_mercury.sh'/>
-  <Path name='/usr/local/bin/update_pressflow.sh'/>
-  <Action name='restart_apparmor'/>
-  <Action name='vnstat_db_eth0'/>
-  <Service name='vnstat'/>
+    <Package name='defoma'/>
+    <Package name='ghostscript'/>
+    <Package name='libdb4.7'/>
+    <Package name='libdbd-mysql-perl'/>
+    <Package name='libdbi-perl'/>
+    <Package name='libgd2-xpm'/>
+    <Package name='libltdl7'/>
+    <Package name='libnet-daemon-perl'/>
+    <Package name='libpaper1'/>
+    <Package name='libpaper-utils'/>
+    <Package name='libplrpc-perl'/>
+    <Package name='libpng12-0'/>
+    <Package name='libssl-dev'/>
+    <Package name='libt1-5'/>
+    <Package name='libtool'/>
+    <Package name='libxpm4'/>
+    <Package name='psmisc'/>
+    <Package name='python-configobj'/>  
+    <Package name='python-support'/>
+    <Package name='ttf-dejavu'/>
+    <Package name='ttf-dejavu-core'/>
+    <Package name='ttf-dejavu-extra'/>
+    <Package name='zlib1g-dev'/>
+
+    <Path name='/etc/motd.tail'/>
+    <Path name='/etc/rc.local'/>
   </Group>
 </Bundle>

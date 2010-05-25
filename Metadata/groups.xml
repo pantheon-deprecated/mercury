@@ -45,6 +45,7 @@
     <Bundle name='cacti-client'/>
     <Bundle name='php'/>
     <Bundle name='memcached'/>
+    <Bundle name='tools'/>
     <Bundle name='mercury'/>
     <Bundle name='mysql-packages'/>
     <Bundle name='mysql-services'/>
