@@ -1,0 +1,25 @@
+<Bundle name ='tools'>
+
+  <!-- Ubuntu/Deb Only -->
+  <Group name='deb'>
+    <Package name='autoconf'/>
+    <Package name='autoconf2.13'/>
+    <Package name='automake'/>
+    <Package name='automake1.4'/>
+    <Package name='bzr'/>
+    <Package name='bzrtools'/>
+    <Package name='curl'/>
+    <Package name='cvs'/>
+    <Package name='screen'/>
+    <Package name='shtool'/>
+    <Package name='subversion'/>
+    <Package name='unzip'/>
+    <Package name='vnstat'/>
+    
+    <Action name='restart_apparmor'/>
+    <Action name='vnstat_db_eth0'/>
+    
+    <Service name='vnstat'/>
+  </Group>
+</Bundle>
+
