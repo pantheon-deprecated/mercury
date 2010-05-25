@@ -24,6 +24,7 @@
     <Package name='php-common'/>
     <Package name='php-cli'/>
     <Package name='php-devel'/>
+    <Package name='php-gd'/>
     <Package name='php-mbstring'/>
     <Package name='php-pear'/>
     <Package name='php-pecl-apc'/>
