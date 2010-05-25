@@ -19,6 +19,7 @@
     <Package name='python-apt'/>
     <Package name='python-fam'/>
     <Package name='python-gamin'/>
+    <Package name='python-support'/>
     <Package name='update-inetd'/>
   </Group>
 
