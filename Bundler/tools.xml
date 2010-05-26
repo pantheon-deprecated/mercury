@@ -1,5 +1,6 @@
 <Bundle name ='tools'>
 
+  <!-- Tools -->
   <Package name='bzr'/>
   <Package name='cvs'/>
   <Package name='screen'/>
@@ -10,11 +11,16 @@
   <!-- Ubuntu/Deb Only -->
   <Group name='deb'>
     <Package name='python-configobj'/>
-    
-    <Action name='restart_apparmor'/>
-    <Action name='vnstat_db_eth0'/>
-    
+
     <Service name='vnstat'/>
+    <Action name='vnstat_db_eth0'/>
+    <Action name='restart_apparmor'/>
+  </Group>
+
+  <!-- CentOS Only -->
+  <Group name='centos'>
+    <Package name='libutempter'/>
+    <Package name='neon'/>
+    <Package name='perl-URI'/>
   </Group>
 </Bundle>
-
