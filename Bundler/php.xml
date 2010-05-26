@@ -32,7 +32,7 @@
 
     <Path name='/etc/php5/apache2/php.ini' altsrc='/php5/apache2/php.ini'/>
     <Path name='/etc/php5/cli/php.ini' altsrc='/php5/cli/php.ini'/>
-    <Path name='/etc/php5/conf.d/apc.ini' altsrc='/php5/conf.d/apc.ini'/>
+    <Path name='/etc/php5/conf.d/apc.ini' altsrc='/php5/apc/apc.ini'/>
   </Group>
 
   <!-- CentOS Only -->
@@ -64,6 +64,7 @@
     <Package name='libpng'/>
     <Package name='m4'/>
     <Package name='t1lib'/>
+    <Path name='/etc/php.d/apc.ini' altsrc='/php5/apc/apc.ini'/>
   </Group>
 </Bundle>
 
