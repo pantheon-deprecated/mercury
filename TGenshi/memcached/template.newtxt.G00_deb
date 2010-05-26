@@ -3,7 +3,7 @@
 # This configuration file is read by the start-memcached script provided as
 # part of the Debian GNU/Linux distribution. 
 
-#PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /root/MERCURY_TUNEABLES
+#PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /etc/mercury/server_tuneables
 
 # Run memcached as a daemon. This command is implied, and is not needed for the
 # daemon to run. See the README.Debian that comes with this package for more

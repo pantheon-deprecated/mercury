@@ -30,7 +30,7 @@
 # server as "/etc/httpd/logs/foo.log".
 #
 
-# PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /root/MERCURY_TUNEABLES
+# PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /etc/mercury/server_tuneables
 
 ### Section 1: Global Environment
 #

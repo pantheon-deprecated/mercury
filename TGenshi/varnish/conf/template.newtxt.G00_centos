@@ -1,6 +1,6 @@
 # Configuration file for varnish
 #
-##PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /root/MERCURY_TUNEABLES
+##PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /etc/mercury/server_tuneables
 #
 # /etc/init.d/varnish expects the variable $$DAEMON_OPTS to be set from this
 # shell script fragment.
