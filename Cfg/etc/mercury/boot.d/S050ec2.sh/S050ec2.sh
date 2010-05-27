@@ -18,4 +18,5 @@ ln -s /mnt/varnish/lib /var/lib/varnish
 chown varnish:varnish /mnt/varnish/lib/pressflow/
 
 # Unset ssh key gen:
+#not used in Ubuntu Lucid, just Jaunty and Karmic (ssh key gen works automagically in Lucid)
 chmod -x /etc/init.d/ec2-ssh-host-key-gen
