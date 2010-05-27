@@ -58,10 +58,10 @@
          HOWTO in the Tomcat 5 documentation bundle for more detailed
          instructions):
          * If your JDK version 1.3 or prior, download and install JSSE 1.0.2 or
-           later, and put the JAR files into "$JAVA_HOME/jre/lib/ext".
+           later, and put the JAR files into "$$JAVA_HOME/jre/lib/ext".
          * Execute:
              %JAVA_HOME%\bin\keytool -genkey -alias tomcat -keyalg RSA (Windows)
-             $JAVA_HOME/bin/keytool -genkey -alias tomcat -keyalg RSA  (Unix)
+             $$JAVA_HOME/bin/keytool -genkey -alias tomcat -keyalg RSA  (Unix)
            with a password value of "changeit" for both the certificate and
            the keystore itself.
 
@@ -72,7 +72,8 @@
          request.getRemoteHost() will return the String version of the
          IP address of the remote client.
     -->
-    <Connector port="8180" protocol="HTTP/1.1" address="127.0.0.1" connectionTimeout="20000" redirectPort="8443" maxThreads="50" minSpareThreads="4"/>
+
+    <Connector port="8180" protocol="HTTP/1.1" address="127.0.0.1" connectionTimeout="20000" redirectPort="8443" maxThreads="${metadata.Probes['tomcat_max_threads']}" minSpareThreads="4"/>
 
     <!-- Define a non-SSL HTTP/1.1 Connector on port 8080 -->
 <!--    <Connector port="8080" maxHttpHeaderSize="8192"
@@ -135,7 +136,7 @@
            For a similar mechanism that is portable to all Servlet 2.4
            containers, check out the "RequestDumperFilter" Filter in the
            example application (the source for this filter may be found in
-           "$CATALINA_HOME/webapps/examples/WEB-INF/classes/filters").
+           "$$CATALINA_HOME/webapps/examples/WEB-INF/classes/filters").
 
            Note that this Valve uses the platform's default character encoding.
            This may cause problems for developers in another encoding, e.g.
@@ -343,9 +344,9 @@
 
         <!-- Access log processes all requests for this virtual host.  By
              default, log files are created in the "logs" directory relative to
-             $CATALINA_HOME.  If you wish, you can specify a different
+             $$CATALINA_HOME.  If you wish, you can specify a different
              directory with the "directory" attribute.  Specify either a relative
-             (to $CATALINA_HOME) or absolute path to the desired directory.
+             (to $$CATALINA_HOME) or absolute path to the desired directory.
         -->
         <!--
         <Valve className="org.apache.catalina.valves.AccessLogValve"
@@ -355,9 +356,9 @@
 
         <!-- Access log processes all requests for this virtual host.  By
              default, log files are created in the "logs" directory relative to
-             $CATALINA_HOME.  If you wish, you can specify a different
+             $$CATALINA_HOME.  If you wish, you can specify a different
              directory with the "directory" attribute.  Specify either a relative
-             (to $CATALINA_HOME) or absolute path to the desired directory.
+             (to $$CATALINA_HOME) or absolute path to the desired directory.
              This access log implementation is optimized for maximum performance,
              but is hardcoded to support only the "common" and "combined" patterns.
         -->
@@ -374,3 +375,4 @@
   </Service>
 
 </Server>
+
