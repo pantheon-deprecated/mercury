@@ -31,7 +31,7 @@ bcfg2-admin xcmd Packages.Refresh
 bcfg2 -vqe
 
 #get ready for possiby changing the mysql and varnish storage paths 
-etc/init.d/varnish stop
+/etc/init.d/varnish stop
 
 # Run the scripts!
 for script in $( ls /etc/mercury/boot.d/S* ) ; do
@@ -40,7 +40,7 @@ done
 
 #making sure varnish and mysql get's restarted...
 /etc/init.d/mysql start
-service varnish start
+/etc/init.d/varnish start
 
 echo "create database pressflow;" | mysql -u root
 
