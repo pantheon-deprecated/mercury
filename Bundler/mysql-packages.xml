@@ -20,15 +20,13 @@
 
   <!-- CentOS Only -->
   <Group name='centos'>
-    <Package name='mysql'/>
-    <Package name='mysql-libs'/>
-    <Package name='mysql-server'/>
+    <Package name='mysql51'/>
+    <Package name='mysql51-server'/>
     <Package name='mysqlclient15'/>
     <Package name='perl-DBD-MySQL'/>
     <Package name='perl-DBI'/>
-    <Package name='php-mysql'/>
-    <Package name='php-pdo'/>
-    <Package name='sqlite2'/>
+    <Package name='php52-mysql'/>
+    <Package name='php52-pdo'/>
   </Group>
 </Bundle>
 

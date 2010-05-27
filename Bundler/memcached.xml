@@ -11,8 +11,7 @@
 
   <!-- CentOS only -->
   <Group name='centos'>
-    <Package name='libevent'/>
-    <Package name='php-pecl-memcache'/>
+    <Package name='php52-pecl-memcache'/>
     <Path name='/etc/sysconfig/memcached' altsrc='/memcached'/>
   </Group>
 </Bundle>

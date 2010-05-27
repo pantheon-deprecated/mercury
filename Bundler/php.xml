@@ -37,33 +37,14 @@
 
   <!-- CentOS Only -->
   <Group name='centos'>
-    <Package name='autoconf'/>
-    <Package name='automake'/>
-    <Package name='freetype'/>
-    <Package name='imake'/>
-    <Package name='php'/>
-    <Package name='php-common'/>
-    <Package name='php-cli'/>
-    <Package name='php-devel'/>
-    <Package name='php-gd'/>
-    <Package name='php-mbstring'/>
+    <Package name='php52'/>
+    <Package name='php52-common'/>
+    <Package name='php52-cli'/>
+    <Package name='php52-devel'/>
+    <Package name='php52-gd'/>
+    <Package name='php52-mbstring'/>
     <Package name='php-pear'/>
-    <Package name='php-pecl-apc'/>
-    <Package name='libedit'/>
-    <Package name='libICE'/>
-    <Package name='libSM'/>
-    <Package name='libX11'/>
-    <Package name='libXau'/>
-    <Package name='libXaw'/>
-    <Package name='libXdmcp'/>
-    <Package name='libXext'/>
-    <Package name='libXmu'/>
-    <Package name='libXpm'/>
-    <Package name='libXt'/>
-    <Package name='libjpeg'/>
-    <Package name='libpng'/>
-    <Package name='m4'/>
-    <Package name='t1lib'/>
+    <Package name='php52-pecl-apc'/>
     <Path name='/etc/php.d/apc.ini' altsrc='/php5/apc/apc.ini'/>
   </Group>
 </Bundle>
