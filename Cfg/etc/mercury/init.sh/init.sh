@@ -3,7 +3,7 @@
 # These scripts run once on boot.
 
 if [ -e /etc/mercury/incep ]; then
-    service mysql start
+    /etc/init.d/mysql start
     exit 0
 fi
 
@@ -31,8 +31,7 @@ bcfg2-admin xcmd Packages.Refresh
 bcfg2 -vqe
 
 #get ready for possiby changing the mysql and varnish storage paths 
-service mysql stop
-service varnish stop
+etc/init.d/varnish stop
 
 # Run the scripts!
 for script in $( ls /etc/mercury/boot.d/S* ) ; do
@@ -40,7 +39,7 @@ for script in $( ls /etc/mercury/boot.d/S* ) ; do
 done
 
 #making sure varnish and mysql get's restarted...
-service mysql start
+/etc/init.d/mysql start
 service varnish start
 
 echo "create database pressflow;" | mysql -u root
