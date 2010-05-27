@@ -38,7 +38,7 @@
     <Bundle name='mysql-packages'/>
     <Bundle name='mysql-services'/>
     <Bundle name='postfix'/>
-    <Bundle name='tomcat6'/>
+    <Bundle name='tomcat'/>
     <Bundle name='varnish'/>
   </Group>
   
