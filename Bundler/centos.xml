@@ -120,7 +120,6 @@
   <Package name='python-sqlite'/>
   <Package name='python-urlgrabber'/>
   <Package name='readline'/>
-  <Package name='remi-release'/>
   <Package name='rhpl'/>
   <Package name='rootfiles'/>
   <Package name='rpm'/>
