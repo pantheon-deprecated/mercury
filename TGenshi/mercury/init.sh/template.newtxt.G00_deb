@@ -42,7 +42,7 @@ done
 /etc/init.d/mysql start
 /etc/init.d/varnish start
 
-echo "create database pressflow;" | mysql -u root
+echo "create database default;" | mysql -u root
 
 # Mark incep date. This prevents us from ever running again.
 echo `date` > /etc/mercury/incep
