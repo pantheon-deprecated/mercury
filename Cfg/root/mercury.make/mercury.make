@@ -14,7 +14,7 @@ projects[mercury][download][revision] = "HEAD"
 
 ; Modules
 projects[] = apachesolr
-projects[memcache] = 1.5-rc1
+projects[] = memcache
 projects[] = varnish
 
 ; ApacheSolr

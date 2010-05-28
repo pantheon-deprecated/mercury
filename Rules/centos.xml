@@ -3,8 +3,10 @@
   <Group name='centos'>
 
  <!-- PATHS -->
-    <Path name='/etc/mercury/init.sh' type='permissions' perms='0755' group='root' owner='root'/>
- 
+ <!--
+    <Path name='/usr/share/tomcat5/common/endorsed/[jaxp_parser_impl].jar' type='nonexistent'/>
+    <Path name='/usr/share/tomcat5/common/endorsed/[xml-commons-apis].jar' type='nonexistent'/>
+ -->
  <!-- SERVICES -->
 
     <!-- BCFG2 -->

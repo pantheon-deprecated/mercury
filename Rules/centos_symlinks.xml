@@ -1,6 +1,0 @@
-<Rules priority="1">
-  <Group name='centos'>
-    <Path name='/usr/share/tomcat5/common/endorsed/[jaxp_parser_impl].jar' type='nonexistent'/>
-    <Path name='/usr/share/tomcat5/common/endorsed/[xml-commons-apis].jar' type='nonexistent'/>
-  </Group>
-</Rules>
