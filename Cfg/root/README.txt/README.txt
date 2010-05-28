@@ -4,13 +4,13 @@ On first boot, please give the bcfg2 server up to 2 minutes to spin up and make 
 You can monitor the progress with "tail -f /etc/mercury/bootlog".
 Once you see "Setup Complete!", you can go to the the url of your site and configure pressflow.
 For the best performance, choose the "Mercury" profile
-The Database is called pressflow, the username is root and there is no password (for now - see #1 below)
+The Database is called default, the username is root and there is no password (for now - see #1 below)
 To finish configuring your Pressflow install:
 
 1) set the mysql root password and create a non-root account (changing user and password to appropriate values):
 mysql -u root
 mysql> set password for root@localhost=PASSWORD('new_password');
-mysql> grant all on pressflow.* to user@localhost identified by 'password';
+mysql> grant all on default.* to user@localhost identified by 'password';
 mysql> flush privileges;
 mysql> \q
 
@@ -20,9 +20,9 @@ mysql> \q
 nano -w /var/www/sites/default/settings.php 
 
 and change: 
-$db_url = 'mysqli://root:@localhost/pressflow';
+$db_url = 'mysqli://root:@localhost/default';
 to:
-$db_url = 'mysqli://new_user:new_password@localhost/pressflow';
+$db_url = 'mysqli://new_user:new_password@localhost/default';
 
 3) add content!
 

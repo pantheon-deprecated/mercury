@@ -3,8 +3,9 @@ MERCURY 1.1 Beta created by Chapter Three (http://chapterthree.com)             
 Thank you for using this AMI.  Please post any question/comments to http://groups.drupal.org/pantheon/
 
 1.1-Beta:
-Added support for Ubuntu Karmic and Linode VPS
-Simpler BCFG2 config files
+Solr and Memcached reconfigured to allow multi-site
+Added support for Ubuntu Lucid and Linode VPS
+Much Simpler BCFG2 config files
 Fixed Bug 541418, Bug 541499, Bug 541554, Bug 541610 and Bug 543688
 Bound tomcat6 to localhost for security
 Using BCFG2 templating system for config files and added support for adding user-configurable data
