@@ -4,7 +4,6 @@
    <Path name='/usr/local/bin/update_pressflow.sh'/>
    <Path name='/etc/mercury/boot.d/S100main.sh'/>
    <Path name='/etc/mercury/default_cron'/>
-   <Path name='/etc/mercury/init.sh'/>
    <Path name='/etc/mercury/template'/>
 
    <!-- AWS Only -->
@@ -23,12 +22,14 @@
 
   <!-- Ubuntu/Deb Only -->
   <Group name='deb'>
+    <Path name='/etc/mercury/init.sh' altsrc='/mercury/init.sh'/>
     <Path name='/etc/motd.tail' altsrc='/etc/motd'/>
     <Path name='/etc/rc.local'/>
   </Group>
 
   <!-- CentOS Only -->
   <Group name='centos'>
+    <Path name='/etc/mercury/init.sh' altsrc='/mercury/init.sh'/>
     <Path name='/etc/motd'/>
   </Group>
 </Bundle>
