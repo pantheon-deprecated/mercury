@@ -2,6 +2,11 @@
 
   <Group name='centos'>
 
+ <!-- PATHS -->
+    <Path name='/etc/mercury/init.sh' type='permissions' perms='0755' group='root' owner='root'/>
+ 
+ <!-- SERVICES -->
+
     <!-- BCFG2 -->
     <Service type='chkconfig' status='on' name='bcfg2'/>
     <Service type='chkconfig' status='on' name='bcfg2-server'/>
