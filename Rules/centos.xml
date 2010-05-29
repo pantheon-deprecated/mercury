@@ -2,12 +2,15 @@
 
   <Group name='centos'>
 
- <!-- PATHS -->
- <!--
+  <!-- ACTIONS -->
+    <Action timing='post' when='always' name='vnstat_db_eth0' command='vnstat -u -i eth0' status='ignore'/>
+
+  <!-- PATHS -->
+
     <Path name='/usr/share/tomcat5/common/endorsed/[jaxp_parser_impl].jar' type='nonexistent'/>
     <Path name='/usr/share/tomcat5/common/endorsed/[xml-commons-apis].jar' type='nonexistent'/>
- -->
- <!-- SERVICES -->
+
+  <!-- SERVICES -->
 
     <!-- BCFG2 -->
     <Service type='chkconfig' status='on' name='bcfg2'/>
