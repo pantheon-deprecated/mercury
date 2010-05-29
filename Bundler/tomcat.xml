@@ -71,7 +71,7 @@
     <Package name='tsconf'/>
     <Package name='tzdata-java'/>
     <Path name='/etc/default/tomcat6' altsrc='/tomcat/conf'/>
-    <Path name='/etc/tomcat6/Catalina/localhost/solr.xml' altsrc='/tomcat/solr'/>
+    <Path name='/etc/tomcat6/Catalina/localhost/default.xml' altsrc='/tomcat/solr'/>
     <Path name='/etc/tomcat6/server.xml' altsrc='/tomcat/server'/>
     <Service name='tomcat6'/>
   </Group>
