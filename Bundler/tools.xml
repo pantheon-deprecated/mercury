@@ -8,12 +8,13 @@
   <Package name='unzip'/>
   <Package name='vnstat'/>
 
+  <Action name='vnstat_db_eth0'/>
+
   <!-- Ubuntu/Deb Only -->
   <Group name='deb'>
     <Package name='python-configobj'/>
 
     <Service name='vnstat'/>
-    <Action name='vnstat_db_eth0'/>
     <Action name='restart_apparmor'/>
   </Group>
 
