@@ -90,6 +90,7 @@
     <Package name='classpathx-mail'/>
     <Package name='cups-libs'/>
     <Package name='eclipse-ecj'/>
+    <Package name='freetype'/>
     <Package name='fontconfig'/>
     <Package name='gcc-java'/>
     <Package name='geronimo-specs'/>
@@ -121,6 +122,8 @@
     <Package name='libgcj'/>
     <Package name='libgcj-devel'/>
     <Package name='libICE'/>
+    <Package name='libjpeg'/>
+    <Package name='libpng'/>
     <Package name='libSM'/>
     <Package name='libtiff'/>
     <Package name='libX11'/>
