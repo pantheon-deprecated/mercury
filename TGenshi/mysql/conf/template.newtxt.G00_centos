@@ -33,7 +33,6 @@ innodb_log_file_size	= ${metadata.Probes['innodb_log_file_size']}
 innodb_flush_log_at_trx_commit = 0
 innodb_flush_method	       = O_DIRECT
 innodb_file_per_table	       = 1
-default_character_set	= utf8
 collation_server	= utf8_general_ci
 character_set_server	= utf8
 
