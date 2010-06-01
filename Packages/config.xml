@@ -101,7 +101,7 @@
     <Arch>i386</Arch>
   </APTSource>
 
-  <!-- Uncomment for CentOS Support 
+  <!-- Uncomment for CentOS Support
 
   <YUMSource>
     <Group>centos5.5</Group>
@@ -114,15 +114,32 @@
     <Arch>x86_64</Arch>
   </YUMSource>
   <YUMSource>
-    <Group>centos5.5</Group>
+    <Group>centos</Group>
     <RawURL>http://download.fedora.redhat.com/pub/epel/5/x86_64</RawURL>
     <Arch>x86_64</Arch>
   </YUMSource>
   <YUMSource>
-    <Group>centos5.5</Group>
+    <Group>centos</Group>
+    <RawURL>http://download.fedora.redhat.com/pub/epel/5/i386</RawURL>
+    <Arch>i386</Arch>
+  </YUMSource>
+  <YUMSource>
+    <Group>centos</Group>
     <RawURL>http://dl.iuscommunity.org/pub/ius/stable/Redhat/5/x86_64</RawURL>
     <Arch>x86_64</Arch>
   </YUMSource>
+  <YUMSource>
+    <Group>centos</Group>
+    <RawURL>http://dl.iuscommunity.org/pub/ius/stable/Redhat/5/i386</RawURL>
+    <Arch>i386</Arch>
+  </YUMSource>
+  <YUMSource>
+    <Group>centos</Group>
+    <RawURL>http://yum.fourkitchens.com/pub/centos/5/noarch</RawURL>
+    <Arch>x86_64</Arch>
+    <Arch>i386</Arch>
+  </YUMSource>
+
   -->
 
 </Sources>
