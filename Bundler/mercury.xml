@@ -31,7 +31,7 @@
   <Group name='centos'>
     <Path name='/etc/mercury/init.sh' altsrc='/mercury/init.sh'/>
     <Path name='/etc/motd'/>
-    <Path name='/etc/rc.local' altsrc='/mercury/rc.local'/>
+    <Path name='/etc/rc.d/rc.local' altsrc='/mercury/rc.local'/>
   </Group>
 </Bundle>
 
