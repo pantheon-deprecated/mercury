@@ -23,5 +23,7 @@
     <Package name='libutempter'/>
     <Package name='neon'/>
     <Package name='perl-URI'/>
+
+    <Path name='/etc/cron.d/vnstat' altsrc='/vnstat/cron'/>
   </Group>
 </Bundle>
