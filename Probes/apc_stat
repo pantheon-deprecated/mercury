@@ -1,0 +1,14 @@
+#!/bin/bash
+#If you wish to replace our default value for apc stat in /etc/php5/conf.d/apc.ini,
+#edit the APC_STAT variable in /etc/mercury/server_tuneables
+
+if [[ -a /etc/mercury/server_tuneables ]]; then
+. /etc/mercury/server_tuneables
+fi
+
+if [[ -n "$APC_STAT" ]]; then
+   echo "$APC_STAT"
+else
+    echo "0"
+fi
+

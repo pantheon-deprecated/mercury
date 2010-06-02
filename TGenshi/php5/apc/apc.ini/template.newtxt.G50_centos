@@ -12,7 +12,7 @@ apc.shm_segments=1
 apc.shm_size=${metadata.Probes['apc_memory']}
 ; A "hint" about the number of distinct source files that will be included or 
 ; requested on your web server. Set to zero or omit if you're not sure;
-apc.num_files_hint=1024
+apc.num_files_hint=${metadata.Probes['apc_num_files_hint']}
 ; Just like num_files_hint, a "hint" about the number of distinct user cache
 ; variables to store.  Set to zero or omit if you're not sure;
 apc.user_entries_hint=4096
@@ -38,7 +38,7 @@ apc.enable_cli=0
 ; Prevents large files from being cached
 apc.max_file_size=1M
 ; Whether to stat the main script file and the fullpath includes.
-apc.stat=1
+apc.stat=${metadata.Probes['apc_stat']}
 apc.stat_ctime=0
 ; With write_lock enabled, only one process at a time will try to compile an 
 ; uncached script while the other processes will run uncached

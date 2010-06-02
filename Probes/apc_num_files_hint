@@ -1,0 +1,14 @@
+#!/bin/bash
+#If you wish to replace our default value for apc num_files_hint in /etc/php5/conf.d/apc.ini,
+#edit the APC_NUM_FILES_HINT variable in /etc/mercury/server_tuneables
+
+if [[ -a /etc/mercury/server_tuneables ]]; then
+. /etc/mercury/server_tuneables
+fi
+
+if [[ -n "$APC_NUM_FILES_HINT" ]]; then
+   echo "$APC_NUM_FILES_HINT"
+else
+    echo "1000"
+fi
+

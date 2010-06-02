@@ -31,6 +31,8 @@ export PHP_MEMORY=""
 
 #/etc/php5/conf.d/apc.ini
 export APC_MEMORY=""
+export APC_STAT="1"
+export APC_NUM_FILES_HINT="500"
 
 #/etc/tomcat6/server.xml
 export TOMCAT_MAX_THREADS=""
