@@ -3,12 +3,12 @@
   <Group name='centos'>
 
   <!-- ACTIONS -->
+
     <Action timing='post' when='always' name='vnstat_db_eth0' command='vnstat -u -i eth0' status='ignore'/>
 
   <!-- PATHS -->
 
-    <Path name='/usr/share/tomcat5/common/endorsed/[jaxp_parser_impl].jar' type='nonexistent'/>
-    <Path name='/usr/share/tomcat5/common/endorsed/[xml-commons-apis].jar' type='nonexistent'/>
+    <Path name='/var/lib/tomcat5/common/endorsed/xalan-j2.jar' type='symlink' to='/usr/share/java/xalan-j2.jar'/>
 
   <!-- SERVICES -->
 

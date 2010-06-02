@@ -159,8 +159,7 @@
     <Path name='/etc/sysconfig/tomcat5' altsrc='/tomcat/conf'/>
     <Path name='/etc/tomcat5/Catalina/localhost/solr.xml' altsrc='/tomcat/solr'/>
     <Path name='/etc/tomcat5/server.xml' altsrc='/tomcat/server'/>
-    <Path name='/usr/share/tomcat5/common/endorsed/[jaxp_parser_impl].jar'/> <!-- See Rules/centos_symlinks -->
-    <Path name='/usr/share/tomcat5/common/endorsed/[xml-commons-apis].jar'/> <!-- See Rules/centos_symlinks -->
+    <Path name='/var/lib/tomcat5/common/endorsed/xalan-j2.jar'/>
     <Service name='tomcat5'/>
   </Group>
 </Bundle>
