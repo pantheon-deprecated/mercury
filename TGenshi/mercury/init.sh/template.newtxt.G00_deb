@@ -43,7 +43,7 @@ done
 /etc/init.d/varnish start
 /etc/init.d/tomcat6 restart
 
-echo "create database default;" | mysql -u root
+echo "create database pantheon;" | mysql -u root
 
 # Mark incep date. This prevents us from ever running again.
 echo `date` > /etc/mercury/incep
