@@ -11,8 +11,8 @@ fi
 exec &> /etc/mercury/bootlog
 
 # Get any updates.
-cd /var/www/; bzr pull
-cd /var/lib/bcfg2; bzr pull
+cd /var/www/; bzr pull --overwrite
+cd /var/lib/bcfg2; bzr pull --overwrite
 
 # Be sure we are running.
 /etc/init.d/bcfg2-server restart
