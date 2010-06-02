@@ -17,7 +17,7 @@ echo "Creating a log of the output of this script at /root/update_mercury.log"
 exec &> /root/update_mercury.log
 
 #get any updates
-cd /var/lib/bcfg2; bzr ci -m "updates automatically commited by update_mercury.sh"; bzr merge; bzr commit -m "changes from Launchpad downloaded";
+cd /var/lib/bcfg2; bzr ci -m "updates automatically commited by update_mercury.sh"; bzr pull; bzr commit -m "changes from Launchpad downloaded";
 
 #process updates:
 bcfg2 -vq
