@@ -44,12 +44,19 @@ fi
 # get the proper architecture
 ARCH=`uname -m`
 case "$ARCH" in
-    "x86_64")
-        OUTPUT=$OUTPUT'\n'`echo group:amd64`
-	;;
-    "i686")
+        "x86_64")
+        if [ "$OS_GROUP" == 'centos' ]; then
+                OUTPUT=$OUTPUT'\n'`echo group:$ARCH`
+        else
+                OUTPUT=$OUTPUT'\n'`echo group:amd64`
+        fi
+        ;;
+        "i386" | "i686")
         OUTPUT=$OUTPUT'\n'`echo group:i386`
-	;;
+        ;;
+        "sparc64")
+        OUTPUT=$OUTPUT'\n'`echo group:sparc64`
+        ;;
 esac
 
 
