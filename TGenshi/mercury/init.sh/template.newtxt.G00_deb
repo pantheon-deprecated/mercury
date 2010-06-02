@@ -23,7 +23,7 @@ while [ -z "$$(netstat -atn | grep :6789)" ]; do
 done
 
 #a little more time...
-echo "1 minute: BCFG2 is loading packages and config files";
+echo "Please Wait: BCFG2 is loading packages and config files";
 sleep 60
 
 # Process updates!
