@@ -157,7 +157,7 @@
     <Package name='zip'/>
     <Package name='zlib-devel'/>
     <Path name='/etc/sysconfig/tomcat5' altsrc='/tomcat/conf'/>
-    <Path name='/etc/tomcat5/Catalina/localhost/solr.xml' altsrc='/tomcat/solr'/>
+    <Path name='/etc/tomcat5/Catalina/localhost/default.xml' altsrc='/tomcat/solr'/>
     <Path name='/etc/tomcat5/server.xml' altsrc='/tomcat/server'/>
     <Path name='/var/lib/tomcat5/common/endorsed/xalan-j2.jar'/>
     <Service name='tomcat5'/>
