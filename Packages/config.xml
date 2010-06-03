@@ -137,6 +137,10 @@
     <Group>centos</Group>
     <RawURL>http://yum.fourkitchens.com/pub/centos/5/noarch</RawURL>
     <Arch>x86_64</Arch>
+  </YUMSource>
+  <YUMSource>
+    <Group>centos</Group>
+    <RawURL>http://yum.fourkitchens.com/pub/centos/5/noarch</RawURL>
     <Arch>i386</Arch>
   </YUMSource>
 
