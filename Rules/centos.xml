@@ -46,6 +46,7 @@
     <Service type='chkconfig' status='on' name='network'/>
     <Service type='chkconfig' status='on' name='rawdevices'/>
     <Service type='chkconfig' status='on' name='restorecond'/>
+    <Service type='chkconfig' status='on' name='rsyslog'/>
     <Service type='chkconfig' status='on' name='sshd'/>
     <Service type='chkconfig' status='on' name='syslog'/>
 
