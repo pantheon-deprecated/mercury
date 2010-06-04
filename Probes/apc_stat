@@ -9,6 +9,6 @@ fi
 if [[ -n "$APC_STAT" ]]; then
    echo "$APC_STAT"
 else
-    echo "0"
+    echo "1"
 fi
 
