@@ -3,11 +3,11 @@
 # Main/Global Boot Script
 
 # Copy template to root, rename and make executable
-cp /etc/mercury/template /etc/mercury/server_tuneables
+cp /etc/mercury/tuneables.template /etc/mercury/server_tuneables
 chown 755 /etc/mercury/server_tuneables
 
 # Setup cron:
-crontab /etc/mercury/default_cron
+crontab /etc/mercury/cron.tuneables
 
 # Postfix
 if [[ -a /usr/local/bin/ec2-metadata ]]; then
