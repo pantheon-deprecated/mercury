@@ -30,6 +30,8 @@ Note: for space reasons, a default Mercury install (on AWS) stores mysql data on
 by an AMI backup and it will disappear if your AMI is stopped or crashes.  Make backups of /mnt/mysql on a regular 
 basis (and/or move it to an EBS volume).
 
+We have docs online that describe how to configure Mercury (http://groups.drupal.org/node/70258) and setup Mercury to use multi-site (http://groups.drupal.org/node/72488)
+
 Please post any question/comments to http://groups.drupal.org/pantheon/
 
 Thanks and enjoy the speed of Mercury!
