@@ -1,4 +1,56 @@
 <Rules priority='1'>
+
+  
+  <Group name='lucid'>
+    <!-- mysql -->
+    <Service type='upstart' status='on' name='mysql'/>
+    <!-- ubuntu -->
+    <Service type='upstart' status='off' name='console-setup'/>
+    <Service type='upstart' status='off' name='control-alt-delete'/>
+    <Service type='upstart' status='on' name='cron'/>
+    <Service type='upstart' status='on' name='dmesg'/>
+    <Service type='upstart' status='off' name='failsafe-x'/>
+    <Service type='upstart' status='off' name='hostname'/>
+    <Service type='upstart' status='off' name='hwclock'/>
+    <Service type='upstart' status='off' name='hwclock-save'/>
+    <Service type='upstart' status='off' name='module-init-tools'/>
+    <Service type='upstart' status='off' name='mountall'/>
+    <Service type='upstart' status='off' name='mountall-net'/>
+    <Service type='upstart' status='off' name='mountall-reboot'/>
+    <Service type='upstart' status='off' name='mountall-shell'/>
+    <Service type='upstart' status='off' name='mounted-dev'/>
+    <Service type='upstart' status='off' name='mounted-tmp'/>
+    <Service type='upstart' status='off' name='mounted-varrun'/>
+    <Service type='upstart' status='off' name='network-interface'/>
+    <Service type='upstart' status='off' name='network-interface-security'/>
+    <Service type='upstart' status='off' name='networking'/>
+    <Service type='upstart' status='off' name='plymouth'/>
+    <Service type='upstart' status='off' name='plymouth-log'/>
+    <Service type='upstart' status='off' name='plymouth-splash'/>
+    <Service type='upstart' status='off' name='plymouth-stop'/>
+    <Service type='upstart' status='off' name='procps'/>
+    <Service type='upstart' status='off' name='rc'/>
+    <Service type='upstart' status='off' name='rc-sysinit'/>
+    <Service type='upstart' status='off' name='rcS'/>
+    <Service type='upstart' status='on' name='rsyslog'/>    
+    <Service type='upstart' status='on' name='tty1'/>
+    <Service type='upstart' status='on' name='udev'/>
+    <Service type='upstart' status='off' name='udev-finish'/>
+    <Service type='upstart' status='off' name='udevmonitor'/>
+    <Service type='upstart' status='off' name='udevtrigger'/>
+    <Service type='upstart' status='on' name='upstart-udev-bridge'/>
+    <Service type='upstart' status='off' name='ureadahead'/>
+    <Service type='upstart' status='off' name='ureadahead-other'/>
+  </Group> 
+  
+  <Group name='lucid' negate='true'>
+    <!-- mysql -->
+    <Service type='deb' status='on' name='mysql'/>
+    <!-- ubuntu -->
+    <Service type='deb' status='on' name='cron'/>
+    <Service type='deb' status='on' name='dmesg'/>
+    <Service type='deb' status='on' name='rsyslog'/>
+  </Group>
   
   <Group name='deb'>
   
@@ -36,9 +88,6 @@
     <!-- mercury -->
     <Service type='deb' status='on' name='vnstat'/>
   
-    <!-- mysql -->
-    <Service type='deb' status='on' name='mysql'/>
-  
     <!-- postfix -->
     <Service type='deb' status='on' name='postfix'/>
   
@@ -49,8 +98,6 @@
     <Service type='deb' status='on' name='atd'/>
     <Service type='deb' status='on' name='bootlogs.sh'/>
     <Service type='deb' status='on' name='bootlogd'/>
-    <Service type='deb' status='on' name='cron'/>
-    <Service type='deb' status='on' name='dmesg'/>
     <Service type='deb' status='on' name='dns-clean'/>
     <Service type='deb' status='on' name='killprocs'/>
     <Service type='deb' status='on' name='klogd'/>
@@ -60,7 +107,6 @@
     <Service type='deb' status='on' name='rc.local'/>
     <Service type='deb' status='on' name='rmnologin'/>
     <Service type='deb' status='on' name='rsync'/>
-    <Service type='deb' status='on' name='rsyslog'/>
     <Service type='deb' status='on' name='single'/>
     <Service type='deb' status='on' name='ssh'/>
     <Service type='deb' status='on' name='sysklogd'/>

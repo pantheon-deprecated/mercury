@@ -10,8 +10,6 @@
   <!-- Ubuntu/Deb Only -->
   <Group name='deb'>
     <Package name='libc6-dev'/>
-    <Package name='libc-dev-bin'/>
-    <Package name='linux-libc-dev'/>
     <Path name='/etc/default/varnish' altsrc='/varnish/conf'/>
   </Group>
 

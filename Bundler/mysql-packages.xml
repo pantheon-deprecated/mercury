@@ -2,18 +2,8 @@
 
   <!-- Ubuntu/Deb Only -->
   <Group name='deb'>
-    <Package name='libdbd-mysql-perl'/>
-    <Package name='libdbi-perl'/>
-    <Package name='libnet-daemon-perl'/>
-    <Package name='libplrpc-perl'/>
-    <Package name='psmisc'/>
     <Package name='mysql-client'/>
-    <Package name='mysql-client-5.1'/>
-    <Package name='mysql-client-core-5.1'/>
-    <Package name='mysql-common'/>
     <Package name='mysql-server'/>
-    <Package name='mysql-server-5.1'/>
-    <Package name='mysql-server-core-5.1'/>
 
     <Action name='clear_ib_logfiles'/>
   </Group>

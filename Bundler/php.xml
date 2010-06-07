@@ -2,21 +2,9 @@
 
   <!-- Ubuntu/Deb Only -->
   <Group name='deb'>
-    <Package name='autoconf'/>
     <Package name='autoconf2.13'/>
     <Package name='automake1.4'/>
-    <Package name='defoma'/>
-    <Package name='ghostscript'/>
     <Package name='libdb4.7'/>
-    <Package name='libgd2-xpm'/>
-    <Package name='libltdl7'/>
-    <Package name='libpaper1'/>
-    <Package name='libpng12-0'/>
-    <Package name='libssl-dev'/>
-    <Package name='libt1-5'/>
-    <Package name='libtool'/>
-    <Package name='libxpm4'/>
-    <Package name='m4'/>
     <Package name='php5'/>
     <Package name='php5-cli'/>
     <Package name='php5-curl'/>
@@ -27,9 +15,6 @@
     <Package name='php-pear'/>
     <Package name='php5-xmlrpc'/>
     <Package name='php-apc'/>
-    <Package name='shtool'/>
-    <Package name='zlib1g-dev'/>
-
     <Path name='/etc/php5/apache2/php.ini' altsrc='/php5/apache2/php.ini'/>
     <Path name='/etc/php5/cli/php.ini' altsrc='/php5/cli/php.ini'/>
     <Path name='/etc/php5/conf.d/apc.ini' altsrc='/php5/apc/apc.ini'/>
