@@ -29,7 +29,7 @@ sleep 60
 bcfg2-admin xcmd Packages.Refresh
 bcfg2 -vqe
 
-#get ready for possiby changing the mysql and varnish storage paths 
+# get ready for possiby changing the mysql and varnish storage paths 
 /etc/init.d/varnish stop
 /etc/init.d/mysqld stop
 
@@ -38,10 +38,15 @@ for script in $$( ls /etc/mercury/boot.d/S* ) ; do
   bash $$script $$*
 done
 
-#making sure varnish and mysql get's restarted...
+# making sure varnish and mysql get's restarted...
 /etc/init.d/mysqld start
 /etc/init.d/varnish start
 
+# setup iptables
+/sbin/iptables-restore < /etc/mercury/iptables.template
+/sbin/service iptables save
+
+# create database
 echo "create database pantheon;" | mysql -u root
 
 # Mark incep date. This prevents us from ever running again.
