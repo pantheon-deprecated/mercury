@@ -7,7 +7,7 @@ cp /etc/mercury/tuneables.template /etc/mercury/server_tuneables
 chown 755 /etc/mercury/server_tuneables
 
 # Setup cron:
-crontab /etc/mercury/cron.tuneables
+crontab /etc/mercury/cron.template
 
 # Postfix
 if [[ -a /usr/local/bin/ec2-metadata ]]; then
