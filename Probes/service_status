@@ -1,0 +1,14 @@
+#!/bin/sh
+
+OUTPUT=""
+
+if [[ -a /etc/mercury/server_tuneables ]]; then
+. /etc/mercury/server_tuneables
+fi
+
+# IPTables Status
+if [[ -n "$IPTABLES_STATUS" && "$IPTABLES_STATUS" == ON ]]; then
+  OUTPUT=$OUTPUT'\n'`echo group:service-iptables-on`
+fi
+
+echo -e $OUTPUT
