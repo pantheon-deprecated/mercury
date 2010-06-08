@@ -2,7 +2,7 @@
 
    <Path name='/usr/local/bin/update_mercury.sh'/>
    <Path name='/usr/local/bin/update_pressflow.sh'/>
-   <Path name='/etc/mercury/boot.d/S100main.sh'/>
+   <Path name='/etc/mercury/boot.d/S100main.sh' altsrc='/mercury/boot.d/S100main.sh'/>
    <Path name='/etc/mercury/cron.template'/>
    <Path name='/etc/mercury/tuneables.template'/>
 
