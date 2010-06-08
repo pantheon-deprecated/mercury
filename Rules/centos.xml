@@ -38,7 +38,7 @@
 
     <!-- CentOS -->
     <Service type='chkconfig' status='on' name='crond'/>
-    <Service type='chkconfig' status='on' name='iptables'/>
+    <Service type='chkconfig' status='off' name='iptables'/>
     <Service type='chkconfig' status='on' name='lvm2-monitor'/>
     <Service type='chkconfig' status='on' name='mcstrans'/>
     <Service type='chkconfig' status='on' name='messagebus'/>

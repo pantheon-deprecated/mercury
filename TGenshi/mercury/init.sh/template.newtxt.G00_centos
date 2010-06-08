@@ -42,10 +42,6 @@ done
 /etc/init.d/mysqld start
 /etc/init.d/varnish start
 
-# setup iptables
-/sbin/iptables-restore < /etc/mercury/iptables.template
-/sbin/service iptables save
-
 # create database
 echo "create database pantheon;" | mysql -u root
 
