@@ -31,4 +31,10 @@ TOMCAT6_SECURITY=no
 
 # Location of the JVM temporary directory
 # WARNING: This directory will be destroyed and recreated at every startup !
-JVM_TMP=/tmp/tomcat6-tmp
+{% python
+    if "amazon-web-services" in metadata.groups :
+        tmpdir = '/mnt/tomcat6/tmp'
+    else:
+        tmpdir = '/tmp/tomcat6/tmp'
+%}\
+JVM_TMP=${tmpdir}

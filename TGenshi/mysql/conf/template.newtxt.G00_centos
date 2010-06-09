@@ -46,6 +46,13 @@ sync_binlog  	       	= 1
 table_cache             = 150
 # set to a little greater than apache maxclients
 max_connections         = ${metadata.Probes['mysql_max_connections']}
+{% python
+    if "amazon-web-services" in metadata.groups :
+        tmpdir = '/mnt/mysql/tmp'
+    else:
+        tmpdir = '/tmp'
+%}\
+tmpdir          = ${tmpdir}
 
 # Per-connection configuration
 

@@ -7,7 +7,7 @@ echo -n "Continue? (y/n)"
 
 read ANSWER
 echo ""
-if [[ ${ANSWER} != "y" ]]; then
+if [[ $${ANSWER} != "y" ]]; then
     echo "Cancelling....."
     exit 1
 fi

@@ -37,8 +37,8 @@ sub vcl_recv {
     unset req.http.Cookie;
   }
 
-  // No varnish for install or update.php
-  if (req.url ~ "install\.php|update\.php") {
+  // No varnish for install,update.php or cron.php
+  if (req.url ~ "install\.php|update\.php|cron\.php") {
     return (pass);      
   }
 
