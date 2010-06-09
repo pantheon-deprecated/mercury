@@ -38,9 +38,10 @@ for script in $$( ls /etc/mercury/boot.d/S* ) ; do
   bash $$script $$*
 done
 
-# making sure varnish and mysql get's restarted...
+# making sure varnish, tomcat and mysql get restarted...
 /etc/init.d/mysqld start
 /etc/init.d/varnish start
+/etc/init.d/tomcat5 restart
 
 # create database
 echo "create database pantheon;" | mysql -u root
