@@ -52,6 +52,12 @@
   <Package name='glibc-common'/>
   <Package name='gmp'/>
   <Package name='gnutls'/>
+  <BoundPackage name="gpg-pubkey" type="rpm">
+    <Instance simplefile="/etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-5" version="e8562897" release="459f07a4"/>
+    <Instance simplefile="/etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL" version="217521f6" release="45e8a532"/>
+    <Instance simplefile="/etc/pki/rpm-gpg/RPM-GPG-KEY-fourkitchens" version="dc699cc9" release="4ac01e7c"/>
+    <Instance simplefile="/etc/pki/rpm-gpg/IUS-COMMUNITY-GPG-KEY" version="9cd4953f" release="4a9da118"/>
+  </BoundPackage>
   <Package name='grep'/>
   <Package name='groff'/>
   <Package name='gzip'/>
