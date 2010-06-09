@@ -3,8 +3,8 @@
    <Path name='/usr/local/bin/update_mercury.sh altsrc='/mercury/update_mercury.sh'/>
    <Path name='/usr/local/bin/update_pressflow.sh altsrc='/mercury/update_pressflow.sh'/>
    <Path name='/etc/mercury/boot.d/S100main.sh' altsrc='/mercury/S100main.sh'/>
-   <Path name='/etc/mercury/cron.template altsrc='/mercury/boot.d/cron.template'/>
-   <Path name='/etc/mercury/tuneables.template'/>
+   <Path name='/etc/mercury/templates/cron altsrc='/mercury/boot.d/'/>
+   <Path name='/etc/mercury/templates/tuneables'/>
    <Path name='/etc/mercury/mercury.make' altsrc='/root/mercury.make'/>
 
    <!-- AWS Only -->
