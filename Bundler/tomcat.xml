@@ -80,7 +80,12 @@
     <Package name='mx4j'/>
     <Package name='pango'/>
     <Package name='regexp'/>
-    <Package name='tomcat5'/>
+    <Package name='tomcat5'>
+      <Ignore name='/etc/sysconfig/tomcat5'/>
+      <Ignore name='/etc/tomcat5/server.xml'/>
+      <Ignore name='/etc/tomcat5/tomcat-users.xml'/>
+      <Ignore name='/var/log/tomcat5/catalina.out'/>
+    </Package>
     <Package name='tomcat5-common-lib'/>
     <Package name='tomcat5-jasper'/>
     <Package name='tomcat5-jsp-2.0-api'/>

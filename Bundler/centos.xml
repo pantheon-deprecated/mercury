@@ -38,7 +38,9 @@
   <Package name='ethtool'/>
   <Package name='expat'/>
   <Package name='file'/>
-  <Package name='filesystem'/>
+  <Package name='filesystem'>
+    <Ignore name='/boot'/>
+  </Package>
   <Package name='findutils'/>
   <Package name='fipscheck'/>
   <Package name='fipscheck-lib'/>
@@ -58,7 +60,9 @@
   <Package name='info'/>
   <Package name='initscripts'/>
   <Package name='iproute'/>
-  <Package name='iptables'/>
+  <Package name='iptables'>
+    <Ignore name='/etc/sysconfig/iptables-config'/>
+  </Package>
   <Package name='iputils'/>
   <Package name='ius-release'/>
   <Package name='keyutils'/>
@@ -107,7 +111,9 @@
   <Package name='openssh-clients'/>
   <Package name='openssh-server'/>
   <Package name='openssl'/>
-  <Package name='pam'/>
+  <Package name='pam'>
+    <Ignore name='/etc/pam.d/system-auth'/>
+  </Package>
   <Package name='passwd'/>
   <Package name='pcre'/>
   <Package name='perl'/>
