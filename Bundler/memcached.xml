@@ -1,10 +1,10 @@
 <Bundle name='memcached'>
 
-  <Package name='memcached'/>
   <Service name='memcached'/>
   
   <!-- Ubuntu/Debian only -->
   <Group name='deb'>
+    <Package name='memcached'/>
     <Package name='php5-memcache'/>
     <Path name='/etc/memcached.conf' altsrc='/memcached'/>
   </Group>
@@ -12,6 +12,10 @@
   <!-- CentOS only -->
   <Group name='centos'>
     <Package name='libevent'/>
+    <Package name='memcached'>
+      <Ignore name='/etc/sysconfig/memcached'/>
+      <Ignore name='/var/run/memcached'/>
+    </Package>
     <Package name='php52-pecl-memcache'/>
     <Path name='/etc/sysconfig/memcached' altsrc='/memcached'/>
   </Group>
