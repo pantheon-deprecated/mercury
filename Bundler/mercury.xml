@@ -5,18 +5,17 @@
    <Path name='/etc/mercury/boot.d/S100main.sh' altsrc='/mercury/S100main.sh'/>
    <Path name='/etc/mercury/cron.template altsrc='/mercury/boot.d/cron.template'/>
    <Path name='/etc/mercury/tuneables.template'/>
+   <Path name='/etc/mercury/mercury.make' altsrc='/root/mercury.make'/>
 
    <!-- AWS Only -->
    <Group name='amazon-web-services'>      
      <Path name='/home/ubuntu/CHANGELOG.txt' altsrc='/root/CHANGELOG.txt'/>
-     <Path name='/home/ubuntu/mercury.make' altsrc='/root/mercury.make'/>
      <Path name='/home/ubuntu/README.txt' altsrc='/root/README.txt'/>
    </Group>
   
    <!-- VPS (Generic Host) -->
    <Group name='vps'>
      <Path name='/root/CHANGELOG.txt'/>
-     <Path name='/root/mercury.make'/>
      <Path name='/root/README.txt'/>
    </Group>
 
