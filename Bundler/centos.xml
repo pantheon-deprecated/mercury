@@ -175,7 +175,7 @@
   <Package name='zlib'/>
 
   <!-- Paths -->
-  <Path name='/etc/mercury/template/iptables'/>
+  <Path name='/etc/mercury/templates/iptables' altsrc='/mercury/iptables'/>
 
   <!-- Services -->
   <Service name='crond'/> 
