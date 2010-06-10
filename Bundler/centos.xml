@@ -1,4 +1,11 @@
 <Bundle name='centos'>
+
+  <Group name='amazon-web-services' negate='true'>
+    <Package name='libselinux-python'/>
+    <Package name='selinux-policy'/>
+    <Package name='selinux-policy-targeted'/>
+  </group> 
+
   <Package name='audit-libs'/>
   <Package name='audit-libs-python'/>
   <Package name='authconfig'/>
@@ -84,7 +91,6 @@
   <Package name='libgpg-error'/>
   <Package name='libidn'/>
   <Package name='libselinux'/>
-  <Package name='libselinux-python'/>
   <Package name='libselinux-utils'/>
   <Package name='libsemanage'/>
   <Package name='libsepol'/>
@@ -140,8 +146,6 @@
   <Package name='rpm-libs'/>
   <Package name='rpm-python'/>
   <Package name='sed'/>
-  <Package name='selinux-policy'/>
-  <Package name='selinux-policy-targeted'/>
   <Package name='setools'/>
   <Package name='setserial'/>
   <Package name='setup'/>
