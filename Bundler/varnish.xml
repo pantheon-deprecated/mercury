@@ -15,13 +15,6 @@
 
   <!-- CentOS Only -->
   <Group name='centos'>
-    <Package name='cpp'/>
-    <Package name='gcc'/>
-    <Package name='glibc-devel'/>
-    <Package name='glibc-headers'/>
-    <Package name='kernel-headers'/>
-    <Package name='libgomp'/>
-    <Package name='varnish-libs'/>
     <Path name='/etc/sysconfig/varnish' altsrc='/varnish/conf'/>
   </Group>
 </Bundle>

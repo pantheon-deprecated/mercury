@@ -20,10 +20,6 @@
 
   <!-- Centos Only -->
   <Group name='centos'>
-    <Package name='apr'/>
-    <Package name='apr-util'/>
-    <Package name='mailcap'/>
-    <Package name='postgresql-libs'/>
     <Package name='httpd'/>
     <Path name='/etc/httpd/conf/httpd.conf' altsrc='/apache2/conf'/>
     <Path name='/etc/httpd/conf/vhosts/default.conf' altsrc='/apache2/vhost'/>
