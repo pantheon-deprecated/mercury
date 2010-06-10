@@ -45,5 +45,5 @@ export VARNISH_VCL_RECV=""
 
 # SERVICE STATE OVERRIDES
 
-# Set to "ON" to enable iptables (defaults from /etc/mercury/iptables.template)
+# Set to "ON" to enable iptables (default settings: /etc/mercury/templates/iptables)
 export IPTABLES_STATUS=""
