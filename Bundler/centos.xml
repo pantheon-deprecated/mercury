@@ -2,6 +2,8 @@
 
   <Group name='amazon-web-services' negate='true'>
     <Package name='libselinux-python'/>
+    <Package name='libselinux-utils'/>
+    <Package name='libsemanage'/>
     <Package name='selinux-policy'/>
     <Package name='selinux-policy-targeted'/>
   </Group>
@@ -37,8 +39,6 @@
   </Package>
   <Package name='ius-release'/>
   <Package name='keyutils'/>
-  <Package name='libselinux-utils'/>
-  <Package name='libsemanage'/>
   <Package name='libusb'/>
   <Package name='libuser'/>
   <Package name='libvolume_id'/>
