@@ -4,7 +4,7 @@
 
 # Copy template to root, rename and make executable
 cp /etc/mercury/templates/tuneables /etc/mercury/server_tuneables
-chown 755 /etc/mercury/server_tuneables
+chmod 755 /etc/mercury/server_tuneables
 
 # Setup cron:
 crontab /etc/mercury/templates/cron
