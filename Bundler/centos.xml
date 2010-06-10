@@ -32,7 +32,9 @@
   <Package name='fourkitchens-release'/>
   <Package name='groff'/>
   <Package name='hwdata'/>
-  <Package name='iptables'/>
+  <Package name='iptables'>
+    <Ignore name='/etc/sysconfig/iptables-config'/>
+  </Package>
   <Package name='ius-release'/>
   <Package name='keyutils'/>
   <Package name='libselinux-utils'/>
