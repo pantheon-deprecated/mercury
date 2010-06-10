@@ -11,7 +11,6 @@
 
   <!-- CentOS only -->
   <Group name='centos'>
-    <Package name='libevent'/>
     <Package name='memcached'>
       <Ignore name='/etc/sysconfig/memcached'/>
       <Ignore name='/var/run/memcached'/>
