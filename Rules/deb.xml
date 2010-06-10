@@ -1,6 +1,7 @@
 <Rules priority='1'>
 
-  
+  <Group name='deb'>
+
   <Group name='lucid'>
     <!-- mysql -->
     <Service type='upstart' status='on' name='mysql'/>
@@ -51,8 +52,6 @@
     <Service type='deb' status='on' name='dmesg'/>
     <Service type='deb' status='on' name='rsyslog'/>
   </Group>
-  
-  <Group name='deb'>
   
  <!-- ACTIONS -->
     <Action timing='post' when='always' name='clear_ib_logfiles' command='bash /var/lib/bcfg2/Probes/innodb_log_file_size' status='ignore'/>
