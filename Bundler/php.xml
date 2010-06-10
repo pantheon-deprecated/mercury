@@ -22,11 +22,6 @@
 
   <!-- CentOS Only -->
   <Group name='centos'>
-    <Package name='autoconf'/>
-    <Package name='automake'/>
-    <Package name='aspell'/>
-    <Package name='aspell-en'/>
-    <Package name='imake'/>
     <Package name='php52'/>
     <Package name='php52-common'/>
     <Package name='php52-cli'/>
@@ -35,8 +30,6 @@
     <Package name='php52-mbstring'/>
     <Package name='php52-pear'/>
     <Package name='php52-pecl-apc'/>
-    <Package name='libtool-ltdl'/>
-    <Package name='m4'/>
     <Path name='/etc/php.ini' altsrc='/php5/apache2/php.ini'/>
     <Path name='/etc/php.d/apc.ini' altsrc='/php5/apc/apc.ini'/>
   </Group>
