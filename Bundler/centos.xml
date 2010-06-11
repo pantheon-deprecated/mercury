@@ -88,6 +88,7 @@
   <Service name='network'/>
   <Service name='rawdevices'/>
   <Service name='restorecond'/>
+  <Service name='rsyslog'/>
   <Service name='sshd'/>
   <Service name='syslog'/>
 
