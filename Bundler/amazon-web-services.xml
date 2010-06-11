@@ -190,10 +190,11 @@
     <Service name='landscape-client'/>
     <Service name='pppd-dns'/>
     <Service name='rsync'/>
-  </Group
+  </Group>
      
-     <!-- CentOS Only -->
+  <!-- CentOS Only -->
   <Group name='centos'>
+  
   </Group>
 
 </Bundle>
