@@ -4,6 +4,7 @@
     <Package name='libselinux'/>
     <Package name='libselinux-python'/>
     <Package name='libselinux-utils'/>
+    <Package name='libsemanage'/>
     <Package name='selinux-policy'/>
     <Package name='selinux-policy-targeted'/>
   </Group>
