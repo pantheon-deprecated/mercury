@@ -2,68 +2,8 @@
 
   <Group name='deb'>
 
-  <Group name='lucid'>
-    <!-- mysql -->
-    <Service type='upstart' status='on' name='mysql'/>
-    <!-- ubuntu -->
-    <Service type='upstart' status='off' name='console-setup'/>
-    <Service type='upstart' status='off' name='control-alt-delete'/>
-    <Service type='upstart' status='on' name='cron'/>
-    <Service type='upstart' status='on' name='dmesg'/>
-    <Service type='upstart' status='off' name='failsafe-x'/>
-    <Service type='upstart' status='off' name='hostname'/>
-    <Service type='upstart' status='off' name='hwclock'/>
-    <Service type='upstart' status='off' name='hwclock-save'/>
-    <Service type='upstart' status='off' name='module-init-tools'/>
-    <Service type='upstart' status='off' name='mountall'/>
-    <Service type='upstart' status='off' name='mountall-net'/>
-    <Service type='upstart' status='off' name='mountall-reboot'/>
-    <Service type='upstart' status='off' name='mountall-shell'/>
-    <Service type='upstart' status='off' name='mounted-dev'/>
-    <Service type='upstart' status='off' name='mounted-tmp'/>
-    <Service type='upstart' status='off' name='mounted-varrun'/>
-    <Service type='upstart' status='off' name='network-interface'/>
-    <Service type='upstart' status='off' name='network-interface-security'/>
-    <Service type='upstart' status='off' name='networking'/>
-    <Service type='upstart' status='off' name='plymouth'/>
-    <Service type='upstart' status='off' name='plymouth-log'/>
-    <Service type='upstart' status='off' name='plymouth-splash'/>
-    <Service type='upstart' status='off' name='plymouth-stop'/>
-    <Service type='upstart' status='off' name='procps'/>
-    <Service type='upstart' status='off' name='rc'/>
-    <Service type='upstart' status='off' name='rc-sysinit'/>
-    <Service type='upstart' status='off' name='rcS'/>
-    <Service type='upstart' status='on' name='rsyslog'/>    
-    <Service type='upstart' status='on' name='tty1'/>
-    <Service type='upstart' status='on' name='udev'/>
-    <Service type='upstart' status='off' name='udev-finish'/>
-    <Service type='upstart' status='off' name='udevmonitor'/>
-    <Service type='upstart' status='off' name='udevtrigger'/>
-    <Service type='upstart' status='on' name='upstart-udev-bridge'/>
-    <Service type='upstart' status='off' name='ureadahead'/>
-    <Service type='upstart' status='off' name='ureadahead-other'/>
-  </Group> 
-  
-  <Group name='lucid' negate='true'>
-    <!-- mysql -->
-    <Service type='deb' status='on' name='mysql'/>
-    <!-- ubuntu -->
-    <Service type='deb' status='on' name='cron'/>
-    <Service type='deb' status='on' name='dmesg'/>
-    <Service type='deb' status='on' name='rsyslog'/>
-  </Group>
-  
- <!-- ACTIONS -->
-    <Action timing='post' when='always' name='clear_ib_logfiles' command='bash /var/lib/bcfg2/Probes/innodb_log_file_size' status='ignore'/>
-    <Action timing='post' when='always' name='vnstat_db_eth0' command='vnstat -u -i eth0' status='ignore'/>
-    <Action timing='post' when='always' name='restart_apparmor' command='service apparmor restart' status='ignore'/>
+    <!-- All DEB VERSION SERVICES -->
 
- <!-- PATHS -->
-    <Path name="/etc/apache2/mods-enabled/expires.load" type="symlink" to='/etc/apache2/mods-available/expires.load'/>
-    <Path name="/etc/apache2/mods-enabled/rewrite.load" type="symlink" to='/etc/apache2/mods-available/rewrite.load'/>
-    <Path name="/etc/apache2/sites-enabled/000-default" type="symlink" to='/etc/apache2/sites-available/default'/>
- 
- <!-- SERVICES -->
     <!-- amazon web services -->
     <Service type='deb' status='off' name='dns-clean'/>
     <Service type='deb' status='off' name='grub-common'/>
@@ -107,14 +47,90 @@
     <Service type='deb' status='on' name='rmnologin'/>
     <Service type='deb' status='on' name='rsync'/>
     <Service type='deb' status='on' name='single'/>
-    <Service type='deb' status='on' name='ssh'/>
     <Service type='deb' status='on' name='sysklogd'/>
   
     <!-- varnish -->
     <Service type='deb' status='on' name='varnish'/>
     <Service type='deb' status='on' name='varnishlog'/>
     <Service type='deb' status='on' name='varnishncsa'/>
+
+    <!-- JAUNTY/KARMIC (don't use upstart to manage services) -->
+    <Group name='jaunty'>
+      <!-- mysql -->
+      <Service type='deb' status='on' name='mysql'/>
+      <!-- ubuntu -->
+      <Service type='deb' status='on' name='cron'/>
+      <Service type='deb' status='on' name='dmesg'/>
+      <Service type='deb' status='on' name='rsyslog'/>
+    </Group>
+
+    <Group name='karmic'>
+      <!-- mysql -->
+      <Service type='deb' status='on' name='mysql'/>
+      <!-- ubuntu -->
+      <Service type='deb' status='on' name='cron'/>
+      <Service type='deb' status='on' name='dmesg'/>
+      <Service type='deb' status='on' name='rsyslog'/>
+    </Group>
+
+    <!-- LUCID (use upstart services) -->
+    <Group name='lucid'>
   
+      <!-- mysql -->
+      <Service type='upstart' status='on' name='mysql'/>
+
+      <!-- Ubuntu -->
+      <Service type='upstart' status='on' name='cron'/>
+      <Service type='upstart' status='on' name='dmesg'/>
+      <Service type='upstart' status='on' name='rsyslog'/>    
+      <Service type='upstart' status='on' name='tty1'/>
+      <Service type='upstart' status='on' name='udev'/>
+      <Service type='upstart' status='on' name='upstart-udev-bridge'/>
+
+      <!-- manual services (don't start/stop) -->
+      <Service mode='manual' status='off' type='upstart' name='control-alt-delete'/>
+      <Service mode='manual' status='off' type='upstart' name='failsafe-x'/>
+      <Service mode='manual' status='off' type='upstart' name='hostname'/>
+      <Service mode='manual' status='off' type='upstart' name='hwclock'/>
+      <Service mode='manual' status='off' type='upstart' name='hwclock-save'/>
+      <Service mode='manual' status='off' type='upstart' name='module-init-tools'/>
+      <Service mode='manual' status='off' type='upstart' name='mountall'/>
+      <Service mode='manual' status='off' type='upstart' name='mountall-net'/>
+      <Service mode='manual' status='off' type='upstart' name='mountall-reboot'/>
+      <Service mode='manual' status='off' type='upstart' name='mountall-shell'/>
+      <Service mode='manual' status='off' type='upstart' name='mounted-dev'/>
+      <Service mode='manual' status='off' type='upstart' name='mounted-tmp'/>
+      <Service mode='manual' status='off' type='upstart' name='mounted-varrun'/>
+      <Service mode='manual' status='off' type='upstart' name='network-interface'/>
+      <Service mode='manual' status='off' type='upstart' name='network-interface-security'/>
+      <Service mode='manual' status='off' type='upstart' name='networking'/>
+      <Service mode='manual' status='off' type='upstart' name='plymouth'/>
+      <Service mode='manual' status='off' type='upstart' name='plymouth-log'/>
+      <Service mode='manual' status='off' type='upstart' name='plymouth-splash'/>
+      <Service mode='manual' status='off' type='upstart' name='plymouth-stop'/>
+      <Service mode='manual' status='off' type='upstart' name='procps'/>
+      <Service mode='manual' status='off' type='upstart' name='rc'/>
+      <Service mode='manual' status='off' type='upstart' name='rc-sysinit'/>
+      <Service mode='manual' status='off' type='upstart' name='rcS'/>
+      <Service mode='manual' status='off' type='upstart' name='udev-finish'/>
+      <Service mode='manual' status='off' type='upstart' name='udevmonitor'/>
+      <Service mode='manual' status='off' type='upstart' name='udevtrigger'/>
+      <Service mode='manual' status='off' type='upstart' name='ureadahead'/>
+      <Service mode='manual' status='off' type='upstart' name='ureadahead-other'/> 
+      <Service mode='manual' status='off' type='upstart' name='console-setup'/>
+
+    </Group> 
+    
+    <!-- ACTIONS -->
+    <Action timing='post' when='always' name='clear_ib_logfiles' command='bash /var/lib/bcfg2/Probes/innodb_log_file_size' status='ignore'/>
+    <Action timing='post' when='always' name='vnstat_db_eth0' command='vnstat -u -i eth0' status='ignore'/>
+    <Action timing='post' when='always' name='restart_apparmor' command='service apparmor restart' status='ignore'/>
+
+    <!-- PATHS -->
+    <Path name="/etc/apache2/mods-enabled/expires.load" type="symlink" to='/etc/apache2/mods-available/expires.load'/>
+    <Path name="/etc/apache2/mods-enabled/rewrite.load" type="symlink" to='/etc/apache2/mods-available/rewrite.load'/>
+    <Path name="/etc/apache2/sites-enabled/000-default" type="symlink" to='/etc/apache2/sites-available/default'/>
+
   </Group>
-  
 </Rules>
+

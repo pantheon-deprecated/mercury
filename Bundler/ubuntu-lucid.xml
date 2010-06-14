@@ -68,7 +68,7 @@
   <Service name='rcS'/>
   <Service name='rsyslog'/>
   <Service name='single'/>
-  <Service name='ssh'/>
+  <BoundService name='ssh' type='upstart' status='on'/>
   <Service name='tty1'/>
   <Service name='udev'/>
   <Service name='udev-finish'/>
