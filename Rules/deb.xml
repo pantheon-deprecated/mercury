@@ -53,17 +53,8 @@
     <Service type='deb' status='on' name='varnishlog'/>
     <Service type='deb' status='on' name='varnishncsa'/>
 
-    <!-- JAUNTY/KARMIC (don't use upstart to manage services) -->
-    <Group name='jaunty'>
-      <!-- mysql -->
-      <Service type='deb' status='on' name='mysql'/>
-      <!-- ubuntu -->
-      <Service type='deb' status='on' name='cron'/>
-      <Service type='deb' status='on' name='dmesg'/>
-      <Service type='deb' status='on' name='rsyslog'/>
-    </Group>
-
-    <Group name='karmic'>
+    <!-- Anything But Lucid (don't use upstart to manage services) -->
+    <Group name='lucid' negate='true'>
       <!-- mysql -->
       <Service type='deb' status='on' name='mysql'/>
       <!-- ubuntu -->
