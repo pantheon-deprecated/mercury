@@ -38,14 +38,14 @@
     <Service type='deb' status='on' name='bootlogs.sh'/>
     <Service type='deb' status='on' name='bootlogd'/>
     <Service type='deb' status='on' name='dns-clean'/>
-    <Service type='deb' status='on' name='killprocs'/>
+    <Service type='deb' status='on' name='killprocs' mode='manual'/>
     <Service type='deb' status='on' name='klogd'/>
-    <Service type='deb' status='on' name='ondemand'/>
+    <Service type='deb' status='on' name='ondemand' mode='manual'/>
     <Service type='deb' status='on' name='pppd-dns'/>
-    <Service type='deb' status='on' name='rc.local'/>
+    <Service type='deb' status='on' name='rc.local' mode='manual'/>
     <Service type='deb' status='on' name='rmnologin'/>
     <Service type='deb' status='on' name='rsync'/>
-    <Service type='deb' status='on' name='single'/>
+    <Service type='deb' status='on' name='single' mode='manual'/>
     <Service type='deb' status='on' name='sysklogd'/>
   
     <!-- varnish -->
