@@ -25,6 +25,12 @@
   <Group name='centos'>
     <Bundle name='centos'/>
   </Group>
+  <Group name='debian'>
+    <Bundle name='debian-lenny'/>
+  </Group>
+  <Group name='debian'>
+    <Bundle name='debian-squeeze'/>
+  </Group>
 
   <!-- pantheon server types -->
   <Group name='mercury'>
