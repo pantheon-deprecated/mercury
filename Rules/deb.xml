@@ -41,7 +41,6 @@
     <Service type='deb' status='on' name='killprocs'/>
     <Service type='deb' status='on' name='klogd'/>
     <Service type='deb' status='on' name='ondemand'/>
-    <Service type='deb' status='on' name='postfix'/>
     <Service type='deb' status='on' name='pppd-dns'/>
     <Service type='deb' status='on' name='rc.local'/>
     <Service type='deb' status='on' name='rmnologin'/>
