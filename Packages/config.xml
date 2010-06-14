@@ -146,4 +146,54 @@
 
   -->
 
+  <!-- Uncomment for Debian Support
+
+  <APTSource>
+    <Group>debian</Group>
+    <URL>http://http.us.debian.org/debian/</URL>
+    <Version>lenny</Version>
+    <Component>main</Component>
+    <Component>contrib</Component>
+    <Component>non-free</Component>
+    <Arch>amd64</Arch>
+    <Arch>i386</Arch>
+  </APTSource>
+  <APTSource>
+    <Group>debian</Group>
+    <URL>http://security.debian.org/</URL>
+    <Version>lenny/updates</Version>
+    <Component>main</Component>
+    <Component>contrib</Component>
+    <Arch>amd64</Arch>
+    <Arch>i386</Arch>
+  </APTSource>
+  <APTSource>
+    <Group>debian</Group>
+    <URL>http://www.backports.org/debian</URL>
+    <Version>lenny-backports</Version>
+    <Component>main</Component>
+    <Component>contrib</Component>
+    <Component>non-free</Component>
+    <Arch>amd64</Arch>
+    <Arch>i386</Arch>
+  </APTSource>
+  <APTSource>
+    <Group>debian</Group>
+    <URL>http://packages.dotdeb.org</URL>
+    <Version>stable</Version>
+    <Component>all</Component>
+    <Arch>amd64</Arch>
+    <Arch>i386</Arch>
+  </APTSource>
+  <APTSource>
+    <Group>debian</Group>
+    <URL>http://debian.bcfg2.org</URL>
+    <Version>lenny</Version>
+    <Component>testing</Component>
+    <Arch>amd64</Arch>
+    <Arch>i386</Arch>
+  </APTSource>
+
+  -->
+
 </Sources>
