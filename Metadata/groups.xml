@@ -1,12 +1,12 @@
 <Groups version='3.0'>
 
-  <!--Ubuntu on AWS-->
+  <!--Mercury on AWS-->
   <Group profile='true' public='true' name='mercury-aws'>
     <Group name='mercury'/>
     <Group name='amazon-web-services'/>
   </Group>
   
-  <!--Ubuntu on Rackspace/Linode-->
+  <!--Mercury on Rackspace/Linode-->
   <Group profile='true' public='true' default='true' name='mercury-vps'>
     <Group name='mercury'/>
     <Group name='vps'/>
@@ -27,9 +27,6 @@
   </Group>
   <Group name='debian'>
     <Bundle name='debian-lenny'/>
-  </Group>
-  <Group name='debian'>
-    <Bundle name='debian-squeeze'/>
   </Group>
 
   <!-- pantheon server types -->
