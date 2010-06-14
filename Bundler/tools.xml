@@ -13,7 +13,11 @@
   <!-- Ubuntu/Deb Only -->
   <Group name='deb'>
     <Service name='vnstat'/>
-    <Action name='restart_apparmor'/>
+
+    <!-- AWS Only -->
+    <Group name='amazon-web-services'>
+      <Action name='restart_apparmor'/>
+    </Group>
   </Group>
 
   <!-- CentOS Only -->
