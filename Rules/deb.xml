@@ -38,15 +38,14 @@
     <Service type='deb' status='on' name='bootlogs.sh'/>
     <Service type='deb' status='on' name='bootlogd'/>
     <Service type='deb' status='on' name='dns-clean'/>
-    <Service type='deb' status='on' name='killprocs'/>
+    <Service type='deb' status='on' name='killprocs' mode='manual'/>
     <Service type='deb' status='on' name='klogd'/>
-    <Service type='deb' status='on' name='ondemand'/>
-    <Service type='deb' status='on' name='postfix'/>
+    <Service type='deb' status='on' name='ondemand' mode='manual'/>
     <Service type='deb' status='on' name='pppd-dns'/>
-    <Service type='deb' status='on' name='rc.local'/>
+    <Service type='deb' status='on' name='rc.local' mode='manual'/>
     <Service type='deb' status='on' name='rmnologin'/>
     <Service type='deb' status='on' name='rsync'/>
-    <Service type='deb' status='on' name='single'/>
+    <Service type='deb' status='on' name='single' mode='manual'/>
     <Service type='deb' status='on' name='sysklogd'/>
   
     <!-- varnish -->
@@ -124,7 +123,11 @@
     <!-- ACTIONS -->
     <Action timing='post' when='always' name='clear_ib_logfiles' command='bash /var/lib/bcfg2/Probes/innodb_log_file_size' status='ignore'/>
     <Action timing='post' when='always' name='vnstat_db_eth0' command='vnstat -u -i eth0' status='ignore'/>
-    <Action timing='post' when='always' name='restart_apparmor' command='service apparmor restart' status='ignore'/>
+    
+    <!-- AWS Only -->
+    <Group name='amazon-web-services'>
+      <Action timing='post' when='always' name='restart_apparmor' command='service apparmor restart' status='ignore'/>
+    </Group>
 
     <!-- PATHS -->
     <Path name="/etc/apache2/mods-enabled/expires.load" type="symlink" to='/etc/apache2/mods-available/expires.load'/>
