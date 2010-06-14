@@ -221,7 +221,6 @@
     <Package name='dump'/>
     <Package name='eject'/>
     <Package name='fbset'/>
-    <Package name='finder'/>
     <Package name='finger'/>
     <Package name='firstboot-tui'/>
     <Package name='flex'/>
