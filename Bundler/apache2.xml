@@ -3,6 +3,12 @@
   <!-- Ubuntu only -->
   <Group name='ubuntu'>
     <Package name='apache2.2-bin'/>
+    <Package name='libaprutil1-dbd-sqlite3'/>
+  </Group>
+
+  <!-- Debian only -->
+  <Group name='debian'>
+    <Package name='libaprutil1'/>
   </Group>
 
   <!-- Ubuntu/Debian only -->
@@ -11,7 +17,6 @@
     <Package name='apache2-mpm-prefork'/>
     <Package name='apache2-utils'/>
     <Package name='libapache2-mod-php5'/>
-    <Package name='libaprutil1-dbd-sqlite3'/>
     <Path name='/etc/apache2/apache2.conf' altsrc='/apache2/conf'/>
     <Path name='/etc/apache2/mods-enabled/expires.load'/>
     <Path name='/etc/apache2/mods-enabled/rewrite.load'/>
