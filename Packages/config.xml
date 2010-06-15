@@ -179,14 +179,6 @@
   </APTSource>
   <APTSource>
     <Group>debian</Group>
-    <URL>http://packages.dotdeb.org</URL>
-    <Version>stable</Version>
-    <Component>all</Component>
-    <Arch>amd64</Arch>
-    <Arch>i386</Arch>
-  </APTSource>
-  <APTSource>
-    <Group>debian</Group>
     <URL>http://debian.bcfg2.org</URL>
     <Version>lenny</Version>
     <Component>testing</Component>
