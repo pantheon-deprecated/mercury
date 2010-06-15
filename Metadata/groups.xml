@@ -25,7 +25,7 @@
   <Group name='centos5'>
     <Bundle name='centos5'/>
   </Group>
-  <Group name='lenny'>
+  <Group name='debian'>
     <Bundle name='debian-lenny'/>
   </Group>
 
