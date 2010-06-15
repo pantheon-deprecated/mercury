@@ -12,9 +12,9 @@ if [[ -z "$INNODB_LOG_FILE_SIZE" ]]; then
 fi
 
 if [[ -a /var/lib/mysql/ib_logfile0 && ( `stat -c '%s' /var/lib/mysql/ib_logfile0` -ne "$INNODB_LOG_FILE_SIZE" ) ]]; then
-    service mysql stop >/dev/null
+    /etc/init.d/mysql stop >/dev/null
     rm /var/lib/mysql/ib_logfile* >/dev/null
-    service mysql start >/dev/null
+    /etc/init.d/mysql start >/dev/null
 fi
 
 echo "$INNODB_LOG_FILE_SIZE"

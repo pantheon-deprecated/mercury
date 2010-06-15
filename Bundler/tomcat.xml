@@ -16,9 +16,6 @@
 
   <!-- Debian Only -->
   <Group name='deb'>
-    <Package name='default-jre'/>
-    <Package name='default-jre-headless'/>
-    <Package name='ttf-dejavu-core'/>
     <Package name='tomcat5.5'/>
     <Path name='/etc/default/tomcat6' altsrc='/tomcat/conf'/>
     <Path name='/etc/tomcat5.5/Catalina/localhost/default.xml' altsrc='/tomcat/solr'/>
