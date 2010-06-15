@@ -10,8 +10,8 @@
 
   <Action name='vnstat_db_eth0'/>
 
-  <!-- Ubuntu/Deb Only -->
-  <Group name='deb'>
+  <!-- Ubuntu Only -->
+  <Group name='ubuntu'>
     <Service name='vnstat'/>
 
     <!-- AWS Only -->

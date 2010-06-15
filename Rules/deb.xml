@@ -1,5 +1,12 @@
 <Rules priority='1'>
 
+  <Group name='ubuntu'>
+    
+    <!-- mercury -->
+    <Service type='deb' status='on' name='vnstat'/>
+
+  </Group>    
+
   <Group name='deb'>
 
     <!-- All DEB VERSION SERVICES -->
@@ -23,9 +30,6 @@
   
     <!-- memcached -->
     <Service type='deb' status='on' name='memcached'/>
-  
-    <!-- mercury -->
-    <Service type='deb' status='on' name='vnstat'/>
   
     <!-- postfix -->
     <Service type='deb' status='on' name='postfix'/>
