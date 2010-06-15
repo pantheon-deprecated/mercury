@@ -1,7 +1,7 @@
 <Bundle name='tomcat'>
   
-  <!-- Ubuntu/Deb Only -->
-  <Group name='deb'>
+  <!-- Ubuntu Only -->
+  <Group name='ubuntu'>
     <Package name='default-jre'/>
     <Package name='default-jre-headless'/>
     <Package name='icedtea-6-jre-cacao'/>
@@ -12,6 +12,18 @@
     <Path name='/etc/tomcat6/Catalina/localhost/default.xml' altsrc='/tomcat/solr'/>
     <Path name='/etc/tomcat6/server.xml' altsrc='/tomcat/server'/>
     <Service name='tomcat6'/>
+  </Group>
+
+  <!-- Debian Only -->
+  <Group name='deb'>
+    <Package name='default-jre'/>
+    <Package name='default-jre-headless'/>
+    <Package name='ttf-dejavu-core'/>
+    <Package name='tomcat5.5'/>
+    <Path name='/etc/default/tomcat6' altsrc='/tomcat/conf'/>
+    <Path name='/etc/tomcat5.5/Catalina/localhost/default.xml' altsrc='/tomcat/solr'/>
+    <Path name='/etc/tomcat5.5/server.xml' altsrc='/tomcat/server'/>
+    <Service name='tomcat5.5'/>
   </Group>
 
   <!-- CentOS Only -->

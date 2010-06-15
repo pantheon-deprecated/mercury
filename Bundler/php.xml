@@ -1,10 +1,14 @@
 <Bundle name='php'>
 
+  <!-- Ubuntu Only -->
+  <Group name='ubuntu'>
+    <Package name='libdb4.7'/>
+  </Group>
+
   <!-- Ubuntu/Deb Only -->
   <Group name='deb'>
     <Package name='autoconf2.13'/>
     <Package name='automake1.4'/>
-    <Package name='libdb4.7'/>
     <Package name='php5'/>
     <Package name='php5-cli'/>
     <Package name='php5-curl'/>

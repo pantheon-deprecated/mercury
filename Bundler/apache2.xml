@@ -1,11 +1,15 @@
 <Bundle name='apache2'>
 
+  <!-- Ubuntu only -->
+  <Group name='ubuntu'>
+    <Package name='apache2.2-bin'/>
+  </Group>
+
   <!-- Ubuntu/Debian only -->
   <Group name='deb'>
     <Package name='apache2'/>
     <Package name='apache2-mpm-prefork'/>
     <Package name='apache2-utils'/>
-    <Package name='apache2.2-bin'/>
     <Package name='libapache2-mod-php5'/>
     <Package name='libaprutil1-dbd-sqlite3'/>
     <Path name='/etc/apache2/apache2.conf' altsrc='/apache2/conf'/>
