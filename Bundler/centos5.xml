@@ -1,4 +1,4 @@
-<Bundle name='centos'>
+<Bundle name='centos5'>
 
   <Group name='amazon-web-services' negate='true'>
     <Package name='libselinux'/>

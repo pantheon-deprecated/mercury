@@ -31,9 +31,11 @@ elif [ -e /etc/redhat-release ]; then
     OUTPUT=$OUTPUT'\n'`echo group:rpm`
     OS_GROUP=`cat /etc/redhat-release | cut -d' ' -f1 | tr '[A-Z]' '[a-z]'`
     REDHAT_VERSION=`cat /etc/redhat-release | cut -d' ' -f3`
+    MAJOR_REDHAT_VERSION=${REDHAT_VERSION:0:1}
     case "$OS_GROUP" in
         "centos" | "fedora")
         OUTPUT=$OUTPUT'\n'`echo group:$OS_GROUP`
+        OUTPUT=$OUTPUT'\n'`echo group:$OS_GROUP$MAJOR_REDHAT_VERSION`
         OUTPUT=$OUTPUT'\n'`echo group:$OS_GROUP$REDHAT_VERSION`
         ;;
     esac

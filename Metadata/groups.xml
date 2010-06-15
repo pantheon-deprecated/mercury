@@ -22,10 +22,10 @@
   <Group name='lucid'>
     <Bundle name='ubuntu-lucid'/>
   </Group>
-  <Group name='centos'>
-    <Bundle name='centos'/>
+  <Group name='centos5'>
+    <Bundle name='centos5'/>
   </Group>
-  <Group name='debian'>
+  <Group name='lenny'>
     <Bundle name='debian-lenny'/>
   </Group>
 
