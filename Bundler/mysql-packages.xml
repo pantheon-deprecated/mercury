@@ -1,5 +1,13 @@
 <Bundle name='mysql-packages'>
 
+  <!-- Debian Only -->
+  <Group name='debian'>
+    <Package name='mysql-client-5.1'/>
+    <Package name='mysql-server-5.1'/>
+    <Package name='mysql-server-core-5.1'/>
+  </Group>
+
+
   <!-- Ubuntu/Deb Only -->
   <Group name='deb'>
     <Package name='mysql-client'/>

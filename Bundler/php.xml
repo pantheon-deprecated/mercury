@@ -5,6 +5,11 @@
     <Package name='libdb4.7'/>
   </Group>
 
+  <!-- Debian Only -->
+  <Group name='debian'>
+    <Package name='gcc-4.2-base'/>
+  </Group>
+
   <!-- Ubuntu/Deb Only -->
   <Group name='deb'>
     <Package name='autoconf2.13'/>

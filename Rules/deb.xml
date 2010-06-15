@@ -1,11 +1,28 @@
 <Rules priority='1'>
 
+  <!-- Ubuntu Only -->
   <Group name='ubuntu'>
     
     <!-- mercury -->
     <Service type='deb' status='on' name='vnstat'/>
 
+    <!-- tomcat6 -->
+    <Service type='deb' status='on' name='tomcat6'/>
+  
   </Group>    
+
+  <!-- Debian Only -->
+  <Group name='debian'>
+
+    <!-- debian -->
+    <Service type='deb' status='on' name='ssh'/>
+    <Service type='deb' status='on' name='stop-bootlogd'/>
+
+    <!-- tomcat6 -->
+    <Service type='deb' status='on' name='tomcat5.5'/>
+
+  </Group>
+
 
   <Group name='deb'>
 
@@ -33,9 +50,6 @@
   
     <!-- postfix -->
     <Service type='deb' status='on' name='postfix'/>
-  
-    <!-- tomcat6 -->
-    <Service type='deb' status='on' name='tomcat6'/>
   
     <!-- ubuntu -->
     <Service type='deb' status='on' name='atd'/>

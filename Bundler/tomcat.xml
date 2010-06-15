@@ -16,7 +16,14 @@
 
   <!-- Debian Only -->
   <Group name='deb'>
+    <Package name='esound-common'/>
+    <Package name='kaffe'/>
+    <Package name='kaffe-common'/>
+    <Package name='kaffe-pthreads'/>
     <Package name='tomcat5.5'/>
+    <Package name='ttf-dejavu'/>
+    <Package name='ttf-dejavu-core'/>
+    <Package name='ttf-dejavu-extra'/>
     <Path name='/etc/default/tomcat6' altsrc='/tomcat/conf'/>
     <Path name='/etc/tomcat5.5/Catalina/localhost/default.xml' altsrc='/tomcat/solr'/>
     <Path name='/etc/tomcat5.5/server.xml' altsrc='/tomcat/server'/>
