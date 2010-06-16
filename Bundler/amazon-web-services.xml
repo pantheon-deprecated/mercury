@@ -5,14 +5,25 @@
   <BoundPath name='/mnt/varnish' type='directory' owner='varnish' group='varnish' perms='0755'/>
   <Path name='/etc/mercury/boot.d/S050ec2.sh' altsrc='/mercury/S050ec2.sh'/>
   
-  <!-- Ubuntu/Deb Only -->
+
+  <!-- Ubuntu/Dev Only -->
   <Group name='deb'>
+    <Package name='alien'/>
+    <Package name='python-m2crypto'/>
+    <Package name='python-pkg-resources'/>
+    <Package name='rpm'/>
+    <Package name='rsync'/>
+    <Path name='/usr/local/bin/ec2-metadata'/>
+    <Service name='rsync'/>
+  </Group>
+
+  <!-- Ubuntu Only -->
+  <Group name='ubuntu'>
     
     <Group name='i386'>
       <Package name='libc6-xen'/>
     </Group>
     
-    <Package name='alien'/>
     <Package name='apparmor'/>
     <Package name='apparmor-utils'/>
     <Package name='apport'/>
@@ -139,13 +150,11 @@
     <Package name='python-launchpadlib'/>
     <Package name='python-lazr.restfulclient'/>
     <Package name='python-lazr.uri'/>
-    <Package name='python-m2crypto'/>
     <Package name='python-newt'/>
     <Package name='python-oauth'/>
     <Package name='python-openssl'/>
     <Package name='python-pam'/>
     <Package name='python-pexpect'/>
-    <Package name='python-pkg-resources'/>
     <Package name='python-problem-report'/>
     <Package name='python-pycurl'/>
     <Package name='python-serial'/>
@@ -160,8 +169,6 @@
     <Package name='python-yaml'/>
     <Package name='python-zope.interface'/>
     <Package name='radeontool'/>
-    <Package name='rpm'/>
-    <Package name='rsync'/>
     <Package name='runurl'/>
     <Package name='smartdimmer'/>
     <Package name='ssh-import'/>
@@ -184,12 +191,10 @@
     <Package name='wpasupplicant'/>
     <Package name='xfsprogs'/>
     <Package name='xz-utils'/>
-    <Path name='/usr/local/bin/ec2-metadata'/>
     <Service name='dns-clean'/>
     <Service name='grub-common'/>
     <Service name='landscape-client'/>
     <Service name='pppd-dns'/>
-    <Service name='rsync'/>
   </Group>
      
   <!-- CentOS Only -->
