@@ -1,11 +1,12 @@
 <Bundle name='debian-lenny'>
+  <Package name='base-passwd'/>
   <Package name='bash'/>
-  <Package name='bash-completion'/>
   <Package name='bsdmainutils'/>
   <Package name='cron'/>
   <Package name='curl'/>
   <Package name='debconf-i18n'/>
   <Package name='dhcp3-client'/>
+  <Package name='dhcp3-common'/>
   <Package name='diff'/>
   <Package name='dmidecode'/>
   <Package name='e2fslibs'/>
@@ -42,6 +43,7 @@
   <Package name='sysv-rc'/>
   <Package name='tar'/>
   <Package name='tasksel'/>
+  <Package name='tasksel-data'/>
   <Package name='tcpd'/>
   <Package name='traceroute'>
   <Package name='udev'/>

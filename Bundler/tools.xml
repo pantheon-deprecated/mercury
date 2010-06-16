@@ -10,6 +10,11 @@
 
   <Action name='vnstat_db_eth0'/>
 
+  <!-- Debian Only -->
+  <Group name='debian'>
+    <Service name='info'/>
+  </Group>
+
   <!-- Ubuntu Only -->
   <Group name='ubuntu'>
     <Service name='vnstat'/>

@@ -16,10 +16,21 @@
 
   <!-- Debian Only -->
   <Group name='deb'>
+    <Package name='default-jdk'/>
+    <Package name='default-jre'/>
+    <Package name='default-jre-headless'/>
+    <Package name='ecj'/>
+    <Package name='ecj-gcj'/>
     <Package name='esound-common'/>
+    <Package name='gappletviewer-4.3'/>
+    <Package name='gcj-4.3'/>
+    <Package name='gij-4.3'/>
+    <Package name='gzip'/>
     <Package name='kaffe'/>
     <Package name='kaffe-common'/>
     <Package name='kaffe-pthreads'/>
+    <Package name='java-gcj-compat'/>
+    <Package name='java-gcj-compat-headless'/>
     <Package name='tomcat5.5'/>
     <Package name='ttf-dejavu'/>
     <Package name='ttf-dejavu-core'/>

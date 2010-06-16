@@ -33,7 +33,6 @@
   <Group name='mercury'>
     <Bundle name='bcfg2'/>
     <Bundle name='apache2'/>
-    <Bundle name='cacti-client'/>
     <Bundle name='php'/>
     <Bundle name='memcached'/>
     <Bundle name='tools'/>
