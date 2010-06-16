@@ -27,7 +27,6 @@ echo "Please Wait: BCFG2 is loading packages and config files";
 sleep 60
 
 # Process updates!
-bcfg2-admin xcmd Packages.Refresh
 bcfg2 -vqe
 
 #get ready for possiby changing the mysql and varnish storage paths 
@@ -41,7 +40,7 @@ done
 #making sure varnish and mysql get restarted...
 /etc/init.d/mysql start
 /etc/init.d/varnish start
-/etc/init.d/tomcat6 restart
+/etc/init.d/tomcat5.5 restart
 
 echo "create database pantheon;" | mysql -u root
 
