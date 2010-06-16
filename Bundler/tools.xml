@@ -12,7 +12,7 @@
 
   <!-- Debian Only -->
   <Group name='debian'>
-    <Service name='info'/>
+    <Package name='info'/>
   </Group>
 
   <!-- Ubuntu Only -->
