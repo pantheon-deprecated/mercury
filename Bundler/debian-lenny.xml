@@ -45,7 +45,7 @@
   <Package name='tasksel'/>
   <Package name='tasksel-data'/>
   <Package name='tcpd'/>
-  <Package name='traceroute'>
+  <Package name='traceroute'/>
   <Package name='udev'/>
   <Package name='update-inetd'/>
   <Package name='util-linux'/>
