@@ -15,7 +15,7 @@
   </Group>
 
   <!-- Debian Only -->
-  <Group name='deb'>
+  <Group name='debian'>
     <Package name='default-jdk'/>
     <Package name='default-jre'/>
     <Package name='default-jre-headless'/>
