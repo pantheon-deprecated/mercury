@@ -5,7 +5,7 @@
    <Path name='/etc/mercury/boot.d/S100main.sh' altsrc='/mercury/S100main.sh'/>
    <Path name='/etc/mercury/templates/cron' altsrc='/mercury/cron'/>
    <Path name='/etc/mercury/templates/tuneables' altsrc='/mercury/tuneables'/>
-   <Path name='/etc/mercury/mercury.make' altsrc='/root/mercury.make'/>
+   <Path name='/etc/mercury/mercury.make'/>
 
    <!-- AWS Only -->
    <Group name='amazon-web-services'>      
