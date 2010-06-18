@@ -45,7 +45,7 @@ sub vcl_recv {
   // Normalize the Accept-Encoding header
   // as per: http://varnish-cache.org/wiki/FAQ/Compression
   if (req.http.Accept-Encoding) {
-    if (req.url ~ "\.(jpg|png|gif|gz|tgz|bz2|tbz|mp3|ogg)$$") {
+    if (req.url ~ "\.(jpg|png|gif|gz|tgz|bz2|tbz|mp3|ogg)$$" || req.url ~ "robots\.txt") {
       # No point in compressing these           
       remove req.http.Accept-Encoding;
     } elsif (req.http.Accept-Encoding ~ "gzip") {
