@@ -1,7 +1,7 @@
 <Bundle name='varnish'>
 
   <Package name='varnish'/>
-  <Path name='/etc/varnish/default.vcl' altsrc='/varnish/vlc'/>
+  <Path name='/etc/varnish/default.vcl' altsrc='/varnish/vcl'/>
   <Service name='varnish'/>
   <Service name='varnishlog'/>
   <Service name='varnishncsa'/>
