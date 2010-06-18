@@ -7,10 +7,12 @@
    <Path name='/etc/mercury/templates/tuneables' altsrc='/mercury/tuneables'/>
    <Path name='/etc/mercury/mercury.make'/>
 
-   <!-- AWS Only -->
-   <Group name='amazon-web-services'>      
-     <Path name='/home/ubuntu/CHANGELOG.txt' altsrc='/root/CHANGELOG.txt'/>
-     <Path name='/home/ubuntu/README.txt' altsrc='/root/README.txt'/>
+   <!-- Lucid on AWS Only -->
+   <Group name='lucid'>
+     <Group name='amazon-web-services'>      
+       <BoundPath name='/home/ubuntu/CHANGELOG.txt' altsrc='/root/CHANGELOG.txt' type='file' owner='ubuntu' group='ubuntu' perms='660'/>
+       <BoundPath name='/home/ubuntu/README.txt' altsrc='/root/README.txt' type='file' owner='ubuntu' group='ubuntu' perms='660'/>
+     </Group>
    </Group>
   
    <!-- VPS (Generic Host) -->
