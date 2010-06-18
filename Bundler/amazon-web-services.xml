@@ -6,7 +6,7 @@
   <Path name='/etc/mercury/boot.d/S050ec2.sh' altsrc='/mercury/S050ec2.sh'/>
   
 
-  <!-- Ubuntu/Dev Only -->
+  <!-- Ubuntu/Deb Only -->
   <Group name='deb'>
     <Package name='alien'/>
     <Package name='python-m2crypto'/>
@@ -120,7 +120,6 @@
     <Package name='lshw'/>
     <Package name='lsof'/>
     <Package name='ltrace'/>
-    <Package name='make'/>
     <Package name='memtest86+'/>
     <Package name='mlocate'/>
     <Package name='mtr-tiny'/>

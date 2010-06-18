@@ -22,6 +22,7 @@
   <Package name='login'/>
   <Package name='logrotate'/>
   <Package name='man-db'/>  
+  <Package name='make'/>
   <Package name='manpages'/>
   <Package name='mountall'/>
   <Package name='nano'/>
@@ -33,6 +34,7 @@
   <Package name='vim'/>
   <Package name='xauth'/>
   <Package name='xml-core'/>
+  <Package name='wget'/>
   <Path name='/etc/apparmor.d/usr.sbin.mysqld' altsrc='/mysql/apparmor'/>
   <Service name='bootlogd'/>
   <Service name='console-setup'/>
