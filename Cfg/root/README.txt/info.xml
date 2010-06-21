@@ -1,0 +1,9 @@
+<FileInfo>
+   <!-- AWS Only -->
+   <Group name='amazon-web-services'>
+     <!-- Lucid -->
+     <Group name='lucid'>
+       <Info owner='ubuntu' group='ubuntu' perms='0600'/>
+     </Group>
+   </Group>
+</FileInfo>
