@@ -1,0 +1,6 @@
+<Bundle name='hudson'>
+  <!--Ubuntu Only -->
+  <Group name='ubuntu'>
+    <Package name='hudson'/>
+  </Group>
+</Bundle>
