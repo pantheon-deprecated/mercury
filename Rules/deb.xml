@@ -9,6 +9,9 @@
     <!-- tomcat6 -->
     <Service type='deb' status='on' name='tomcat6'/>
   
+    <!-- hudson -->
+    <Service type='deb' status='on' name='hudson'/>
+  
   </Group>    
 
   <!-- Debian Only -->
