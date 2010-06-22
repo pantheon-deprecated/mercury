@@ -1,0 +1,55 @@
+{% python
+  # assign tomcat service version
+  if "centos" in metadata.groups:
+      tomcat = 'tomcat5'
+  elif "debian" in metadata.groups: 
+      tomcat = 'tomcat5.5'
+  else:
+      tomcat = 'tomcat6'
+%}\
+#!/bin/bash
+
+# exit on any error or any pipeline command error
+set -e
+set -o pipefail
+
+echo "Starting Mercury init"
+
+# These scripts run once on first boot.
+if [ -e /etc/mercury/incep ]; then
+    echo "Mercury init has already run. Exiting."
+    exit 1
+fi
+
+# Get any Mercury/Pressflow updates.
+bash /usr/local/bin/update_mercury.sh --headless 
+bash /usr/local/bin/update_pressflow.sh --headless
+
+# Run any other startup scripts
+for script in $$( ls /etc/mercury/boot.d/S* ) ; do
+  bash $$script $$*
+done
+
+# Restart tomcat (pick up any ApacheSolr changes)
+/etc/init.d/${tomcat} restart
+
+# Create database
+echo "create database pantheon;" | mysql -u root
+
+# Mark incep date. This prevents us from ever running again.
+echo `date` > /etc/mercury/incep
+
+echo '
+
+##############################
+#   Mercury Setup Complete!  #
+##############################
+
+'
+
+echo '
+DEAR SYSADMIN: MERCURY IS READY FOR YOU NOW
+
+Do not forget the README.txt, CHANGELOG.txt and docs!
+'| wall
+

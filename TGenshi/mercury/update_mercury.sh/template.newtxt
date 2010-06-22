@@ -1,25 +1,50 @@
 #!/bin/bash
 
-#This script updates the /var/lib/bcfg2 rom the pantheon project on launchpad and runs bcfg2 to apply the updates
+#This script updates /var/lib/bcfg2 from the pantheon project on launchpad and runs bcfg2 to apply the updates
 
-echo "This script updates the /var/lib/bcfg2 from the pantheon project on launchpad and runs bcfg2 to apply the updates"
-echo -n "Continue? (y/n)"
+# exit on any error or any pipeline command error
+set -e
+set -o pipefail
 
-read ANSWER
-echo ""
-if [[ $${ANSWER} != "y" ]]; then
-    echo "Cancelling....."
-    exit 1
+echo "Starting Mercury Update Script"
+
+# --headless assumes this script is not being run by hand (but rather in hudson or through another script)
+if [[ "--headless" != $$1 ]]; then
+  echo "This script updates the /var/lib/bcfg2 from the pantheon project on launchpad and runs bcfg2 to apply the updates"
+  echo -n "Continue? (y/n)"
+
+  read ANSWER
+  echo ""
+  if [[ $${ANSWER} != "y" ]]; then
+      echo "Cancelling....."
+      exit 1
+  fi
+  echo "Creating a log of the output of this script at /etc/mercury/logs/update_mercury.log"
+  exec &> /etc/mercury/logs/update_mercury.log
 fi
 
-# Create a log of all output we run.
-echo "Creating a log of the output of this script at /root/update_mercury.log"
-exec &> /root/update_mercury.log
+# Stop BCFG2 Server
+/etc/init.d/bcfg2-server stop
 
 #get any updates
-cd /var/lib/bcfg2; bzr ci -m "updates automatically commited by update_mercury.sh"; bzr pull --overwrite; bzr commit -m "changes from Launchpad downloaded";
+cd /var/lib/bcfg2; bzr commit --unchanged -m "updates automatically commited by update_mercury.sh"; bzr pull --overwrite; bzr commit --unchanged -m "changes from Launchpad downloaded";
+
+# Start BCFG2 Server
+/etc/init.d/bcfg2-server start
+
+# Wait for BCGF2 to spin up.
+while [ -z "$$(netstat -atn | grep :6789)" ]; do
+    sleep 5
+done
+
+#a little more time...
+echo "Please Wait: BCFG2 is loading packages and config files";
+sleep 60
+
+# Update Packages cache
+bcfg2-admin xcmd Packages.Refresh
 
 #process updates:
 bcfg2 -vq
 
-echo "done!"
+echo "Mercury Update Complete!"

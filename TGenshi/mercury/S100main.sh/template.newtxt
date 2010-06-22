@@ -2,6 +2,8 @@
 
 # Main/Global Boot Script
 
+echo "Starting Main Mercury Boot Script"
+
 # Copy template to root, rename and make executable
 cp /etc/mercury/templates/tuneables /etc/mercury/server_tuneables
 chmod 755 /etc/mercury/server_tuneables
@@ -21,6 +23,13 @@ postconf -e "myhostname = $${REAL_HOSTNAME}"
 postconf -e "mydomain = $${REAL_HOSTNAME}"
 postconf -e "mydestination = $${REAL_HOSTNAME}, localhost"
 /etc/init.d/postfix restart
+
+{% if "centos" in metadata.groups %}\
+# Configure iptables
+/sbin/iptables-restore < /etc/mercury/templates/iptables
+/sbin/service iptables save
+/etc/init.d/iptables stop
+{% end %}\
 
 # Phone home - helps us to know how many users there are without passing any 
 # identifying or personal information to us.
