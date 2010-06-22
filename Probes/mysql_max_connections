@@ -11,13 +11,13 @@ RAM=`grep MemTotal /proc/meminfo | sed 's/[^0-9]*//g'`
 if [[ -n "$MYSQL_MAX_CONNECTIONS" ]]; then
    echo "$MYSQL_MAX_CONNECTIONS"
 elif (($RAM>=8000000)); then
-    echo "155"
+    echo "120"
 elif (($RAM>=4000000)); then
-    echo "80"
+    echo "60"
 elif (($RAM>=2000000)); then
-    echo "42"
+    echo "30"
 elif (($RAM>=1000000)); then
-    echo "23"
+    echo "20"
 else
-    echo "15"
+    echo "10"
 fi

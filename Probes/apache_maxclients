@@ -11,13 +11,13 @@ RAM=`grep MemTotal /proc/meminfo | sed 's/[^0-9]*//g'`
 if [[ -n "$APACHE_MAXCLIENTS" ]]; then
    echo "$APACHE_MAXCLIENTS"
 elif (($RAM>=8000000)); then
-    echo "150"
+    echo "80"
 elif (($RAM>=4000000)); then
-    echo "75"
+    echo "40"
 elif (($RAM>=2000000)); then
-    echo "37"
+    echo "20"
 elif (($RAM>=1000000)); then
-    echo "18"
-else
     echo "10"
+else
+    echo "5"
 fi

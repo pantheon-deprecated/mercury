@@ -12,9 +12,6 @@ if [[ -n "$APC_MEMORY" ]]; then
    echo "$APC_MEMORY"
 elif (($RAM>=2000000)); then
     echo "128"
-elif (($RAM>=1000000)); then
-    echo "96"
 else
-    echo "64"
+    echo "96"
 fi
-

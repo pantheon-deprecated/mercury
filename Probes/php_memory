@@ -10,11 +10,7 @@ RAM=`grep MemTotal /proc/meminfo | sed 's/[^0-9]*//g'`
 
 if [[ -n "$PHP_MEMORY" ]]; then
    echo "$PHP_MEMORY"
-elif (($RAM>=2000000)); then
-    echo "512"
-elif (($RAM>=1000000)); then
-    echo "256"
 else
-    echo "128"
+    echo "96"
 fi
 
