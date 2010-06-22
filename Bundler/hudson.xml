@@ -1,11 +1,15 @@
 <Bundle name='hudson'>
+
+  <!-- All Distros -->
+  <Package name='hudson'/>
+  <Service name='hudson'/>
+
   <!--Ubuntu Only -->
   <Group name='ubuntu'>
     <Package name='daemon'/>
     <Package name='gcj-4.4-base'/>
     <Package name='gcj-4.4-jre-headless'/>
     <Package name='libgcj10'/>
-    <Package name='hudson'/>
-    <Service name='hudson'/>
   </Group>
+  
 </Bundle>

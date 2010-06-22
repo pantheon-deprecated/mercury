@@ -49,6 +49,9 @@
     <!-- Httpd -->
     <Service type='chkconfig' status='on' name='httpd'/>
 
+    <!-- Hudson -->
+    <Service type='chkconfig' status='on' name='hudson'/>
+
     <!-- Memcached -->
     <Service type='chkconfig' status='on' name='memcached'/>
 
