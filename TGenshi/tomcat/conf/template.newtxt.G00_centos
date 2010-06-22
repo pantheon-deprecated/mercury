@@ -28,7 +28,7 @@ JAVA_ENDORSED_DIRS="/usr/share/tomcat5/common/endorsed"
 # for ExtensionValidator to be functional. 
 #JAVA_OPTS="$$JAVA_OPTS -Dcatalina.ext.dirs=$$CATALINA_HOME/shared/lib:$$CATALINA_HOME/common/lib"
 
-JAVA_OPTS="-Djava.awt.headless=true -Xmx${metadata.Probes['tomcat_memory']}"
+JAVA_OPTS="-Djava.awt.headless=true -Xmx${metadata.Probes['tomcat_memory']}m"
 
 # What user should run tomcat
 TOMCAT_USER="tomcat"
