@@ -3,6 +3,7 @@
   <!-- All Distros -->
   <Package name='hudson'/>
   <Service name='hudson'/>
+  <Path name='/var/lib/hudson/jobs/mercury_init/config.xml' altsrc='/hudson/jobs/mercury_init'/>
 
   <!--Ubuntu Only -->
   <Group name='ubuntu'>
