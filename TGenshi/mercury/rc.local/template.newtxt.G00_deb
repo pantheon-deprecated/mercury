@@ -12,6 +12,6 @@
 # By default this script does nothing.
 
 # run the mercury init script, if necessary
-/etc/mercury/init.sh
+/etc/mercury/init.sh 2>&1 | tee /etc/mercury/logs/init.log
 
 exit 0
