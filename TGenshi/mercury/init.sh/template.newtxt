@@ -33,6 +33,9 @@ done
 # Restart tomcat (pick up any ApacheSolr changes)
 /etc/init.d/${tomcat} restart
 
+# Restart Varnish
+/etc/init.d/varnish restart
+
 # Create database
 echo "create database pantheon;" | mysql -u root
 
