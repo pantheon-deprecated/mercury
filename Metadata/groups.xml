@@ -12,6 +12,13 @@
     <Group name='vps'/>
   </Group>
 
+  <!--Temporary Hudson Testing-->
+  <Group profile='true' public='true' name='hudson-test'>
+    <Group name='mercury'/>
+    <Group name='vps'/>
+    <Bundle name='hudson'/>
+  </Group>
+
   <!-- Operating systems -->
   <Group name='jaunty'> 
     <Bundle name='ubuntu-jaunty'/>
