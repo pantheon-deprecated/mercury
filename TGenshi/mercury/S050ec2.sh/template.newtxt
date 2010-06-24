@@ -20,21 +20,19 @@ chmod 1777 /tmp
 ${mysqlcmd} stop
 
 {% if "centos" in metadata.groups %}\
-
 # Make changes to MySQL
 mv /var/log/mysqld.log /mnt/mysql/
 ln -s /mnt/mysql/mysqld.log /var/log/mysqld.log
 mv /var/lib/mysql /mnt/mysql/lib
 ln -s /mnt/mysql/lib /var/lib/mysql
+{% end %}\
 
-{% else %}\
-
+{% if "centos" not in metadata.groups %}\
 # Make changes to Mysql:
 mv /var/log/mysql /mnt/mysql/log
 ln -s /mnt/mysql/log /var/log/mysql
 mv /var/lib/mysql /mnt/mysql/lib
 ln -s /mnt/mysql/lib /var/lib/mysql
-
 {% end %}\
 
 # start mysql
