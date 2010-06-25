@@ -19,9 +19,9 @@ else
 fi
 
 echo $$REAL_HOSTNAME > /etc/mailname
-postconf -e "myhostname = $${REAL_HOSTNAME}"
-postconf -e "mydomain = $${REAL_HOSTNAME}"
-postconf -e "mydestination = $${REAL_HOSTNAME}, localhost"
+/usr/sbin/postconf -e "myhostname = $${REAL_HOSTNAME}"
+/usr/sbin/postconf -e "mydomain = $${REAL_HOSTNAME}"
+/usr/sbin/postconf -e "mydestination = $${REAL_HOSTNAME}, localhost"
 /etc/init.d/postfix restart
 
 {% if "centos" in metadata.groups %}\
