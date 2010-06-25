@@ -2,10 +2,13 @@
   # assign tomcat service version
   if "centos" in metadata.groups:
       tomcat = 'tomcat5'
+      pmupdate = 'yum clean all; yum -y update'
   elif "debian" in metadata.groups: 
       tomcat = 'tomcat5.5'
-  else:
+      pmupdate = 'apt-get -y update; apt-get -y dist-upgrade'
+  elif "ubuntu" in metadata.groups:
       tomcat = 'tomcat6'
+      pmupdate = 'apt-get -y update; apt-get -y dist-upgrade'
 %}\
 #!/bin/bash
 
@@ -20,6 +23,9 @@ if [ -e /etc/mercury/incep ]; then
     echo "Mercury init has already run. Exiting."
     exit 1
 fi
+
+# Update Packages
+${pmupdate}
 
 # Get any Mercury/Pressflow updates.
 bash /usr/local/bin/update_mercury.sh --headless 
