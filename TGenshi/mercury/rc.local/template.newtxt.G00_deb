@@ -21,7 +21,7 @@ if [ ! -f /etc/mercury/incep ]; then
   done
 
   # Run the mercury_init Hudson build
-  java -jar /var/run/hudson/war/WEB-INF/hudson-cli.jar -s http://173.203.119.143:8080/ build mercury_init
+  java -jar /var/run/hudson/war/WEB-INF/hudson-cli.jar -s http://127.0.0.1:8080/ build mercury_init
 fi
 
 exit 0
