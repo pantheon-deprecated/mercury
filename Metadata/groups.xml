@@ -12,13 +12,6 @@
     <Group name='vps'/>
   </Group>
 
-  <!--Temporary Hudson Testing-->
-  <Group profile='true' public='true' name='hudson-test'>
-    <Group name='mercury'/>
-    <Group name='vps'/>
-    <Bundle name='hudson'/>
-  </Group>
-
   <!-- Operating systems -->
   <Group name='jaunty'> 
     <Bundle name='ubuntu-jaunty'/>
@@ -49,6 +42,7 @@
     <Bundle name='postfix'/>
     <Bundle name='tomcat'/>
     <Bundle name='varnish'/>
+    <Group name='hudson'/>
   </Group>
   
   <!-- hosting providers -->
@@ -57,6 +51,13 @@
   </Group>  
   <Group name='vps'>
     <Bundle name='vps'/>
+  </Group>
+
+  <!-- Hudson -->
+  <Group name='hudson'/>
+    <Bundle name='hudson-package'/>
+    <Bundle name='hudson-service'/>
+    <Bundle name='hudson-builds'/>
   </Group>
   
 </Groups>

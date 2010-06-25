@@ -11,7 +11,17 @@
 #
 # By default this script does nothing.
 
-# run the mercury init script, if necessary
-/etc/mercury/init.sh 2>&1 | tee /etc/mercury/logs/init.log
+
+# ADDED BY PANTHEON #
+
+if [ -e /etc/mercury/incep ]; then
+  # Wait for Hudson to spin Up
+  while [[ "`curl -sL --connect-timeout 1 -w "%{http_code}\\n" "127.0.0.1:8080" -o /dev/null`" != "200" ]]; do
+    sleep 5
+  done
+
+  # Run the mercury_init Hudson build
+  java -jar /var/run/hudson/war/WEB-INF/hudson-cli.jar -s http://173.203.119.143:8080/ build mercury_init
+fi
 
 exit 0

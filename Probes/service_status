@@ -11,4 +11,9 @@ if [[ -n "$IPTABLES_STATUS" && "$IPTABLES_STATUS" == ON ]]; then
   OUTPUT=$OUTPUT'\n'`echo group:service-iptables-on`
 fi
 
+# Hudson Status
+if [[ -n "$HUDSON_STATUS" && "$HUDSON_STATUS" == OFF ]]; then
+  OUTPUT=$OUTPUT'\n'`echo group:service-hudson-off`
+fi
+
 echo -e $OUTPUT

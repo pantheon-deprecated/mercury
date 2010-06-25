@@ -7,10 +7,17 @@
     <Group name='service-iptables-on'>
       <Service type='chkconfig' status='on' name='iptables'/>
     </Group>
+
   </Group>
 
   <!-- Ubuntu/Deb Only -->
   <Group name='deb'>
+
+    <!-- Hudson Override (OFF) -->
+    <Group name='service-hudson-off'>
+      <Service type='deb' status='off' name='hudson'/>
+    </Group>
+
   </Group>
 
 </Rules>
