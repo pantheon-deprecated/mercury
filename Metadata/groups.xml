@@ -54,7 +54,7 @@
   </Group>
 
   <!-- Hudson -->
-  <Group name='hudson'/>
+  <Group name='hudson'>
     <Bundle name='hudson-package'/>
     <Bundle name='hudson-service'/>
     <Bundle name='hudson-builds'/>
