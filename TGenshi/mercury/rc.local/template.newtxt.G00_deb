@@ -14,7 +14,7 @@
 
 # ADDED BY PANTHEON #
 
-if [ -e /etc/mercury/incep ]; then
+if [ ! -f /etc/mercury/incep ]; then
   # Wait for Hudson to spin Up
   while [[ "`curl -sL --connect-timeout 1 -w "%{http_code}\\n" "127.0.0.1:8080" -o /dev/null`" != "200" ]]; do
     sleep 5
