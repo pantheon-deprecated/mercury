@@ -1,0 +1,5 @@
+<Bundle name='hudson-service'>
+
+  <Service name='hudson'/>
+
+</Bundle>
