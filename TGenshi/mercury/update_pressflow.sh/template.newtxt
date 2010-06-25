@@ -30,6 +30,6 @@ if [[ "--headless" != $$1 ]]; then
 fi
 
 #get any updates
-cd ${webroot}; bzr commit --unchanged -m "updates automatically commited by update_pressflow.sh"; bzr pull --overwrite; bzr commit --unchanged -m "changes from pressflow repo downloaded";
+cd ${webroot}; bzr pull --overwrite;
 
 echo "Pressflow Update Complete!"
