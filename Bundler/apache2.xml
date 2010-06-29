@@ -22,7 +22,6 @@
     <Path name='/etc/apache2/mods-enabled/rewrite.load'/>
     <Path name='/etc/apache2/sites-enabled/000-default'/>
     <Path name='/etc/apache2/ports.conf' altsrc='/apache2/ports'/>
-    <Path name='/etc/apache2/sites-available/default' altsrc='/apache2/vhost'/>
     <Path name='/etc/apache2/conf.d/mercury' altsrc='/apache2/mercury'/>
     <Service name='apache2'/>
   </Group>
@@ -31,10 +30,11 @@
   <Group name='centos'>
     <Package name='httpd'/>
     <Path name='/etc/httpd/conf/httpd.conf' altsrc='/apache2/conf'/>
-    <Path name='/etc/httpd/conf/vhosts/default.conf' altsrc='/apache2/vhost'/>
     <Path name='/etc/httpd/conf.d/mercury.conf' altsrc='/apache2/mercury'/>
     <Service name='httpd'/>
   </Group>
+
+<Path name='/etc/mercury/templates/vhost' altsrc='/apache2/vhost'/>
 
 </Bundle>
 

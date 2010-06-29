@@ -8,6 +8,15 @@ echo "Starting Main Mercury Boot Script"
 cp /etc/mercury/templates/tuneables /etc/mercury/server_tuneables
 chmod 755 /etc/mercury/server_tuneables
 
+# moving vhost from bcfg2 control:
+{% if "deb" in metadata.groups %}\
+cp /etc/mercury/templates/vhost /etc/apache2/sites-available/default
+{% end %}\
+
+{% if "centos" in metadata.groups %}\
+cp /etc/mercury/templates/vhost /etc/httpd/conf/vhosts/default.conf
+{% end %}\
+
 # Setup cron:
 crontab /etc/mercury/templates/cron
 
