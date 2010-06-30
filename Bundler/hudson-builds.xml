@@ -5,15 +5,15 @@
 
   <!-- Ubuntu/Debian Only -->
   <Group name='deb'>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/mercury_init' owner='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs' owner='hudson' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/mercury_init' owner='hudson' perms='0755'/>
   </Group>
 
 
   <!-- Centos Only -->
   <Group name='centos'>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/mercury_init' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs' owner='hudson' group='hudson' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/mercury_init' owner='hudson' group='hudson' perms='0755'/>
   </Group>    
 
 </Bundle>
