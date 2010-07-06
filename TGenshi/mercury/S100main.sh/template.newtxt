@@ -4,7 +4,7 @@
 
 echo "Starting Main Mercury Boot Script"
 
-# Copy template to root, rename and make executable
+# Copy template, rename and make executable
 cp /etc/mercury/templates/tuneables /etc/mercury/server_tuneables
 chmod 755 /etc/mercury/server_tuneables
 
@@ -16,9 +16,6 @@ cp /etc/mercury/templates/vhost /etc/apache2/sites-available/default
 {% if "centos" in metadata.groups %}\
 cp /etc/mercury/templates/vhost /etc/httpd/conf/vhosts/default.conf
 {% end %}\
-
-# Setup cron:
-crontab /etc/mercury/templates/cron
 
 # Postfix
 if [[ -a /usr/local/bin/ec2-metadata ]]; then
