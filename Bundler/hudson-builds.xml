@@ -14,5 +14,6 @@
   </Group>    
   
   <Path name='/var/lib/hudson/jobs/mercury_init/config.xml' altsrc='/hudson/jobs/mercury_init/config.xml'/>
+  <Path name='/var/lib/hudson/jobs/mercury_cron/config.xml' altsrc='/hudson/jobs/mercury_cron/config.xml'/>
   
 </Bundle>
