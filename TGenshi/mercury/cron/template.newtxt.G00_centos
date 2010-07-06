@@ -1,2 +1,0 @@
-# m h  dom mon dow   command
-0 * * * * /usr/local/bin/drush -r /var/www/html cron

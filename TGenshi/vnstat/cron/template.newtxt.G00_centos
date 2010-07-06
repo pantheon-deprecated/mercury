@@ -1,3 +1,2 @@
 MAILTO=root
-# to enable interface monitoring via vnstat remove comment on next line
 */5 * * * *  vnstat /usr/sbin/vnstat.cron
