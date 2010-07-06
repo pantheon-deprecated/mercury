@@ -6,14 +6,35 @@ if [[ -a /etc/mercury/server_tuneables ]]; then
 . /etc/mercury/server_tuneables
 fi
 
-# IPTables Status
+# IPTables Status (Default is OFF)
 if [[ -n "$IPTABLES_STATUS" && "$IPTABLES_STATUS" == ON ]]; then
   OUTPUT=$OUTPUT'\n'`echo group:service-iptables-on`
 fi
 
-# Hudson Status
+# Hudson Status (Defaults to ON)
 if [[ -n "$HUDSON_STATUS" && "$HUDSON_STATUS" == OFF ]]; then
   OUTPUT=$OUTPUT'\n'`echo group:service-hudson-off`
 fi
+
+# Memcached Status (Defaults to ON)
+if [[ -n "$MEMCACHED_STATUS" && "$MEMCACHED_STATUS" == OFF ]]; then
+  OUTPUT=$OUTPUT'\n'`echo group:service-memcached-off`
+fi
+
+# MySQL Status (Defaults to ON)
+if [[ -n "$MYSQL_STATUS" && "$MYSQL_STATUS" == OFF ]]; then
+  OUTPUT=$OUTPUT'\n'`echo group:service-mysql-off`
+fi
+
+# Tomcat / Solr Status (Defaults to ON)
+if [[ -n "$TOMCAT_STATUS" && "$TOMCAT_STATUS" == OFF ]]; then
+  OUTPUT=$OUTPUT'\n'`echo group:service-tomcat-off`
+fi
+
+# Varnish Status (Defaults to ON)
+if [[ -n "$VARNISH_STATUS" && "$VARNISH_STATUS" == OFF ]]; then
+  OUTPUT=$OUTPUT'\n'`echo group:service-varnish-off`
+fi
+
 
 echo -e $OUTPUT

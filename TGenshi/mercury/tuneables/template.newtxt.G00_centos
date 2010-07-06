@@ -43,7 +43,25 @@ export VARNISH_VCL_FETCH=""
 export VARNISH_VCL_HASH=""
 export VARNISH_VCL_RECV=""
 
-# SERVICE STATE OVERRIDES
 
-# Set to "ON" to enable iptables (default settings: /etc/mercury/templates/iptables)
+# SERVICE STATE OVERRIDES
+# Set services to "ON" or "OFF". If left blank, the services will use the mercury defaults.
+
+# Hudson Default ON.
+export HUDSON_STATUS=""
+
+# IPTables Default OFF. If enabled, iptables will start with settings found in: /etc/mercury/templates/iptables
 export IPTABLES_STATUS=""
+
+# Memcached Default ON
+export MEMCACHED_STATUS=""
+
+# MysQL Default ON
+export MYSQL_STATUS=""
+
+# Varnish Default ON
+export VARNISH_STATUS=""
+
+# Tomcat Default ON
+export TOMCAT_STATUS=""
+

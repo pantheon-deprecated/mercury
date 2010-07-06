@@ -44,6 +44,20 @@ export VARNISH_VCL_HASH=""
 export VARNISH_VCL_RECV=""
 
 # SERVICE STATE OVERRIDES
+# Set services to "ON" or "OFF". If left blank, the services will use the mercury defaults.
 
-# Defaults to ON. Setting to "OFF" overrides default
+# Hudson Defaults to ON. 
 export HUDSON_STATUS=""
+
+# Memcached Default ON
+export MEMCACHED_STATUS=""
+
+# MysQL Default ON
+export MYSQL_STATUS=""
+
+# Varnish Default ON
+export VARNISH_STATUS=""
+
+# Tomcat Default ON
+export TOMCAT_STATUS=""
+
