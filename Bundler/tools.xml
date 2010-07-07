@@ -17,6 +17,8 @@
 
   <!-- Ubuntu Only -->
   <Group name='ubuntu'>
+    <Package name='fabric'/>
+    <Path name='/etc/mercury/templates/mercury.settings.php'/>
     <Service name='vnstat'/>
 
     <!-- AWS Only -->
