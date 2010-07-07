@@ -22,7 +22,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>sudo /usr/bin/fab -f /etc/mercury/fabric/import_site.py import_site:$TARBALL</command>
+      <command>sudo /usr/bin/fab -f /etc/mercury/fabric/import_site.py import_site:$$TARBALL</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
