@@ -3,6 +3,7 @@
    <Path name='/usr/local/bin/update_mercury.sh' altsrc='/mercury/update_mercury.sh'/>
    <Path name='/usr/local/bin/update_pressflow.sh' altsrc='/mercury/update_pressflow.sh'/>
    <Path name='/etc/mercury/boot.d/S100main.sh' altsrc='/mercury/S100main.sh'/>
+   <Path name='/etc/mercury/templates/cron' altsrc='/mercury/cron'/>
    <Path name='/etc/mercury/templates/tuneables' altsrc='/mercury/tuneables'/>
    <Path name='/etc/mercury/mercury.make'/>
    <BoundPath type='directory' owner='root' group='root' perms='0700' name='/etc/mercury/logs'/>
