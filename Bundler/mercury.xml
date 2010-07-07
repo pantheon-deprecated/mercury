@@ -6,6 +6,7 @@
    <Path name='/etc/mercury/templates/cron' altsrc='/mercury/cron'/>
    <Path name='/etc/mercury/templates/tuneables' altsrc='/mercury/tuneables'/>
    <Path name='/etc/mercury/mercury.make'/>
+   <Path name='/etc/mercury/templates/mercury.settings.php'/>
    <BoundPath type='directory' owner='root' group='root' perms='0700' name='/etc/mercury/logs'/>
 
    <!-- AWS Only -->
