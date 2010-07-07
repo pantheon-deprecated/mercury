@@ -99,10 +99,10 @@ def setup_site_files(webroot, working_dir):
 def update_settings(webroot, db_info):
     #TODO: add slug file to bcfg2
     #TODO: remove any previously defined $db_url strings rather than relying on ours being last
-    slub = Template(local("cat /etc/mercury/templates/mercury.settings.php"))
+    slug = Template(local("cat /etc/mercury/templates/mercury.settings.php"))
     slug = slug.safe_substitute(db_info)
     with open(webroot + "sites/default/settings.php", 'a') as f:
-        f.write(blob)
+        f.write(slug)
     f.close
 
 def setup_modules(webroot):
@@ -192,8 +192,6 @@ def restart_services(distro):
         local('/etc/init.d/tomcat5 restart')
 
 def import_site(site_archive, working_dir='/tmp/import_site/'):
-    #TODO: Write cleanup function
-    #TODO: clear solr index (if exists) before using new site
     
     unarchive(site_archive, working_dir)
 
@@ -206,4 +204,7 @@ def import_site(site_archive, working_dir='/tmp/import_site/'):
     update_settings(site_info['webroot'], db_info)
     set_permissions(site_info)
     restart_services(site_info['distro'])
+
+    #TODO: Write cleanup function
+    #TODO: clear solr index (if exists) before using new site
 
