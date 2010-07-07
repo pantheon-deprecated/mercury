@@ -52,7 +52,7 @@ def get_branch_and_revision(working_dir):
     if exists(working_dir + "PRESSFLOW.txt"):
         rev = local("cat " + working_dir + "PRESSFLOW.txt").split('.')[2]
         ret['branch'] = "lp:pressflow/6.x"
-        ret['revision'] = rev
+        ret['revision'] = rev.replace('\n','')
         ret['type'] = "PRESSFLOW"
     else:
         rev = local("cat " + working_dir  + "CHANGELOG.txt | grep --max-count=1 Drupal | sed 's/Drupal \([0-9]\)*\.\([0-9]*\).*/\\1-\\2/'")
