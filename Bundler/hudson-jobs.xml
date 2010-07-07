@@ -1,4 +1,4 @@
-<Bundle name='hudson-builds'>
+<Bundle name='hudson-jobs'>
 
   <!-- Ubuntu/Debian Only -->
   <Group name='deb'>

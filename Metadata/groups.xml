@@ -57,7 +57,7 @@
   <Group name='hudson'>
     <Bundle name='hudson-package'/>
     <Bundle name='hudson-service'/>
-    <Bundle name='hudson-builds'/>
+    <Bundle name='hudson-jobs'/>
   </Group>
   
 </Groups>
