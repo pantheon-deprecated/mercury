@@ -171,8 +171,8 @@ def set_permissions(site_info):
 
     # setup ownership and permissions
     local('chown -R ' + site_info['owner'] + ':' + site_info['group'] + ' ' + site_info['webroot'])
-    local('chmod 440 ' + site_info['webroot'] + '/sites/default/settings.php')
-    local('chmod 775 ' + site_info['webroot'] + '/sites/default/files')
+    local('chmod 440 ' + site_info['webroot'] + 'sites/default/settings.php')
+    local('chmod 775 ' + site_info['webroot'] + 'sites/default/files')
 
     #TODO: where do we want to set the start point for searching for 'files' directories (to change perms)?
     # make sure everything under the 'files' directory has proper perms (770 on dirs, 550 on files)
