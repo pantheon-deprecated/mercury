@@ -5,8 +5,12 @@ from os.path import exists
 from string import Template
 
 def unarchive(archive, destination):
-    #TODO: check if destination exists 
+
+    if exists(destination):
+        local("rm -rf " + destination)
+
     local("bzr init " + destination)
+
     with cd(destination):
         local("bzr import " + archive)
         local("rm -r ./.bzr")
@@ -74,32 +78,43 @@ def import_database(db_info, working_dir):
     local("rm -f " + db_dump_file)
 
 def setup_site_files(webroot, working_dir):
-    version = get_branch_and_revision(working_dir)
-    if exists(webroot):
-        local('rm -r ' + webroot)
     #TODO: add large file size sanity check (no commits over 20mb)
     #TODO: sanity check for versions prior to 6.6 (no pressflow branch).
-    local("bzr branch -r " + version['revision'] + " " + version['branch'] + " " + webroot)
     #TODO: test wildcard in ignore
     #TODO: look into ignoreing files directory
+    #TODO: sanity check for conflicts (hacked core)
+    #TODO: check if updatedb needs to run. Fabric will return error if it doesn't need to run.
+
+    if exists(webroot):
+        local('rm -r ' + webroot)
+
+    # Create vanilla drupal/pressflow branch of same version as import site
+    version = get_branch_and_revision(working_dir)
+    local("bzr branch -r " + version['revision'] + " " + version['branch'] + " " + webroot)
+
+    # Bring import site up to current Pressflow version
     with cd(webroot):
+
+        # Import site and revert any changes to core
         local("bzr import " + working_dir)
+        reverted = local("bzr revert")
+
+        # Cleanup potential issues
         local("rm -f PRESSFLOW.txt")
-#       if exists(".bzrignore"):
-#           local('bzr revert .bzrignore')
+        #if exists(".bzrignore"):
+        #    local('bzr revert .bzrignore')
+
+        # Magic Happens
         local("bzr add")
-        print local("bzr status")
         local("bzr commit --unchanged -m 'Automated Commit'")
         local("bzr merge lp:pressflow/6.x")
-        print local("bzr conflicts")
-        #TODO: sanity check for conflicts (hacked core)
+        conflicts = local("bzr conflicts")
         local("bzr commit --unchanged -m 'Update to latest Pressflow core'")
-        #TODO: check if updatedb needs to run. Fabric will return error if it doesn't need to run.
+
         # Run update.php
         local("drush -y updatedb")
 
 def update_settings(webroot, db_info):
-    #TODO: add slug file to bcfg2
     #TODO: remove any previously defined $db_url strings rather than relying on ours being last
     slug = Template(local("cat /etc/mercury/templates/mercury.settings.php"))
     slug = slug.safe_substitute(db_info)
@@ -152,9 +167,6 @@ def setup_modules(webroot):
             if status == 'Disabled':
                 local("drush -y en " + module)
 
-        # Update modules
-        local("drush -y pm-updatecode")
-                
         # Set apachesolr variables
         local("drush php-eval \"variable_set('apachesolr_path', '/default');\"")
         local("drush php-eval \"variable_set('apachesolr_port', 8180);\"")
