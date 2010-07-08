@@ -108,11 +108,15 @@ def setup_site_files(webroot, working_dir):
         local("bzr add")
         local("bzr commit --unchanged -m 'Automated Commit'")
         local("bzr merge lp:pressflow/6.x")
-        conflicts = local("bzr conflicts")
         local("bzr commit --unchanged -m 'Update to latest Pressflow core'")
 
         # Run update.php
         local("drush -y updatedb")
+
+        # Save reverted files as hudson build artifacts
+        with open('/var/lib/hudson/jobs/import_site/workspace/reverted.txt', 'w') as f:
+            f.write(reverted)
+        f.close
 
 def update_settings(webroot, db_info):
     #TODO: remove any previously defined $db_url strings rather than relying on ours being last
