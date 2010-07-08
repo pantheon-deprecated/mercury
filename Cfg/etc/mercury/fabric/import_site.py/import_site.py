@@ -10,6 +10,8 @@ def unarchive(archive, destination):
     with cd(destination):
         local("bzr import " + archive)
         local("rm -r ./.bzr")
+        local("find . -depth -name .svn -exec rm -fr {} \;")
+        local("find . -depth -name CVS -exec rm -fr {} \;")
 
 def get_db_info(working_dir):
     '''Get database information from settings.php'''
