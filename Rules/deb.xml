@@ -65,10 +65,12 @@
     <Service type='deb' status='on' name='pppd-dns'/>
     <Service type='deb' status='on' name='rc.local' mode='manual'/>
     <Service type='deb' status='on' name='rmnologin'/>
-    <Service type='deb' status='on' name='rsync'/>
     <Service type='deb' status='on' name='single' mode='manual'/>
     <Service type='deb' status='on' name='sysklogd'/>
-  
+
+    <!-- tools -->
+    <Service type='deb' status='off' name='rsync'/>
+
     <!-- varnish -->
     <Service type='deb' status='on' name='varnish'/>
     <Service type='deb' status='on' name='varnishlog'/>

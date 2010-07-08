@@ -1,17 +1,28 @@
 <Groups version='3.0'>
 
-  <!--Mercury on AWS-->
-  <Group profile='true' public='true' name='mercury-aws'>
-    <Group name='mercury'/>
-    <Group name='amazon-web-services'/>
-  </Group>
-  
   <!--Mercury on Rackspace/Linode-->
   <Group profile='true' public='true' default='true' name='mercury-vps'>
     <Group name='mercury'/>
     <Group name='vps'/>
   </Group>
 
+  <!--Mercury on AWS-->
+  <Group profile='true' public='true' name='mercury-aws'>
+    <Group name='mercury'/>
+    <Group name='amazon-web-services'/>
+  </Group>
+  
+  <!--Mercury on AWS w/ EBS boot-->
+  <Group profile='true' public='true' name='mercury-aws-ebs'>
+    <Group name='mercury'/>
+    <Group name='amazon-web-services-ebs'/>
+  </Group>
+  
+  <!--Custom Mercury-->
+  <Group profile='true' public='true' name='mercury-custom'>
+    <xi:include href="mercurycustom.xml" />
+  </Group>
+  
   <!-- Operating systems -->
   <Group name='jaunty'> 
     <Bundle name='ubuntu-jaunty'/>
@@ -46,12 +57,16 @@
   </Group>
   
   <!-- hosting providers -->
-  <Group name='amazon-web-services'>
-    <Bundle name='amazon-web-services'/>
-  </Group>  
   <Group name='vps'>
     <Bundle name='vps'/>
   </Group>
+  <Group name='amazon-web-services'>
+    <Bundle name='amazon-web-services-packages'/>
+    <Bundle name='amazon-web-services-files'/>
+  </Group>  
+  <Group name='amazon-web-services-ebs'>
+    <Bundle name='amazon-web-services-packages'/>
+  </Group>  
 
   <!-- Hudson -->
   <Group name='hudson'>

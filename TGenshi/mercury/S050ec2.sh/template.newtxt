@@ -9,9 +9,8 @@
 #!/bin/bash
 
 # Move mysql and varnish to /mnt
-# TODO support for EBS and RDS
 
-echo "Starting AWS Specific Configuration"
+echo "Starting AWS Specific Configuration (non ebs-boot instances only)"
 
 #fix /tmp perms
 chmod 1777 /tmp

@@ -4,6 +4,7 @@
   <Package name='bzr'/>
   <Package name='bzrtools'/>
   <Package name='cvs'/>
+  <Package name='rsync'/>
   <Package name='screen'/>
   <Package name='subversion'/>
   <Package name='unzip'/>
@@ -11,7 +12,9 @@
 
   <Action name='vnstat_db_eth0'/>
 
-  <!-- Debian Only -->
+  <Service name-'rsync'/>
+
+<!-- Debian Only -->
   <Group name='debian'>
     <Package name='info'/>
   </Group>
