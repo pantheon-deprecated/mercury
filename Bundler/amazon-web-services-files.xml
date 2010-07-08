@@ -1,4 +1,4 @@
-<Bundle name='amazon-web-services'>
+<Bundle name='amazon-web-services-files'>
   
   <BoundPath name='/mnt/mysql/tmp' type='directory' owner='mysql' group='mysql' perms='1777'/>
   <BoundPath name='/mnt/tomcat6/tmp' type='directory' owner='tomcat6' group='tomcat6' perms='1777'/>
