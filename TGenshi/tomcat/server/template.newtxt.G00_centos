@@ -73,7 +73,7 @@
          IP address of the remote client.
     -->
 
-    <Connector port="8180" protocol="HTTP/1.1" address="127.0.0.1" connectionTimeout="20000" redirectPort="8443" maxThreads="${metadata.Probes['tomcat_max_threads']}" minSpareThreads="2"/>
+    <Connector port="8983" protocol="HTTP/1.1" address="127.0.0.1" connectionTimeout="20000" redirectPort="8443" maxThreads="${metadata.Probes['tomcat_max_threads']}" minSpareThreads="2"/>
 
     <!-- Define a non-SSL HTTP/1.1 Connector on port 8080 -->
 <!--    <Connector port="8080" maxHttpHeaderSize="8192"
