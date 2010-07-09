@@ -10,11 +10,11 @@ touch /var/lock/subsys/local
 
 if [ ! -f /etc/mercury/incep ]; then
   # Wait for Hudson to spin Up
-  while [ "`curl -sL --connect-timeout 1 -w "%{http_code}\\n" "127.0.0.1:8080" -o /dev/null`" != "200" ]; do
+  while [ "`curl -sL --connect-timeout 1 -w "%{http_code}\\n" "127.0.0.1:8081" -o /dev/null`" != "200" ]; do
     sleep 5
   done
 
   # Run the mercury_init Hudson build
-  java -jar /var/lib/hudson/war/WEB-INF/hudson-cli.jar -s http://127.0.0.1:8080/ build mercury_init
+  java -jar /var/lib/hudson/war/WEB-INF/hudson-cli.jar -s http://127.0.0.1:8081/ build mercury_init
 fi
 
