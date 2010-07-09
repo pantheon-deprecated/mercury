@@ -234,7 +234,7 @@ def setup_modules(webroot):
 
         # Set apachesolr variables
         local("drush php-eval \"variable_set('apachesolr_path', '/default');\"")
-        local("drush php-eval \"variable_set('apachesolr_port', 8180);\"")
+        local("drush php-eval \"variable_set('apachesolr_port', 8983);\"")
         local("drush php-eval \"variable_set('apachesolr_search_make_default', 1);\"")
         local("drush php-eval \"variable_set('apachesolr_search_spellcheck', TRUE);\"")
 
