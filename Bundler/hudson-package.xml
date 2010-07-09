@@ -2,6 +2,7 @@
 
   <!-- All Distros -->
   <Package name='hudson'/>
+  <Path name='/etc/default/hudson' altsrc='hudson/conf'/>
 
   <!--Ubuntu Only -->
   <Group name='ubuntu'>
