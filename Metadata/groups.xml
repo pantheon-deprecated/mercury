@@ -18,11 +18,6 @@
     <Group name='amazon-web-services-ebs'/>
   </Group>
   
-  <!--Custom Mercury-->
-  <Group profile='true' public='true' name='mercury-custom'>
-    <xi:include href="mercurycustom.xml" />
-  </Group>
-  
   <!-- Operating systems -->
   <Group name='jaunty'> 
     <Bundle name='ubuntu-jaunty'/>
