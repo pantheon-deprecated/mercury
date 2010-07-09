@@ -1,5 +1,5 @@
 <Bundle name ='tools'>
-
+  
   <!-- Tools -->
   <Package name='bzr'/>
   <Package name='bzrtools'/>
@@ -9,16 +9,16 @@
   <Package name='subversion'/>
   <Package name='unzip'/>
   <Package name='vnstat'/>
-
+  
   <Action name='vnstat_db_eth0'/>
-
-  <Service name-'rsync'/>
-
+  
+  <Service name='rsync'/>
+  
   <!-- Debian Only -->
   <Group name='debian'>
     <Package name='info'/>
   </Group>
-
+  
   <!-- Ubuntu Only -->
   <Group name='ubuntu'>
     <Package name='fabric'/>
