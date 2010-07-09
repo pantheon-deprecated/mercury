@@ -17,23 +17,83 @@ def unarchive(archive, destination):
         local("find . -depth -name .svn -exec rm -fr {} \;")
         local("find . -depth -name CVS -exec rm -fr {} \;")
 
-def get_db_info(working_dir):
-    '''Get database information from settings.php'''
-    #TODO: check if db_url uses single or double quotes to define db connection string.
-    #TODO: check if multiple db_urls are defined (use last)
-    #TODO: check for valid user/pass/dbname
-    if exists(working_dir + 'sites/default/settings.php'):
-        # Below strips schema (e.g. mysql) for urlparse. If we need the schema, it is in back-reference 1 (change /\\2/ to /\\1:\\2/)
-        url = urlparse(local("awk '/^\$db_url = /' " + working_dir + "sites/default/settings.php | sed 's/^.*'\\''\([a-z]*\):\(.*\)'\\''.*$/\\2/'"))
-        ret = {}
-        ret['username'] = url.username
-        ret['password'] = url.password
-        ret['database'] = url.path[1:].replace('\n','')
-        return ret
+def is_valid_db(db_info):
+
+    # Check for problems
+    if db_info['username'] == None or db_info['password'] == None or db_info['database'] == None:
+        # Invalid db connection string (missing information)
+        return False
+    elif db_info['username'] == "username" and db_info['password'] == "password" and db_info['database'] == "databasename":
+        # Connection string is still set to default values
+        return False
+    elif  ['/','\\','.'] in db_info['database']:
+        # Invalid characters in database name
+        return False
     else:
+        return True
+
+def get_db(settings_path):
+
+    url = local("awk '/^\$db_url = /' " + settings_path + " | sed 's/^.*'\\''\([a-z]*\):\(.*\)'\\''.*$/\\2/'")
+    if url.endswith('\n'):
+        url = url[:-1]
+
+    # Check for multiple connection strings. If more than one, use the last.
+    if '\n' in url:
+        url = url.split('\n')
+        url = urlparse(url[len(url)-1])
+    else:
+        url = urlparse(url)
+
+    db_info = {}
+    db_info['username'] = url.username
+    db_info['password'] = url.password
+    db_info['database'] = url.path[1:].replace('\n','')
+
+    return db_info
+
+def get_settings(working_dir):
+
+    db_info = {}
+    # Get all settings.php files and put into list
+    with cd(working_dir):
+        settings_files = local('find sites/ -name settings.php -type f')
+    if settings_files.endswith('\n'):
+        settings_files = settings_files[:-1]
+
+    # Check if any settings.php files were found
+    if not settings_files:
         return False
 
-def get_site_info():
+    # multiple settings.php files
+    if '\n' in settings_files:
+        match = None
+        settings_files = settings_files.split('\n')
+        # Step through each settings.php file and select a valid settings.php (with preference for sites/default/)
+        for sfile in settings_files:
+            db_info = get_db(working_dir + sfile)
+            if is_valid_db(db_info):
+                if sfile.find('/default/') != -1:
+                    return db_info
+                match = db_info
+        if match:
+            return match
+        else:
+            # No valid settings.php found
+            return False
+
+    # Single settings.php
+    else:
+        db_info = get_db(working_dir + settings_files)
+        if is_valid_db(db_info):
+            return db_info
+        else:
+            # No valid settings.php found
+            return False
+
+
+
+def get_env_vars():
     '''Get distribution name and return environmental variables based on distribution defaults.'''
     #TODO: Do we need more specific ubuntu versions (e.g. check for lucid for upstart services?)
     ret = {}
@@ -105,11 +165,12 @@ def setup_site_files(webroot, working_dir):
         #    local('bzr revert .bzrignore')
 
         # Magic Happens
-        local("bzr add")
+        #local("bzr add")
         local("bzr commit --unchanged -m 'Automated Commit'")
         local("bzr merge lp:pressflow/6.x")
-        local("bzr commit --unchanged -m 'Update to latest Pressflow core'")
-
+        local("rm -r ./.bzr")
+#local("bzr commit --unchanged -m 'Update to latest Pressflow core'")
+        
         # Run update.php
         local("drush -y updatedb")
 
@@ -212,13 +273,13 @@ def import_site(site_archive, working_dir='/tmp/import_site/'):
     
     unarchive(site_archive, working_dir)
 
-    db_info = get_db_info(working_dir)
-    site_info = get_site_info()
+    settings_info = get_settings(working_dir)
+    site_info = get_env_vars()
 
-    import_database(db_info, working_dir)
+    import_database(settings_info, working_dir)
     setup_site_files(site_info['webroot'], working_dir)
     setup_modules(site_info['webroot'])
-    update_settings(site_info['webroot'], db_info)
+    update_settings(site_info['webroot'], settings_info)
     set_permissions(site_info)
     restart_services(site_info['distro'])
 
