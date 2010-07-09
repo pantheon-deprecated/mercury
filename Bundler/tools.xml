@@ -14,7 +14,7 @@
 
   <Service name-'rsync'/>
 
-<!-- Debian Only -->
+  <!-- Debian Only -->
   <Group name='debian'>
     <Package name='info'/>
   </Group>
@@ -24,13 +24,13 @@
     <Package name='fabric'/>
     <Path name='/etc/mercury/fabric/import_site.py'/>
     <Service name='vnstat'/>
-
+    
     <!-- AWS Only -->
     <Group name='amazon-web-services'>
       <Action name='restart_apparmor'/>
     </Group>
   </Group>
-
+  
   <!-- CentOS Only -->
   <Group name='centos'>
     <Path name='/etc/cron.d/vnstat' altsrc='/vnstat/cron'/>
