@@ -106,14 +106,14 @@ def choose_site(sites, working_dir):
         print "WARNING: The database that was dumped does not match any Drupal settings.php files."
 
     # Resort to manual
-    print "Multiple sites found. Please select the site you wish to use:"
+    print "\nMultiple sites found. Please select the site you wish to use:\n"
     count = 0
     for site in sites:
         print "[" + str(count) + "]: " + sites[count]['site_dir']
         count += 1
     valid = False
     while not valid:
-        choice = int(prompt('Choose Site: ', validate=r'^\d{1,3}$'))
+        choice = int(prompt('\nChoose Site: ', validate=r'^\d{1,3}$'))
         if choice < len(sites) and choice > -1:
             valid = True
     return sites[choice]
@@ -136,12 +136,11 @@ def get_env_vars():
         ret['distro'] = 'centos'
     return ret
 
-def get_version(working_dir):
-    pdb.set_trace()
+def get_drupal_version(working_dir):
     # Test 1: Try to get version from system.module
     version = (local("awk \"/define\(\'VERSION\'/\" " + working_dir + "modules/system/system.module" + "| sed \"s_^.*'\(6\.[0-9]\{1,2\}\)'.*_\\1_\"")).rstrip('\n')
     if not version:
-        # Try to get drupal version from system.info
+        # Test 2: Try to get drupal version from system.info
         version = (local("awk '/version/ {if ($3 != \"VERSION\") print $3}' " + working_dir + "modules/system/system.info" + r' | sed "s_^\"\(6\.[0-9]\{1,2\}\)\".*_\1_"')).rstrip('\n')
     if not version:
         # Test 3: Try to get drupal version from Changelog
@@ -151,22 +150,37 @@ def get_version(working_dir):
     else:
         return version
 
+def get_pressflow_revision(working_dir, drupal_version):
+    #TODO: Optimize this (restrict search to revisions within Drupal minor version)
+    if exists("/tmp/pf_temp"):
+        local("rm -rf /tmp/pf_temp")
+    local("bzr branch lp:pressflow/6.x /tmp/pf_temp")
+    with cd("/tmp/pf_temp"):
+        match = {'num':100000,'revno':0}
+        revno = local("bzr revno").rstrip('\n')
+        for i in range(int(revno),0,-1):
+            local("bzr revert -r" + str(i))
+            diff = int(local("diff -rup " + working_dir + " ./ | wc -l"))
+            if diff < match['num']:
+                match['num'] = diff
+                match['revno'] = i
+    return str(match['revno'])
+        
 def get_branch_and_revision(working_dir):
     #TODO: pressflow.txt  doesn't exists if pulled from bzr
     #TODO: check that it is Drupal V6
 
     ret = {}
-
+    drupal_version = (get_drupal_version(working_dir)).rstrip('\n')
     # Check if site uses Pressflow (look in system.module)
     pressflow = local("awk \"/\'info\' =>/\" " + working_dir + "modules/system/system.module" + r' | sed "s_^.*\(Powered by Pressflow\).*_\1_"')
 
     if not pressflow:
-        revision = (get_version(working_dir)).rstrip('\n')
         ret['branch'] = "lp:drupal/6.x-stable"
-        ret['revision'] = "tag:DRUPAL-" + revision
+        ret['revision'] = "tag:DRUPAL-" + drupal_version 
         ret['type'] = "DRUPAL"
     else:
-        revision = "" # <--- in progress
+        revision = get_pressflow_revision(working_dir, drupal_version)
         ret['branch'] = "lp:pressflow/6.x"
         ret['revision'] = revision 
         ret['type'] = "PRESSFLOW"
