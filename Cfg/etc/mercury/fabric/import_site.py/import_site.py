@@ -1,10 +1,16 @@
 from __future__ import with_statement
 from fabric.api import *
+from fabric.contrib.console import confirm
+from fabric.operations import prompt
 from urlparse import urlparse
 from os.path import exists
 from string import Template
+import pdb
 
 def unarchive(archive, destination):
+
+    if not exists(archive):
+        abort("Archive file \"" + archive + "\" does not exist.")
 
     if exists(destination):
         local("rm -rf " + destination)
@@ -26,17 +32,15 @@ def is_valid_db(db_info):
     elif db_info['username'] == "username" and db_info['password'] == "password" and db_info['database'] == "databasename":
         # Connection string is still set to default values
         return False
-    elif  ['/','\\','.'] in db_info['database']:
+    elif  ('/' or '\\' or '.') in db_info['database']:
         # Invalid characters in database name
         return False
     else:
         return True
 
-def get_db(settings_path):
+def get_site_settings(working_dir, settings_file):
 
-    url = local("awk '/^\$db_url = /' " + settings_path + " | sed 's/^.*'\\''\([a-z]*\):\(.*\)'\\''.*$/\\2/'")
-    if url.endswith('\n'):
-        url = url[:-1]
+    url = (local("awk '/^\$db_url = /' " + working_dir + settings_file + " | sed 's/^.*'\\''\([a-z]*\):\(.*\)'\\''.*$/\\2/'")).rstrip('\n')
 
     # Check for multiple connection strings. If more than one, use the last.
     if '\n' in url:
@@ -45,21 +49,20 @@ def get_db(settings_path):
     else:
         url = urlparse(url)
 
-    db_info = {}
-    db_info['username'] = url.username
-    db_info['password'] = url.password
-    db_info['database'] = url.path[1:].replace('\n','')
+    ret = {}
+    ret['username'] = url.username
+    ret['password'] = url.password
+    ret['database'] = url.path[1:].replace('\n','')
+    ret['site_dir'] = settings_file.replace(working_dir,'').replace('settings.php','')
 
-    return db_info
+    return ret
 
 def get_settings(working_dir):
-
-    db_info = {}
+    site_settings = {}
+    match = []
     # Get all settings.php files and put into list
     with cd(working_dir):
-        settings_files = local('find sites/ -name settings.php -type f')
-    if settings_files.endswith('\n'):
-        settings_files = settings_files[:-1]
+        settings_files = (local('find sites/ -name settings.php -type f')).rstrip('\n')
 
     # Check if any settings.php files were found
     if not settings_files:
@@ -67,31 +70,53 @@ def get_settings(working_dir):
 
     # multiple settings.php files
     if '\n' in settings_files:
-        match = None
         settings_files = settings_files.split('\n')
         # Step through each settings.php file and select a valid settings.php (with preference for sites/default/)
         for sfile in settings_files:
-            db_info = get_db(working_dir + sfile)
-            if is_valid_db(db_info):
-                if sfile.find('/default/') != -1:
-                    return db_info
-                match = db_info
-        if match:
-            return match
-        else:
-            # No valid settings.php found
-            return False
+            site_settings = get_site_settings(working_dir, sfile)
+            if is_valid_db(site_settings):
+                match.append(site_settings)
+        if match.count > 1:
+            return choose_site(match, working_dir)
+        elif match.count == 1:
+            return match.pop()
 
     # Single settings.php
     else:
-        db_info = get_db(working_dir + settings_files)
-        if is_valid_db(db_info):
-            return db_info
-        else:
-            # No valid settings.php found
-            return False
+        site_settings = get_site_settings(working_dir + settings_files)
+        if is_valid_db(site_settings):
+            match.append(site_settings)
+            return match.pop()
+    
+    abort("No valid settings.php was found")
 
+def choose_site(sites, working_dir):
+    # Try to autmatically figure out which site to use first.
 
+    # Test 1: if db name in the dump file comments matche the db name in only one settings.php, this is a safe match.
+    found = []
+    # If we need it, host is in back-reference 1 (\1)
+    dumped_db_name = (local(r"awk '/^-- Host:/' " + get_db_dump_name(working_dir) + r" | sed 's_.*Host:\s*\(.*\)\s*Database:\s*\(.*\)$_\2_'")).rstrip('\n')
+    for site in sites:
+        if site['database'] == dumped_db_name:
+            found.append(site)
+    if found.count == 1:
+        return found.pop()
+    elif found.count == 0:
+        print "WARNING: The database that was dumped does not match any Drupal settings.php files."
+
+    # Resort to manual
+    print "Multiple sites found. Please select the site you wish to use:"
+    count = 0
+    for site in sites:
+        print "[" + str(count) + "]: " + sites[count]['site_dir']
+        count += 1
+    valid = False
+    while not valid:
+        choice = int(prompt('Choose Site: ', validate=r'^\d{1,3}$'))
+        if choice < len(sites) and choice > -1:
+            valid = True
+    return sites[choice]
 
 def get_env_vars():
     '''Get distribution name and return environmental variables based on distribution defaults.'''
@@ -111,26 +136,62 @@ def get_env_vars():
         ret['distro'] = 'centos'
     return ret
 
+def get_version(working_dir):
+    pdb.set_trace()
+    # Test 1: Try to get version from system.module
+    version = (local("awk \"/define\(\'VERSION\'/\" " + working_dir + "modules/system/system.module" + "| sed \"s_^.*'\(6\.[0-9]\{1,2\}\)'.*_\\1_\"")).rstrip('\n')
+    if not version:
+        # Try to get drupal version from system.info
+        version = (local("awk '/version/ {if ($3 != \"VERSION\") print $3}' " + working_dir + "modules/system/system.info" + r' | sed "s_^\"\(6\.[0-9]\{1,2\}\)\".*_\1_"')).rstrip('\n')
+    if not version:
+        # Test 3: Try to get drupal version from Changelog
+        version = (local("cat " + working_dir  + "CHANGELOG.txt | grep --max-count=1 Drupal | sed 's/Drupal \([0-9]\)*\.\([0-9]*\).*/\\1-\\2/'")).rstrip('\n')
+    if not version:
+        abort("Unable to determine Drupal version.")
+    else:
+        return version
+
 def get_branch_and_revision(working_dir):
     #TODO: pressflow.txt  doesn't exists if pulled from bzr
     #TODO: check that it is Drupal V6
+
     ret = {}
-    if exists(working_dir + "PRESSFLOW.txt"):
-        rev = local("cat " + working_dir + "PRESSFLOW.txt").split('.')[2]
-        ret['branch'] = "lp:pressflow/6.x"
-        ret['revision'] = rev.replace('\n','')
-        ret['type'] = "PRESSFLOW"
-    else:
-        rev = local("cat " + working_dir  + "CHANGELOG.txt | grep --max-count=1 Drupal | sed 's/Drupal \([0-9]\)*\.\([0-9]*\).*/\\1-\\2/'")
+
+    # Check if site uses Pressflow (look in system.module)
+    pressflow = local("awk \"/\'info\' =>/\" " + working_dir + "modules/system/system.module" + r' | sed "s_^.*\(Powered by Pressflow\).*_\1_"')
+
+    if not pressflow:
+        revision = (get_version(working_dir)).rstrip('\n')
         ret['branch'] = "lp:drupal/6.x-stable"
-        ret['revision'] = "tag:DRUPAL-" + rev.replace('\n','')
+        ret['revision'] = "tag:DRUPAL-" + revision
         ret['type'] = "DRUPAL"
+    else:
+        revision = "" # <--- in progress
+        ret['branch'] = "lp:pressflow/6.x"
+        ret['revision'] = revision 
+        ret['type'] = "PRESSFLOW"
+
     return ret
 
+def get_db_dump_name(working_dir):
+    with settings(warn_only=True):
+        db_dump_file = local("ls " + working_dir + "*.sql")
+    
+    # Test for no .sql files
+    if db_dump_file.failed:
+        abort("ERROR: No database dump file (*.sql) found.")
+
+    # Test for multiple .sql files
+    db_dump_file = db_dump_file.rstrip('\n')
+    if '\n' in db_dump_file:
+        abort("ERROR: Multiple database dump files (.sql) found.")
+
+    return db_dump_file
+
 def import_database(db_info, working_dir):
-    #TODO: test for multiple .sql files
-    #TODO: test for no .sql files
-    db_dump_file = local("ls " + working_dir + "*.sql")
+
+    db_dump_file = get_db_dump_name(working_dir)
+
     local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS " + db_info['database'] + "'")
     local("mysql -u root -e \"GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, LOCK TABLES, CREATE TEMPORARY TABLES ON " + db_info['database'] + ".* TO '" + db_info['username'] + "'@'localhost' IDENTIFIED BY '" + db_info['password'] + "';\"")
     local("mysql -u root -e 'FLUSH PRIVILEGES;'")
@@ -150,6 +211,10 @@ def setup_site_files(webroot, working_dir):
 
     # Create vanilla drupal/pressflow branch of same version as import site
     version = get_branch_and_revision(working_dir)
+    if (version['revision'] == None) or (version['revision'] == "tag:DRUPAL-"):
+        abort("Unable to determine base Drupal / Pressflow version")
+
+
     local("bzr branch -r " + version['revision'] + " " + version['branch'] + " " + webroot)
 
     # Bring import site up to current Pressflow version
