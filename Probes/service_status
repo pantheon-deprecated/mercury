@@ -6,14 +6,19 @@ if [[ -a /etc/mercury/server_tuneables ]]; then
 . /etc/mercury/server_tuneables
 fi
 
-# IPTables Status (Default is OFF)
-if [[ -n "$IPTABLES_STATUS" && "$IPTABLES_STATUS" == ON ]]; then
-  OUTPUT=$OUTPUT'\n'`echo group:service-iptables-on`
+# Apache Status (Defaults to ON)
+if [[ -n "$APACHE_STATUS" && "$APACHE_STATUS" == OFF ]]; then
+  OUTPUT=$OUTPUT'\n'`echo group:service-apache-off`
 fi
 
 # Hudson Status (Defaults to ON)
 if [[ -n "$HUDSON_STATUS" && "$HUDSON_STATUS" == OFF ]]; then
   OUTPUT=$OUTPUT'\n'`echo group:service-hudson-off`
+fi
+
+# IPTables Status (Default is OFF)
+if [[ -n "$IPTABLES_STATUS" && "$IPTABLES_STATUS" == ON ]]; then
+  OUTPUT=$OUTPUT'\n'`echo group:service-iptables-on`
 fi
 
 # Memcached Status (Defaults to ON)
