@@ -1,0 +1,16 @@
+#!/bin/bash
+#If you wish to replace our default value for php memory in /etc/php5/apache2/php.ini,
+#edit the PHP_POST_MAX_SIZE variable in /etc/mercury/server_tuneables
+
+if [[ -a /etc/mercury/server_tuneables ]]; then
+. /etc/mercury/server_tuneables
+fi
+
+RAM=`grep MemTotal /proc/meminfo | sed 's/[^0-9]*//g'`
+
+if [[ -n "$PHP_POST_MAX_SIZE" ]]; then
+   echo "$PHP_POST_MAX_SIZE"
+else
+    echo "8"
+fi
+
