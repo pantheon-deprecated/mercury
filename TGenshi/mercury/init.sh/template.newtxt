@@ -42,6 +42,9 @@ done
 # Restart tomcat (pick up any ApacheSolr changes)
 /etc/init.d/${tomcat} restart
 
+# Restart Hudson
+/etc/init.d/hudson restart
+
 # Restart Apache
 /etc/init.d/${apache} restart
 
