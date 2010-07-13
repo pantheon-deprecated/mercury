@@ -3,12 +3,15 @@
   if "centos" in metadata.groups:
       tomcat = 'tomcat5'
       pmupdate = 'yum clean all; yum -y update'
+      apache = 'httpd'
   elif "debian" in metadata.groups: 
       tomcat = 'tomcat5.5'
       pmupdate = 'apt-get -y update; apt-get -y dist-upgrade'
+      apache = 'apache2'
   elif "ubuntu" in metadata.groups:
       tomcat = 'tomcat6'
       pmupdate = 'apt-get -y update; apt-get -y dist-upgrade'
+      apache = 'apache2'
 %}\
 #!/bin/bash
 
@@ -40,7 +43,7 @@ done
 /etc/init.d/${tomcat} restart
 
 # Restart Apache
-/etc/init.d/apache2 restart
+/etc/init.d/${apache} restart
 
 # Restart Varnish
 /etc/init.d/varnish restart
