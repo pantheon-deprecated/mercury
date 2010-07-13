@@ -29,6 +29,10 @@ export MYSQL_MAX_CONNECTIONS=""
 #/etc/php5/apache2/php.ini
 export PHP_MEMORY=""
 
+#/etc/php5/apache2/php.ini and #/etc/php5/cli/php.ini
+export PHP_UPLOAD_MAX_FILESIZE=""
+export PHP_POST_MAX_SIZE=""
+
 #/etc/php5/conf.d/apc.ini
 export APC_MEMORY=""
 export APC_STAT=""

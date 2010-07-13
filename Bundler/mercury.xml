@@ -1,12 +1,13 @@
 <Bundle name='mercury'>
 
+   <Path name='/etc/mercury/boot.d/S100main.sh' altsrc='/mercury/S100main.sh'/>
+   <Path name='/etc/mercury/mercury.make'/>
+   <Path name='/etc/mercury/templates/cron' altsrc='/mercury/cron'/>
+   <Path name='/etc/mercury/templates/iptables' altsrc='/mercury/iptables'/>
+   <Path name='/etc/mercury/templates/mercury.settings.php'/>
+   <Path name='/etc/mercury/templates/tuneables' altsrc='/mercury/tuneables'/>
    <Path name='/usr/local/bin/update_mercury.sh' altsrc='/mercury/update_mercury.sh'/>
    <Path name='/usr/local/bin/update_pressflow.sh' altsrc='/mercury/update_pressflow.sh'/>
-   <Path name='/etc/mercury/boot.d/S100main.sh' altsrc='/mercury/S100main.sh'/>
-   <Path name='/etc/mercury/templates/cron' altsrc='/mercury/cron'/>
-   <Path name='/etc/mercury/templates/tuneables' altsrc='/mercury/tuneables'/>
-   <Path name='/etc/mercury/mercury.make'/>
-   <Path name='/etc/mercury/templates/mercury.settings.php'/>
    <BoundPath type='directory' owner='root' group='root' perms='0700' name='/etc/mercury/logs'/>
 
    <!-- AWS Only -->

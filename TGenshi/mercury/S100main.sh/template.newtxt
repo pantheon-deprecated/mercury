@@ -30,9 +30,12 @@ echo $$REAL_HOSTNAME > /etc/mailname
 /usr/sbin/postconf -e "mydestination = $${REAL_HOSTNAME}, localhost"
 /etc/init.d/postfix restart
 
-{% if "centos" in metadata.groups %}\
 # Configure iptables
 /sbin/iptables-restore < /etc/mercury/templates/iptables
+{% if "deb" in metadata.groups %}\
+/sbin/iptables-save
+{% end %}\
+{% if "centos" in metadata.groups %}\
 /sbin/service iptables save
 /etc/init.d/iptables stop
 {% end %}\
