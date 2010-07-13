@@ -5,6 +5,7 @@ from fabric.operations import prompt
 from urlparse import urlparse
 from os.path import exists
 from string import Template
+from pprint import pprint
 import pdb
 
 def unarchive(archive, destination):
@@ -67,7 +68,7 @@ def get_settings(working_dir):
     # Check if any settings.php files were found
     if not settings_files:
         return False
-
+    print settings_files
     # multiple settings.php files
     if '\n' in settings_files:
         settings_files = settings_files.split('\n')
@@ -83,7 +84,7 @@ def get_settings(working_dir):
 
     # Single settings.php
     else:
-        site_settings = get_site_settings(working_dir + settings_files)
+        site_settings = get_site_settings(working_dir, settings_files)
         if is_valid_db(site_settings):
             match.append(site_settings)
             return match.pop()
@@ -138,10 +139,10 @@ def get_env_vars():
 
 def get_drupal_version(working_dir):
     # Test 1: Try to get version from system.module
-    version = (local("awk \"/define\(\'VERSION\'/\" " + working_dir + "modules/system/system.module" + "| sed \"s_^.*'\(6\.[0-9]\{1,2\}\)'.*_\\1_\"")).rstrip('\n')
+    version = (local("awk \"/define\(\'VERSION\'/\" " + working_dir + "modules/system/system.module" + "| sed \"s_^.*'\(6\)\.\([0-9]\{1,2\}\)'.*_\\1-\\2_\"")).rstrip('\n')
     if not version:
         # Test 2: Try to get drupal version from system.info
-        version = (local("awk '/version/ {if ($3 != \"VERSION\") print $3}' " + working_dir + "modules/system/system.info" + r' | sed "s_^\"\(6\.[0-9]\{1,2\}\)\".*_\1_"')).rstrip('\n')
+        version = (local("awk '/version/ {if ($3 != \"VERSION\") print $3}' " + working_dir + "modules/system/system.info" + r' | sed "s_^\"\(6\)\.\([0-9]\{1,2\}\)\".*_\1-\2_"')).rstrip('\n')
     if not version:
         # Test 3: Try to get drupal version from Changelog
         version = (local("cat " + working_dir  + "CHANGELOG.txt | grep --max-count=1 Drupal | sed 's/Drupal \([0-9]\)*\.\([0-9]*\).*/\\1-\\2/'")).rstrip('\n')
@@ -173,17 +174,18 @@ def get_branch_and_revision(working_dir):
     ret = {}
     drupal_version = (get_drupal_version(working_dir)).rstrip('\n')
     # Check if site uses Pressflow (look in system.module)
-    pressflow = local("awk \"/\'info\' =>/\" " + working_dir + "modules/system/system.module" + r' | sed "s_^.*\(Powered by Pressflow\).*_\1_"')
-
-    if not pressflow:
+    dist = (local("awk \"/\'info\' =>/\" " + working_dir + "modules/system/system.module" + r' | sed "s_^.*Powered by \([a-zA-Z]*\).*_\1_"')).rstrip('\n')
+    if dist == 'Drupal':
         ret['branch'] = "lp:drupal/6.x-stable"
         ret['revision'] = "tag:DRUPAL-" + drupal_version 
         ret['type'] = "DRUPAL"
-    else:
+    elif dist == 'Pressflow':
         revision = get_pressflow_revision(working_dir, drupal_version)
         ret['branch'] = "lp:pressflow/6.x"
         ret['revision'] = revision 
         ret['type'] = "PRESSFLOW"
+    else:
+        abort("Cannot determine if using Drupal or Pressflow")
 
     return ret
 
@@ -251,7 +253,7 @@ def setup_site_files(webroot, working_dir):
 #local("bzr commit --unchanged -m 'Update to latest Pressflow core'")
         
         # Run update.php
-        local("drush -y updatedb")
+        #local("drush -y updatedb")
 
         # Save reverted files as hudson build artifacts
         with open('/var/lib/hudson/jobs/import_site/workspace/reverted.txt', 'w') as f:
@@ -266,18 +268,21 @@ def update_settings(webroot, db_info):
         f.write(slug)
     f.close
 
-def setup_modules(webroot):
-
-    required_modules = {'apachesolr':None, 'apachesolr_search':None, 'cookie_cache_bypass':None, 'locale':None, 'memcache_admin':None, 'syslog':None, 'varnish':None}
-
+def get_module_status(webroot):
+    #TODO: extend drush so that "drush pm-list" can have xml/json friendly output. Below is temporary stop-gap
     with cd(webroot):
-        #TODO: extend drush so that "drush pm-list" can have xml/json friendly output. Below is temporary stop-gap
-
         # Output module status in dictionary friendly format.
         site_modules = local("drush sql-query \"SELECT name, status FROM system WHERE type='module';\" | awk -v sq=\"'\" '{if ($1 != \"name\" && $2 == 1) print \"(\"sq$1sq\", \"sq\"Enabled\"sq\")\"; if ($1 != \"name\" && $2 == 0) print \"(\"sq$1sq\", \"sq\"Disabled\"sq\")\" }'").replace('\n',',')[:-1]
-        # Create module dictionary. Key=Module name, Value=Enabled/Disabled/None
-        site_modules = dict(eval(site_modules))
+    return dict(eval(site_modules))
 
+def setup_modules(webroot):
+
+    required_modules = {'apachesolr':None, 'apachesolr_search':None, 'cookie_cache_bypass':'Disabled', 'locale':None, 'memcache_admin':None, 'syslog':None, 'varnish':None}
+
+    # Get module dictionary. Key=Module name, Value=Enabled/Disabled/None
+    site_modules = get_module_status(webroot)
+
+    with cd(webroot):
         # If a required module is found, the value is set to site_modules current status (Enabled/Disabled). If not found, value=None.
         for name in required_modules.keys():
             if site_modules.has_key(name):
@@ -297,10 +302,12 @@ def setup_modules(webroot):
             local("wget http://solr-php-client.googlecode.com/files/SolrPhpClient.r22.2009-11-09.tgz")
             local("mkdir -p ./sites/all/modules/apachesolr/SolrPhpClient/")
             local("tar xzf SolrPhpClient.r22.2009-11-09.tgz -C ./sites/all/modules/apachesolr/")
-            local("drush -y en apachesolr")
+            with settings(warn_only=True):
+                local("drush -y en apachesolr")
             del(required_modules['apachesolr'])
         if required_modules['apachesolr_search'] == 'Disabled':
-            local("drush -y en apachesolr_search")
+            with settings(warn_only=True):
+                local("drush -y en apachesolr_search")
             del(required_modules['apachesolr_search'])
 
         # Normal Cases: Download if absent & enable if disabled.
@@ -309,7 +316,8 @@ def setup_modules(webroot):
                 local("drush -y dl " + module)
                 status = 'Disabled' 
             if status == 'Disabled':
-                local("drush -y en " + module)
+                with settings(warn_only=True):
+                    local("drush -y en " + module)
 
         # Set apachesolr variables
         local("drush php-eval \"variable_set('apachesolr_path', '/default');\"")
@@ -324,6 +332,15 @@ def setup_modules(webroot):
         local("drush php-eval \"variable_set('page_compression', 0);\"")
         local("drush php-eval \"variable_set('preprocess_js', TRUE);\"")
         local("drush php-eval \"variable_set('preprocess_css', TRUE);\"")
+
+    # Drush will report failure if we try to enable a module that is already enabled.
+    # To get around this, we wrap "drush en" in warn_only=True.
+    # However, we still want to make sure the modules are enabled (and didn't fail for another reason).
+    site_modules = get_module_status(webroot)
+    check_modules = ['apachesolr', 'apachesolr_search', 'cookie_cache_bypass', 'locale', 'syslog', 'varnish']
+    for module in check_modules:
+        if site_modules[module] == 'Disabled':
+            print "WARNING: Required module \"" + module + "\" could not be enabled."
 
 def set_permissions(site_info):
 
