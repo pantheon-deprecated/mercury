@@ -266,7 +266,7 @@ expose_php = On
 ;;;;;;;;;;;;;;;;;;;
 
 max_execution_time = 30     ; Maximum execution time of each script, in seconds
-max_input_time = 60 ; Maximum amount of time each script may spend parsing request data
+max_input_time = -1 ; Maximum amount of time each script may spend parsing request data
 ;max_input_nesting_level = 64 ; Maximum input variable nesting level
 memory_limit = ${metadata.Probes['php_memory']}M      ; Maximum amount of memory a script may consume (16MB)
 
@@ -449,7 +449,7 @@ register_argc_argv = On
 auto_globals_jit = On
 
 ; Maximum size of POST data that PHP will accept.
-post_max_size = 8M
+post_max_size = ${metadata.Probes['php_post_max_size']}M
 
 ; Magic quotes
 ;
@@ -563,7 +563,7 @@ file_uploads = On
 ;upload_tmp_dir =
 
 ; Maximum allowed size for uploaded files.
-upload_max_filesize = 2M
+upload_max_filesize = ${metadata.Probes['php_upload_max_filesize']}M
 
 
 ;;;;;;;;;;;;;;;;;;

@@ -17,7 +17,7 @@ backend default {
 
 sub vcl_recv {
   // Remove has_js and Google Analytics cookies.
-  set req.http.Cookie = regsuball(req.http.Cookie, "(^|;\s*)(__[a-z]+|has_js)=[^;]*", "");
+  set req.http.Cookie = regsuball(req.http.Cookie, "(^|;\s*)(__[a-z]+)=[^;]*", "");
   
   // To users: if you have additional cookies being set by your system (e.g.
   // from a javascript analytics file or similar) you will need to add VCL
@@ -197,11 +197,14 @@ XID: "} req.xid {"
 #    set obj.prefetch =  -30s;
 #    return (deliver);
 #}
-#
-#sub vcl_deliver {
-#    return (deliver);
-#}
-#
+
+sub vcl_deliver {
+
+    ${metadata.Probes['varnish_vcl_deliver']}
+
+    return (deliver);
+}
+
 #sub vcl_discard {
 #    /* XXX: Do not redefine vcl_discard{}, it is not yet supported */
 #    return (discard);
