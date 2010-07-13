@@ -31,6 +31,7 @@
     <Package name='httpd'/>
     <Path name='/etc/httpd/conf/httpd.conf' altsrc='/apache2/conf'/>
     <Path name='/etc/httpd/conf.d/mercury.conf' altsrc='/apache2/mercury'/>
+    <BoundPath name='/etc/httpd/conf/vhosts' type='directory' owner='root' group='root' perms='0755'/>
     <Service name='httpd'/>
   </Group>
 
