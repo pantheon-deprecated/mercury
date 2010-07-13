@@ -12,8 +12,11 @@
   
   <Action name='vnstat_db_eth0'/>
   
-  <Service name='rsync'/>
-  
+  <!-- Debian/Ubuntu Only -->
+  <Group name='deb'>
+    <Service name='rsync'/>
+  </Group>
+
   <!-- Debian Only -->
   <Group name='debian'>
     <Package name='info'/>

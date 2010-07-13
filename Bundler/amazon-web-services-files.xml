@@ -4,5 +4,9 @@
   <BoundPath name='/mnt/tomcat6/tmp' type='directory' owner='tomcat6' group='tomcat6' perms='1777'/>
   <BoundPath name='/mnt/varnish' type='directory' owner='varnish' group='varnish' perms='0755'/>
   <Path name='/etc/mercury/boot.d/S050ec2.sh' altsrc='/mercury/S050ec2.sh'/>
-  
+
+  <!-- Centos Only -->
+  <Group name='centos'>
+    <BoundPath name='/etc/httpd/conf/vhosts' type='directory' owner='root' group='root' perms='0755'/>
+  </Group>
 </Bundle>
