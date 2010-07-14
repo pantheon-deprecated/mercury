@@ -3,7 +3,8 @@
   <!-- All Distros -->
   <Package name='hudson'/>
   <Path name='/etc/default/hudson' altsrc='/hudson/conf'/>
-
+  <Path name='/var/lib/hudson/config.xml' altsrc='/hudson/config.xml'/>
+    
   <!--Ubuntu Only -->
   <Group name='ubuntu'>
     <Package name='daemon'/>
