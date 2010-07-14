@@ -24,6 +24,9 @@ else
     REAL_HOSTNAME=`hostname`
 fi
 
+#add hudson to /etc/shadow group to use system login/password:
+/usr/sbin/usermod -a -G shadow hudson
+
 echo $$REAL_HOSTNAME > /etc/mailname
 /usr/sbin/postconf -e "myhostname = $${REAL_HOSTNAME}"
 /usr/sbin/postconf -e "mydomain = $${REAL_HOSTNAME}"
