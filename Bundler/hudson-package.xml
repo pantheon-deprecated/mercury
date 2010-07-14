@@ -2,7 +2,6 @@
 
   <!-- All Distros -->
   <Package name='hudson'/>
-  <Path name='/etc/default/hudson' altsrc='/hudson/conf'/>
   <Path name='/var/lib/hudson/config.xml' altsrc='/hudson/config.xml'/>
     
   <!--Ubuntu Only -->
@@ -13,4 +12,14 @@
     <Package name='libgcj10'/>
   </Group>
   
+  <!--Debian/Ubuntu Only -->
+  <Group name='deb'>
+    <Path name='/etc/default/hudson' altsrc='/hudson/conf'/>
+  </Group>
+
+  <!--Centos Only -->
+  <Group name='centos'>
+    <Path name='/etc/sysconfig/hudson' altsrc='/hudson/conf'/>
+  </Group>
+
 </Bundle>
