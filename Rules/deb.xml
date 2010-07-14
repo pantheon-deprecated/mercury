@@ -42,7 +42,7 @@
     <Service type='deb' status='on' name='apache2'/>
   
     <!-- bcfg2 -->
-    <Service type='deb' status='on' name='bcfg2'/>
+    <Service type='deb' status='off' name='bcfg2'/>
     <Service type='deb' status='on' name='bcfg2-server'/>
   
     <!-- cacti -->

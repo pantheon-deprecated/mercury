@@ -1,5 +1,5 @@
 <Bundle name='bcfg2'>
-
+  
   <Package name='bcfg2'/>
   <Package name='bcfg2-server'/>
   <Package name='gamin'/>
@@ -7,12 +7,12 @@
   <Package name='python-lxml'/>
   <Service name='bcfg2'/>
   <Service name='bcfg2-server'/>
-
+  
   <!-- Ubuntu/Debian Only -->
   <Group name='deb'>
-  <Package name='python-gamin'/>
+    <Package name='python-gamin'/>
   </Group>
-
+  
   <!-- CentOS Only -->
   <Group name='centos'>
     <Package name='gamin-python'/>
@@ -22,6 +22,6 @@
     <Package name='python-pycurl'/>
     <Package name='python-ssl'/>
   </Group>
-
+  
 </Bundle>
 
