@@ -182,8 +182,8 @@ case "$1" in
     log_daemon_msg "Restarting $DESC" "$NAME"
     do_stop
     case "$?" in
-	sleep 10
       0|1)
+	sleep 10
         do_start
         case "$?" in
           0) log_end_msg 0 ;;
