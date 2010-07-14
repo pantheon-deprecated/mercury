@@ -41,9 +41,6 @@ done
 echo "Please Wait: BCFG2 is loading packages and config files";
 sleep 60
 
-# Update Packages cache
-/usr/sbin/bcfg2-admin xcmd Packages.Refresh
-
 #process updates:
 /usr/sbin/bcfg2 -vq
 
