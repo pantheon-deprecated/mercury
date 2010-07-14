@@ -43,10 +43,7 @@ done
 /etc/init.d/${tomcat} restart
 
 # Restart Hudson
-#/etc/init.d/hudson restart doesn't release port 8081 fast enough for hudson to start again, so we stop and start by hand:
-/etc/init.d/hudson stop
-sleep 30
-/etc/init.d/hudson start
+/etc/init.d/hudson restart
 
 # Restart Apache
 /etc/init.d/${apache} restart
