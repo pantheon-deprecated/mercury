@@ -11,8 +11,10 @@
 
 # Allows HTTP and HTTPS connections from anywhere
 -A INPUT -p tcp --dport 80 -j ACCEPT
--A INPUT -p tcp --dport 81 -j ACCEPT
 -A INPUT -p tcp --dport 443 -j ACCEPT
+-A INPUT -p tcp --dport 8080 -j ACCEPT
+-A INPUT -p tcp --dport 8081 -j ACCEPT
+
 
 #  Allows SSH connections
 -A INPUT -p tcp -m state --state NEW --dport 22 -j ACCEPT
