@@ -1,6 +1,7 @@
 <Bundle name='mercury'>
 
    <Path name='/etc/mercury/boot.d/S100main.sh' altsrc='/mercury/S100main.sh'/>
+   <Path name='/etc/mercury/init.sh' altsrc='/mercury/init.sh'/>
    <Path name='/etc/mercury/mercury.make'/>
    <Path name='/etc/mercury/templates/cron' altsrc='/mercury/cron'/>
    <Path name='/etc/mercury/templates/iptables' altsrc='/mercury/iptables'/>
@@ -32,14 +33,12 @@
 
   <!-- Ubuntu/Deb Only -->
   <Group name='deb'>
-    <Path name='/etc/mercury/init.sh' altsrc='/mercury/init.sh'/>
     <Path name='/etc/motd.tail' altsrc='/etc/motd'/>
     <Path name='/etc/rc.local' altsrc='/mercury/rc.local'/>
   </Group>
 
   <!-- CentOS Only -->
   <Group name='centos'>
-    <Path name='/etc/mercury/init.sh' altsrc='/mercury/init.sh'/>
     <Path name='/etc/motd'/>
     <Path name='/etc/rc.d/rc.local' altsrc='/mercury/rc.local'/>
   </Group>
