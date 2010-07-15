@@ -54,21 +54,21 @@ def get_site_settings(working_dir, settings_file):
     ret['username'] = url.username
     ret['password'] = url.password
     ret['database'] = url.path[1:].replace('\n','')
-    ret['site_dir'] = settings_file.replace(working_dir,'').replace('settings.php','')
-
+    ret['site_dir'] = settings_file.replace('sites/','').replace('settings.php','')
+    
     return ret
 
 def get_settings(working_dir):
     site_settings = {}
     match = []
-    # Get all settings.php files and put into list
+    # Get all settings.php files
     with cd(working_dir):
         settings_files = (local('find sites/ -name settings.php -type f')).rstrip('\n')
 
     # Check if any settings.php files were found
     if not settings_files:
         return False
-    print settings_files
+
     # multiple settings.php files
     if '\n' in settings_files:
         settings_files = settings_files.split('\n')
@@ -86,15 +86,14 @@ def get_settings(working_dir):
     else:
         site_settings = get_site_settings(working_dir, settings_files)
         if is_valid_db(site_settings):
-            match.append(site_settings)
-            return match.pop()
+            return site_settings
     
     abort("No valid settings.php was found")
 
 def choose_site(sites, working_dir):
     # Try to autmatically figure out which site to use first.
 
-    # Test 1: if db name in the dump file comments matche the db name in only one settings.php, this is a safe match.
+    # Test 1: if db name in the dump file comments match the db name in only one settings.php, this is a safe match.
     found = []
     # If we need it, host is in back-reference 1 (\1)
     dumped_db_name = (local(r"awk '/^-- Host:/' " + get_db_dump_name(working_dir) + r" | sed 's_.*Host:\s*\(.*\)\s*Database:\s*\(.*\)$_\2_'")).rstrip('\n')
@@ -114,7 +113,7 @@ def choose_site(sites, working_dir):
         count += 1
     valid = False
     while not valid:
-        choice = int(prompt('\nChoose Site: ', validate=r'^\d{1,3}$'))
+        choice = int(prompt('\nChoose Site: \n', validate=r'^\d{1,3}$'))
         if choice < len(sites) and choice > -1:
             valid = True
     return sites[choice]
@@ -187,6 +186,9 @@ def get_branch_and_revision(working_dir):
     else:
         abort("Cannot determine if using Drupal or Pressflow")
 
+    if (ret['revision'] == None) or (ret['revision'] == "tag:DRUPAL-"):
+        abort("Unable to determine base Drupal / Pressflow version")
+
     return ret
 
 def get_db_dump_name(working_dir):
@@ -214,22 +216,19 @@ def import_database(db_info, working_dir):
     local("mysql -u root " + db_info['database'] + " < " + db_dump_file)
     local("rm -f " + db_dump_file)
 
-def setup_site_files(webroot, working_dir):
+def setup_site_files(webroot, site, working_dir):
     #TODO: add large file size sanity check (no commits over 20mb)
     #TODO: sanity check for versions prior to 6.6 (no pressflow branch).
     #TODO: test wildcard in ignore
     #TODO: look into ignoreing files directory
     #TODO: sanity check for conflicts (hacked core)
     #TODO: check if updatedb needs to run. Fabric will return error if it doesn't need to run.
-
+    
     if exists(webroot):
         local('rm -r ' + webroot)
 
     # Create vanilla drupal/pressflow branch of same version as import site
     version = get_branch_and_revision(working_dir)
-    if (version['revision'] == None) or (version['revision'] == "tag:DRUPAL-"):
-        abort("Unable to determine base Drupal / Pressflow version")
-
 
     local("bzr branch -r " + version['revision'] + " " + version['branch'] + " " + webroot)
 
@@ -252,13 +251,14 @@ def setup_site_files(webroot, working_dir):
         local("rm -r ./.bzr")
 #local("bzr commit --unchanged -m 'Update to latest Pressflow core'")
         
-        # Run update.php
-        #local("drush -y updatedb")
+        # Run update.php. Wrap in warn_only because drush returns failure if it doesn't need to run.
+        with settings(warn_only=True):
+            local("drush -y --uri=" + site + " updatedb")
 
-        # Save reverted files as hudson build artifacts
-        with open('/var/lib/hudson/jobs/import_site/workspace/reverted.txt', 'w') as f:
-            f.write(reverted)
-        f.close
+    # Save reverted files as hudson build artifacts
+    #with open('/var/lib/hudson/jobs/import_site/workspace/reverted.txt', 'w') as f:
+    #    f.write(reverted)
+    #f.close
 
 def update_settings(webroot, db_info):
     #TODO: remove any previously defined $db_url strings rather than relying on ours being last
@@ -268,19 +268,19 @@ def update_settings(webroot, db_info):
         f.write(slug)
     f.close
 
-def get_module_status(webroot):
+def get_module_status(site_path):
     #TODO: extend drush so that "drush pm-list" can have xml/json friendly output. Below is temporary stop-gap
-    with cd(webroot):
+    with cd(site_path):
         # Output module status in dictionary friendly format.
         site_modules = local("drush sql-query \"SELECT name, status FROM system WHERE type='module';\" | awk -v sq=\"'\" '{if ($1 != \"name\" && $2 == 1) print \"(\"sq$1sq\", \"sq\"Enabled\"sq\")\"; if ($1 != \"name\" && $2 == 0) print \"(\"sq$1sq\", \"sq\"Disabled\"sq\")\" }'").replace('\n',',')[:-1]
     return dict(eval(site_modules))
 
-def setup_modules(webroot):
+def setup_modules(webroot, site):
 
-    required_modules = {'apachesolr':None, 'apachesolr_search':None, 'cookie_cache_bypass':'Disabled', 'locale':None, 'memcache_admin':None, 'syslog':None, 'varnish':None}
+    required_modules = {'apachesolr':None, 'apachesolr_search':'disabled', 'cookie_cache_bypass':'Disabled', 'locale':None, 'memcache_admin':None, 'syslog':None, 'varnish':None}
 
     # Get module dictionary. Key=Module name, Value=Enabled/Disabled/None
-    site_modules = get_module_status(webroot)
+    site_modules = get_module_status(webroot + "sites/" + site)
 
     with cd(webroot):
         # If a required module is found, the value is set to site_modules current status (Enabled/Disabled). If not found, value=None.
@@ -300,14 +300,14 @@ def setup_modules(webroot):
             required_modules['apachesolr_search'] = 'Disabled'
         if required_modules['apachesolr'] == 'Disabled':
             local("wget http://solr-php-client.googlecode.com/files/SolrPhpClient.r22.2009-11-09.tgz")
-            local("mkdir -p ./sites/all/modules/apachesolr/SolrPhpClient/")
-            local("tar xzf SolrPhpClient.r22.2009-11-09.tgz -C ./sites/all/modules/apachesolr/")
+            local("mkdir -p " + webroot + "sites/all/modules/apachesolr/SolrPhpClient/")
+            local("tar xzf SolrPhpClient.r22.2009-11-09.tgz -C " + webroot  + "sites/all/modules/apachesolr/")
             with settings(warn_only=True):
-                local("drush -y en apachesolr")
+                local("drush -y --uri=" + site + " en apachesolr")
             del(required_modules['apachesolr'])
         if required_modules['apachesolr_search'] == 'Disabled':
             with settings(warn_only=True):
-                local("drush -y en apachesolr_search")
+                local("drush -y --uri=" + site + " en apachesolr_search")
             del(required_modules['apachesolr_search'])
 
         # Normal Cases: Download if absent & enable if disabled.
@@ -317,8 +317,9 @@ def setup_modules(webroot):
                 status = 'Disabled' 
             if status == 'Disabled':
                 with settings(warn_only=True):
-                    local("drush -y en " + module)
+                    local("drush -y --uri=" + site + " en " + module)
 
+    with cd(webroot + "sites/" + site):
         # Set apachesolr variables
         local("drush php-eval \"variable_set('apachesolr_path', '/default');\"")
         local("drush php-eval \"variable_set('apachesolr_port', 8983);\"")
@@ -367,14 +368,16 @@ def restart_services(distro):
 
 def import_site(site_archive, working_dir='/tmp/import_site/'):
     
-    unarchive(site_archive, working_dir)
+    #unarchive(site_archive, working_dir)
 
     settings_info = get_settings(working_dir)
     site_info = get_env_vars()
+    #TODO: clean this up.
+    site_info['site_dir'] = settings_info['site_dir']
 
     import_database(settings_info, working_dir)
-    setup_site_files(site_info['webroot'], working_dir)
-    setup_modules(site_info['webroot'])
+    setup_site_files(site_info['webroot'], site_info['site_dir'], working_dir)
+    setup_modules(site_info['webroot'], site_info['site_dir'])
     update_settings(site_info['webroot'], settings_info)
     set_permissions(site_info)
     restart_services(site_info['distro'])
