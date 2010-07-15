@@ -40,16 +40,17 @@ if [[ "--headless" != $$1 ]]; then
   fi
   echo "Creating a log of the output of this script at /etc/mercury/logs/init.log"
   exec &> /etc/mercury/logs/init.log
-fi
 
-# Update Packages
-${pmupdate}
+  # Update Packages
+  ${pmupdate}
 
-if [[ "--headless" != $$1 ]]; then
   # Get any Mercury/Pressflow updates.
   bash /usr/local/bin/update_mercury.sh --headless 
   bash /usr/local/bin/update_pressflow.sh --headless
 else
+  # Update Packages
+  ${pmupdate}
+
   # Get any Mercury/Pressflow updates.
   bash /usr/local/bin/update_mercury.sh
   bash /usr/local/bin/update_pressflow.sh
