@@ -45,7 +45,7 @@ fi
 # Update Packages
 ${pmupdate}
 
-if [[ "--headless" != $1 ]]; then
+if [[ "--headless" != $$1 ]]; then
   # Get any Mercury/Pressflow updates.
   bash /usr/local/bin/update_mercury.sh --headless 
   bash /usr/local/bin/update_pressflow.sh --headless
