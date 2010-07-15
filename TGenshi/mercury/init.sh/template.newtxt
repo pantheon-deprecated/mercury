@@ -27,12 +27,33 @@ if [ -e /etc/mercury/incep ]; then
     exit 1
 fi
 
+# --headless assumes this script is not being run by hand (but rather in hudson or through another script)
+if [[ "--headless" != $1 ]]; then
+  echo "This script updates the /var/lib/bcfg2 from the pantheon project on launchpad and runs bcfg2 to apply the updates (plus other initial configuration)"
+  echo -n "Continue? (y/n)"
+
+  read ANSWER
+  echo ""
+  if [[ ${ANSWER} != "y" ]]; then
+      echo "Cancelling....."
+      exit 1
+  fi
+  echo "Creating a log of the output of this script at /etc/mercury/logs/init.log"
+  exec &> /etc/mercury/logs/init.log
+fi
+
 # Update Packages
 ${pmupdate}
 
-# Get any Mercury/Pressflow updates.
-bash /usr/local/bin/update_mercury.sh --headless 
-bash /usr/local/bin/update_pressflow.sh --headless
+if [[ "--headless" != $1 ]]; then
+  # Get any Mercury/Pressflow updates.
+  bash /usr/local/bin/update_mercury.sh --headless 
+  bash /usr/local/bin/update_pressflow.sh --headless
+else
+  # Get any Mercury/Pressflow updates.
+  bash /usr/local/bin/update_mercury.sh
+  bash /usr/local/bin/update_pressflow.sh
+fi
 
 # Run any other startup scripts
 for script in $$( ls /etc/mercury/boot.d/S* ) ; do

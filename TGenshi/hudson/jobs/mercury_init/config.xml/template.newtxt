@@ -7,13 +7,12 @@ Run once on first boot.</description>
   <properties/>
   <scm class="hudson.scm.NullSCM"/>
   <canRoam>true</canRoam>
-  <disabled>${metadata.Probes['incep_exists']}</disabled>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers class="vector"/>
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>sudo /etc/mercury/init.sh 2&gt;&amp;1 | sudo tee /etc/mercury/logs/init.log</command>
+      <command>sudo /etc/mercury/init.sh --headless 2&gt;&amp;1</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>

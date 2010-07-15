@@ -1,8 +1,0 @@
-#!/bin/bash
-
-# If incep exists init.sh has already run and this probe will disable the Hudson Mercury_Init job
-if [ -a /etc/mercury/incep ] ; then
-  echo "true"
-else
-  echo "false"
-fi
