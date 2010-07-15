@@ -45,15 +45,15 @@ if [[ "--headless" != $$1 ]]; then
   ${pmupdate}
 
   # Get any Mercury/Pressflow updates.
-  bash /usr/local/bin/update_mercury.sh --headless 
-  bash /usr/local/bin/update_pressflow.sh --headless
+  bash /usr/local/bin/update_mercury.sh
+  bash /usr/local/bin/update_pressflow.sh
 else
   # Update Packages
   ${pmupdate}
 
   # Get any Mercury/Pressflow updates.
-  bash /usr/local/bin/update_mercury.sh
-  bash /usr/local/bin/update_pressflow.sh
+  bash /usr/local/bin/update_mercury.sh --headless
+  bash /usr/local/bin/update_pressflow.sh --headless
 fi
 
 # Run any other startup scripts
