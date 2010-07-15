@@ -28,13 +28,13 @@ if [ -e /etc/mercury/incep ]; then
 fi
 
 # --headless assumes this script is not being run by hand (but rather in hudson or through another script)
-if [[ "--headless" != $1 ]]; then
+if [[ "--headless" != $$1 ]]; then
   echo "This script updates the /var/lib/bcfg2 from the pantheon project on launchpad and runs bcfg2 to apply the updates (plus other initial configuration)"
   echo -n "Continue? (y/n)"
 
   read ANSWER
   echo ""
-  if [[ ${ANSWER} != "y" ]]; then
+  if [[ $${ANSWER} != "y" ]]; then
       echo "Cancelling....."
       exit 1
   fi
