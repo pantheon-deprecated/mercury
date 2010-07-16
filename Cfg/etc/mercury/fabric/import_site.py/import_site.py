@@ -260,11 +260,11 @@ def setup_site_files(webroot, site, working_dir):
     #    f.write(reverted)
     #f.close
 
-def update_settings(webroot, db_info):
+def update_settings(webroot, site, db_info):
     #TODO: remove any previously defined $db_url strings rather than relying on ours being last
     slug = Template(local("cat /etc/mercury/templates/mercury.settings.php"))
     slug = slug.safe_substitute(db_info)
-    with open(webroot + "sites/default/settings.php", 'a') as f:
+    with open(webroot + "sites/" + site + "settings.php", 'a') as f:
         f.write(slug)
     f.close
 
@@ -337,7 +337,7 @@ def setup_modules(webroot, site):
     # Drush will report failure if we try to enable a module that is already enabled.
     # To get around this, we wrap "drush en" in warn_only=True.
     # However, we still want to make sure the modules are enabled (and didn't fail for another reason).
-    site_modules = get_module_status(webroot)
+    site_modules = get_module_status(webroot + "sites/" + site)
     check_modules = ['apachesolr', 'apachesolr_search', 'cookie_cache_bypass', 'locale', 'syslog', 'varnish']
     for module in check_modules:
         if site_modules[module] == 'Disabled':
@@ -347,11 +347,11 @@ def set_permissions(site_info):
 
     # setup ownership and permissions
     local('chown -R ' + site_info['owner'] + ':' + site_info['group'] + ' ' + site_info['webroot'])
-    local('chmod 440 ' + site_info['webroot'] + 'sites/default/settings.php')
+    local('chmod 440 ' + site_info['webroot'] + 'sites/' + site_info['site_dir'] + 'settings.php')
 
     #TODO: where do we want to set the start point for searching for 'files' directories (to change perms)?
     # make sure everything under the 'files' directory has proper perms (770 on dirs, 550 on files)
-    with cd(site_info['webroot'] + '/sites/'):
+    with cd(site_info['webroot'] + 'sites/'):
         local("find . -type d -name files -exec chmod ug=rwx,o= '{}' \;")
         local("find . -name files -type d -exec find '{}' -type f \; | while read FILE; do chmod ug=rw,o= \"$FILE\"; done")
         local("find . -name files -type d -exec find '{}' -type d \; | while read DIR; do chmod ug=rwx,o= \"$DIR\"; done")
@@ -378,8 +378,12 @@ def import_site(site_archive, working_dir='/tmp/import_site/'):
     import_database(settings_info, working_dir)
     setup_site_files(site_info['webroot'], site_info['site_dir'], working_dir)
     setup_modules(site_info['webroot'], site_info['site_dir'])
-    update_settings(site_info['webroot'], settings_info)
+    update_settings(site_info['webroot'], site_info['site_dir'], settings_info)
     set_permissions(site_info)
+    #TODO: clean this up
+    ip = (local('hostname --ip-address')).rstrip('\n')
+    with cd(site_info['webroot'] + "sites/"):
+        local("ln -s " site_info['site_dir'] + " " + ip)
     restart_services(site_info['distro'])
 
     #TODO: Write cleanup function
