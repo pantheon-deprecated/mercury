@@ -368,7 +368,7 @@ def restart_services(distro):
 
 def import_site(site_archive, working_dir='/tmp/import_site/'):
     
-    #unarchive(site_archive, working_dir)
+    unarchive(site_archive, working_dir)
 
     settings_info = get_settings(working_dir)
     site_info = get_env_vars()
