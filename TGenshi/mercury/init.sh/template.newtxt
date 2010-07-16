@@ -71,10 +71,10 @@ done
 /etc/init.d/varnish restart
 
 # Create database
-if [ -n "$MYSQL_ROOT_PASSWORD" ]; then
-  MYSQL_ROOT_PASSWORD="-p${MYSQL_ROOT_PASSWORD}"
+if [ -n "$$MYSQL_ROOT_PASSWORD" ]; then
+  MYSQL_ROOT_PASSWORD="-p$${MYSQL_ROOT_PASSWORD}"
 fi
-echo "CREATE DATABASE IF NOT EXISTS pantheon;" | mysql -u root ${MYSQL_ROOT_PASSWORD}
+echo "CREATE DATABASE IF NOT EXISTS pantheon;" | mysql -u root $${MYSQL_ROOT_PASSWORD}
 
 # Mark incep date. This prevents us from ever running again.
 echo `date` > /etc/mercury/incep
