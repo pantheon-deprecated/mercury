@@ -383,7 +383,7 @@ def import_site(site_archive, working_dir='/tmp/import_site/'):
     #TODO: clean this up
     ip = (local('hostname --ip-address')).rstrip('\n')
     with cd(site_info['webroot'] + "sites/"):
-        local("ln -s " site_info['site_dir'] + " " + ip)
+        local("ln -s " + site_info['site_dir'] + " " + ip)
     restart_services(site_info['distro'])
 
     #TODO: Write cleanup function
