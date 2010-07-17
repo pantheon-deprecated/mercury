@@ -24,18 +24,18 @@ def unarchive(archive, destination):
         local("find . -depth -name .svn -exec rm -fr {} \;")
         local("find . -depth -name CVS -exec rm -fr {} \;")
 
-def is_valid_db(db_info):
+def is_valid_db_url(database):
 
     # Check for problems
-    if db_info['username'] == None or db_info['password'] == None or db_info['database'] == None:
+    if database['username'] == None or database['password'] == None or database['db_name'] == None:
         # Invalid db connection string (missing information)
         return False
-    elif db_info['username'] == "username" and db_info['password'] == "password" and db_info['database'] == "databasename":
+    elif database['username'] == "username" and database['password'] == "password" and database['db_name'] == "databasename":
         # Connection string is still set to default values
         return False
-    elif  ('/' or '\\' or '.') in db_info['database']:
+    #elif  ('/' or '\\' or '.') in database['db_name']:
         # Invalid characters in database name
-        return False
+    #    return False
     else:
         return True
 
@@ -53,7 +53,7 @@ def get_site_settings(working_dir, settings_file):
     ret = {}
     ret['username'] = url.username
     ret['password'] = url.password
-    ret['database'] = url.path[1:].replace('\n','')
+    ret['db_name'] = url.path[1:].replace('\n','')
     ret['site_dir'] = settings_file.replace('sites/','').replace('settings.php','')
     
     return ret
@@ -72,20 +72,24 @@ def get_settings(working_dir):
     # multiple settings.php files
     if '\n' in settings_files:
         settings_files = settings_files.split('\n')
-        # Step through each settings.php file and select a valid settings.php (with preference for sites/default/)
+        # Step through each settings.php file and select all valid sites 
         for sfile in settings_files:
             site_settings = get_site_settings(working_dir, sfile)
-            if is_valid_db(site_settings):
+            if is_valid_db_url(site_settings):
                 match.append(site_settings)
+
+        # If more than one valid site is found, decide which to use
         if match.count > 1:
             return choose_site(match, working_dir)
+
+        # If only one valid site is found, use this.
         elif match.count == 1:
             return match.pop()
 
     # Single settings.php
     else:
         site_settings = get_site_settings(working_dir, settings_files)
-        if is_valid_db(site_settings):
+        if is_valid_db_url(site_settings):
             return site_settings
     
     abort("No valid settings.php was found")
@@ -98,14 +102,14 @@ def choose_site(sites, working_dir):
     # If we need it, host is in back-reference 1 (\1)
     dumped_db_name = (local(r"awk '/^-- Host:/' " + get_db_dump_name(working_dir) + r" | sed 's_.*Host:\s*\(.*\)\s*Database:\s*\(.*\)$_\2_'")).rstrip('\n')
     for site in sites:
-        if site['database'] == dumped_db_name:
+        if site['db_name'] == dumped_db_name:
             found.append(site)
     if found.count == 1:
         return found.pop()
     elif found.count == 0:
         print "WARNING: The database that was dumped does not match any Drupal settings.php files."
 
-    # Resort to manual
+    # Automated selection failed. Resort to manual.
     print "\nMultiple sites found. Please select the site you wish to use:\n"
     count = 0
     for site in sites:
@@ -118,9 +122,7 @@ def choose_site(sites, working_dir):
             valid = True
     return sites[choice]
 
-def get_env_vars():
-    '''Get distribution name and return environmental variables based on distribution defaults.'''
-    #TODO: Do we need more specific ubuntu versions (e.g. check for lucid for upstart services?)
+def get_server_settings():
     ret = {}
     # Default Ubuntu
     if exists('/etc/debian_version'):
@@ -134,6 +136,7 @@ def get_env_vars():
         ret['owner'] = 'root'
         ret['group'] = 'apache'
         ret['distro'] = 'centos'
+    ret['ip'] = (local('hostname --ip-address')).rstrip('\n')
     return ret
 
 def get_drupal_version(working_dir):
@@ -206,14 +209,14 @@ def get_db_dump_name(working_dir):
 
     return db_dump_file
 
-def import_database(db_info, working_dir):
+def import_database(db, working_dir):
 
     db_dump_file = get_db_dump_name(working_dir)
 
-    local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS " + db_info['database'] + "'")
-    local("mysql -u root -e \"GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, LOCK TABLES, CREATE TEMPORARY TABLES ON " + db_info['database'] + ".* TO '" + db_info['username'] + "'@'localhost' IDENTIFIED BY '" + db_info['password'] + "';\"")
+    local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS " + db['db_name'] + "'")
+    local("mysql -u root -e \"GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, LOCK TABLES, CREATE TEMPORARY TABLES ON " + db['db_name'] + ".* TO '" + db['username'] + "'@'localhost' IDENTIFIED BY '" + db['password'] + "';\"")
     local("mysql -u root -e 'FLUSH PRIVILEGES;'")
-    local("mysql -u root " + db_info['database'] + " < " + db_dump_file)
+    local("mysql -u root " + db['db_name'] + " < " + db_dump_file)
     local("rm -f " + db_dump_file)
 
 def setup_site_files(webroot, site, working_dir):
@@ -260,11 +263,11 @@ def setup_site_files(webroot, site, working_dir):
     #    f.write(reverted)
     #f.close
 
-def update_settings(webroot, site, db_info):
+def update_settings(webroot, site_settings):
     #TODO: remove any previously defined $db_url strings rather than relying on ours being last
     slug = Template(local("cat /etc/mercury/templates/mercury.settings.php"))
-    slug = slug.safe_substitute(db_info)
-    with open(webroot + "sites/" + site + "settings.php", 'a') as f:
+    slug = slug.safe_substitute(site_settings)
+    with open(webroot + "sites/" + site_settings['site_dir'] + "settings.php", 'a') as f:
         f.write(slug)
     f.close
 
@@ -343,15 +346,14 @@ def setup_modules(webroot, site):
         if site_modules[module] == 'Disabled':
             print "WARNING: Required module \"" + module + "\" could not be enabled."
 
-def set_permissions(site_info):
-
+def set_permissions(server_settings, site_dir):
+    #TODO: make database call to find file dir location for specific site
     # setup ownership and permissions
-    local('chown -R ' + site_info['owner'] + ':' + site_info['group'] + ' ' + site_info['webroot'])
-    local('chmod 440 ' + site_info['webroot'] + 'sites/' + site_info['site_dir'] + 'settings.php')
+    local('chown -R ' + server_settings['owner'] + ':' + server_settings['group'] + ' ' + server_settings['webroot'])
+    local('chmod 440 ' + server_settings['webroot'] + 'sites/' + site_dir + 'settings.php')
 
-    #TODO: where do we want to set the start point for searching for 'files' directories (to change perms)?
     # make sure everything under the 'files' directory has proper perms (770 on dirs, 550 on files)
-    with cd(site_info['webroot'] + 'sites/'):
+    with cd(server_settings['webroot'] + 'sites/'):
         local("find . -type d -name files -exec chmod ug=rwx,o= '{}' \;")
         local("find . -name files -type d -exec find '{}' -type f \; | while read FILE; do chmod ug=rw,o= \"$FILE\"; done")
         local("find . -name files -type d -exec find '{}' -type d \; | while read DIR; do chmod ug=rwx,o= \"$DIR\"; done")
@@ -367,24 +369,36 @@ def restart_services(distro):
         local('/etc/init.d/tomcat5 restart')
 
 def import_site(site_archive, working_dir='/tmp/import_site/'):
-    
+
+    # Extract compressed site into a temporary working directory
     unarchive(site_archive, working_dir)
 
-    settings_info = get_settings(working_dir)
-    site_info = get_env_vars()
-    #TODO: clean this up.
-    site_info['site_dir'] = settings_info['site_dir']
+    # Get database connection info & the sites directory that will be used
+    site_settings = get_settings(working_dir)
 
-    import_database(settings_info, working_dir)
-    setup_site_files(site_info['webroot'], site_info['site_dir'], working_dir)
-    setup_modules(site_info['webroot'], site_info['site_dir'])
-    update_settings(site_info['webroot'], site_info['site_dir'], settings_info)
-    set_permissions(site_info)
-    #TODO: clean this up
-    ip = (local('hostname --ip-address')).rstrip('\n')
-    with cd(site_info['webroot'] + "sites/"):
-        local("ln -s " + site_info['site_dir'] + " " + ip)
-    restart_services(site_info['distro'])
+    # Get server environment information
+    server_settings = get_server_settings()
+
+    # Import the database database dump & grant permissions
+    import_database(site_settings, working_dir)
+
+    # Create the webroot. Import the existing site. Update to latest Pressflow.
+    setup_site_files(server_settings['webroot'], site_settings['site_dir'], working_dir)
+
+    # Download and enable any modules required by Pantheon
+    setup_modules(server_settings['webroot'], site_settings['site_dir'])
+
+    # Update settings.php with database connection info, and add Pantheon caching information.
+    update_settings(server_settings['webroot'], site_settings)
+
+    # Set ownership & permissions for webroot, settings.php, and files directories.
+    set_permissions(server_settings, site_settings['site_dir'])
+
+    with cd(server_settings['webroot'] + "sites/"):
+        local("ln -s " + site_settings['site_dir'] + " " + server_settings['ip'])
+
+    # Kick Apache, Memcached, Tomcat
+    restart_services(server_settings['distro'])
 
     #TODO: Write cleanup function
     #TODO: clear solr index (if exists) before using new site
