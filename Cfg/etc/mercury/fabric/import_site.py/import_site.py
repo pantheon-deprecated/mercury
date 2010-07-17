@@ -58,20 +58,26 @@ def get_site_settings(working_dir, settings_file):
     
     return ret
 
-def get_settings(working_dir):
+def get_settings(working_dir, selected_site = None):
     site_settings = {}
-    match = []
-    # Get all settings.php files
-    with cd(working_dir):
-        settings_files = (local('find sites/ -name settings.php -type f')).rstrip('\n')
+    match = [] 
 
-    # Check if any settings.php files were found
-    if not settings_files:
-        return False
+    # Site may have been preselected (in web-interface)
+    if selected_site:
+        settings_files = "sites/" + selected_site + "/settings.php"
+        print settings_files
+    else:
+        # Get all settings.php files
+        with cd(working_dir):
+            settings_files = (local('find sites/ -name settings.php -type f')).rstrip('\n')
+
+        # Check if any settings.php files were found
+        if not settings_files:
+            return False
 
     # multiple settings.php files
     if '\n' in settings_files:
-        settings_files = settings_files.split('\n')
+        settings_files.split('\n')
         # Step through each settings.php file and select all valid sites 
         for sfile in settings_files:
             site_settings = get_site_settings(working_dir, sfile)
@@ -82,7 +88,7 @@ def get_settings(working_dir):
         if match.count > 1:
             return choose_site(match, working_dir)
 
-        # If only one valid site is found, use this.
+        # If only one valid site is found, use it.
         elif match.count == 1:
             return match.pop()
 
@@ -368,13 +374,13 @@ def restart_services(distro):
         local('/etc/init.d/memcached restart')
         local('/etc/init.d/tomcat5 restart')
 
-def import_site(site_archive, working_dir='/tmp/import_site/'):
+def import_site(site_archive, selected_site = None, working_dir='/tmp/import_site/'):
 
     # Extract compressed site into a temporary working directory
     unarchive(site_archive, working_dir)
 
     # Get database connection info & the sites directory that will be used
-    site_settings = get_settings(working_dir)
+    site_settings = get_settings(working_dir, selected_site)
 
     # Get server environment information
     server_settings = get_server_settings()
