@@ -5,7 +5,7 @@
 # Alter With Caution :)
 #
 ##########################
-$db_url = 'mysqli://${username}:${password}@localhost/${database}';
+$db_url = 'mysqli://${username}:${password}@localhost/${db_name}';
 
 # Varnish reverse proxy on localhost
 $conf['reverse_proxy'] = TRUE;
