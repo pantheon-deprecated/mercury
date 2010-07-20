@@ -6,6 +6,11 @@ from os.path import exists
 env.hosts = ['pantheon@localhost']
 
 def add_support_account():
+    '''Generate a public/private key pair for root.'''
+    with cd('~/.ssh'):
+        local('ssh-keygen -trsa -b1024 -f id_rsa -N ""')
+
+    '''Set up the Pantheon support account with sudo and the proper keys.'''
     local('echo "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers')
     local('useradd pantheon --base-dir=/var --comment="Pantheon Support" --create-home --groups=www-data,sudo --shell=/bin/bash')
     with cd('~pantheon'):
@@ -19,8 +24,6 @@ def add_support_account():
 def initialize():
     '''Initialize the Pantheon system.'''
     #add_support_account()
-    run('whoami')
-    sudo('whoami')
     set_up_apt()
 
 def set_up_apt():
