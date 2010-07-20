@@ -77,7 +77,7 @@ def get_settings(working_dir, selected_site = None):
 
     # multiple settings.php files
     if '\n' in settings_files:
-        settings_files.split('\n')
+        settings_files = settings_files.split('\n')
         # Step through each settings.php file and select all valid sites 
         for sfile in settings_files:
             site_settings = get_site_settings(working_dir, sfile)
