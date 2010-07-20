@@ -58,7 +58,7 @@ def get_site_settings(working_dir, settings_file):
     
     return ret
 
-def get_settings(working_dir, selected_site = None):
+def get_settings(working_dir, selected_site, hudson):
     site_settings = {}
     match = [] 
 
@@ -86,7 +86,7 @@ def get_settings(working_dir, selected_site = None):
 
         # If more than one valid site is found, decide which to use
         if match.count > 1:
-            return choose_site(match, working_dir)
+            return choose_site(match, working_dir, hudson)
 
         # If only one valid site is found, use it.
         elif match.count == 1:
@@ -100,7 +100,7 @@ def get_settings(working_dir, selected_site = None):
     
     abort("No valid settings.php was found")
 
-def choose_site(sites, working_dir):
+def choose_site(sites, working_dir, hudson):
     # Try to autmatically figure out which site to use first.
 
     # Test 1: if db name in the dump file comments match the db name in only one settings.php, this is a safe match.
@@ -116,17 +116,25 @@ def choose_site(sites, working_dir):
         print "WARNING: The database that was dumped does not match any Drupal settings.php files."
 
     # Automated selection failed. Resort to manual.
-    print "\nMultiple sites found. Please select the site you wish to use:\n"
-    count = 0
-    for site in sites:
-        print "[" + str(count) + "]: " + sites[count]['site_dir']
-        count += 1
-    valid = False
-    while not valid:
-        choice = int(prompt('\nChoose Site: \n', validate=r'^\d{1,3}$'))
-        if choice < len(sites) and choice > -1:
-            valid = True
-    return sites[choice]
+    if not hudson:
+        print "\nMultiple sites found. Please select the site you wish to use:\n"
+        count = 0
+        for site in sites:
+            print "[" + str(count) + "]: " + sites[count]['site_dir']
+            count += 1
+        valid = False
+        while not valid:
+            choice = int(prompt('\nChoose Site: \n', validate=r'^\d{1,3}$'))
+            if choice < len(sites) and choice > -1:
+                valid = True
+        return sites[choice]
+    # Script was started by hudson (return list of sites to choose from)
+    else:
+        with open('/var/lib/hudson/jobs/import_site/workspace/available-sites.txt', 'w') as f:
+            for site in sites:
+                f.write(site['site_dir'].rstrip('/') + '\n')
+        f.close
+        abort("Multiple Sites Found. List stored in available-sites.txt build artifact.")
 
 def get_server_settings():
     ret = {}
@@ -286,7 +294,7 @@ def get_module_status(site_path):
 
 def setup_modules(webroot, site):
 
-    required_modules = {'apachesolr':None, 'apachesolr_search':'disabled', 'cookie_cache_bypass':'Disabled', 'locale':None, 'memcache_admin':None, 'syslog':None, 'varnish':None}
+    required_modules = {'apachesolr':None, 'apachesolr_search':'Disabled', 'cookie_cache_bypass':'Disabled', 'locale':None, 'memcache_admin':None, 'syslog':None, 'varnish':None}
 
     # Get module dictionary. Key=Module name, Value=Enabled/Disabled/None
     site_modules = get_module_status(webroot + "sites/" + site)
@@ -300,8 +308,10 @@ def setup_modules(webroot, site):
         # Special case: download memcache if memcache_admin doesn't exist, but don't enable memcache_admin.
         if required_modules['memcache_admin'] == None:
             local("drush -y dl memcache")
+            required_modules['memcache_admin'] = 'Disabled'
+        if required_modules['memcache_admin'] == 'Disabled':
             del(required_modules['memcache_admin'])
-    
+
         # Special Case: Make sure both apachesolr and apachesolr_search are installed and enabled.
         if required_modules['apachesolr'] == None:
             local("drush -y dl apachesolr")
@@ -374,13 +384,22 @@ def restart_services(distro):
         local('/etc/init.d/memcached restart')
         local('/etc/init.d/tomcat5 restart')
 
-def import_site(site_archive, selected_site = None, working_dir='/tmp/import_site/'):
+def import_site(site_archive, run_from, selected_site = None):
+    working_dir = '/tmp/import_site/'
 
+    # variables from fabfile / cmdline come in as strings. Covert to bool types
+    if not bool(selected_site):
+        selected_site = None
+    if run_from == 'hudson': 
+        hudson = True
+    else:
+        hudson = False
+   
     # Extract compressed site into a temporary working directory
     unarchive(site_archive, working_dir)
 
     # Get database connection info & the sites directory that will be used
-    site_settings = get_settings(working_dir, selected_site)
+    site_settings = get_settings(working_dir, selected_site, hudson)
 
     # Get server environment information
     server_settings = get_server_settings()
