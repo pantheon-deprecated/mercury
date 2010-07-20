@@ -3,16 +3,25 @@ from fabric.api import *
 from fabric.contrib.console import confirm
 from os.path import exists
 
-env.hosts = ['localhost']
+env.hosts = ['pantheon@localhost']
 
-def ssh_loopback():
-    with cd('~/.ssh'):
-        local('rm -f id_rsa id_rsa.pub')
-        local('ssh-keygen -trsa -b1024 -f id_rsa -N ""')
-        local('cp id_rsa.pub authorized_keys')
-        local('chmod 600 authorized_keys')
-    run('echo Working')
+def add_support_account():
+    local('echo "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers')
+    local('useradd pantheon --base-dir=/var --comment="Pantheon Support" --create-home --groups=www-data,sudo --shell=/bin/bash')
+    with cd('~pantheon'):
+        local('mkdir .ssh')
+        local('chmod 700 .ssh')
+        local('cp /opt/pantheon/init/authorized_keys .ssh/')
+        local('cat ~/.ssh/id_rsa.pub > .ssh/authorized_keys')
+        local('chmod 600 .ssh/authorized_keys')
+        local('chown -R pantheon: .ssh')
 
-def init():
+def initialize():
     '''Initialize the Pantheon system.'''
-    ssh_loopback()
+    #add_support_account()
+    run('whoami')
+    sudo('whoami')
+    set_up_apt()
+
+def set_up_apt():
+    sudo('echo \'APT::Install-Recommends "0";\' >>  /etc/apt/apt.conf')
