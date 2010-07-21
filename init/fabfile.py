@@ -8,6 +8,7 @@ env.hosts = ['pantheon@localhost']
 
 def add_support_account():
     '''Generate a public/private key pair for root.'''
+    local('mkdir ~/.ssh')
     with cd('~/.ssh'):
         with settings(warn_only=True):
             local('ssh-keygen -trsa -b1024 -f id_rsa -N ""')
