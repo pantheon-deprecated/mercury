@@ -24,7 +24,7 @@ def add_support_account():
 
 def initialize():
     '''Initialize the Pantheon system.'''
-    #add_support_account()
+    add_support_account()
     initialize_aptitude()
     initialize_bcfg2()
     initialize_drush()
