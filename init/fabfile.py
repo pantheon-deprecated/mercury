@@ -54,12 +54,16 @@ def initialize_bcfg2():
     run('openssl req -batch -new  -subj "/C=US/ST=California/L=San Francisco/CN=localhost" -key /etc/bcfg2.key | openssl x509 -req -days 1000 -signkey /tmp/bcfg2.key -out /tmp/bcfg2.crt')
     sudo('cp /tmp/bcfg2.crt /etc/')
     sudo('chmod 0600 /etc/bcfg2.key')
-
+    sudo('rmdir /var/lib/bcfg2')
     sudo('ln -s /opt/pantheon/bcfg2 /var/lib/')
-    sudo('echo -e "<Clients version=\"3.0\">\n</Clients>" >> /var/lib/bcfg2/Metadata/clients.xml')
+    sudo('cp /opt/pantheon/init/clients.xml /var/lib/bcfg2/Metadata/')
     sudo('sed -i "s/^plugins = .*$/plugins = Bundler,Cfg,Metadata,Packages,Probes,Rules,TGenshi\\nfilemonitor = gamin/" /etc/bcfg2.conf')
     sudo('/etc/init.d/bcfg2-server start')
-    sleep(15) # @TODO: Detect BCFG2 startup properly
+    server_running = False
+    while not server_running:
+        with settings(warn_only = True):
+            server_running = (sudo('netstat -atn | grep :6789')).rstrip('\n')
+        sleep(5)
     sudo('/usr/sbin/bcfg2 -vqed') # @TODO: Add "-p 'mercury-aws'" for EC2
 
 def initialize_drush():
