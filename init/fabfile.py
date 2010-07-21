@@ -2,6 +2,7 @@ from __future__ import with_statement
 from fabric.api import *
 from fabric.contrib.console import confirm
 from os.path import exists
+from time import sleep
 
 env.hosts = ['pantheon@localhost']
 
@@ -24,7 +25,73 @@ def add_support_account():
 def initialize():
     '''Initialize the Pantheon system.'''
     #add_support_account()
-    set_up_apt()
+    initialize_aptitude()
+    initialize_bcfg2()
+    initialize_drush()
+    initialize_pantheon()
+    initialize_solr()
+    initialize_hudson()
+    initialize_pressflow()
 
-def set_up_apt():
+def initialize_aptitude():
+    with cd('/opt/pantheon/init'):
+        sudo('cp pantheon.list /etc/apt/sources.list.d/')
+        sudo('cp lucid /etc/apt/preferences.d/')
+        sudo('apt-key add gpgkeys.txt')
     sudo('echo \'APT::Install-Recommends "0";\' >>  /etc/apt/apt.conf')
+    sudo('apt-get update')
+    sudo('apt-get -y dist-upgrade')
+
+def initialize_bcfg2():
+    sudo('apt-get install -y bcfg2-server gamin python-gamin python-genshi')
+
+    with cd('/opt/pantheon/init'):
+        sudo('cp bcfg2.conf /etc/')
+    run('openssl req -batch -x509 -nodes -subj "/C=US/ST=California/L=San Francisco/CN=localhost" -days 1000 -newkey rsa:2048 -keyout /tmp/bcfg2.key -noout')
+    sudo('cp /tmp/bcfg2.key /etc/')
+    run('openssl req -batch -new  -subj "/C=US/ST=California/L=San Francisco/CN=localhost" -key /etc/bcfg2.key | openssl x509 -req -days 1000 -signkey /tmp/bcfg2.key -out /tmp/bcfg2.crt')
+    sudo('cp /tmp/bcfg2.crt /etc/')
+    sudo('chmod 0600 /etc/bcfg2.key')
+
+    sudo('ln -s /opt/pantheon/bcfg2 /var/lib/')
+    sudo('echo -e "<Clients version=\"3.0\">\n</Clients>" >> /var/lib/bcfg2/Metadata/clients.xml')
+    sudo('sed -i "s/^plugins = .*$/plugins = Bundler,Cfg,Metadata,Packages,Probes,Rules,TGenshi\\nfilemonitor = gamin/" /etc/bcfg2.conf')
+    sudo('/etc/init.d/bcfg2-server start')
+    sleep(15) # @TODO: Detect BCFG2 startup properly
+    sudo('/usr/sbin/bcfg2 -vqed') # @TODO: Add "-p 'mercury-aws'" for EC2
+
+def initialize_drush():
+    run('wget http://ftp.drupal.org/files/projects/drush-All-versions-3.0.tar.gz')
+    run('tar xvzf drush-All-versions-3.0.tar.gz')
+    run('sudo chmod 555 drush/drush')
+    sudo('sudo chown -R root: drush')
+    sudo('mv drush /opt/')
+    sudo('ln -s /opt/drush/drush /usr/local/bin/drush')
+    sudo('drush dl drush_make')
+
+def initialize_pantheon():
+    sudo('rm -rf /var/www')
+    sudo('sudo drush make --working-copy /etc/mercury/mercury.make /var/www/')
+
+def initialize_solr():
+    run('wget http://apache.osuosl.org/lucene/solr/1.4.0/apache-solr-1.4.1.tgz')
+    run('tar xvzf apache-solr-1.4.1.tgz')
+    sudo('mkdir /var/solr')
+    sudo('mv apache-solr-1.4.0/dist/apache-solr-1.4.0.war /var/solr/solr.war')
+    sudo('mv apache-solr-1.4.0/example/solr /var/solr/default')
+    sudo('mv /var/www/sites/all/modules/apachesolr/schema.xml /var/solr/default/conf/')
+    sudo('mv /var/www/sites/all/modules/apachesolr/solrconfig.xml /var/solr/default/conf/')
+    sudo('chown -R tomcat6:root /var/solr/')
+
+def initialize_hudson():
+    sudo('echo "hudson ALL = NOPASSWD: /usr/local/bin/drush, /etc/mercury/init.sh, /usr/bin/fab, /usr/sbin/bcfg2" >> /etc/sudoers')
+    sudo('usermod -a -G shadow hudson')
+
+def initialize_pressflow():
+    sudo('mkdir /var/www/sites/default/files')
+    sudo('cp /var/www/sites/default/default.settings.php /var/www/sites/default/settings.php')
+    sudo('chown -R root:www-data /var/www/*')
+    sudo('chown www-data:www-data /var/www/sites/default/settings.php')
+    sudo('chmod 660 /var/www/sites/default/settings.php')
+    sudo('chmod 775 /var/www/sites/default/files')
+
