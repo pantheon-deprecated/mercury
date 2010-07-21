@@ -6,7 +6,7 @@ from time import sleep
 
 env.hosts = ['pantheon@localhost']
 
-def add_support_account():
+def initialize_support_account():
     '''Generate a public/private key pair for root.'''
     local('mkdir ~/.ssh')
     with cd('~/.ssh'):
@@ -26,7 +26,7 @@ def add_support_account():
 
 def initialize():
     '''Initialize the Pantheon system.'''
-    add_support_account()
+    initialize_support_account()
     initialize_aptitude()
     initialize_bcfg2()
     initialize_drush()
