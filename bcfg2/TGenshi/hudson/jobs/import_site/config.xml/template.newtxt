@@ -11,6 +11,20 @@
           <description>Full path to tarball</description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>RUN_FROM</name>
+          <description>If script is being run from hudson</description>
+          <choices class="java.util.Arrays$$ArrayList">
+            <a class="string-array">
+              <string>hudson</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>SITE</name>
+          <description>Select specific site you wish to import</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
@@ -22,7 +36,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>sudo /usr/bin/fab -f /etc/mercury/fabric/import_site.py import_site:$$TARBALL</command>
+      <command>sudo /usr/bin/fab -f /etc/mercury/fabric/import_site.py import_site:$$TARBALL,$$RUN_FROM,$$SITE</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
