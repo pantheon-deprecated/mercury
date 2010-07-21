@@ -356,11 +356,11 @@ def setup_modules(webroot, site):
     # Drush will report failure if we try to enable a module that is already enabled.
     # To get around this, we wrap "drush en" in warn_only=True.
     # However, we still want to make sure the modules are enabled (and didn't fail for another reason).
-    site_modules = get_module_status(webroot + "sites/" + site)
-    check_modules = ['apachesolr', 'apachesolr_search', 'cookie_cache_bypass', 'locale', 'syslog', 'varnish']
-    for module in check_modules:
-        if site_modules[module] == 'Disabled':
-            print "WARNING: Required module \"" + module + "\" could not be enabled."
+    #site_modules = get_module_status(webroot + "sites/" + site)
+    #check_modules = ['apachesolr', 'apachesolr_search', 'cookie_cache_bypass', 'locale', 'syslog', 'varnish']
+    #for module in check_modules:
+    #    if site_modules[module] == 'Disabled':
+    #        print "WARNING: Required module \"" + module + "\" could not be enabled."
 
 def set_permissions(server_settings, site_dir):
     #TODO: make database call to find file dir location for specific site
@@ -384,7 +384,7 @@ def restart_services(distro):
         local('/etc/init.d/memcached restart')
         local('/etc/init.d/tomcat5 restart')
 
-def import_site(site_archive, run_from, selected_site = None):
+def import_site(site_archive, run_from = False, selected_site = None):
     working_dir = '/tmp/import_site/'
 
     # variables from fabfile / cmdline come in as strings. Covert to bool types
