@@ -9,7 +9,8 @@ env.hosts = ['pantheon@localhost']
 def add_support_account():
     '''Generate a public/private key pair for root.'''
     with cd('~/.ssh'):
-        local('ssh-keygen -trsa -b1024 -f id_rsa -N ""')
+        with settings(warn_only=True):
+            local('ssh-keygen -trsa -b1024 -f id_rsa -N ""')
 
     '''Set up the Pantheon support account with sudo and the proper keys.'''
     local('echo "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers')
