@@ -80,11 +80,11 @@ def initialize_pantheon():
     sudo('sudo drush make --working-copy /etc/mercury/mercury.make /var/www/')
 
 def initialize_solr():
-    run('wget http://apache.osuosl.org/lucene/solr/1.4.0/apache-solr-1.4.1.tgz')
+    run('wget http://apache.osuosl.org/lucene/solr/1.4.1/apache-solr-1.4.1.tgz')
     run('tar xvzf apache-solr-1.4.1.tgz')
     sudo('mkdir /var/solr')
-    sudo('mv apache-solr-1.4.0/dist/apache-solr-1.4.0.war /var/solr/solr.war')
-    sudo('mv apache-solr-1.4.0/example/solr /var/solr/default')
+    sudo('mv apache-solr-1.4.1/dist/apache-solr-1.4.1.war /var/solr/solr.war')
+    sudo('mv apache-solr-1.4.1/example/solr /var/solr/default')
     sudo('mv /var/www/sites/all/modules/apachesolr/schema.xml /var/solr/default/conf/')
     sudo('mv /var/www/sites/all/modules/apachesolr/solrconfig.xml /var/solr/default/conf/')
     sudo('chown -R tomcat6:root /var/solr/')
