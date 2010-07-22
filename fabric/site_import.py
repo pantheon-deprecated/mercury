@@ -1,70 +1,63 @@
 from fabric.api import *
-from fabric.contrib.console import confirm
 from fabric.operations import prompt
-from urlparse import urlparse
 from os.path import exists
 from string import Template
-from pprint import pprint
+from re import search
+from pantheon import *
 import pdb
+def import_site(site_archive, hudson = 'False', selected_site = ''):
+    '''Import site archive into a Pantheon server'''
+    hudson, selected_site, working_dir = _set_env_vars(hudson, selected_site)
 
-def unarchive(archive, destination):
+    unarchive(site_archive, working_dir)
 
-    if not exists(archive):
-        abort("Archive file \"" + archive + "\" does not exist.")
+    site_settings = _get_settings(working_dir, selected_site, hudson)
+    server_settings = _get_server_settings()
 
-    if exists(destination):
-        local("rm -rf " + destination)
+    _import_database(site_settings, working_dir)
+    _setup_site_files(server_settings['webroot'], site_settings['site_name'], working_dir)
+    _setup_modules(server_settings['webroot'], site_settings['site_name'])
+    _update_settings(server_settings['webroot'], site_settings)
+    _set_permissions(server_settings, site_settings['site_name'])
 
-    local("bzr init " + destination)
+    with cd(server_settings['webroot'] + "sites/"):
+        local("ln -s " + site_settings['site_name'] + " " + server_settings['ip'])
 
-    with cd(destination):
-        local("bzr import " + archive)
-        local("rm -r ./.bzr")
-        local("find . -depth -name .svn -exec rm -fr {} \;")
-        local("find . -depth -name CVS -exec rm -fr {} \;")
+    _restart_services(server_settings['distro'])
 
-def is_valid_db_url(database):
+    #TODO: Write cleanup function
+    #TODO: clear solr index (if exists) before using new site
+    #
 
-    # Check for problems
-    if database['username'] == None or database['password'] == None or database['db_name'] == None:
-        # Invalid db connection string (missing information)
+def _set_env_vars(run_from, selected_site):
+    # Variables from commandline are always passed as strings. Convert to proper types.
+    hudson = False
+    if run_from == 'True':
+        hudson = True
+    if selected_site.strip() == '':
+        site = False
+    else:
+        site = selected_site.stirp()
+    return hudson, site, '/tmp/import_site/'
+
+def _is_valid_db_url(database):
+    # Invalid db connection string (missing information)
+    if database['db_username'] == None or database['db_password'] == None or database['db_name'] == None:
         return False
-    elif database['username'] == "username" and database['password'] == "password" and database['db_name'] == "databasename":
-        # Connection string is still set to default values
+    # Connection string is still set to default values
+    elif database['db_username'] == "db_username" and database['db_password'] == "password" and database['db_name'] == "databasename":
         return False
-    #elif  ('/' or '\\' or '.') in database['db_name']:
-        # Invalid characters in database name
-    #    return False
+    # Valid
     else:
         return True
 
-def get_site_settings(working_dir, settings_file):
-
-    url = (local("awk '/^\$db_url = /' " + working_dir + settings_file + " | sed 's/^.*'\\''\([a-z]*\):\(.*\)'\\''.*$/\\2/'")).rstrip('\n')
-
-    # Check for multiple connection strings. If more than one, use the last.
-    if '\n' in url:
-        url = url.split('\n')
-        url = urlparse(url[len(url)-1])
-    else:
-        url = urlparse(url)
-
-    ret = {}
-    ret['username'] = url.username
-    ret['password'] = url.password
-    ret['db_name'] = url.path[1:].replace('\n','')
-    ret['site_dir'] = settings_file.replace('sites/','').replace('settings.php','')
-    
-    return ret
-
-def get_settings(working_dir, selected_site, hudson):
+def _get_settings(working_dir, selected_site, hudson):
     site_settings = {}
     match = [] 
 
     # Site may have been preselected (in web-interface)
     if selected_site:
         settings_files = "sites/" + selected_site + "/settings.php"
-        print settings_files
     else:
         # Get all settings.php files
         with cd(working_dir):
@@ -72,20 +65,23 @@ def get_settings(working_dir, selected_site, hudson):
 
         # Check if any settings.php files were found
         if not settings_files:
-            return False
+            abort("No settings.php files were found.") 
 
     # multiple settings.php files
     if '\n' in settings_files:
+        pdb.set_trace()
         settings_files = settings_files.split('\n')
         # Step through each settings.php file and select all valid sites 
         for sfile in settings_files:
-            site_settings = get_site_settings(working_dir, sfile)
-            if is_valid_db_url(site_settings):
+            site_settings = get_database_settings(working_dir + sfile)
+            site_settings['site_name'] = (search(r'^.*sites/(.*)/settings.php',sfile)).group(1)
+
+            if _is_valid_db_url(site_settings):
                 match.append(site_settings)
 
         # If more than one valid site is found, decide which to use
         if match.count > 1:
-            return choose_site(match, working_dir, hudson)
+            return _choose_site(match, working_dir, hudson)
 
         # If only one valid site is found, use it.
         elif match.count == 1:
@@ -93,19 +89,21 @@ def get_settings(working_dir, selected_site, hudson):
 
     # Single settings.php
     else:
-        site_settings = get_site_settings(working_dir, settings_files)
-        if is_valid_db_url(site_settings):
+        site_settings = get_database_settings(working_dir + settings_files)
+        site_settings['site_name'] = (search(r'^.*sites/(.*)/settings.php',settings_file)).group(1)
+
+        if _is_valid_db_url(site_settings):
             return site_settings
     
     abort("No valid settings.php was found")
 
-def choose_site(sites, working_dir, hudson):
+def _choose_site(sites, working_dir, hudson):
     # Try to autmatically figure out which site to use first.
 
     # Test 1: if db name in the dump file comments match the db name in only one settings.php, this is a safe match.
     found = []
     # If we need it, host is in back-reference 1 (\1)
-    dumped_db_name = (local(r"awk '/^-- Host:/' " + get_db_dump_name(working_dir) + r" | sed 's_.*Host:\s*\(.*\)\s*Database:\s*\(.*\)$_\2_'")).rstrip('\n')
+    dumped_db_name = (local(r"awk '/^-- Host:/' " + _get_db_dump_name(working_dir) + r" | sed 's_.*Host:\s*\(.*\)\s*Database:\s*\(.*\)$_\2_'")).rstrip('\n')
     for site in sites:
         if site['db_name'] == dumped_db_name:
             found.append(site)
@@ -116,10 +114,11 @@ def choose_site(sites, working_dir, hudson):
 
     # Automated selection failed. Resort to manual.
     if not hudson:
+        pdb.set_trace()
         print "\nMultiple sites found. Please select the site you wish to use:\n"
         count = 0
         for site in sites:
-            print "[" + str(count) + "]: " + sites[count]['site_dir']
+            print "[" + str(count) + "]: " + site['site_name']
             count += 1
         valid = False
         while not valid:
@@ -131,11 +130,11 @@ def choose_site(sites, working_dir, hudson):
     else:
         with open('/var/lib/hudson/jobs/import_site/workspace/available-sites.txt', 'w') as f:
             for site in sites:
-                f.write(site['site_dir'].rstrip('/') + '\n')
+                f.write(site['site_name'] + '\n')
         f.close
         abort("Multiple Sites Found. List stored in available-sites.txt build artifact.")
 
-def get_server_settings():
+def _get_server_settings():
     ret = {}
     # Default Ubuntu
     if exists('/etc/debian_version'):
@@ -152,7 +151,7 @@ def get_server_settings():
     ret['ip'] = (local('hostname --ip-address')).rstrip('\n')
     return ret
 
-def get_drupal_version(working_dir):
+def _get_drupal_version(working_dir):
     # Test 1: Try to get version from system.module
     version = (local("awk \"/define\(\'VERSION\'/\" " + working_dir + "modules/system/system.module" + "| sed \"s_^.*'\(6\)\.\([0-9]\{1,2\}\)'.*_\\1-\\2_\"")).rstrip('\n')
     if not version:
@@ -166,8 +165,12 @@ def get_drupal_version(working_dir):
     else:
         return version
 
-def get_pressflow_revision(working_dir, drupal_version):
+def _get_pressflow_revision(working_dir, drupal_version):
     #TODO: Optimize this (restrict search to revisions within Drupal minor version)
+    #TODO: Add check for .bzr metadata
+    if exists(working_dir + 'PRESSFLOW.txt'):
+        revno = local("cat " + working_dir + "PRESSFLOW.txt").split('.')[2].rstrip('\n')
+        return revno
     if exists("/tmp/pf_temp"):
         local("rm -rf /tmp/pf_temp")
     local("bzr branch lp:pressflow/6.x /tmp/pf_temp")
@@ -182,12 +185,12 @@ def get_pressflow_revision(working_dir, drupal_version):
                 match['revno'] = i
     return str(match['revno'])
         
-def get_branch_and_revision(working_dir):
+def _get_branch_and_revision(working_dir):
     #TODO: pressflow.txt  doesn't exists if pulled from bzr
     #TODO: check that it is Drupal V6
 
     ret = {}
-    drupal_version = (get_drupal_version(working_dir)).rstrip('\n')
+    drupal_version = (_get_drupal_version(working_dir)).rstrip('\n')
     # Check if site uses Pressflow (look in system.module)
     dist = (local("awk \"/\'info\' =>/\" " + working_dir + "modules/system/system.module" + r' | sed "s_^.*Powered by \([a-zA-Z]*\).*_\1_"')).rstrip('\n')
     if dist == 'Drupal':
@@ -195,7 +198,7 @@ def get_branch_and_revision(working_dir):
         ret['revision'] = "tag:DRUPAL-" + drupal_version 
         ret['type'] = "DRUPAL"
     elif dist == 'Pressflow':
-        revision = get_pressflow_revision(working_dir, drupal_version)
+        revision = _get_pressflow_revision(working_dir, drupal_version)
         ret['branch'] = "lp:pressflow/6.x"
         ret['revision'] = revision 
         ret['type'] = "PRESSFLOW"
@@ -207,7 +210,7 @@ def get_branch_and_revision(working_dir):
 
     return ret
 
-def get_db_dump_name(working_dir):
+def _get_db_dump_name(working_dir):
     with settings(warn_only=True):
         db_dump_file = local("ls " + working_dir + "*.sql")
     
@@ -222,17 +225,17 @@ def get_db_dump_name(working_dir):
 
     return db_dump_file
 
-def import_database(db, working_dir):
+def _import_database(db, working_dir):
 
-    db_dump_file = get_db_dump_name(working_dir)
+    db_dump_file = _get_db_dump_name(working_dir)
 
     local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS " + db['db_name'] + "'")
-    local("mysql -u root -e \"GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, LOCK TABLES, CREATE TEMPORARY TABLES ON " + db['db_name'] + ".* TO '" + db['username'] + "'@'localhost' IDENTIFIED BY '" + db['password'] + "';\"")
+    local("mysql -u root -e \"GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, LOCK TABLES, CREATE TEMPORARY TABLES ON " + db['db_name'] + ".* TO '" + db['db_username'] + "'@'localhost' IDENTIFIED BY '" + db['db_password'] + "';\"")
     local("mysql -u root -e 'FLUSH PRIVILEGES;'")
     local("mysql -u root " + db['db_name'] + " < " + db_dump_file)
     local("rm -f " + db_dump_file)
 
-def setup_site_files(webroot, site, working_dir):
+def _setup_site_files(webroot, site, working_dir):
     #TODO: add large file size sanity check (no commits over 20mb)
     #TODO: sanity check for versions prior to 6.6 (no pressflow branch).
     #TODO: test wildcard in ignore
@@ -244,7 +247,7 @@ def setup_site_files(webroot, site, working_dir):
         local('rm -r ' + webroot)
 
     # Create vanilla drupal/pressflow branch of same version as import site
-    version = get_branch_and_revision(working_dir)
+    version = _get_branch_and_revision(working_dir)
 
     local("bzr branch -r " + version['revision'] + " " + version['branch'] + " " + webroot)
 
@@ -276,27 +279,27 @@ def setup_site_files(webroot, site, working_dir):
     #    f.write(reverted)
     #f.close
 
-def update_settings(webroot, site_settings):
+def _update_settings(webroot, site_settings):
     #TODO: remove any previously defined $db_url strings rather than relying on ours being last
-    slug = Template(local("cat /etc/mercury/templates/mercury.settings.php"))
+    slug = Template(local("cat /opt/pantheon/fabric/templates/pantheon.settings.php"))
     slug = slug.safe_substitute(site_settings)
-    with open(webroot + "sites/" + site_settings['site_dir'] + "settings.php", 'a') as f:
+    with open(webroot + "sites/" + site_settings['site_name'] + "/settings.php", 'a') as f:
         f.write(slug)
     f.close
 
-def get_module_status(site_path):
+def _get_module_status(site_path):
     #TODO: extend drush so that "drush pm-list" can have xml/json friendly output. Below is temporary stop-gap
     with cd(site_path):
         # Output module status in dictionary friendly format.
         site_modules = local("drush sql-query \"SELECT name, status FROM system WHERE type='module';\" | awk -v sq=\"'\" '{if ($1 != \"name\" && $2 == 1) print \"(\"sq$1sq\", \"sq\"Enabled\"sq\")\"; if ($1 != \"name\" && $2 == 0) print \"(\"sq$1sq\", \"sq\"Disabled\"sq\")\" }'").replace('\n',',')[:-1]
     return dict(eval(site_modules))
 
-def setup_modules(webroot, site):
+def _setup_modules(webroot, site):
 
     required_modules = {'apachesolr':None, 'apachesolr_search':'Disabled', 'cookie_cache_bypass':'Disabled', 'locale':None, 'memcache_admin':None, 'syslog':None, 'varnish':None}
 
     # Get module dictionary. Key=Module name, Value=Enabled/Disabled/None
-    site_modules = get_module_status(webroot + "sites/" + site)
+    site_modules = _get_module_status(webroot + "sites/" + site)
 
     with cd(webroot):
         # If a required module is found, the value is set to site_modules current status (Enabled/Disabled). If not found, value=None.
@@ -355,17 +358,17 @@ def setup_modules(webroot, site):
     # Drush will report failure if we try to enable a module that is already enabled.
     # To get around this, we wrap "drush en" in warn_only=True.
     # However, we still want to make sure the modules are enabled (and didn't fail for another reason).
-    site_modules = get_module_status(webroot + "sites/" + site)
+    site_modules = _get_module_status(webroot + "sites/" + site)
     check_modules = ['apachesolr', 'apachesolr_search', 'cookie_cache_bypass', 'locale', 'syslog', 'varnish']
     for module in check_modules:
         if site_modules[module] == 'Disabled':
             print "WARNING: Required module \"" + module + "\" could not be enabled."
 
-def set_permissions(server_settings, site_dir):
+def _set_permissions(server_settings, site_name):
     #TODO: make database call to find file dir location for specific site
     # setup ownership and permissions
     local('chown -R ' + server_settings['owner'] + ':' + server_settings['group'] + ' ' + server_settings['webroot'])
-    local('chmod 440 ' + server_settings['webroot'] + 'sites/' + site_dir + 'settings.php')
+    local('chmod 440 ' + server_settings['webroot'] + 'sites/' + site_name + '/settings.php')
 
     # make sure everything under the 'files' directory has proper perms (770 on dirs, 550 on files)
     with cd(server_settings['webroot'] + 'sites/'):
@@ -373,7 +376,7 @@ def set_permissions(server_settings, site_dir):
         local("find . -name files -type d -exec find '{}' -type f \; | while read FILE; do chmod ug=rw,o= \"$FILE\"; done")
         local("find . -name files -type d -exec find '{}' -type d \; | while read DIR; do chmod ug=rwx,o= \"$DIR\"; done")
 
-def restart_services(distro):
+def _restart_services(distro):
     if distro == 'ubuntu':
         local('/etc/init.d/apache2 restart')
         local('/etc/init.d/memcached restart')
@@ -383,46 +386,3 @@ def restart_services(distro):
         local('/etc/init.d/memcached restart')
         local('/etc/init.d/tomcat5 restart')
 
-def import_site(site_archive, run_from, selected_site = None):
-    working_dir = '/tmp/import_site/'
-
-    # variables from fabfile / cmdline come in as strings. Covert to bool types
-    if not bool(selected_site):
-        selected_site = None
-    if run_from == 'hudson': 
-        hudson = True
-    else:
-        hudson = False
-   
-    # Extract compressed site into a temporary working directory
-    unarchive(site_archive, working_dir)
-
-    # Get database connection info & the sites directory that will be used
-    site_settings = get_settings(working_dir, selected_site, hudson)
-
-    # Get server environment information
-    server_settings = get_server_settings()
-
-    # Import the database database dump & grant permissions
-    import_database(site_settings, working_dir)
-
-    # Create the webroot. Import the existing site. Update to latest Pressflow.
-    setup_site_files(server_settings['webroot'], site_settings['site_dir'], working_dir)
-
-    # Download and enable any modules required by Pantheon
-    setup_modules(server_settings['webroot'], site_settings['site_dir'])
-
-    # Update settings.php with database connection info, and add Pantheon caching information.
-    update_settings(server_settings['webroot'], site_settings)
-
-    # Set ownership & permissions for webroot, settings.php, and files directories.
-    set_permissions(server_settings, site_settings['site_dir'])
-
-    with cd(server_settings['webroot'] + "sites/"):
-        local("ln -s " + site_settings['site_dir'] + " " + server_settings['ip'])
-
-    # Kick Apache, Memcached, Tomcat
-    restart_services(server_settings['distro'])
-
-    #TODO: Write cleanup function
-    #TODO: clear solr index (if exists) before using new site
