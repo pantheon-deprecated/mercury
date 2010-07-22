@@ -1,4 +1,3 @@
-from __future__ import with_statement
 from fabric.api import *
 from fabric.contrib.console import confirm
 from fabric.operations import prompt
@@ -427,4 +426,3 @@ def import_site(site_archive, run_from, selected_site = None):
 
     #TODO: Write cleanup function
     #TODO: clear solr index (if exists) before using new site
-
