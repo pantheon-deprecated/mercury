@@ -1,6 +1,7 @@
 from fabric.api import *
 from os.path import exists
 from urlparse import urlparse
+from re import search
 
 def unarchive(archive, destination):
     '''Extract archive to destination directory and remove VCS files'''
@@ -32,8 +33,45 @@ def get_database_settings(settings_file):
     ret['db_username'] = url.username
     ret['db_password'] = url.password
     ret['db_name'] = url.path[1:].replace('\n','')
+    ret['db_hostname'] = url.hostname
 
     return ret
+
+def get_settings(webroot):
+    sites = {}
+    # Get all settings.php files
+    with cd(webroot):
+        settings_files = (local('find sites/ -name settings.php -type f')).rstrip('\n')
+    # multiple settings.php files
+    if '\n' in settings_files:
+        settings_files = settings_files.split('\n')
+        # Step through each settings.php file and select all valid sites 
+        for sfile in settings_files:
+            db_settings = get_database_settings(webroot + sfile)
+            if is_valid_db_url(db_settings):
+                site_name = (search(r'^.*sites/(.*)/settings.php',sfile)).group(1)
+                sites[site_name] = db_settings
+    # Single settings.php
+    else:
+        db_settings = get_database_settings(webroot + settings_files)
+        if is_valid_db_url(db_settings):
+            site_name = (search(r'^.*sites/(.*)/settings.php', settings_file)).group(1)
+            sites[site_name] = db_settings
+    return sites
+
+def is_valid_db_url(database):
+    # Invalid db connection string (missing information)
+    if database['db_username'] == None or database['db_name'] == None:
+        return False
+    # Connection string is still set to default values
+    elif database['db_username'] == "username" \
+        and database['db_password'] == "password" \
+        and database['db_name'] == "databasename" \
+        and database['db_hostname'] == "localhost":
+        return False
+    # Valid
+    else:
+        return True
 
 def get_server_settings():
     ret = {}
