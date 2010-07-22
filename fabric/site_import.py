@@ -12,7 +12,7 @@ def import_site(site_archive, hudson = 'False', selected_site = ''):
     unarchive(site_archive, working_dir)
 
     site_settings = _get_settings(working_dir, selected_site, hudson)
-    server_settings = _get_server_settings()
+    server_settings = get_server_settings()
 
     _import_database(site_settings, working_dir)
     _setup_site_files(server_settings['webroot'], site_settings['site_name'], working_dir)
@@ -133,23 +133,6 @@ def _choose_site(sites, working_dir, hudson):
                 f.write(site['site_name'] + '\n')
         f.close
         abort("Multiple Sites Found. List stored in available-sites.txt build artifact.")
-
-def _get_server_settings():
-    ret = {}
-    # Default Ubuntu
-    if exists('/etc/debian_version'):
-        ret['webroot'] = '/var/www/'
-        ret['owner'] = 'root'
-        ret['group'] = 'www-data'
-        ret['distro'] = 'ubuntu'
-    # Default Centos
-    elif exists('/etc/redhat-release'):
-        ret['webroot'] = '/var/www/html/'
-        ret['owner'] = 'root'
-        ret['group'] = 'apache'
-        ret['distro'] = 'centos'
-    ret['ip'] = (local('hostname --ip-address')).rstrip('\n')
-    return ret
 
 def _get_drupal_version(working_dir):
     # Test 1: Try to get version from system.module

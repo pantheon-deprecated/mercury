@@ -34,3 +34,21 @@ def get_database_settings(settings_file):
     ret['db_name'] = url.path[1:].replace('\n','')
 
     return ret
+
+def _get_server_settings():
+    ret = {}
+    # Default Ubuntu
+    if exists('/etc/debian_version'):
+        ret['webroot'] = '/var/www/'
+        ret['owner'] = 'root'
+        ret['group'] = 'www-data'
+        ret['distro'] = 'ubuntu'
+    # Default Centos
+    elif exists('/etc/redhat-release'):
+        ret['webroot'] = '/var/www/html/'
+        ret['owner'] = 'root'
+        ret['group'] = 'apache'
+        ret['distro'] = 'centos'
+    ret['ip'] = (local('hostname --ip-address')).rstrip('\n')
+    return ret
+
