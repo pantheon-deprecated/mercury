@@ -19,7 +19,7 @@ def unarchive(archive, destination):
         local("find . -depth -name .svn -exec rm -fr {} \;")
         local("find . -depth -name CVS -exec rm -fr {} \;")
 
-def get_database_settings(settings_file):
+def _get_database_settings(settings_file):
     url = (local("awk '/^\$db_url = /' " + settings_file + " | sed 's/^.*'\\''\([a-z]*\):\(.*\)'\\''.*$/\\2/'")).rstrip('\n')
 
     # Check for multiple connection strings. If more than one, use the last.
@@ -47,19 +47,37 @@ def get_settings(webroot):
         settings_files = settings_files.split('\n')
         # Step through each settings.php file and select all valid sites 
         for sfile in settings_files:
-            db_settings = get_database_settings(webroot + sfile)
-            if is_valid_db_url(db_settings):
+            db_settings = _get_database_settings(webroot + sfile)
+            if _is_valid_db_url(db_settings):
                 site_name = (search(r'^.*sites/(.*)/settings.php',sfile)).group(1)
                 sites[site_name] = db_settings
     # Single settings.php
     else:
-        db_settings = get_database_settings(webroot + settings_files)
-        if is_valid_db_url(db_settings):
+        db_settings = _get_database_settings(webroot + settings_files)
+        if _is_valid_db_url(db_settings):
             site_name = (search(r'^.*sites/(.*)/settings.php', settings_file)).group(1)
             sites[site_name] = db_settings
     return sites
 
-def is_valid_db_url(database):
+def _get_database_settings(settings_file):
+    url = (local("awk '/^\$db_url = /' " + settings_file + " | sed 's/^.*'\\''\([a-z]*\):\(.*\)'\\''.*$/\\2/'")).rstrip('\n')
+
+    # Check for multiple connection strings. If more than one, use the last.
+    if '\n' in url:
+        url = url.split('\n')
+        url = urlparse(url[len(url)-1])
+    else:
+        url = urlparse(url)
+
+    ret = {}
+    ret['db_username'] = url.username
+    ret['db_password'] = url.password
+    ret['db_name'] = url.path[1:].replace('\n','')
+    ret['db_hostname'] = url.hostname
+
+    return ret
+
+def _is_valid_db_url(database):
     # Invalid db connection string (missing information)
     if database['db_username'] == None or database['db_name'] == None:
         return False
