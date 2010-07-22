@@ -35,7 +35,7 @@ def get_database_settings(settings_file):
 
     return ret
 
-def _get_server_settings():
+def get_server_settings():
     ret = {}
     # Default Ubuntu
     if exists('/etc/debian_version'):
