@@ -11,7 +11,7 @@ def import_site(site_archive, hudson = 'False', selected_site = ''):
 
     unarchive(site_archive, working_dir)
 
-    site_settings = _get_settings(working_dir, selected_site, hudson)
+    site_settings = _get_settings(working_dir, selected_site)
     server_settings = get_server_settings()
 
     _import_database(site_settings, working_dir)
@@ -40,79 +40,37 @@ def _set_env_vars(run_from, selected_site):
         site = selected_site.stirp()
     return hudson, site, '/tmp/import_site/'
 
-def _is_valid_db_url(database):
-    # Invalid db connection string (missing information)
-    if database['db_username'] == None or database['db_password'] == None or database['db_name'] == None:
-        return False
-    # Connection string is still set to default values
-    elif database['db_username'] == "db_username" and database['db_password'] == "password" and database['db_name'] == "databasename":
-        return False
-    # Valid
-    else:
-        return True
-
-def _get_settings(working_dir, selected_site, hudson):
-    site_settings = {}
-    match = [] 
-
+def _get_site(working_dir, site):
+    sites = {}
     # Site may have been preselected (in web-interface)
-    if selected_site:
-        settings_files = "sites/" + selected_site + "/settings.php"
-    else:
-        # Get all settings.php files
-        with cd(working_dir):
-            settings_files = (local('find sites/ -name settings.php -type f')).rstrip('\n')
-
-        # Check if any settings.php files were found
-        if not settings_files:
-            abort("No settings.php files were found.") 
-
-    # multiple settings.php files
-    if '\n' in settings_files:
-        pdb.set_trace()
-        settings_files = settings_files.split('\n')
-        # Step through each settings.php file and select all valid sites 
-        for sfile in settings_files:
-            site_settings = get_database_settings(working_dir + sfile)
-            site_settings['site_name'] = (search(r'^.*sites/(.*)/settings.php',sfile)).group(1)
-
-            if _is_valid_db_url(site_settings):
-                match.append(site_settings)
-
-        # If more than one valid site is found, decide which to use
-        if match.count > 1:
-            return _choose_site(match, working_dir, hudson)
-
-        # If only one valid site is found, use it.
-        elif match.count == 1:
-            return match.pop()
-
-    # Single settings.php
-    else:
-        site_settings = get_database_settings(working_dir + settings_files)
-        site_settings['site_name'] = (search(r'^.*sites/(.*)/settings.php',settings_file)).group(1)
-
-        if _is_valid_db_url(site_settings):
-            return site_settings
+    if site:
+        sites[site] = get_database_settings(working_dir + "sites/" + site + "/settings.php")
+        return sites
     
-    abort("No valid settings.php was found")
-
-def _choose_site(sites, working_dir, hudson):
-    # Try to autmatically figure out which site to use first.
-
-    # Test 1: if db name in the dump file comments match the db name in only one settings.php, this is a safe match.
-    found = []
-    # If we need it, host is in back-reference 1 (\1)
-    dumped_db_name = (local(r"awk '/^-- Host:/' " + _get_db_dump_name(working_dir) + r" | sed 's_.*Host:\s*\(.*\)\s*Database:\s*\(.*\)$_\2_'")).rstrip('\n')
-    for site in sites:
-        if site['db_name'] == dumped_db_name:
-            found.append(site)
-    if found.count == 1:
-        return found.pop()
-    elif found.count == 0:
-        print "WARNING: The database that was dumped does not match any Drupal settings.php files."
-
-    # Automated selection failed. Resort to manual.
+    # Get all valid sites
+    sites = get_site_settings(working_dir)
+    
+    if sites.count == 0: abort("No valid settings.php found")
+    if sites.count == 1: return sites
+    if sites.count > 1:
+        # Try to autmatically figure out which site to use first.
+        # Test 1: if db name in the dump file comments match the db name in only one settings.php, this is a safe match.
+        found = []
+        db_dumps = _get_database_dumps()
+        if db_dumps.count == 0: abort("No database dumps found")
+        if db_dumps.count == 1: 
+            db_name = (local(r"awk '/^-- Host:/' " + working_dir + db_dumps[0] \
+                          r" | sed 's_.*Host:\s*\(.*\)\s*Database:\s*\(.*\)$_\2_'")).rstrip('\n')
+            for name in sites.keys():
+                if sites[name]['db_name'] == db_name
+                    found[site] = sites[site]
+            if found.count == 1: return found
+            if found.count == 0: print "WARNING: Database dump does not match any databases defined in settings.php files"
+        if db_dumps.count > 1:        
+            # TODO: For multiple database support add comparison between dict of sites and dict of databases
+            pass
+     
+        # Automated selection failed. Resort to manual.
     if not hudson:
         pdb.set_trace()
         print "\nMultiple sites found. Please select the site you wish to use:\n"
@@ -122,7 +80,7 @@ def _choose_site(sites, working_dir, hudson):
             count += 1
         valid = False
         while not valid:
-            choice = int(prompt('\nChoose Site: \n', validate=r'^\d{1,3}$'))
+            choice = int(prompt('\nChoose Site: \n', validate=r'^\d{1,2}$'))
             if choice < len(sites) and choice > -1:
                 valid = True
         return sites[choice]
@@ -134,6 +92,11 @@ def _choose_site(sites, working_dir, hudson):
         f.close
         abort("Multiple Sites Found. List stored in available-sites.txt build artifact.")
 
+def _get_database_dumps(working_dir):
+    with settings(warn_only=True):
+        with cd(working_dir)
+            return (local("ls *.sql")).rstrip('\n').split(' ')
+    
 def _get_drupal_version(working_dir):
     # Test 1: Try to get version from system.module
     version = (local("awk \"/define\(\'VERSION\'/\" " + working_dir + "modules/system/system.module" + "| sed \"s_^.*'\(6\)\.\([0-9]\{1,2\}\)'.*_\\1-\\2_\"")).rstrip('\n')
@@ -193,29 +156,14 @@ def _get_branch_and_revision(working_dir):
 
     return ret
 
-def _get_db_dump_name(working_dir):
-    with settings(warn_only=True):
-        db_dump_file = local("ls " + working_dir + "*.sql")
-    
-    # Test for no .sql files
-    if db_dump_file.failed:
-        abort("ERROR: No database dump file (*.sql) found.")
-
-    # Test for multiple .sql files
-    db_dump_file = db_dump_file.rstrip('\n')
-    if '\n' in db_dump_file:
-        abort("ERROR: Multiple database dump files (.sql) found.")
-
-    return db_dump_file
-
 def _import_database(db, working_dir):
 
     db_dump_file = _get_db_dump_name(working_dir)
-
-    local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS " + db['db_name'] + "'")
-    local("mysql -u root -e \"GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, LOCK TABLES, CREATE TEMPORARY TABLES ON " + db['db_name'] + ".* TO '" + db['db_username'] + "'@'localhost' IDENTIFIED BY '" + db['db_password'] + "';\"")
-    local("mysql -u root -e 'FLUSH PRIVILEGES;'")
-    local("mysql -u root " + db['db_name'] + " < " + db_dump_file)
+    #TODO: break drop and create database into own function
+    local("mysql -u root -e 'DROP DATABASE IF EXISTS " + db['db_name'] + "'")
+    local("mysql -u root -e 'CREATE DATABASE " + db['db_name'] + "'")
+    local("mysql -u root -e \"GRANT ALL ON " + db['db_name'] + ".* TO '" + db['db_username'] + "'@'localhost' IDENTIFIED BY '" + db['db_password'] + "';\"")
+    local("cat " + db_dump_file + " | grep -v '^INSERT INTO `cache[_a-z]*`' | sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | mysql -u root " + db['db_name'])
     local("rm -f " + db_dump_file)
 
 def _setup_site_files(webroot, site, working_dir):

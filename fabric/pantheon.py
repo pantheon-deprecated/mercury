@@ -19,7 +19,7 @@ def unarchive(archive, destination):
         local("find . -depth -name .svn -exec rm -fr {} \;")
         local("find . -depth -name CVS -exec rm -fr {} \;")
 
-def _get_database_settings(settings_file):
+def get_database_settings(settings_file):
     url = (local("awk '/^\$db_url = /' " + settings_file + " | sed 's/^.*'\\''\([a-z]*\):\(.*\)'\\''.*$/\\2/'")).rstrip('\n')
 
     # Check for multiple connection strings. If more than one, use the last.
@@ -37,7 +37,7 @@ def _get_database_settings(settings_file):
 
     return ret
 
-def get_settings(webroot):
+def get_site_settings(webroot):
     sites = {}
     # Get all settings.php files
     with cd(webroot):
@@ -47,13 +47,13 @@ def get_settings(webroot):
         settings_files = settings_files.split('\n')
         # Step through each settings.php file and select all valid sites 
         for sfile in settings_files:
-            db_settings = _get_database_settings(webroot + sfile)
+            db_settings = get_database_settings(webroot + sfile)
             if _is_valid_db_url(db_settings):
                 site_name = (search(r'^.*sites/(.*)/settings.php',sfile)).group(1)
                 sites[site_name] = db_settings
     # Single settings.php
     else:
-        db_settings = _get_database_settings(webroot + settings_files)
+        db_settings = get_database_settings(webroot + settings_files)
         if _is_valid_db_url(db_settings):
             site_name = (search(r'^.*sites/(.*)/settings.php', settings_file)).group(1)
             sites[site_name] = db_settings
