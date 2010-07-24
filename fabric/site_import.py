@@ -5,13 +5,13 @@ from string import Template
 from re import search
 from pantheon import *
 import pdb
-def import_site(site_archive, hudson = 'False', selected_site = ''):
+def import_site(site_archive, selected_site = ''):
     '''Import site archive into a Pantheon server'''
     hudson, selected_site, working_dir = _set_env_vars(hudson, selected_site)
 
     unarchive(site_archive, working_dir)
 
-    site_settings = _get_settings(working_dir, selected_site)
+    site_settings = _get_site(working_dir, selected_site)
     server_settings = get_server_settings()
 
     _import_database(site_settings, working_dir)
@@ -39,6 +39,37 @@ def _set_env_vars(run_from, selected_site):
     else:
         site = selected_site.stirp()
     return hudson, site, '/tmp/import_site/'
+
+def get_sites(working_dir):
+    matched_sites = {}
+
+    sites = get_site_settings(working_dir)
+    site_count = len(sites)
+    databases = get_database_names(working_dir)
+    db_count = len(databases)
+
+    # Single Database
+    if db_count == 1:
+        # Single Site - Assume site matches database
+        if site_count == 1:
+            matched_sites[0]['name'] = sites.keys()[0]
+            matched_sites[0]['settings'] = sites.values()[0]
+            matched_sites[0]['database'] = database.keys()[0]
+        # Multiple Sites
+        elif sites_count > 1:
+            count = 0
+            for site_name, settings in sites.iteritems():
+                db_name for db_name in databases.values() if db_name[0] == settings['db_name']:
+                    matched_sites[count]['name'] = site_name
+                    matched_sites[count]['settings'] = settings
+                    matched_sites[count]['database'] = db_name
+                    count += 1
+        else:
+            abort("No Drupal Sites Found")
+    # Multiple Databases
+    elif  database.count() > 1:
+    else:
+        abort("No Databases Found")
 
 def _get_site(working_dir, site):
     sites = {}

@@ -19,24 +19,6 @@ def unarchive(archive, destination):
         local("find . -depth -name .svn -exec rm -fr {} \;")
         local("find . -depth -name CVS -exec rm -fr {} \;")
 
-def get_database_settings(settings_file):
-    url = (local("awk '/^\$db_url = /' " + settings_file + " | sed 's/^.*'\\''\([a-z]*\):\(.*\)'\\''.*$/\\2/'")).rstrip('\n')
-
-    # Check for multiple connection strings. If more than one, use the last.
-    if '\n' in url:
-        url = url.split('\n')
-        url = urlparse(url[len(url)-1])
-    else:
-        url = urlparse(url)
-
-    ret = {}
-    ret['db_username'] = url.username
-    ret['db_password'] = url.password
-    ret['db_name'] = url.path[1:].replace('\n','')
-    ret['db_hostname'] = url.hostname
-
-    return ret
-
 def get_site_settings(webroot):
     sites = {}
     # Get all settings.php files
@@ -45,7 +27,7 @@ def get_site_settings(webroot):
     # multiple settings.php files
     if '\n' in settings_files:
         settings_files = settings_files.split('\n')
-        # Step through each settings.php file and select all valid sites 
+        # Step through each settings.php file and select sites 
         for sfile in settings_files:
             db_settings = get_database_settings(webroot + sfile)
             if _is_valid_db_url(db_settings):
@@ -59,8 +41,9 @@ def get_site_settings(webroot):
             sites[site_name] = db_settings
     return sites
 
-def _get_database_settings(settings_file):
-    url = (local("awk '/^\$db_url = /' " + settings_file + " | sed 's/^.*'\\''\([a-z]*\):\(.*\)'\\''.*$/\\2/'")).rstrip('\n')
+def get_database_settings(settings_file):
+    url = (local("awk '/^\$db_url = /' " + settings_file + \
+              " | sed 's/^.*'\\''\([a-z]*\):\(.*\)'\\''.*$/\\2/'")).rstrip('\n')
 
     # Check for multiple connection strings. If more than one, use the last.
     if '\n' in url:
@@ -77,11 +60,40 @@ def _get_database_settings(settings_file):
 
     return ret
 
+def get_database_names(webroot):
+''' Returns a dictionary of databases in the form of: databases[dump_filename][databasenames]
+    Currently only using dump_filename and assuming single database
+    but will support future multi-site dumps in single file (or across files).'''
+    databases = {}
+    # Get all database dump files
+    with cd(webroot):
+        db_dump_files = (local("find . -maxdepth 1 -type f -name *.sql")).lstrip('./').rstrip('\n')
+    # Multiple database files
+    if '\n' in db_dump_files:
+        db_dump_files = db_dump_files.split()
+        for db in db_dump_files:
+            databases[db] = get_database_name_from_dump(webroot + db)
+    # Single database file
+    else:
+        databases[db_dump_files] = get_database_name_from_dump(webroot + db_dump_file)
+    return databases
+
+def _get_database_name_from_dump(database_dump):
+    # Check for 'USE' directive (multiple databases possible)
+    databases = (local("grep '^USE `' " + database_dump + r" | sed 's/^.*`\(.*\)`;/\1/'")).rstrip('\n')
+    if databases:
+        return databases.split('\n')
+    # Check dump file comments for database name
+    else:
+        databases = (local(r"awk '/^-- Host:/' " + working_dir + db_dumps[0] \
+                  r" | sed 's_.*Host:\s*\(.*\)\s*Database:\s*\(.*\)$_\2_'")).rstrip('\n')
+        return databases.split('\n')
+
 def _is_valid_db_url(database):
-    # Invalid db connection string (missing information)
-    if database['db_username'] == None or database['db_name'] == None:
+    # Invalid: Missing username or databasename 
+    if database['db_name'] == None:
         return False
-    # Connection string is still set to default values
+    # Invalid: Set to default values
     elif database['db_username'] == "username" \
         and database['db_password'] == "password" \
         and database['db_name'] == "databasename" \
