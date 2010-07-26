@@ -60,35 +60,6 @@ def get_database_settings(settings_file):
 
     return ret
 
-def get_database_names(webroot):
-''' Returns a dictionary of databases in the form of: databases[dump_filename][databasenames]
-    Currently only using dump_filename and assuming single database
-    but will support future multi-site dumps in single file (or across files).'''
-    databases = {}
-    # Get all database dump files
-    with cd(webroot):
-        db_dump_files = (local("find . -maxdepth 1 -type f -name *.sql")).lstrip('./').rstrip('\n')
-    # Multiple database files
-    if '\n' in db_dump_files:
-        db_dump_files = db_dump_files.split()
-        for db in db_dump_files:
-            databases[db] = get_database_name_from_dump(webroot + db)
-    # Single database file
-    else:
-        databases[db_dump_files] = get_database_name_from_dump(webroot + db_dump_file)
-    return databases
-
-def _get_database_name_from_dump(database_dump):
-    # Check for 'USE' directive (multiple databases possible)
-    databases = (local("grep '^USE `' " + database_dump + r" | sed 's/^.*`\(.*\)`;/\1/'")).rstrip('\n')
-    if databases:
-        return databases.split('\n')
-    # Check dump file comments for database name
-    else:
-        databases = (local(r"awk '/^-- Host:/' " + working_dir + db_dumps[0] \
-                  r" | sed 's_.*Host:\s*\(.*\)\s*Database:\s*\(.*\)$_\2_'")).rstrip('\n')
-        return databases.split('\n')
-
 def _is_valid_db_url(database):
     # Invalid: Missing username or databasename 
     if database['db_name'] == None:

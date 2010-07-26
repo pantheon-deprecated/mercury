@@ -5,14 +5,16 @@ from string import Template
 from re import search
 from pantheon import *
 import pdb
-def import_site(site_archive, selected_site = ''):
-    '''Import site archive into a Pantheon server'''
-    hudson, selected_site, working_dir = _set_env_vars(hudson, selected_site)
 
+def import_site(site_archive, working_dir='/tmp/import_site/'):
+    '''Import site archive into a Pantheon server'''
+    server_settings = get_server_settings()
     unarchive(site_archive, working_dir)
 
-    site_settings = _get_site(working_dir, selected_site)
-    server_settings = get_server_settings()
+    sites = get_sites(working_dir)
+    sanity_check(sites)
+    setup_databases(sites)
+    build_sites(sites)
 
     _import_database(site_settings, working_dir)
     _setup_site_files(server_settings['webroot'], site_settings['site_name'], working_dir)
@@ -25,109 +27,99 @@ def import_site(site_archive, selected_site = ''):
 
     _restart_services(server_settings['distro'])
 
-    #TODO: Write cleanup function
-    #TODO: clear solr index (if exists) before using new site
-    #
-
-def _set_env_vars(run_from, selected_site):
-    # Variables from commandline are always passed as strings. Convert to proper types.
-    hudson = False
-    if run_from == 'True':
-        hudson = True
-    if selected_site.strip() == '':
-        site = False
-    else:
-        site = selected_site.stirp()
-    return hudson, site, '/tmp/import_site/'
-
 def get_sites(working_dir):
-    matched_sites = {}
+    matched_sites = [] 
 
     sites = get_site_settings(working_dir)
+    databases = _get_database_names(working_dir)
+    
     site_count = len(sites)
-    databases = get_database_names(working_dir)
     db_count = len(databases)
 
     # Single Database
     if db_count == 1:
-        # Single Site - Assume site matches database
+        # Single Site - Single Database - Assume site matches database
         if site_count == 1:
-            matched_sites[0]['name'] = sites.keys()[0]
-            matched_sites[0]['settings'] = sites.values()[0]
-            matched_sites[0]['database'] = database.keys()[0]
-        # Multiple Sites
-        elif sites_count > 1:
-            count = 0
-            for site_name, settings in sites.iteritems():
-                db_name for db_name in databases.values() if db_name[0] == settings['db_name']:
-                    matched_sites[count]['name'] = site_name
-                    matched_sites[count]['settings'] = settings
-                    matched_sites[count]['database'] = db_name
-                    count += 1
+            matched_sites.append({'site_name':sites.keys()[0],'db_settings':sites.values()[0],'db_dump':databases.keys()[0]})
+        # Multiple Sites - Single Databse - Check for matches based on database name
+        elif site_count > 1:
+            db_name = databases.values()[0]
+            for site_name, db_settings in sites.iteritems():
+                if db_settings['db_name'] == db_name[0]:
+                    matched_sites.append({'site_name':site_name, 'db_settings':db_settings, 'db_dump':databases.keys()[0]})
         else:
-            abort("No Drupal Sites Found")
+            pass # no matches found
+
     # Multiple Databases
     elif  database.count() > 1:
+        pass
     else:
-        abort("No Databases Found")
+        pass #no matches found
+    pdb.set_trace()
+    return matched_sites
 
-def _get_site(working_dir, site):
-    sites = {}
-    # Site may have been preselected (in web-interface)
-    if site:
-        sites[site] = get_database_settings(working_dir + "sites/" + site + "/settings.php")
-        return sites
-    
-    # Get all valid sites
-    sites = get_site_settings(working_dir)
-    
-    if sites.count == 0: abort("No valid settings.php found")
-    if sites.count == 1: return sites
-    if sites.count > 1:
-        # Try to autmatically figure out which site to use first.
-        # Test 1: if db name in the dump file comments match the db name in only one settings.php, this is a safe match.
-        found = []
-        db_dumps = _get_database_dumps()
-        if db_dumps.count == 0: abort("No database dumps found")
-        if db_dumps.count == 1: 
-            db_name = (local(r"awk '/^-- Host:/' " + working_dir + db_dumps[0] \
-                          r" | sed 's_.*Host:\s*\(.*\)\s*Database:\s*\(.*\)$_\2_'")).rstrip('\n')
-            for name in sites.keys():
-                if sites[name]['db_name'] == db_name
-                    found[site] = sites[site]
-            if found.count == 1: return found
-            if found.count == 0: print "WARNING: Database dump does not match any databases defined in settings.php files"
-        if db_dumps.count > 1:        
-            # TODO: For multiple database support add comparison between dict of sites and dict of databases
-            pass
-     
-        # Automated selection failed. Resort to manual.
-    if not hudson:
-        pdb.set_trace()
-        print "\nMultiple sites found. Please select the site you wish to use:\n"
-        count = 0
-        for site in sites:
-            print "[" + str(count) + "]: " + site['site_name']
-            count += 1
-        valid = False
-        while not valid:
-            choice = int(prompt('\nChoose Site: \n', validate=r'^\d{1,2}$'))
-            if choice < len(sites) and choice > -1:
-                valid = True
-        return sites[choice]
-    # Script was started by hudson (return list of sites to choose from)
+def setup_databases(sites, working_dir):
+    # Create a database for each dumpfile that contains a database matched to a site.
+    for database in [db_names.get('db_settings').get('db_name') for db_names in matched_sites]:
+        create_database(database)
+    # Import each matched database.
+#    for db_settings in []
+#    import_database()
+
+def create_database(database):
+    local("mysql -u root -e 'DROP DATABASE IF EXISTS '%s'" % (database))
+    local("mysql -u root -e 'CREATE DATABASE '%s'" % (database))
+ 
+
+#def build_sites(sites):
+
+    #import database
+    #setup site files
+    #setup modules
+    #update_settings
+    #set permissions
+
+def sanity_check(sites):
+    # Check that valid sites exist
+    if not sites:
+        abort("No Valid Drupal Sites Found")
+
+    # Check for multiple databses with the same name
+    found = []
+    for site in sites:
+        for database in site['database']:
+            if database in found:
+                abort("Multiple databases with the same name.")
+            else:
+                found.append(database)
+
+def _get_database_names(webroot):
+    ''' Returns a dictionary of databases in the form of: databases[dump_filename][databasenames].''' 
+    databases = {}
+    # Get all database dump files
+    with cd(webroot):
+        db_dump_files = (local("find . -maxdepth 1 -type f -name *.sql")).lstrip('./').rstrip('\n')
+    # Multiple database files
+    if '\n' in db_dump_files:
+        db_dump_files = db_dump_files.split()
+        for db in db_dump_files:
+            databases[db] = _get_database_name_from_dump(webroot + db)
+    # Single database file
     else:
-        with open('/var/lib/hudson/jobs/import_site/workspace/available-sites.txt', 'w') as f:
-            for site in sites:
-                f.write(site['site_name'] + '\n')
-        f.close
-        abort("Multiple Sites Found. List stored in available-sites.txt build artifact.")
+        databases[db_dump_files] = _get_database_name_from_dump(webroot + db_dump_files)
+    return databases
 
-def _get_database_dumps(working_dir):
-    with settings(warn_only=True):
-        with cd(working_dir)
-            return (local("ls *.sql")).rstrip('\n').split(' ')
-    
+def _get_database_name_from_dump(database_dump):
+    # Check for 'USE' directive (multiple databases possible)
+    databases = (local("grep '^USE `' " + database_dump + r" | sed 's/^.*`\(.*\)`;/\1/'")).rstrip('\n')
+    if databases:
+        return databases.split('\n')
+    # Check dump file comments for database name
+    else:
+        databases = (local(r"awk '/^-- Host:/' " + database_dump \
+            + r" | sed 's_.*Host:\s*\(.*\)\s*Database:\s*\(.*\)$_\2_'")).rstrip('\n')
+        return databases.split('\n')
+
 def _get_drupal_version(working_dir):
     # Test 1: Try to get version from system.module
     version = (local("awk \"/define\(\'VERSION\'/\" " + working_dir + "modules/system/system.module" + "| sed \"s_^.*'\(6\)\.\([0-9]\{1,2\}\)'.*_\\1-\\2_\"")).rstrip('\n')
