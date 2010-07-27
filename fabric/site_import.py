@@ -10,22 +10,20 @@ def import_site(site_archive, working_dir='/tmp/import_site/'):
     '''Import site archive into a Pantheon server'''
     server_settings = get_server_settings()
     unarchive(site_archive, working_dir)
-
     sites = get_sites(working_dir)
     sanity_check(sites)
     setup_databases(sites)
-    build_sites(sites)
 
-    _import_database(site_settings, working_dir)
-    _setup_site_files(server_settings['webroot'], site_settings['site_name'], working_dir)
-    _setup_modules(server_settings['webroot'], site_settings['site_name'])
-    _update_settings(server_settings['webroot'], site_settings)
-    _set_permissions(server_settings, site_settings['site_name'])
+#    _import_database(site_settings, working_dir)
+#    _setup_site_files(server_settings['webroot'], site_settings['site_name'], working_dir)
+#    _setup_modules(server_settings['webroot'], site_settings['site_name'])
+#    _update_settings(server_settings['webroot'], site_settings)
+#    _set_permissions(server_settings, site_settings['site_name'])
 
-    with cd(server_settings['webroot'] + "sites/"):
-        local("ln -s " + site_settings['site_name'] + " " + server_settings['ip'])
+#    with cd(server_settings['webroot'] + "sites/"):
+#        local("ln -s " + site_settings['site_name'] + " " + server_settings['ip'])
 
-    _restart_services(server_settings['distro'])
+#    _restart_services(server_settings['distro'])
 
 def get_sites(working_dir):
     matched_sites = [] 
@@ -35,18 +33,18 @@ def get_sites(working_dir):
     
     site_count = len(sites)
     db_count = len(databases)
-
+    pdb.set_trace()
     # Single Database
     if db_count == 1:
         # Single Site - Single Database - Assume site matches database
         if site_count == 1:
-            matched_sites.append({'site_name':sites.keys()[0],'db_settings':sites.values()[0],'db_dump':databases.keys()[0]})
+            sites[sites.keys()[0]]['db_dump'] = databases.keys()[0]
         # Multiple Sites - Single Databse - Check for matches based on database name
         elif site_count > 1:
-            db_name = databases.values()[0]
-            for site_name, db_settings in sites.iteritems():
-                if db_settings['db_name'] == db_name[0]:
-                    matched_sites.append({'site_name':site_name, 'db_settings':db_settings, 'db_dump':databases.keys()[0]})
+            for site in sites:
+                if sites[site]['db_name'] == databases.values()[0]:
+                    sites[site]['db_dump'] = databases.keys()[0]
+            matched_sites.append(sites)
         else:
             pass # no matches found
 
@@ -55,22 +53,25 @@ def get_sites(working_dir):
         pass
     else:
         pass #no matches found
-    pdb.set_trace()
     return matched_sites
 
 def setup_databases(sites, working_dir):
     # Create a database for each dumpfile that contains a database matched to a site.
-    for database in [db_names.get('db_settings').get('db_name') for db_names in matched_sites]:
+    for database in [sites[site]['db_dump'] for site in sites]:
         create_database(database)
-    # Import each matched database.
-#    for db_settings in []
-#    import_database()
+    import_database(sites)
 
 def create_database(database):
     local("mysql -u root -e 'DROP DATABASE IF EXISTS '%s'" % (database))
     local("mysql -u root -e 'CREATE DATABASE '%s'" % (database))
- 
 
+def import_databases(sites):
+    dump_files = []
+    databases = []
+    for db_dump in [sites[site]['db_dump'] for site in sites]:
+        pass
+    
+ 
 #def build_sites(sites):
 
     #import database
