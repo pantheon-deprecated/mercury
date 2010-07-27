@@ -30,6 +30,6 @@ if [[ "--headless" != $$1 ]]; then
 fi
 
 #get any updates
-cd ${webroot}; bzr pull --overwrite;
+cd ${webroot}; bzr up
 
 echo "Pressflow Update Complete!"
