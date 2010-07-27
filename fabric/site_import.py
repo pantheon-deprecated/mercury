@@ -4,7 +4,6 @@ from os.path import exists
 from string import Template
 from re import search
 from pantheon import *
-import pdb
 
 def import_site(site_archive, working_dir='/tmp/import_site/'):
     '''Import site archive into a Pantheon server'''
@@ -33,7 +32,6 @@ def get_sites(working_dir):
     
     site_count = len(sites)
     db_count = len(databases)
-    pdb.set_trace()
     # Single Database
     if db_count == 1:
         # Single Site - Single Database - Assume site matches database
