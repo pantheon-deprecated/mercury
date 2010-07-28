@@ -1,0 +1,3 @@
+*.pyc
+./bcfg2/Packages/cache
+./bcfg2/Metadata/clients.xml

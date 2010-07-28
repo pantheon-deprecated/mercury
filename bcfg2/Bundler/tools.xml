@@ -25,7 +25,6 @@
   <!-- Ubuntu Only -->
   <Group name='ubuntu'>
     <Package name='fabric'/>
-    <Path name='/etc/mercury/fabric/import_site.py'/>
     <Service name='vnstat'/>
     
     <!-- AWS Only -->

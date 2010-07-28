@@ -27,7 +27,7 @@ fi
 /etc/init.d/bcfg2-server stop
 
 #get any updates
-cd /var/lib/bcfg2; bzr pull --overwrite;
+cd /var/lib/bcfg2; bzr up
 
 # Start BCFG2 Server
 /etc/init.d/bcfg2-server start
