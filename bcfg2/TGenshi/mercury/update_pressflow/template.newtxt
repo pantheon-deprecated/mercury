@@ -1,8 +1,8 @@
 {% python
     if "centos" in metadata.groups :
-        webroot = '/var/www/html/'
+        webroot = '/var/www/html/dev'
     else:
-        webroot = '/var/www/'
+        webroot = '/var/www/dev'
 %}\
 #!/bin/bash
 

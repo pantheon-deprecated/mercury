@@ -70,7 +70,7 @@ def _initialize_bcfg2():
         with settings(hide('warnings'), warn_only=True):
             server_running = (sudo('netstat -atn | grep :6789')).rstrip('\n')
         sleep(5)
-    sudo('/usr/sbin/bcfg2 -vqed') # @TODO: Add "-p 'mercury-aws'" for EC2
+    sudo('/usr/sbin/bcfg2 -vqed') # @TODO: Add "-p 'mercury-aws'" for EC2 and "-p 'mercury-aws-ebs for EBS'"
 
 def _initialize_drush():
     sudo('[ ! -d drush ] || rm -rf drush')
@@ -84,7 +84,7 @@ def _initialize_drush():
 
 def _initialize_pantheon():
     sudo('rm -rf /var/www')
-    sudo('drush make --working-copy /etc/mercury/mercury.make /var/www/')
+    sudo('drush make --working-copy /etc/mercury/mercury.make /var/www/dev/')
 
 def _initialize_solr():
     sudo('[ ! -d apache-solr-1.4.1 ] || rm -rf apache-solr-1.4.1')
@@ -92,9 +92,11 @@ def _initialize_solr():
     run('tar xvzf apache-solr-1.4.1.tgz')
     sudo('mkdir -p /var/solr')
     sudo('mv apache-solr-1.4.1/dist/apache-solr-1.4.1.war /var/solr/solr.war')
-    sudo('mv apache-solr-1.4.1/example/solr /var/solr/default')
-    sudo('mv /var/www/sites/all/modules/apachesolr/schema.xml /var/solr/default/conf/')
-    sudo('mv /var/www/sites/all/modules/apachesolr/solrconfig.xml /var/solr/default/conf/')
+    sudo('mv apache-solr-1.4.1/example/solr /var/solr/dev')
+    sudo('mv /var/www/dev/sites/all/modules/apachesolr/schema.xml /var/solr/dev/conf/')
+    sudo('mv /var/www/dev/sites/all/modules/apachesolr/solrconfig.xml /var/solr/dev/conf/')
+    sudo('cp -a /var/solr/dev /var/solr/test')
+    sudo('cp -a /var/solr/dev /var/solr/live')
     sudo('chown -R tomcat6:root /var/solr/')
 
 def _initialize_hudson():
@@ -106,10 +108,10 @@ def _initialize_hudson():
     sudo('usermod -a -G shadow hudson')
 
 def _initialize_pressflow():
-    sudo('mkdir -p /var/www/sites/default/files')
-    sudo('cp /var/www/sites/default/default.settings.php /var/www/sites/default/settings.php')
-    sudo('cat /opt/pantheon/fabric/templates/settings.php.end >> /var/www/sites/default/settings.php')
+    sudo('mkdir -p /var/www/dev/sites/default/files')
+    sudo('cp /var/www/dev/sites/default/default.settings.php /var/www/dev/sites/default/settings.php')
+    sudo('cat /opt/pantheon/fabric/templates/settings.php.end >> /var/www/dev/sites/default/settings.php')
     sudo('chown -R root:www-data /var/www/*')
-    sudo('chown www-data:www-data /var/www/sites/default/settings.php')
-    sudo('chmod 660 /var/www/sites/default/settings.php')
-    sudo('chmod 775 /var/www/sites/default/files')
+    sudo('chown www-data:www-data /var/www/dev/sites/default/settings.php')
+    sudo('chmod 660 /var/www/dev/sites/default/settings.php')
+    sudo('chmod 775 /var/www/dev/sites/default/files')

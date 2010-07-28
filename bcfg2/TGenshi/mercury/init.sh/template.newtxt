@@ -45,15 +45,15 @@ if [[ "--headless" != $$1 ]]; then
   ${pmupdate}
 
   # Get any Mercury/Pressflow updates.
-  bash /usr/local/bin/update_mercury.sh
-  bash /usr/local/bin/update_pressflow.sh
+  bash /usr/local/bin/update_mercury
+  bash /usr/local/bin/update_pressflow
 else
   # Update Packages
   ${pmupdate}
 
   # Get any Mercury/Pressflow updates.
-  bash /usr/local/bin/update_mercury.sh --headless
-  bash /usr/local/bin/update_pressflow.sh --headless
+  bash /usr/local/bin/update_mercury --headless
+  bash /usr/local/bin/update_pressflow --headless
 fi
 
 # Run any other startup scripts
@@ -74,7 +74,9 @@ done
 if [ -n "$$MYSQL_ROOT_PASSWORD" ]; then
   MYSQL_ROOT_PASSWORD="-p$${MYSQL_ROOT_PASSWORD}"
 fi
-echo "CREATE DATABASE IF NOT EXISTS pantheon;" | mysql -u root $${MYSQL_ROOT_PASSWORD}
+echo "CREATE DATABASE IF NOT EXISTS dev;" | mysql -u root $${MYSQL_ROOT_PASSWORD}
+echo "CREATE DATABASE IF NOT EXISTS test;" | mysql -u root $${MYSQL_ROOT_PASSWORD}
+echo "CREATE DATABASE IF NOT EXISTS live;" | mysql -u root $${MYSQL_ROOT_PASSWORD}
 
 # Mark incep date. This prevents us from ever running again.
 echo `date` > /etc/mercury/incep

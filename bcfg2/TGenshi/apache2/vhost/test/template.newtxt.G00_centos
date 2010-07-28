@@ -1,0 +1,15 @@
+<VirtualHost *:8082>
+	ServerAdmin webmaster@localhost
+
+	DocumentRoot /var/www/html/test
+	<Directory />
+		Options FollowSymLinks
+		AllowOverride None
+	</Directory>
+	<Directory /var/www/html/test>
+		Options Indexes FollowSymLinks MultiViews
+		AllowOverride All
+		Order allow,deny
+		allow from all
+	</Directory>
+</VirtualHost>

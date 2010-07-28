@@ -35,7 +35,9 @@
     <Service name='httpd'/>
   </Group>
 
-<Path name='/etc/mercury/templates/vhost' altsrc='/apache2/vhost'/>
+  <Path name='/etc/mercury/templates/vhost/dev' altsrc='/apache2/vhost/dev'/>
+  <Path name='/etc/mercury/templates/vhost/test' altsrc='/apache2/vhost/test'/>
+  <Path name='/etc/mercury/templates/vhost/live' altsrc='/apache2/vhost/live'/>
 
 </Bundle>
 

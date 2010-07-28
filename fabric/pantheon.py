@@ -78,13 +78,13 @@ def get_server_settings():
     ret = {}
     # Default Ubuntu
     if exists('/etc/debian_version'):
-        ret['webroot'] = '/var/www/'
+        ret['webroot'] = '/var/www/live/'
         ret['owner'] = 'root'
         ret['group'] = 'www-data'
         ret['distro'] = 'ubuntu'
     # Default Centos
     elif exists('/etc/redhat-release'):
-        ret['webroot'] = '/var/www/html/'
+        ret['webroot'] = '/var/www/html/live/'
         ret['owner'] = 'root'
         ret['group'] = 'apache'
         ret['distro'] = 'centos'
