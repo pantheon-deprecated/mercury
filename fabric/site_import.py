@@ -4,45 +4,56 @@ from os.path import exists
 from string import Template
 from re import search
 from pantheon import *
+import pdb
 
 def import_site(site_archive, working_dir='/tmp/import_site/'):
     '''Import site archive into a Pantheon server'''
-    server_settings = get_server_settings()
     unarchive(site_archive, working_dir)
-    sites = get_sites(working_dir)
-    sanity_check(sites)
-    setup_databases(sites)
 
-#    _import_database(site_settings, working_dir)
-#    _setup_site_files(server_settings['webroot'], site_settings['site_name'], working_dir)
-#    _setup_modules(server_settings['webroot'], site_settings['site_name'])
-#    _update_settings(server_settings['webroot'], site_settings)
-#    _set_permissions(server_settings, site_settings['site_name'])
+    server_settings = get_server_settings()
+    sites = _get_sites(working_dir)
+
+    _sanity_check(sites)
+
+    site_names = sites.keys()
+    webroot = server_settings['webroot']
+    
+    _setup_databases(sites, working_dir)
+    _setup_site_files(webroot, working_dir, site_names)
+    _setup_modules(webroot, site_names)
+    _setup_settings_files(webroot, sites)
+    _setup_permissions(server_settings, site_names)
+
+    _restart_services(server_settings['distro'])
 
 #    with cd(server_settings['webroot'] + "sites/"):
 #        local("ln -s " + site_settings['site_name'] + " " + server_settings['ip'])
 
-#    _restart_services(server_settings['distro'])
+def _get_sites(working_dir):
+    match = {}
 
-def get_sites(working_dir):
-    matched_sites = [] 
-
-    sites = get_site_settings(working_dir)
-    databases = _get_database_names(working_dir)
-    
-    site_count = len(sites)
-    db_count = len(databases)
+    exported_sites = get_site_settings(working_dir)
+    exported_databases = _get_database_names(working_dir)
+    site_count = len(exported_sites)
+    db_count = len(exported_databases)
     # Single Database
     if db_count == 1:
         # Single Site - Single Database - Assume site matches database
         if site_count == 1:
-            sites[sites.keys()[0]]['db_dump'] = databases.keys()[0]
-        # Multiple Sites - Single Databse - Check for matches based on database name
+            site = exported_sites.keys()[0]
+            match[site] = {}
+            match[site]['database'] = exported_site[site]
+            match[site]['database']['db_dump'] = exported_databases.keys()[0]
+            match[site]['database']['db_names_from'] = exported_database.values()[0]['db_names_from']
+        # Multiple Sites - Single Database - Check for matches based on database name
         elif site_count > 1:
-            for site in sites:
-                if sites[site]['db_name'] == databases.values()[0]:
-                    sites[site]['db_dump'] = databases.keys()[0]
-            matched_sites.append(sites)
+            db_name = exported_databases.values()[0]['db_names'][0]
+            for site in exported_sites:
+                if exported_sites[site]['db_name'] == db_name:
+                    match[site] = {}
+                    match[site]['database'] = exported_sites[site]
+                    match[site]['database']['db_dump'] = exported_databases.keys()[0]
+                    match[site]['database']['db_names_from'] = exported_databases.values()[0]['db_names_from']
         else:
             pass # no matches found
 
@@ -51,49 +62,51 @@ def get_sites(working_dir):
         pass
     else:
         pass #no matches found
-    return matched_sites
+    return match
 
-def setup_databases(sites, working_dir):
-    # Create a database for each dumpfile that contains a database matched to a site.
-    for database in [sites[site]['db_dump'] for site in sites]:
-        create_database(database)
-    import_database(sites)
+def _setup_databases(sites, working_dir):
+    # Create a database for each database matched to a site.
+    for database in [sites[site]['database']['db_name'] for site in sites]:
+        local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % (database))
+        local("mysql -u root -e 'CREATE DATABASE %s'" % (database))
+    # Import each database dump that contains one or more databases matched to a site.
+    databases = [sites[site]['database'] for site in sites]
+    _import_databases(databases, working_dir)
 
-def create_database(database):
-    local("mysql -u root -e 'DROP DATABASE IF EXISTS '%s'" % (database))
-    local("mysql -u root -e 'CREATE DATABASE '%s'" % (database))
+def _import_databases(databases, working_dir):
+    name_from_use = []
+    for database in databases:
+        # Grants
+        if not database['db_password']: database['db_password'] = ''
+        local("mysql -u root -e \"GRANT ALL ON %s.* TO '%s'@'localhost' IDENTIFIED BY '%s';\"" % (database['db_name'], database['db_username'], database['db_password']))
+        # If the "USE" directive is in the dump file, we need to handle if differently.
+        if database['db_names_from'] == 'USE':
+            name_from_use.append(database['db_dump'])
+        # If the database name was found in the header comment, import the database using that name.
+        elif database['db_names_from'] == 'COMMENT':
+            if database['db_password']: database['db_password'] = '-p'+database['db_password']
+            local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | mysql -u %s %s %s" % \
+                    (working_dir + database['db_dump'], database['db_username'], database['db_password'], database['db_name']))
 
-def import_databases(sites):
-    dump_files = []
-    databases = []
-    for db_dump in [sites[site]['db_dump'] for site in sites]:
-        pass
-    
- 
-#def build_sites(sites):
+    # If database names are defined by "USE", import the dump file which contains the database.
+    if name_from_use:
+        # Remove duplicates (multiple databases could come from same dump file, but we only want to import each file once.)
+        name_from_use = set(name_from_use)
+        for db_dump in name_from_use:
+            local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | mysql -u %s -p%s" % \
+                    (working_dir + database['db_dump'], database['db_username'], database['db_password']))
+    # Cleanup
+    with cd(working_dir):
+        local("rm -f " + " ".join(["%s" % dump['db_dump'] for dump in databases]))
 
-    #import database
-    #setup site files
-    #setup modules
-    #update_settings
-    #set permissions
-
-def sanity_check(sites):
+def _sanity_check(sites):
     # Check that valid sites exist
     if not sites:
         abort("No Valid Drupal Sites Found")
-
-    # Check for multiple databses with the same name
-    found = []
-    for site in sites:
-        for database in site['database']:
-            if database in found:
-                abort("Multiple databases with the same name.")
-            else:
-                found.append(database)
+    #TODO: Add check for databases with same name but existing in different dump files
 
 def _get_database_names(webroot):
-    ''' Returns a dictionary of databases in the form of: databases[dump_filename][databasenames].''' 
+    ''' Returns a dictionary of databases in the form of: databases[dump_filename][database_names].''' 
     databases = {}
     # Get all database dump files
     with cd(webroot):
@@ -102,22 +115,22 @@ def _get_database_names(webroot):
     if '\n' in db_dump_files:
         db_dump_files = db_dump_files.split()
         for db in db_dump_files:
-            databases[db] = _get_database_name_from_dump(webroot + db)
+            databases[db] = _get_database_names_from_dump(webroot + db)
     # Single database file
     else:
-        databases[db_dump_files] = _get_database_name_from_dump(webroot + db_dump_files)
+        databases[db_dump_files] = _get_database_names_from_dump(webroot + db_dump_files)
     return databases
 
-def _get_database_name_from_dump(database_dump):
+def _get_database_names_from_dump(database_dump):
     # Check for 'USE' directive (multiple databases possible)
     databases = (local("grep '^USE `' " + database_dump + r" | sed 's/^.*`\(.*\)`;/\1/'")).rstrip('\n')
     if databases:
-        return databases.split('\n')
+        return {'db_names':databases.split('\n'), 'db_names_from':'USE'}
     # Check dump file comments for database name
     else:
         databases = (local(r"awk '/^-- Host:/' " + database_dump \
             + r" | sed 's_.*Host:\s*\(.*\)\s*Database:\s*\(.*\)$_\2_'")).rstrip('\n')
-        return databases.split('\n')
+        return {'db_names':databases.split('\n'), 'db_names_from':'COMMENT'}
 
 def _get_drupal_version(working_dir):
     # Test 1: Try to get version from system.module
@@ -178,33 +191,19 @@ def _get_branch_and_revision(working_dir):
 
     return ret
 
-def _import_database(db, working_dir):
-
-    db_dump_file = _get_db_dump_name(working_dir)
-    #TODO: break drop and create database into own function
-    local("mysql -u root -e 'DROP DATABASE IF EXISTS " + db['db_name'] + "'")
-    local("mysql -u root -e 'CREATE DATABASE " + db['db_name'] + "'")
-    local("mysql -u root -e \"GRANT ALL ON " + db['db_name'] + ".* TO '" + db['db_username'] + "'@'localhost' IDENTIFIED BY '" + db['db_password'] + "';\"")
-    local("cat " + db_dump_file + " | grep -v '^INSERT INTO `cache[_a-z]*`' | sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | mysql -u root " + db['db_name'])
-    local("rm -f " + db_dump_file)
-
-def _setup_site_files(webroot, site, working_dir):
+def _setup_site_files(webroot, working_dir, sites):
     #TODO: add large file size sanity check (no commits over 20mb)
     #TODO: sanity check for versions prior to 6.6 (no pressflow branch).
-    #TODO: test wildcard in ignore
     #TODO: look into ignoreing files directory
-    #TODO: sanity check for conflicts (hacked core)
-    #TODO: check if updatedb needs to run. Fabric will return error if it doesn't need to run.
+    #TODO: check for conflicts (hacked core)
     
     if exists(webroot):
         local('rm -r ' + webroot)
 
     # Create vanilla drupal/pressflow branch of same version as import site
     version = _get_branch_and_revision(working_dir)
-
     local("bzr branch -r " + version['revision'] + " " + version['branch'] + " " + webroot)
 
-    # Bring import site up to current Pressflow version
     with cd(webroot):
 
         # Import site and revert any changes to core
@@ -213,121 +212,68 @@ def _setup_site_files(webroot, site, working_dir):
 
         # Cleanup potential issues
         local("rm -f PRESSFLOW.txt")
-        #if exists(".bzrignore"):
-        #    local('bzr revert .bzrignore')
 
-        # Magic Happens
-        #local("bzr add")
+        # Merge in Latest Pressflow
         local("bzr commit --unchanged -m 'Automated Commit'")
         local("bzr merge lp:pressflow/6.x")
         local("rm -r ./.bzr")
-#local("bzr commit --unchanged -m 'Update to latest Pressflow core'")
         
         # Run update.php. Wrap in warn_only because drush returns failure if it doesn't need to run.
         with settings(warn_only=True):
-            local("drush -y --uri=" + site + " updatedb")
+            for site in sites:
+                local("drush -y --uri=" + site + " updatedb")
 
-    # Save reverted files as hudson build artifacts
-    #with open('/var/lib/hudson/jobs/import_site/workspace/reverted.txt', 'w') as f:
-    #    f.write(reverted)
-    #f.close
+def _setup_modules(webroot, sites):
 
-def _update_settings(webroot, site_settings):
-    #TODO: remove any previously defined $db_url strings rather than relying on ours being last
-    slug = Template(local("cat /opt/pantheon/fabric/templates/pantheon.settings.php"))
-    slug = slug.safe_substitute(site_settings)
-    with open(webroot + "sites/" + site_settings['site_name'] + "/settings.php", 'a') as f:
-        f.write(slug)
-    f.close
+    required_modules = ['apachesolr', 'apachesolr_search', 'cookie_cache_bypass', 'locale', 'syslog', 'varnish']
 
-def _get_module_status(site_path):
-    #TODO: extend drush so that "drush pm-list" can have xml/json friendly output. Below is temporary stop-gap
-    with cd(site_path):
-        # Output module status in dictionary friendly format.
-        site_modules = local("drush sql-query \"SELECT name, status FROM system WHERE type='module';\" | awk -v sq=\"'\" '{if ($1 != \"name\" && $2 == 1) print \"(\"sq$1sq\", \"sq\"Enabled\"sq\")\"; if ($1 != \"name\" && $2 == 0) print \"(\"sq$1sq\", \"sq\"Disabled\"sq\")\" }'").replace('\n',',')[:-1]
-    return dict(eval(site_modules))
-
-def _setup_modules(webroot, site):
-
-    required_modules = {'apachesolr':None, 'apachesolr_search':'Disabled', 'cookie_cache_bypass':'Disabled', 'locale':None, 'memcache_admin':None, 'syslog':None, 'varnish':None}
-
-    # Get module dictionary. Key=Module name, Value=Enabled/Disabled/None
-    site_modules = _get_module_status(webroot + "sites/" + site)
-
-    with cd(webroot):
-        # If a required module is found, the value is set to site_modules current status (Enabled/Disabled). If not found, value=None.
-        for name in required_modules.keys():
-            if site_modules.has_key(name):
-                required_modules[name] = site_modules[name]
-
-        # Special case: download memcache if memcache_admin doesn't exist, but don't enable memcache_admin.
-        if required_modules['memcache_admin'] == None:
-            local("drush -y dl memcache")
-            required_modules['memcache_admin'] = 'Disabled'
-        if required_modules['memcache_admin'] == 'Disabled':
-            del(required_modules['memcache_admin'])
-
-        # Special Case: Make sure both apachesolr and apachesolr_search are installed and enabled.
-        if required_modules['apachesolr'] == None:
-            local("drush -y dl apachesolr")
-            required_modules['apachesolr'] = 'Disabled'
-            required_modules['apachesolr_search'] = 'Disabled'
-        if required_modules['apachesolr'] == 'Disabled':
-            local("wget http://solr-php-client.googlecode.com/files/SolrPhpClient.r22.2009-11-09.tgz")
-            local("mkdir -p " + webroot + "sites/all/modules/apachesolr/SolrPhpClient/")
-            local("tar xzf SolrPhpClient.r22.2009-11-09.tgz -C " + webroot  + "sites/all/modules/apachesolr/")
+    # Make sure all required modules exist in sites/all/modules
+    with cd(webroot + "sites/all/modules/"):
+        local("drush dl -y apachesolr memcache varnish")
+        local("wget http://solr-php-client.googlecode.com/files/SolrPhpClient.r22.2009-11-09.tgz")
+        local("mkdir -p " + webroot + "sites/all/modules/apachesolr/SolrPhpClient/")
+        local("tar xzf SolrPhpClient.r22.2009-11-09.tgz -C " + webroot  + "sites/all/modules/apachesolr/")
+        local("rm SolrPhpClient.r22.2009-11-09.tgz")
+    for site in sites:
+        with cd(webroot + "sites/" + site):
+            # If required modules exist in specific site directory, make sure they are on latest version.
+            if exists("modules"):
+                with cd("modules"):
+                    if exists("apachesolr"):
+                        local("drush dl -y apachesolr")
+                    if exists("memcache"):
+                        local("drush dl -y memcache")
+                    if exists("varnish"):
+                        local("drush dl -y varnish")
+            # Enable all required modules
             with settings(warn_only=True):
-                local("drush -y --uri=" + site + " en apachesolr")
-            del(required_modules['apachesolr'])
-        if required_modules['apachesolr_search'] == 'Disabled':
-            with settings(warn_only=True):
-                local("drush -y --uri=" + site + " en apachesolr_search")
-            del(required_modules['apachesolr_search'])
+                local("drush en -y " + " ".join(["%s" % module for module in required_modules]))
 
-        # Normal Cases: Download if absent & enable if disabled.
-        for module, status in required_modules.iteritems():
-            if status == None:
-                local("drush -y dl " + module)
-                status = 'Disabled' 
-            if status == 'Disabled':
-                with settings(warn_only=True):
-                    local("drush -y --uri=" + site + " en " + module)
+            # Set apachesolr variables
+            local("drush php-eval \"variable_set('apachesolr_path', '/default');\"")
+            local("drush php-eval \"variable_set('apachesolr_port', 8983);\"")
+            local("drush php-eval \"variable_set('apachesolr_search_make_default', 1);\"")
+            local("drush php-eval \"variable_set('apachesolr_search_spellcheck', TRUE);\"")
 
-    with cd(webroot + "sites/" + site):
-        # Set apachesolr variables
-        local("drush php-eval \"variable_set('apachesolr_path', '/default');\"")
-        local("drush php-eval \"variable_set('apachesolr_port', 8983);\"")
-        local("drush php-eval \"variable_set('apachesolr_search_make_default', 1);\"")
-        local("drush php-eval \"variable_set('apachesolr_search_spellcheck', TRUE);\"")
+            # Set admin/settings/performance variables
+            local("drush php-eval \"variable_set('cache', CACHE_EXTERNAL);\"")
+            local("drush php-eval \"variable_set('page_cache_max_age', 900);\"")
+            local("drush php-eval \"variable_set('block_cache', TRUE);\"")
+            local("drush php-eval \"variable_set('page_compression', 0);\"")
+            local("drush php-eval \"variable_set('preprocess_js', TRUE);\"")
+            local("drush php-eval \"variable_set('preprocess_css', TRUE);\"")
 
-        # Set admin/settings/performance variables
-        local("drush php-eval \"variable_set('cache', CACHE_EXTERNAL);\"")
-        local("drush php-eval \"variable_set('page_cache_max_age', 900);\"")
-        local("drush php-eval \"variable_set('block_cache', TRUE);\"")
-        local("drush php-eval \"variable_set('page_compression', 0);\"")
-        local("drush php-eval \"variable_set('preprocess_js', TRUE);\"")
-        local("drush php-eval \"variable_set('preprocess_css', TRUE);\"")
-
-    # Drush will report failure if we try to enable a module that is already enabled.
-    # To get around this, we wrap "drush en" in warn_only=True.
-    # However, we still want to make sure the modules are enabled (and didn't fail for another reason).
-    site_modules = _get_module_status(webroot + "sites/" + site)
-    check_modules = ['apachesolr', 'apachesolr_search', 'cookie_cache_bypass', 'locale', 'syslog', 'varnish']
-    for module in check_modules:
-        if site_modules[module] == 'Disabled':
-            print "WARNING: Required module \"" + module + "\" could not be enabled."
-
-def _set_permissions(server_settings, site_name):
-    #TODO: make database call to find file dir location for specific site
-    # setup ownership and permissions
-    local('chown -R ' + server_settings['owner'] + ':' + server_settings['group'] + ' ' + server_settings['webroot'])
-    local('chmod 440 ' + server_settings['webroot'] + 'sites/' + site_name + '/settings.php')
-
-    # make sure everything under the 'files' directory has proper perms (770 on dirs, 550 on files)
-    with cd(server_settings['webroot'] + 'sites/'):
-        local("find . -type d -name files -exec chmod ug=rwx,o= '{}' \;")
-        local("find . -name files -type d -exec find '{}' -type f \; | while read FILE; do chmod ug=rw,o= \"$FILE\"; done")
-        local("find . -name files -type d -exec find '{}' -type d \; | while read DIR; do chmod ug=rwx,o= \"$DIR\"; done")
+def _setup_permissions(server_settings, sites):
+    local("chown -R %(owner)s:%(group)s %(webroot)s" % server_settings)
+    for site in sites:
+        pdb.set_trace()
+        with cd(server_settings['webroot'] + "sites/" + site):
+            local("chmod 440 settings.php")
+            file_directory = (local("drush variable-get file_directory_path | sed 's/^file_directory_path: \"\(.*\)\".*/\\1/'")).rstrip('\n')
+        with cd(server_settings['webroot'] + file_directory):
+            local("chmod 770 .")
+            local("find . -type d -exec find '{}' -type f \; | while read FILE; do chmod 550 \"$FILE\"; done")
+            local("find . -type d -exec find '{}' -type d \; | while read DIR; do chmod 770 \"$DIR\"; done")
 
 def _restart_services(distro):
     if distro == 'ubuntu':
@@ -338,3 +284,15 @@ def _restart_services(distro):
         local('/etc/init.d/httpd restart')
         local('/etc/init.d/memcached restart')
         local('/etc/init.d/tomcat5 restart')
+
+def _setup_settings_files(webroot, sites):
+    slug_template = local("cat /opt/pantheon/fabric/templates/pantheon.settings.php")
+    for site_name, site_values in sites.iteritems():
+        if site_values['database']['db_password']:
+            site_values['database']['db_password'] = ":" + site_values['database']['db_password']
+        slug = Template(slug_template)
+        slug = slug.safe_substitute(site_values['database'])
+        with open(webroot + "sites/" + site_name + "/settings.php", 'a') as f:
+            f.write(slug)
+        f.close
+
