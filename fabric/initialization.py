@@ -108,6 +108,7 @@ def _initialize_hudson():
 def _initialize_pressflow():
     sudo('mkdir -p /var/www/sites/default/files')
     sudo('cp /var/www/sites/default/default.settings.php /var/www/sites/default/settings.php')
+    sudo('cat /opt/pantheon/fabric/templates/settings.php.end >> /var/www/sites/default/settings.php')
     sudo('chown -R root:www-data /var/www/*')
     sudo('chown www-data:www-data /var/www/sites/default/settings.php')
     sudo('chmod 660 /var/www/sites/default/settings.php')
