@@ -338,4 +338,3 @@ def _restart_services(distro):
         local('/etc/init.d/httpd restart')
         local('/etc/init.d/memcached restart')
         local('/etc/init.d/tomcat5 restart')
-
