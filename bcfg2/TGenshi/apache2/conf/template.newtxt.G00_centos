@@ -135,6 +135,8 @@ MaxRequestsPerChild  0
 #
 #Listen 12.34.56.78:80
 Listen 8080
+Listen 8082
+Listen 8083
 
 #
 # Dynamic Shared Object (DSO) Support
