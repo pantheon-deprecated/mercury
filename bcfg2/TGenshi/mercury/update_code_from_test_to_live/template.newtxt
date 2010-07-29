@@ -9,12 +9,12 @@ set -o pipefail
 echo "Starting the update_code_from_test_to_live script"
 
 # --headless assumes this script is not being run by hand (but rather in hudson or through another script)
-if [[ "--headless" != $$1 ]]; then
-    echo "CONFIRM: push code from $TEST_WEBROOT (test) to $LIVE_WEBROOT (live) (y/n)"
+if [[ "--headless" != $$$$1 ]]; then
+    echo "CONFIRM: push code from $$TEST_WEBROOT (test) to $$LIVE_WEBROOT (live) (y/n)"
     
     read ANSWER
     echo ""
-    if [[ ${ANSWER} != "y" ]]; then
+    if [[ $${ANSWER} != "y" ]]; then
 	echo "Cancelling....."
 	exit 1
     fi
@@ -22,34 +22,34 @@ if [[ "--headless" != $$1 ]]; then
     exec &> /etc/mercury/logs/update_code_from_test_to_live.log
 fi
 
-if svn status $TEST_WEBROOT | grep -q -v "?"; then 
+if svn status $$TEST_WEBROOT | grep -q -v "?"; then 
     echo "*WARNING*Test is OUT OF SYNC with SVN. You should probably fix this before proceeding!  Proceed anyway? (Y/N)"
     read ANSWER
     echo ""
-    if [[ ${ANSWER} != "y" ]]; then
+    if [[ $${ANSWER} != "y" ]]; then
         echo "Cancelling....."
         exit 1
     fi
 fi
 
-echo "*Backing up current live codebase to $BACKUP_DIR/www-last*"
+echo "*Backing up current live codebase to $$BACKUP_DIR/www-last*"
 
-mkdir -p $BACKUP_DIR
+mkdir -p $$BACKUP_DIR
 rm -rf BACKUP_DIR/www-last
-rsync -a $LIVE_WEBROOT $BACKUP_DIR/www-last
+rsync -a $$LIVE_WEBROOT $$BACKUP_DIR/www-last
 
-echo "*Backing up Current database to $BACKUP_DIR/live.$DATE.sq (for good measure)*"
+echo "*Backing up Current database to $$BACKUP_DIR/live.$$DATE.sq (for good measure)*"
 
-mysqldump -u $LIVE_DB_USERNAME -p$LIVE_DB_PASSWORD $LIVE_DB > $BACKUP_DIR/live.$DATE.sql
+mysqldump -u $$LIVE_DB_USERNAME -p$$LIVE_DB_PASSWORD $$LIVE_DB > $$BACKUP_DIR/live.$$DATE.sql
 
 echo "*Exporting Stable Codebase"
 
-svn export $TEST_WEBROOT $TMP_DIR/code_push/
+svn export $$TEST_WEBROOT $$TMP_DIR/code_push/
 
 echo "*Synchronizing*"
 
-rsync -av --exclude=settings.php $TMP_DIR/code_push/ $LIVE_WEBROOT
+rsync -av --exclude=settings.php $$TMP_DIR/code_push/ $$LIVE_WEBROOT
 
 echo "*Code Push Complete!*"
 
-rm -Rf $TMP_DIR/code_push
+rm -Rf $$TMP_DIR/code_push

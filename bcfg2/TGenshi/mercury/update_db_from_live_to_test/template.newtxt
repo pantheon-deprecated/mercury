@@ -9,13 +9,13 @@ set -o pipefail
 echo "Starting the update_db_from_live_to_test script"
 
 # --headless assumes this script is not being run by hand (but rather in hudson or through another script)
-if [[ "--headless" != $$1 ]]; then
-    echo "CONFIRM: update db from $LIVE_WEBROOT (live) to $TEST_WEBROOT (test)"
+if [[ "--headless" != $$$$1 ]]; then
+    echo "CONFIRM: update db from $$LIVE_WEBROOT (live) to $$TEST_WEBROOT (test)"
     echo -n "Continue (y/n)"
 
     read ANSWER
     echo ""
-    if [[ ${ANSWER} != "y" ]]; then
+    if [[ $${ANSWER} != "y" ]]; then
 	echo "Cancelling....."
 	exit 1
     fi
@@ -25,13 +25,13 @@ fi
 
 echo "*Backing up test db*"
 
-mysqldump -u $TEST_DB_USERNAME -p$TEST_DB_PASSWORD $TEST_DB > $BACKUP_DIR/test.$DATE.sql
+mysqldump -u $$TEST_DB_USERNAME -p$$TEST_DB_PASSWORD $$TEST_DB > $$BACKUP_DIR/test.$$DATE.sql
 
 echo "*Updating test db*"
 
-mysqldump -u $LIVE_DB_USERNAME -p$LIVE_DB_PASSWORD $LIVE_DB > $BACKUP_DIR/live.$DATE.sql
-echo "drop database $TEST_DB" | mysql -u $TEST_DB_USERNAME -p$TEST_DB_PASSWORD 
-echo "create database $TEST_DB" | mysql -u $TEST_DB_USERNAME -p$TEST_DB_PASSWORD 
-mysql -u $TEST_DB_USERNAME -p$TEST_DB_PASSWORD -D $TEST_DB < $BACKUP_DIR/live.$DATE.sql
+mysqldump -u $$LIVE_DB_USERNAME -p$$LIVE_DB_PASSWORD $$LIVE_DB > $$BACKUP_DIR/live.$$DATE.sql
+echo "drop database $$TEST_DB" | mysql -u $$TEST_DB_USERNAME -p$$TEST_DB_PASSWORD 
+echo "create database $$TEST_DB" | mysql -u $$TEST_DB_USERNAME -p$$TEST_DB_PASSWORD 
+mysql -u $$TEST_DB_USERNAME -p$$TEST_DB_PASSWORD -D $$TEST_DB < $$BACKUP_DIR/live.$$DATE.sql
 
 echo "*test db updated*"
