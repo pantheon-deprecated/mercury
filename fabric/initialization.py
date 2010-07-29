@@ -116,12 +116,13 @@ def _initialize_pressflow():
     sudo('chmod 775 /var/www/dev/sites/default/files')
     sudo('git init /var/www/dev')
     with cd('/var/www/dev'):
-        run('git add .')
-        run('git commit -m "initial checkin"')
-        run('git tag v1.0')
+        sudo('git add .')
+        sudo('git commit -m "initial checkin"')
+        sudo('git tag v1.0')
     sudo('git clone /var/www/dev /var/www/test')
     sudo('mkdir /var/www/live')
     with cd('/var/www/test'):
         sudo('git checkout v1.0')
-        run('git archive master | sudo tar -x -C /var/www/live')
+        sudo('git archive master | sudo tar -x -C /var/www/live')
+    sudo('sed -i "s/')
     sudo('chown -R root:www-data /var/www/*')
