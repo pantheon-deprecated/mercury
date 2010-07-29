@@ -40,7 +40,7 @@
     <Path name='/etc/default/tomcat6' altsrc='/tomcat/conf'/>
     <Path name='/etc/tomcat5.5/Catalina/localhost/dev.xml' altsrc='/tomcat/solr/dev'/>
     <Path name='/etc/tomcat5.5/Catalina/localhost/test.xml' altsrc='/tomcat/solr/test'/>
-    <Path name='/etc/tomcat5.5/Catalina/localhost/live.xml' altsrc='/tomcat/solr'/live/>
+    <Path name='/etc/tomcat5.5/Catalina/localhost/live.xml' altsrc='/tomcat/solr/live'/>
     <Path name='/etc/tomcat5.5/server.xml' altsrc='/tomcat/server'/>
     <Service name='tomcat5.5'/>
   </Group>
