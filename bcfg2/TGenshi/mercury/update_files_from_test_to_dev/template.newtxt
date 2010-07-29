@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# exit on any error or any pipeline command error
+set -e
+set -o pipefail
+
+. /etc/mercury/update_scripts_config
+
+echo "Starting the update_files_from_test_to_dev script"
+
+# --headless assumes this script is not being run by hand (but rather in hudson or through another script)                                                                                                     
+if [[ "--headless" != $$1 ]]; then
+    echo "CONFIRM: update files from $TEST_WEBROOT (test) to $DEV_WEBROOT (dev) (y/n)"
+
+    read ANSWER
+    echo ""
+    if [[ ${ANSWER} != "y" ]]; then
+	echo "Cancelling....."
+	exit 1
+    fi
+    echo "Creating a log of the output of this script at /etc/mercury/logs/update_files_from_test_to_dev.log"
+    exec &> /etc/mercury/logs/update_files_from_test_to_dev.log
+fi
+
+echo "*Updating dev files*"
+
+rsync -av $TEST_WEBROOT/sites/all/files/ $DEV_WEBROOT/sites/all/files/
+
+echo "*dev files updated*"

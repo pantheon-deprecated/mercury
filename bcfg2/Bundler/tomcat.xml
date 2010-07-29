@@ -9,7 +9,9 @@
     <Package name='ttf-dejavu-core'/>
     <Package name='tomcat6'/>
     <Path name='/etc/default/tomcat6' altsrc='/tomcat/conf'/>
-    <Path name='/etc/tomcat6/Catalina/localhost/default.xml' altsrc='/tomcat/solr'/>
+    <Path name='/etc/tomcat6/Catalina/localhost/dev.xml' altsrc='/tomcat/solr/dev'/>
+    <Path name='/etc/tomcat6/Catalina/localhost/test.xml' altsrc='/tomcat/solr/test'/>
+    <Path name='/etc/tomcat6/Catalina/localhost/live.xml' altsrc='/tomcat/solr/live'/>
     <Path name='/etc/tomcat6/server.xml' altsrc='/tomcat/server'/>
     <Service name='tomcat6'/>
   </Group>
@@ -36,7 +38,9 @@
     <Package name='ttf-dejavu-core'/>
     <Package name='ttf-dejavu-extra'/>
     <Path name='/etc/default/tomcat6' altsrc='/tomcat/conf'/>
-    <Path name='/etc/tomcat5.5/Catalina/localhost/default.xml' altsrc='/tomcat/solr'/>
+    <Path name='/etc/tomcat5.5/Catalina/localhost/dev.xml' altsrc='/tomcat/solr/dev'/>
+    <Path name='/etc/tomcat5.5/Catalina/localhost/test.xml' altsrc='/tomcat/solr/test'/>
+    <Path name='/etc/tomcat5.5/Catalina/localhost/live.xml' altsrc='/tomcat/solr'/live/>
     <Path name='/etc/tomcat5.5/server.xml' altsrc='/tomcat/server'/>
     <Service name='tomcat5.5'/>
   </Group>
@@ -52,7 +56,9 @@
       <Ignore name='/var/log/tomcat5/catalina.out'/>
     </Package>
     <Path name='/etc/sysconfig/tomcat5' altsrc='/tomcat/conf'/>
-    <Path name='/etc/tomcat5/Catalina/localhost/default.xml' altsrc='/tomcat/solr'/>
+    <Path name='/etc/tomcat5/Catalina/localhost/dev.xml' altsrc='/tomcat/solr/dev/'/>
+    <Path name='/etc/tomcat5/Catalina/localhost/test.xml' altsrc='/tomcat/solr/test'/>
+    <Path name='/etc/tomcat5/Catalina/localhost/live.xml' altsrc='/tomcat/solr/live'/>
     <Path name='/etc/tomcat5/server.xml' altsrc='/tomcat/server'/>
     <Path name='/var/lib/tomcat5/common/endorsed/xalan-j2.jar'/>
     <Service name='tomcat5'/>

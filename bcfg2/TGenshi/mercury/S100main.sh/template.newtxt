@@ -23,6 +23,9 @@ cp /etc/mercury/templates/vhost/live /etc/httpd/conf/vhosts/live.conf
 ln -sf /etc/httpd/conf/vhosts/live.conf /etc/httpd/conf/vhosts/default.conf
 {% end %}\
 
+a2ensite dev
+a2ensite test
+
 # Postfix
 if [[ -a /usr/local/bin/ec2-metadata ]]; then
     REAL_HOSTNAME=$$(/usr/local/bin/ec2-metadata -p | sed 's/public-hostname: //')
