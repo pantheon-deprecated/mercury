@@ -118,7 +118,7 @@ def _initialize_pressflow():
     sudo('git init /var/www/dev')
     with cd('/var/www/dev'):
         sudo('git add .')
-        sudo('git commit -m "initial checkin"')
+        sudo('git commit -m "initial branch commit"')
         sudo('git tag v1.0')
     sudo('git clone /var/www/dev /var/www/test')
     sudo('mkdir /var/www/live')
