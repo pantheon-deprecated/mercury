@@ -22,7 +22,7 @@ if [[ "--headless" != $$$$1 ]]; then
     exec &> /etc/mercury/logs/update_code_from_test_to_live.log
 fi
 
-if svn status $$TEST_WEBROOT | grep -q -v "?"; then 
+if svn git $$TEST_WEBROOT | grep -q -v "?"; then 
     echo "*WARNING*Test is OUT OF SYNC with SVN. You should probably fix this before proceeding!  Proceed anyway? (Y/N)"
     read ANSWER
     echo ""
@@ -44,7 +44,7 @@ mysqldump -u $$LIVE_DB_USERNAME -p$$LIVE_DB_PASSWORD $$LIVE_DB > $$BACKUP_DIR/li
 
 echo "*Exporting Stable Codebase"
 
-svn export $$TEST_WEBROOT $$TMP_DIR/code_push/
+git archive master | tar -x -C $$TMP_DIR/code_push/
 
 echo "*Synchronizing*"
 

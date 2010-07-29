@@ -124,5 +124,6 @@ def _initialize_pressflow():
     with cd('/var/www/test'):
         sudo('git checkout v1.0')
         sudo('git archive master | sudo tar -x -C /var/www/live')
-    sudo('sed -i "s/')
+    sudo('sed -i "s/dev/test/g" /var/www/test/sites/default/settings.php')
+    sudo('sed -i "s/dev/live/g" /var/www/live/sites/default/settings.php')
     sudo('chown -R root:www-data /var/www/*')

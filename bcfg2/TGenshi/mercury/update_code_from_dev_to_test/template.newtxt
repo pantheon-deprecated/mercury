@@ -25,7 +25,7 @@ fi
 echo "*Updating test*"
 
 chmod +w $$TEST_WEBROOT/sites/$$TEST_SITE_DIR/settings.php
-svn update --username $$SVN_USER --password $$SVN_PASS $$TEST_WEBROOT
+cd $$TEST_WEBROOT; git checkout
 sed -i "s|^\$$db_url = .*|\$$db_url = 'mysqli:\\/\\/$$TEST_DB_USERNAME:$$TEST_DB_PASSWORD@localhost\\/$$TEST_DB';|" $$TEST_WEBROOT/sites/$$TEST_SITE_DIR/settings.php
 chmod -w $$TEST_WEBROOT/sites/$$TEST_SITE_DIR/settings.php
 
