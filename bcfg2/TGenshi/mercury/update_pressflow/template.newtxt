@@ -6,7 +6,7 @@
 %}\
 #!/bin/bash
 
-#This script updates the /var/www dir (pressflow) from the pressflow project on launchpad
+#This script updates the /var/www/dev dir (pressflow) from the pressflow project on launchpad
 
 # exit on any error or any pipeline command error
 set -e
@@ -16,7 +16,7 @@ echo "Starting Pressflow Update Script"
 
 # --headless assumes this script is not being run by hand (but rather in hudson or through another script)
 if [[ "--headless" != $$1 ]]; then
-  echo "This script updates the /var/www dir (pressflow) from the pressflow project on launchpad"
+  echo "This script updates the /var/www/dev (or /var/www/html/dev for centos) dir from the pressflow project on launchpad"
   echo -n "Continue? (y/n)"
 
   read ANSWER
