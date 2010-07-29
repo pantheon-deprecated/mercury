@@ -110,21 +110,22 @@ def _initialize_hudson():
 
 def _initialize_pressflow():
     sudo('mkdir -p /var/www/dev/sites/default/files')
+    sudo('touch /var/www/dev/sites/default/files.gitignore')
     sudo('cp /var/www/dev/sites/default/default.settings.php /var/www/dev/sites/default/settings.php')
     sudo('cat /opt/pantheon/fabric/templates/settings.php.end >> /var/www/dev/sites/default/settings.php')
-    sudo('chown www-data:www-data /var/www/dev/sites/default/settings.php')
-    sudo('chmod 660 /var/www/dev/sites/default/settings.php')
-    sudo('chmod 775 /var/www/dev/sites/default/files')
-    sudo('git init /var/www/dev')
+    sudo('mkdir /var/www/live')
     with cd('/var/www/dev'):
+        sudo('git init')
         sudo('git add .')
         sudo('git commit -m "initial branch commit"')
         sudo('git tag v1.0')
     sudo('git clone /var/www/dev /var/www/test')
-    sudo('mkdir /var/www/live')
     with cd('/var/www/test'):
         sudo('git checkout v1.0')
         sudo('git archive master | sudo tar -x -C /var/www/live')
     sudo('sed -i "s/dev/test/g" /var/www/test/sites/default/settings.php')
     sudo('sed -i "s/dev/live/g" /var/www/live/sites/default/settings.php')
+    sudo('chown www-data:www-data /var/www/*/sites/default/settings.php')
+    sudo('chmod 660 /var/www/*/sites/default/settings.php')
+    sudo('chmod 775 /var/www/*/sites/default/files')
     sudo('chown -R root:www-data /var/www/*')
