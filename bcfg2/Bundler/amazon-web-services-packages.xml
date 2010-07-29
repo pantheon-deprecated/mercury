@@ -225,7 +225,6 @@
     <Package name='gcc-gnat'/>
     <Package name='gcc-java'/>
     <Package name='gcc-objc++'/>
-    <Package name='git'/>
     <Package name='gnupg'/>
     <Package name='gpm'/>
     <Package name='ibmasm'/>

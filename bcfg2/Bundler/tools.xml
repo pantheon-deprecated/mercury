@@ -14,6 +14,7 @@
   
   <!-- Debian/Ubuntu Only -->
   <Group name='deb'>
+    <Package name='git-core'/>
     <Service name='rsync'/>
   </Group>
 
@@ -35,6 +36,7 @@
   
   <!-- CentOS Only -->
   <Group name='centos'>
+    <Package name='git'/>
     <Path name='/etc/cron.d/vnstat' altsrc='/vnstat/cron'/>
   </Group>
 </Bundle>
