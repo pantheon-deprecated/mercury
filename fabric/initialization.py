@@ -106,6 +106,7 @@ def _initialize_hudson():
     if 'hudson ALL = NOPASSWD:' not in sudoers:
         sudo('echo "%s" >> /etc/sudoers' % hudson_sudoer)
     sudo('usermod -a -G shadow hudson')
+    sudo('/etc/init.d/hudson restart')
 
 def _initialize_pressflow():
     sudo('mkdir -p /var/www/dev/sites/default/files')
