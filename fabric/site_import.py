@@ -42,23 +42,21 @@ def _get_sites(working_dir):
         if site_count == 1:
             site = exported_sites.keys()[0]
             match[site] = {}
-            match[site]['database'] = exported_site[site]
+            match[site]['database'] = exported_sites[site]
             match[site]['database']['db_dump'] = exported_databases.keys()[0]
-            match[site]['database']['db_names_from'] = exported_database.values()[0]['db_names_from']
         # Multiple Sites - Single Database - Check for matches based on database name
         elif site_count > 1:
-            db_name = exported_databases.values()[0]['db_names'][0]
+            db_name = exported_databases.values()[0]
             for site in exported_sites:
                 if exported_sites[site]['db_name'] == db_name:
                     match[site] = {}
                     match[site]['database'] = exported_sites[site]
                     match[site]['database']['db_dump'] = exported_databases.keys()[0]
-                    match[site]['database']['db_names_from'] = exported_databases.values()[0]['db_names_from']
         else:
             pass # no matches found
 
     # Multiple Databases
-    elif  database.count() > 1:
+    elif db_count > 1:
         pass
     else:
         pass #no matches found
@@ -74,27 +72,19 @@ def _setup_databases(sites, working_dir):
     _import_databases(databases, working_dir)
 
 def _import_databases(databases, working_dir):
-    name_from_use = []
     for database in databases:
-        # Grants
+        # Change 'None' to empty string
         if not database['db_password']: database['db_password'] = ''
+        # Grants
         local("mysql -u root -e \"GRANT ALL ON %s.* TO '%s'@'localhost' IDENTIFIED BY '%s';\"" % (database['db_name'], database['db_username'], database['db_password']))
-        # If the "USE" directive is in the dump file, we need to handle if differently.
-        if database['db_names_from'] == 'USE':
-            name_from_use.append(database['db_dump'])
-        # If the database name was found in the header comment, import the database using that name.
-        elif database['db_names_from'] == 'COMMENT':
-            if database['db_password']: database['db_password'] = '-p'+database['db_password']
-            local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | mysql -u %s %s %s" % \
-                    (working_dir + database['db_dump'], database['db_username'], database['db_password'], database['db_name']))
-
-    # If database names are defined by "USE", import the dump file which contains the database.
-    if name_from_use:
-        # Remove duplicates (multiple databases could come from same dump file, but we only want to import each file once.)
-        name_from_use = set(name_from_use)
-        for db_dump in name_from_use:
-            local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | mysql -u %s -p%s" % \
-                    (working_dir + database['db_dump'], database['db_username'], database['db_password']))
+        # If password exists, add the -p flag
+        if database['db_password']: 
+            db_pass = '-p'+database['db_password']
+        else:
+            db_pass = ''
+        # Strip cache tables, convert MyISAM to InnoDB, and import.
+        local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | mysql -u %s %s %s" % \
+                (working_dir + database['db_dump'], database['db_username'], db_pass, database['db_name']))
     # Cleanup
     with cd(working_dir):
         local("rm -f " + " ".join(["%s" % dump['db_dump'] for dump in databases]))
@@ -106,7 +96,6 @@ def _sanity_check(sites):
     #TODO: Add check for databases with same name but existing in different dump files
 
 def _get_database_names(webroot):
-    ''' Returns a dictionary of databases in the form of: databases[dump_filename][database_names].''' 
     databases = {}
     # Get all database dump files
     with cd(webroot):
@@ -114,23 +103,24 @@ def _get_database_names(webroot):
     # Multiple database files
     if '\n' in db_dump_files:
         db_dump_files = db_dump_files.split()
-        for db in db_dump_files:
-            databases[db] = _get_database_names_from_dump(webroot + db)
+        for db_dump in db_dump_files:
+            databases[db_dump] = _get_database_name_from_dump(webroot + db_dump)
     # Single database file
     else:
-        databases[db_dump_files] = _get_database_names_from_dump(webroot + db_dump_files)
+        databases[db_dump_files] = _get_database_name_from_dump(webroot + db_dump_files)
     return databases
 
-def _get_database_names_from_dump(database_dump):
-    # Check for 'USE' directive (multiple databases possible)
+def _get_database_name_from_dump(database_dump):
+    # Check for 'USE' statement
     databases = (local("grep '^USE `' " + database_dump + r" | sed 's/^.*`\(.*\)`;/\1/'")).rstrip('\n')
-    if databases:
-        return {'db_names':databases.split('\n'), 'db_names_from':'USE'}
+    # If multiple databases defined in dump file, abort.
+    if '\n' in databases:
+        abort("Multiple databases found in: " + database_dump)
     # Check dump file comments for database name
-    else:
+    elif not databases:
         databases = (local(r"awk '/^-- Host:/' " + database_dump \
             + r" | sed 's_.*Host:\s*\(.*\)\s*Database:\s*\(.*\)$_\2_'")).rstrip('\n')
-        return {'db_names':databases.split('\n'), 'db_names_from':'COMMENT'}
+    return databases
 
 def _get_drupal_version(working_dir):
     # Test 1: Try to get version from system.module
@@ -228,6 +218,8 @@ def _setup_modules(webroot, sites):
     required_modules = ['apachesolr', 'apachesolr_search', 'cookie_cache_bypass', 'locale', 'syslog', 'varnish']
 
     # Make sure all required modules exist in sites/all/modules
+    if not exists(webroot + "sites/all/modules/"):
+        local("mkdir " + webroot + "sites/all/modules/")
     with cd(webroot + "sites/all/modules/"):
         local("drush dl -y apachesolr memcache varnish")
         local("wget http://solr-php-client.googlecode.com/files/SolrPhpClient.r22.2009-11-09.tgz")
@@ -249,7 +241,7 @@ def _setup_modules(webroot, sites):
             with settings(warn_only=True):
                 local("drush en -y " + " ".join(["%s" % module for module in required_modules]))
 
-            # Set apachesolr variables
+            # Set apachesolr variables (use php-eval because drush vset always sets as string)
             local("drush php-eval \"variable_set('apachesolr_path', '/default');\"")
             local("drush php-eval \"variable_set('apachesolr_port', 8983);\"")
             local("drush php-eval \"variable_set('apachesolr_search_make_default', 1);\"")
@@ -265,11 +257,19 @@ def _setup_modules(webroot, sites):
 
 def _setup_permissions(server_settings, sites):
     local("chown -R %(owner)s:%(group)s %(webroot)s" % server_settings)
+    pdb.set_trace()
     for site in sites:
-        pdb.set_trace()
         with cd(server_settings['webroot'] + "sites/" + site):
             local("chmod 440 settings.php")
-            file_directory = (local("drush variable-get file_directory_path | sed 's/^file_directory_path: \"\(.*\)\".*/\\1/'")).rstrip('\n')
+            file_directory = (local("drush variable-get file_directory_path | grep 'file_directory_path: \"' | sed 's/^file_directory_path: \"\(.*\)\".*/\\1/'")).rstrip('\n')
+            # if file_directory is not set, create one and set variable.
+            if not file_directory:
+                local("mkdir files")
+                file_directory = "sites/" + site + "/files"
+                local("drush variable-set --always-set file_directory_path" + file_directory)
+            # if file_directory is set, but doesn't exist, create it.
+            if not exists(server_settings['webroot'] + file_directory):
+                local("mkdir -p " + server_settings['webroot'] + file_directory)
         with cd(server_settings['webroot'] + file_directory):
             local("chmod 770 .")
             local("find . -type d -exec find '{}' -type f \; | while read FILE; do chmod 550 \"$FILE\"; done")
