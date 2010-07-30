@@ -125,7 +125,7 @@ def _initialize_pressflow():
         sudo('git archive master | sudo tar -x -C /var/www/live')
     sudo('sed -i "s/dev/test/g" /var/www/test/sites/default/settings.php')
     sudo('sed -i "s/dev/live/g" /var/www/live/sites/default/settings.php')
+    sudo('chown -R root:www-data /var/www/*')
     sudo('chown www-data:www-data /var/www/*/sites/default/settings.php')
     sudo('chmod 660 /var/www/*/sites/default/settings.php')
     sudo('chmod 775 /var/www/*/sites/default/files')
-    sudo('chown -R root:www-data /var/www/*')
