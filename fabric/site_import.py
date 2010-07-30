@@ -4,7 +4,6 @@ from os.path import exists
 from string import Template
 from re import search
 from pantheon import *
-import pdb
 
 def import_site(site_archive, working_dir='/tmp/import_site/'):
     '''Import site archive into a Pantheon server'''
@@ -257,7 +256,6 @@ def _setup_modules(webroot, sites):
 def _setup_permissions(server_settings, sites):
     file_paths = []
     local("chown -R %(owner)s:%(group)s %(webroot)s" % server_settings)
-    pdb.set_trace()
     for site in sites:
         with cd(server_settings['webroot'] + "sites/" + site):
             local("chmod 440 settings.php")
