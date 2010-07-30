@@ -12,9 +12,6 @@ def import_site(site_archive, working_dir='/tmp/import_site/'):
 
     server_settings = get_server_settings()
     sites = _get_sites(working_dir)
-
-    _sanity_check(sites)
-
     site_names = sites.keys()
     webroot = server_settings['webroot']
     
@@ -36,70 +33,71 @@ def _get_sites(working_dir):
     exported_databases = _get_database_names(working_dir)
     site_count = len(exported_sites)
     db_count = len(exported_databases)
-    # Single Database
-    if db_count == 1:
+    if len(exported_sites) == 1 and len(exported_databases == 1):
         # Single Site - Single Database - Assume site matches database
-        if site_count == 1:
-            site = exported_sites.keys()[0]
-            match[site] = {}
-            match[site]['database'] = exported_sites[site]
-            match[site]['database']['db_dump'] = exported_databases.keys()[0]
-        # Multiple Sites - Single Database - Check for matches based on database name
-        elif site_count > 1:
-            db_name = exported_databases.values()[0]
-            for site in exported_sites:
-                if exported_sites[site]['db_name'] == db_name:
-                    match[site] = {}
-                    match[site]['database'] = exported_sites[site]
-                    match[site]['database']['db_dump'] = exported_databases.keys()[0]
-        else:
-            pass # no matches found
-
-    # Multiple Databases
-    elif db_count > 1:
-        pass
-    else:
-        pass #no matches found
+        site = exported_sites.keys()[0]
+        match[site] = {}
+        match[site]['database'] = exported_sites[site]
+        match[site]['database']['db_dump'] = exported_databases.keys()[0]
+    else: 
+        matched_databases = {}
+        for site in exported_sites.keys():
+            for db_dump in exported_databases.keys():
+                if exported_sites[site]['db_name'] == exported_databases[db_dump]:
+                    matched_databases[site] = []
+                    if exported_databases[db_dump] not in matched_databases[site]:
+                        match[site] = {}
+                        match[site]['database'] = exported_sites[site]
+                        match[site]['database']['db_dump'] = db_dump
+                        # track database names that match a site in case multiple dumps contain databases with same name.
+                        matched_databases[site].append(exported_databases[db_dump])
     return match
 
 def _setup_databases(sites, working_dir):
-    # Create a database for each database matched to a site.
-    for database in [sites[site]['database']['db_name'] for site in sites]:
+    # Get all databases, and put in a set to remove duplicates. Create a database for each unique database matched to a site. 
+    databases = set([database for database in [sites[site]['database']['db_name'] for site in sites]])
+    for database in databases:
         local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % (database))
         local("mysql -u root -e 'CREATE DATABASE %s'" % (database))
-    # Import each database dump that contains one or more databases matched to a site.
-    databases = [sites[site]['database'] for site in sites]
-    _import_databases(databases, working_dir)
+    # Import each database dump that contains a database matched to a site.
+    database_settings = [sites[site]['database'] for site in sites]
+    _import_databases(database_settings, working_dir)
 
 def _import_databases(databases, working_dir):
+
+    # Create temporary superuser to perform import operations
+    with settings(warn_only=True):
+        local("mysql -u root -e \"DROP USER 'pantheon-admin'@'localhost';\"")
+    local("mysql -u root -e \"CREATE USER 'pantheon-admin'@'localhost' IDENTIFIED BY '';\"")
+    local("mysql -u root -e \"GRANT ALL PRIVILEGES ON *.* TO 'pantheon-admin'@'localhost' WITH GRANT OPTION;\"")
+
+
+    imported = []
+    # Set grants and import
     for database in databases:
         # Change 'None' to empty string
         if not database['db_password']: database['db_password'] = ''
-        # Grants
-        local("mysql -u root -e \"GRANT ALL ON %s.* TO '%s'@'localhost' IDENTIFIED BY '%s';\"" % (database['db_name'], database['db_username'], database['db_password']))
-        # If password exists, add the -p flag
-        if database['db_password']: 
-            db_pass = '-p'+database['db_password']
-        else:
-            db_pass = ''
-        # Strip cache tables, convert MyISAM to InnoDB, and import.
-        local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | mysql -u %s %s %s" % \
-                (working_dir + database['db_dump'], database['db_username'], db_pass, database['db_name']))
-    # Cleanup
-    with cd(working_dir):
-        local("rm -f " + " ".join(["%s" % dump['db_dump'] for dump in databases]))
+        local("mysql -u pantheon-admin -e \"GRANT ALL ON %s.* TO '%s'@'localhost' IDENTIFIED BY '%s';\"" % \
+                (database['db_name'], database['db_username'], database['db_password']))
+        if database['db_dump'] not in imported:
+            # Strip cache tables, convert MyISAM to InnoDB, and import.
+            local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | mysql -u pantheon-admin %s" % \
+                    (working_dir + database['db_dump'], database['db_name']))
+            # track imported dump files. If multiple sites use same db, no need to import again.
+            imported.append(database['db_dump'])
 
-def _sanity_check(sites):
-    # Check that valid sites exist
-    if not sites:
-        abort("No Valid Drupal Sites Found")
-    #TODO: Add check for databases with same name but existing in different dump files
+    # Cleanup
+    local("mysql -u pantheon-admin -e \"DROP USER 'pantheon-admin'@'localhost'\"")
+    db_dumps = set([dump['db_dump'] for dump in databases])
+    with cd(working_dir):
+        local("rm -f " + " ".join(["%s" % db_dump for db_dump in db_dumps]))
 
 def _get_database_names(webroot):
     databases = {}
     # Get all database dump files
     with cd(webroot):
-        db_dump_files = (local("find . -maxdepth 1 -type f -name *.sql")).lstrip('./').rstrip('\n')
+        with settings(warn_only=True):
+            db_dump_files = (local("find . -maxdepth 1 -type f | grep '\.sql'")).replace('./','').rstrip('\n')
     # Multiple database files
     if '\n' in db_dump_files:
         db_dump_files = db_dump_files.split()
@@ -221,7 +219,8 @@ def _setup_modules(webroot, sites):
     if not exists(webroot + "sites/all/modules/"):
         local("mkdir " + webroot + "sites/all/modules/")
     with cd(webroot + "sites/all/modules/"):
-        local("drush dl -y apachesolr memcache varnish")
+        with settings(warn_only=True):
+            local("drush dl -y apachesolr memcache varnish")
         local("wget http://solr-php-client.googlecode.com/files/SolrPhpClient.r22.2009-11-09.tgz")
         local("mkdir -p " + webroot + "sites/all/modules/apachesolr/SolrPhpClient/")
         local("tar xzf SolrPhpClient.r22.2009-11-09.tgz -C " + webroot  + "sites/all/modules/apachesolr/")
@@ -256,21 +255,25 @@ def _setup_modules(webroot, sites):
             local("drush php-eval \"variable_set('preprocess_css', TRUE);\"")
 
 def _setup_permissions(server_settings, sites):
+    file_paths = []
     local("chown -R %(owner)s:%(group)s %(webroot)s" % server_settings)
     pdb.set_trace()
     for site in sites:
         with cd(server_settings['webroot'] + "sites/" + site):
             local("chmod 440 settings.php")
-            file_directory = (local("drush variable-get file_directory_path | grep 'file_directory_path: \"' | sed 's/^file_directory_path: \"\(.*\)\".*/\\1/'")).rstrip('\n')
-            # if file_directory is not set, create one and set variable.
-            if not file_directory:
+            file_path = (local("drush variable-get file_directory_path | grep 'file_directory_path: \"' | sed 's/^file_directory_path: \"\(.*\)\".*/\\1/'")).rstrip('\n')
+            # if file_directory_path is not set, create one and set variable.
+            if not file_path:
                 local("mkdir files")
-                file_directory = "sites/" + site + "/files"
-                local("drush variable-set --always-set file_directory_path" + file_directory)
-            # if file_directory is set, but doesn't exist, create it.
-            if not exists(server_settings['webroot'] + file_directory):
-                local("mkdir -p " + server_settings['webroot'] + file_directory)
-        with cd(server_settings['webroot'] + file_directory):
+                file_path = "sites/" + site + "/files"
+                with settings(warn_only=True):
+                    local("drush variable-set --always-set file_directory_path " + file_path)
+            # if file_directory_path is set, but doesn't exist, create it.
+            if not exists(server_settings['webroot'] + file_path):
+                local("mkdir -p " + server_settings['webroot'] + file_path)
+            file_paths.append(file_path)
+    for file_path in set(file_paths):
+        with cd(server_settings['webroot'] + file_path):
             local("chmod 770 .")
             local("find . -type d -exec find '{}' -type f \; | while read FILE; do chmod 550 \"$FILE\"; done")
             local("find . -type d -exec find '{}' -type d \; | while read DIR; do chmod 770 \"$DIR\"; done")
