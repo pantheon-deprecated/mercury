@@ -8,7 +8,7 @@
  * @return
  *   An array of modules to enable.
  */
-function pantheon_profile_modules() {
+function mercury_profile_modules() {
   return array(
     // core: swap dblog for syslog
     'color', 'comment', 'cookie_cache_bypass', 'help', 'menu', 'taxonomy', 'syslog', 'locale', 'search', 'update', 'dblog',
@@ -27,9 +27,9 @@ function pantheon_profile_modules() {
  *   and optional 'language' to override the language selection for
  *   language-specific profiles.
  */
-function pantheon_profile_details() {
+function mercury_profile_details() {
   return array(
-    'name' => 'Pantheon',
+    'name' => 'Mercury',
     'description' => 'A high-performance stack including support for Varnish.',
 
   );
@@ -44,7 +44,7 @@ function pantheon_profile_details() {
  *   while the values will be displayed to the user in the installer
  *   task list.
  */
-function pantheon_profile_task_list() {
+function mercury_profile_task_list() {
   // Take a swat at settings.php since this is called right before the database
   // settings are written in. But it also can only be written once.
   $settings_file = './'. conf_path(FALSE, TRUE) .'/settings.php';
@@ -53,11 +53,11 @@ function pantheon_profile_task_list() {
   if (strpos($slug, '### END') === FALSE) {
     if (is_writable($settings_file)) {
       $fp = fopen($settings_file, 'a');  
-      if (fwrite($fp, _pantheon_settings()) === FALSE) {
+      if (fwrite($fp, _mercury_settings()) === FALSE) {
         drupal_set_message("Writing settings failed!", 'error');
       }
       else {
-        drupal_set_message("Pantheon configuration successfully written to your settings.php", 'message');
+        drupal_set_message("Mercury configuration successfully written to your settings.php", 'message');
       }
     }
     else {
@@ -80,7 +80,7 @@ function pantheon_profile_task_list() {
  *   An optional HTML string to display to the user. Only used if you
  *   modify the $task, otherwise discarded.
  */
-function pantheon_profile_tasks(&$task, $url) {
+function mercury_profile_tasks(&$task, $url) {
 
   // Insert default user-defined node types into the database. For a complete
   // list of available node type attributes, refer to the node type API
@@ -132,7 +132,7 @@ function pantheon_profile_tasks(&$task, $url) {
   variable_set('preprocess_js', TRUE);
   variable_set('preprocess_css', TRUE);
   
-  // Set correct ApacheSolr port for Pantheon.
+  // Set correct ApacheSolr port for Mercury.
   variable_set('apachesolr_path', '/live');
   variable_set('apachesolr_search_make_default', 1);
   variable_set('apachesolr_search_spellcheck', TRUE);
