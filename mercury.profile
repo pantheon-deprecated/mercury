@@ -151,39 +151,3 @@ function pantheon_profile_tasks(&$task, $url) {
   // Update the menu router information.
   menu_rebuild();
 }
-
-
-/**
- * Things we need in settings.php
- */
-function _pantheon_settings() {
-  $slug = '### END Pantheon settings written on '. date(DATE_ATOM);
-  $settings = <<<EndTXT
-##########################
-#
-# Pantheon Settings
-#
-# Alter With Caution :)
-#
-##########################
-
-# Varnish reverse proxy on localhost
-\$conf['reverse_proxy'] = TRUE;           
-\$conf['reverse_proxy_addresses'] = array('127.0.0.1'); 
-
-# Memcached configuration
-\$conf['cache_inc'] = './sites/all/modules/memcache/memcache.inc';
-\$conf['memcache_servers'] = array(
-         '127.0.0.1:11211' => 'default',
-      	 );
-\$conf['memcache_bins'] = array(
-          'cache'        => 'default',
-	  );
-# Key Prefix: edit this for multisite use.
-\$conf['memcache_key_prefix'] = 'default';
-
-$slug
-EndTXT;
-
-  return $settings;
-}

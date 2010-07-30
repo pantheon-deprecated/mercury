@@ -5,7 +5,9 @@
 # Alter With Caution :)
 #
 ##########################
-$db_url = 'mysqli://${db_username}:${db_password}@localhost/${db_name}';
+$db_url = 'mysqli://root:@localhost/dev';
+$conf = array();
+$conf['pressflow_smart_start'] = TRUE;
 
 # Varnish reverse proxy on localhost
 $conf['reverse_proxy'] = TRUE;
