@@ -30,9 +30,7 @@ def _get_sites(working_dir):
 
     exported_sites = get_site_settings(working_dir)
     exported_databases = _get_database_names(working_dir)
-    site_count = len(exported_sites)
-    db_count = len(exported_databases)
-    if len(exported_sites) == 1 and len(exported_databases == 1):
+    if len(exported_sites) == 1 and len(exported_databases) == 1:
         # Single Site - Single Database - Assume site matches database
         site = exported_sites.keys()[0]
         match[site] = {}
