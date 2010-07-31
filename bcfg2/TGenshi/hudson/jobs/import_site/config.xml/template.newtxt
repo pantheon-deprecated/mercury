@@ -22,7 +22,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>sudo /usr/bin/fab -f /opt/pantheon/fabric/site_import.py import_site:$ARCHIVE</command>
+      <command>sudo /usr/bin/fab -f /opt/pantheon/fabric/site_import.py import_site:$$ARCHIVE</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
