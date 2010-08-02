@@ -123,8 +123,8 @@ def _initialize_pressflow():
     with cd('/var/www/test'):
         sudo('git checkout v1.0')
         sudo('git archive master | sudo tar -x -C /var/www/live')
-    sudo('sed -i "s/dev/test/g" /var/www/test/sites/default/settings.php')
-    sudo('sed -i "s/dev/live/g" /var/www/live/sites/default/settings.php')
+    sudo('sed -i "s/dev/test/g" /var/www/test/sites/default/settings.php /var/www/test/profiles/mercury/mercury/profile')
+    sudo('sed -i "s/dev/live/g" /var/www/live/sites/default/settings.php /var/www/live/profiles/mercury/mercury/profile')
     sudo('chown -R root:www-data /var/www/*')
     sudo('chown www-data:www-data /var/www/*/sites/default/settings.php')
     sudo('chmod 660 /var/www/*/sites/default/settings.php')
