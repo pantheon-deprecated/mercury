@@ -146,13 +146,15 @@ def _get_pressflow_revision(working_dir, drupal_version):
     local("git clone git://gitorious.org/pressflow/6.git /tmp/pf_temp")
     with cd("/tmp/pf_temp"):
         match = {'difference': None, 'commit': None}
-        commits = local("git log --max-count=1 | grep '^commit' | sed 's/^commit //'").split('\n')
+        commits = local("git log | grep '^commit' | sed 's/^commit //'").split('\n')
         for commit in commits:
-            local("git reset --hard " + commit)
-            difference = int(local("diff -rup " + working_dir + " ./ | wc -l"))
-            if match['commit'] == None or difference < match['difference']:
-                match['difference'] = difference
-                match['commit'] = commit
+            if len(commit) > 1:
+                local("git reset --hard " + commit)
+                difference = int(local("diff -rup " + working_dir + " ./ | wc -l"))
+                print("Commit " + commit + " shows difference of " + str(difference))
+                if match['commit'] == None or difference < match['difference']:
+                    match['difference'] = difference
+                    match['commit'] = commit
     return match['commit']
         
 def _get_branch_and_revision(working_dir):
@@ -199,6 +201,7 @@ def _setup_site_files(webroot, working_dir, sites):
 
         # Import site and revert any changes to core
         #local("git import-orig " + working_dir)
+        local("rm -rf " + webroot + "*")
         local("rsync -avz " + working_dir + " " + webroot)
 
         # TODO: What is this for?
@@ -207,15 +210,17 @@ def _setup_site_files(webroot, working_dir, sites):
         # Cleanup potential issues
         local("rm -f PRESSFLOW.txt")
 
-				# Commit the imported site on top of the closest-match core
+        # Commit the imported site on top of the closest-match core
         local("git add .")
+        print(local("git status"))
         local("git commit -a -m 'Imported site.'")
+        print(local("git status"))
         
         # Merge in Latest Pressflow
         local("git checkout master")
         local("git pull git://gitorious.org/pressflow/6.git master")
         local("git checkout pantheon")
-        local("git pull . master") # Should automatically commit.
+        local("git pull . master") # Fails on conflict, commits otherwise.
         
         # TODO: Check for conflicts
         
