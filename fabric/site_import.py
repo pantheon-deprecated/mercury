@@ -135,26 +135,28 @@ def _get_drupal_version(working_dir):
 
 def _get_pressflow_revision(working_dir, drupal_version):
     #TODO: Optimize this (restrict search to revisions within Drupal minor version)
-    #TODO: Add check for .bzr metadata
-    if exists(working_dir + 'PRESSFLOW.txt'):
-        revno = local("cat " + working_dir + "PRESSFLOW.txt").split('.')[2].rstrip('\n')
-        return revno
+    #TODO: Add check for Bazaar or git metadata
+    
+    # PRESSFLOW.txt is currently not usable to identify a git commit.
+    #if exists(working_dir + 'PRESSFLOW.txt'):
+    #    revno = local("cat " + working_dir + "PRESSFLOW.txt").split('.')[2].rstrip('\n')
+    #    return revno
     if exists("/tmp/pf_temp"):
         local("rm -rf /tmp/pf_temp")
-    local("bzr branch lp:pressflow/6.x /tmp/pf_temp")
+    local("git clone git://gitorious.org/pressflow/6.git /tmp/pf_temp")
     with cd("/tmp/pf_temp"):
-        match = {'num':100000,'revno':0}
-        revno = local("bzr revno").rstrip('\n')
-        for i in range(int(revno),0,-1):
-            local("bzr revert -r" + str(i))
-            diff = int(local("diff -rup " + working_dir + " ./ | wc -l"))
-            if diff < match['num']:
-                match['num'] = diff
-                match['revno'] = i
-    return str(match['revno'])
+        match = {'difference': None, 'commit': None}
+        commits = local("git log --max-count=1 | grep '^commit' | sed 's/^commit //'").split('\n')
+        for commit in commits:
+            local("git reset --hard " + commit)
+            difference = int(local("diff -rup " + working_dir + " ./ | wc -l"))
+            if match['commit'] == None or difference < match['difference']:
+                match['difference'] = difference
+                match['commit'] = commit
+    return match['commit']
         
 def _get_branch_and_revision(working_dir):
-    #TODO: pressflow.txt  doesn't exists if pulled from bzr
+    #TODO: pressflow.txt  doesn't exists if pulled from version control
     #TODO: check that it is Drupal V6
 
     ret = {}
@@ -162,12 +164,12 @@ def _get_branch_and_revision(working_dir):
     # Check if site uses Pressflow (look in system.module)
     dist = (local("awk \"/\'info\' =>/\" " + working_dir + "modules/system/system.module" + r' | sed "s_^.*Powered by \([a-zA-Z]*\).*_\1_"')).rstrip('\n')
     if dist == 'Drupal':
-        ret['branch'] = "lp:drupal/6.x-stable"
-        ret['revision'] = "tag:DRUPAL-" + drupal_version 
+        ret['branch'] = "git://gitorious.org/drupal/6.git"
+        ret['revision'] = "DRUPAL-" + drupal_version 
         ret['type'] = "DRUPAL"
     elif dist == 'Pressflow':
         revision = _get_pressflow_revision(working_dir, drupal_version)
-        ret['branch'] = "lp:pressflow/6.x"
+        ret['branch'] = "git://gitorious.org/pressflow/6.git"
         ret['revision'] = revision 
         ret['type'] = "PRESSFLOW"
     else:
@@ -189,21 +191,26 @@ def _setup_site_files(webroot, working_dir, sites):
 
     # Create vanilla drupal/pressflow branch of same version as import site
     version = _get_branch_and_revision(working_dir)
-    local("bzr branch -r " + version['revision'] + " " + version['branch'] + " " + webroot)
+    local("git clone " + version['branch'] + " " + webroot)
 
     with cd(webroot):
+        local("git checkout pantheon " + version['revision'])
 
         # Import site and revert any changes to core
-        local("bzr import " + working_dir)
-        reverted = local("bzr revert")
+        local("git import-orig " + working_dir)
+
+        # TODO: What is this for?
+        #reverted = local("git reset --hard")
 
         # Cleanup potential issues
         local("rm -f PRESSFLOW.txt")
 
         # Merge in Latest Pressflow
-        local("bzr commit --unchanged -m 'Automated Commit'")
-        local("bzr merge lp:pressflow/6.x")
-        local("rm -r ./.bzr")
+        local("git commit -m 'Automated Commit'")
+        local("git pull git://gitorious.org/pressflow/6.git")
+        
+        # TODO: Is this necessary?
+        #local("rm -r ./.git")
         
         # Run update.php. Wrap in warn_only because drush returns failure if it doesn't need to run.
         with settings(warn_only=True):
