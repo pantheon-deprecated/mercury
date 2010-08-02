@@ -3,6 +3,7 @@
   <!-- Tools -->
   <Package name='bzr'/>
   <Package name='bzrtools'/>
+  <Package name='git-core'/>
   <Package name='cvs'/>
   <Package name='rsync'/>
   <Package name='screen'/>
