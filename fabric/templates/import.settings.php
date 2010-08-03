@@ -22,5 +22,4 @@ $conf['memcache_bins'] = array(
 # Key Prefix: edit this for multisite use.
 $conf['memcache_key_prefix'] = '${site_prefix}';
 
-${smart_start}
 ### END Mercury settings ###
