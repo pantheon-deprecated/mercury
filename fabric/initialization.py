@@ -112,7 +112,7 @@ def _initialize_pressflow():
     sudo('mkdir -p /var/www/dev/sites/default/files')
     sudo('touch /var/www/dev/sites/default/files/gitignore')
     sudo('cp /var/www/dev/sites/default/default.settings.php /var/www/dev/sites/default/settings.php')
-    sudo('cat /opt/pantheon/fabric/templates/pantheon.settings.php >> /var/www/dev/sites/default/settings.php')
+    sudo('cat /opt/pantheon/fabric/templates/newsite.settings.php >> /var/www/dev/sites/default/settings.php')
     sudo('mkdir /var/www/live')
     with cd('/var/www/dev'):
         sudo('git init')
