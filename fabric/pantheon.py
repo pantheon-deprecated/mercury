@@ -37,7 +37,7 @@ def get_site_settings(webroot):
     else:
         db_settings = get_database_settings(webroot + settings_files)
         if _is_valid_db_url(db_settings):
-            site_name = (search(r'^.*sites/(.*)/settings.php', settings_file)).group(1)
+            site_name = (search(r'^.*sites/(.*)/settings.php', settings_files)).group(1)
             sites[site_name] = db_settings
     return sites
 
