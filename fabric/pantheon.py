@@ -37,7 +37,7 @@ def get_site_settings(webroot):
     else:
         db_settings = get_database_settings(webroot + settings_files)
         if _is_valid_db_url(db_settings):
-            site_name = (search(r'^.*sites/(.*)/settings.php', settings_file)).group(1)
+            site_name = (search(r'^.*sites/(.*)/settings.php', settings_files)).group(1)
             sites[site_name] = db_settings
     return sites
 
@@ -78,13 +78,13 @@ def get_server_settings():
     ret = {}
     # Default Ubuntu
     if exists('/etc/debian_version'):
-        ret['webroot'] = '/var/www/live/'
+        ret['webroot'] = '/var/www/'
         ret['owner'] = 'root'
         ret['group'] = 'www-data'
         ret['distro'] = 'ubuntu'
     # Default Centos
     elif exists('/etc/redhat-release'):
-        ret['webroot'] = '/var/www/html/live/'
+        ret['webroot'] = '/var/www/html/'
         ret['owner'] = 'root'
         ret['group'] = 'apache'
         ret['distro'] = 'centos'
