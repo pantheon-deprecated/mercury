@@ -1,6 +1,6 @@
 ##########################
 #
-# Mercury Settings
+# Pantheon Settings
 #
 # Alter With Caution :)
 #
@@ -22,4 +22,4 @@ $conf['memcache_bins'] = array(
 # Key Prefix: edit this for multisite use.
 $conf['memcache_key_prefix'] = '${site_prefix}';
 
-### END Mercury settings ###
+### END Pantheon settings ###

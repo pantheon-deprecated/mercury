@@ -2,7 +2,7 @@
 # Last Modified: Tue Jun 19 17:37:30 2007
 #include <tunables/global>
 
-#PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /etc/mercury/server_tuneables
+#PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /etc/pantheon/server_tuneables
 
 /usr/sbin/mysqld {
   #include <abstractions/base>

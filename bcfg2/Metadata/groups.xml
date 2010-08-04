@@ -1,20 +1,20 @@
 <Groups version='3.0'>
 
-  <!--Mercury on Rackspace/Linode-->
-  <Group profile='true' public='true' default='true' name='mercury-vps'>
-    <Group name='mercury'/>
+  <!--Pantheon on Rackspace/Linode-->
+  <Group profile='true' public='true' default='true' name='pantheon-vps'>
+    <Group name='pantheon'/>
     <Group name='vps'/>
   </Group>
 
-  <!--Mercury on AWS-->
-  <Group profile='true' public='true' name='mercury-aws'>
-    <Group name='mercury'/>
+  <!--Pantheon on AWS-->
+  <Group profile='true' public='true' name='pantheon-aws'>
+    <Group name='pantheon'/>
     <Group name='amazon-web-services'/>
   </Group>
   
-  <!--Mercury on AWS w/ EBS boot-->
-  <Group profile='true' public='true' name='mercury-aws-ebs'>
-    <Group name='mercury'/>
+  <!--Pantheon on AWS w/ EBS boot-->
+  <Group profile='true' public='true' name='pantheon-aws-ebs'>
+    <Group name='pantheon'/>
     <Group name='amazon-web-services-ebs'/>
   </Group>
   
@@ -36,13 +36,13 @@
   </Group>
 
   <!-- pantheon server types -->
-  <Group name='mercury'>
+  <Group name='pantheon'>
     <Bundle name='bcfg2'/>
     <Bundle name='apache2'/>
     <Bundle name='php'/>
     <Bundle name='memcached'/>
     <Bundle name='tools'/>
-    <Bundle name='mercury'/>
+    <Bundle name='pantheon'/>
     <Bundle name='mysql-packages'/>
     <Bundle name='mysql-services'/>
     <Bundle name='postfix'/>

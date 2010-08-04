@@ -1,0 +1,58 @@
+#!/bin/bash
+
+# Main/Global Boot Script
+
+echo "Starting Main Pantheon Boot Script"
+
+# Copy template, rename and make executable
+cp /etc/pantheon/templates/tuneables /etc/pantheon/server_tuneables
+chmod 755 /etc/pantheon/server_tuneables
+
+# moving vhost from bcfg2 control:
+{% if "deb" in metadata.groups %}\
+cp /etc/pantheon/templates/vhost/pantheon_dev /etc/apache2/sites-available/pantheon_dev
+cp /etc/pantheon/templates/vhost/pantheon_test /etc/apache2/sites-available/pantheon_test
+cp /etc/pantheon/templates/vhost/pantheon_live /etc/apache2/sites-available/pantheon_live
+ln -sf /etc/apache2/sites-available/pantheon_live /etc/apache2/sites-available/default
+{% end %}\
+
+{% if "centos" in metadata.groups %}\
+cp /etc/pantheon/templates/vhost/pantheon_dev /etc/httpd/conf/vhosts/pantheon_dev.conf
+cp /etc/pantheon/templates/vhost/pantheon_test /etc/httpd/conf/vhosts/pantheon_test.conf
+cp /etc/pantheon/templates/vhost/pantheon_live /etc/httpd/conf/vhosts/pantheon_live.conf
+ln -sf /etc/httpd/conf/vhosts/pantheon_live.conf /etc/httpd/conf/vhosts/pantheon_default.conf
+{% end %}\
+
+a2ensite pantheon_dev
+a2ensite pantheon_test
+
+# Postfix
+if [[ -a /usr/local/bin/ec2-metadata ]]; then
+    REAL_HOSTNAME=$$(/usr/local/bin/ec2-metadata -p | sed 's/public-hostname: //')
+else
+    REAL_HOSTNAME=`hostname`
+fi
+
+#add hudson to /etc/shadow group to use system login/password:
+/usr/sbin/usermod -a -G shadow hudson
+
+echo $$REAL_HOSTNAME > /etc/mailname
+/usr/sbin/postconf -e "myhostname = $${REAL_HOSTNAME}"
+/usr/sbin/postconf -e "mydomain = $${REAL_HOSTNAME}"
+/usr/sbin/postconf -e "mydestination = $${REAL_HOSTNAME}, localhost"
+/etc/init.d/postfix restart
+
+# Configure iptables
+/sbin/iptables-restore < /etc/pantheon/templates/iptables
+{% if "deb" in metadata.groups %}\
+/sbin/iptables-save
+{% end %}\
+{% if "centos" in metadata.groups %}\
+/sbin/service iptables save
+/etc/init.d/iptables stop
+{% end %}\
+
+# Phone home - helps us to know how many users there are without passing any 
+# identifying or personal information to us.
+ID=`hostname -f | md5sum | sed 's/[^a-zA-Z0-9]//g'`
+curl "http://getpantheon.com/pantheon.php?id=$$ID&product=pantheon"

@@ -1,6 +1,6 @@
 ##########################
 #
-# Mercury Settings
+# Pantheon Settings
 #
 # Alter With Caution :)
 #
@@ -28,4 +28,4 @@ $conf['memcache_key_prefix'] = 'pantheon_dev';
 
 $conf['pressflow_smart_start'] = TRUE;
 
-### END Mercury settings ###
+### END Pantheon settings ###
