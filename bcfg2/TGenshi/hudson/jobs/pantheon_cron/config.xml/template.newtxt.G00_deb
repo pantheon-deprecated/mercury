@@ -16,7 +16,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>/usr/bin/sudo /usr/local/bin/drush -r /var/www cron</command>
+      <command>/usr/bin/sudo /usr/local/bin/drush -r /var/www/pantheon_live cron</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
