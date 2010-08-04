@@ -1,5 +1,6 @@
 <VirtualHost *:8080>
 	ServerAdmin webmaster@localhost
+	ServerName pantheon_live.*
 
 	DocumentRoot /var/www/html/pantheon_live
 	<Directory />

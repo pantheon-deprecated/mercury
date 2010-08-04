@@ -1,5 +1,6 @@
 <VirtualHost *:8082>
 	ServerAdmin webmaster@localhost
+	ServerName pantheon_test.*
 
 	DocumentRoot /var/www/html/pantheon_test
 	<Directory />
