@@ -70,7 +70,7 @@ def _initialize_bcfg2():
         with settings(hide('warnings'), warn_only=True):
             server_running = (sudo('netstat -atn | grep :6789')).rstrip('\n')
         sleep(5)
-    sudo('/usr/sbin/bcfg2 -vqed') # @TODO: Add "-p 'mercury-aws'" for EC2
+    sudo('/usr/sbin/bcfg2 -vqed') # @TODO: Add "-p 'mercury-aws'" for EC2 and "-p 'mercury-aws-ebs for EBS'"
 
 def _initialize_drush():
     sudo('[ ! -d drush ] || rm -rf drush')
@@ -84,7 +84,7 @@ def _initialize_drush():
 
 def _initialize_pantheon():
     sudo('rm -rf /var/www')
-    sudo('drush make --working-copy /etc/mercury/mercury.make /var/www/')
+    sudo('drush make --working-copy /etc/mercury/mercury.make /var/www/pantheon_dev/')
 
 def _initialize_solr():
     sudo('[ ! -d apache-solr-1.4.1 ] || rm -rf apache-solr-1.4.1')
@@ -92,9 +92,11 @@ def _initialize_solr():
     run('tar xvzf apache-solr-1.4.1.tgz')
     sudo('mkdir -p /var/solr')
     sudo('mv apache-solr-1.4.1/dist/apache-solr-1.4.1.war /var/solr/solr.war')
-    sudo('mv apache-solr-1.4.1/example/solr /var/solr/default')
-    sudo('mv /var/www/sites/all/modules/apachesolr/schema.xml /var/solr/default/conf/')
-    sudo('mv /var/www/sites/all/modules/apachesolr/solrconfig.xml /var/solr/default/conf/')
+    sudo('mv apache-solr-1.4.1/example/solr /var/solr/pantheon_dev')
+    sudo('mv /var/www/pantheon_dev/sites/all/modules/apachesolr/schema.xml /var/solr/pantheon_dev/conf/')
+    sudo('mv /var/www/pantheon_dev/sites/all/modules/apachesolr/solrconfig.xml /var/solr/pantheon_dev/conf/')
+    sudo('cp -a /var/solr/pantheon_dev /var/solr/pantheon_test')
+    sudo('cp -a /var/solr/pantheon_dev /var/solr/pantheon_live')
     sudo('chown -R tomcat6:root /var/solr/')
 
 def _initialize_hudson():
@@ -104,12 +106,27 @@ def _initialize_hudson():
     if 'hudson ALL = NOPASSWD:' not in sudoers:
         sudo('echo "%s" >> /etc/sudoers' % hudson_sudoer)
     sudo('usermod -a -G shadow hudson')
+    sudo('/etc/init.d/hudson restart')
 
 def _initialize_pressflow():
-    sudo('mkdir -p /var/www/sites/default/files')
-    sudo('cp /var/www/sites/default/default.settings.php /var/www/sites/default/settings.php')
-    sudo('cat /opt/pantheon/fabric/templates/settings.php.end >> /var/www/sites/default/settings.php')
+    sudo('mkdir -p /var/www/pantheon_dev/sites/default/files')
+    sudo('touch /var/www/pantheon_dev/sites/default/files/gitignore')
+    sudo('cp /var/www/pantheon_dev/sites/default/default.settings.php /var/www/pantheon_dev/sites/default/settings.php')
+    sudo('cat /opt/pantheon/fabric/templates/newsite.settings.php >> /var/www/pantheon_dev/sites/default/settings.php')
+    sudo('mkdir /var/www/pantheon_live')
+    with cd('/var/www/pantheon_dev'):
+        sudo('git init')
+        sudo('git add .')
+        sudo('git commit -m "initial branch commit"')
+        sudo('git tag v1.0')
+    sudo('git clone /var/www/pantheon_dev /var/www/pantheon_test')
+    with cd('/var/www/pantheon_test'):
+        sudo('git checkout v1.0')
+        sudo('git archive master | sudo tar -x -C /var/www/pantheon_live')
+    sudo('sed -i "s/pantheon_dev/pantheon_test/g" /var/www/pantheon_test/sites/default/settings.php /var/www/pantheon_test/profiles/mercury/mercury.profile')
+    sudo('sed -i "s/pantheon_dev/pantheon_live/g" /var/www/pantheon_live/sites/default/settings.php /var/www/pantheon_live/profiles/mercury/mercury.profile')
     sudo('chown -R root:www-data /var/www/*')
-    sudo('chown www-data:www-data /var/www/sites/default/settings.php')
-    sudo('chmod 660 /var/www/sites/default/settings.php')
-    sudo('chmod 775 /var/www/sites/default/files')
+    sudo('chown www-data:www-data /var/www/*/sites/default/settings.php')
+    sudo('chmod 660 /var/www/*/sites/default/settings.php')
+    sudo('chmod 775 /var/www/*/sites/default/files')
+    sudo('chmod 775 /var/www/*/sites/default')

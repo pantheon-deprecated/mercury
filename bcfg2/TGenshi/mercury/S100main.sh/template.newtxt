@@ -10,12 +10,21 @@ chmod 755 /etc/mercury/server_tuneables
 
 # moving vhost from bcfg2 control:
 {% if "deb" in metadata.groups %}\
-cp /etc/mercury/templates/vhost /etc/apache2/sites-available/default
+cp /etc/mercury/templates/vhost/pantheon_dev /etc/apache2/sites-available/pantheon_dev
+cp /etc/mercury/templates/vhost/pantheon_test /etc/apache2/sites-available/pantheon_test
+cp /etc/mercury/templates/vhost/pantheon_live /etc/apache2/sites-available/pantheon_live
+ln -sf /etc/apache2/sites-available/pantheon_live /etc/apache2/sites-available/default
 {% end %}\
 
 {% if "centos" in metadata.groups %}\
-cp /etc/mercury/templates/vhost /etc/httpd/conf/vhosts/default.conf
+cp /etc/mercury/templates/vhost/pantheon_dev /etc/httpd/conf/vhosts/pantheon_dev.conf
+cp /etc/mercury/templates/vhost/pantheon_test /etc/httpd/conf/vhosts/pantheon_test.conf
+cp /etc/mercury/templates/vhost/pantheon_live /etc/httpd/conf/vhosts/pantheon_live.conf
+ln -sf /etc/httpd/conf/vhosts/pantheon_live.conf /etc/httpd/conf/vhosts/pantheon_default.conf
 {% end %}\
+
+a2ensite pantheon_dev
+a2ensite pantheon_test
 
 # Postfix
 if [[ -a /usr/local/bin/ec2-metadata ]]; then

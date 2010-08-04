@@ -1,12 +1,13 @@
 <VirtualHost *:8080>
 	ServerAdmin webmaster@localhost
+	ServerName pantheon_live.*
 
-	DocumentRoot /var/www
+	DocumentRoot /var/www/pantheon_live
 	<Directory />
 		Options FollowSymLinks
 		AllowOverride None
 	</Directory>
-	<Directory /var/www/>
+	<Directory /var/www/pantheon_live/>
 		Options Indexes FollowSymLinks MultiViews
 		AllowOverride All
 		Order allow,deny

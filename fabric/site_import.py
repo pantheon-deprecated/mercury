@@ -309,10 +309,8 @@ def _restart_services(distro):
         local('/etc/init.d/tomcat5 restart')
 
 def _setup_settings_files(webroot, sites):
-    slug_template = local("cat /opt/pantheon/fabric/templates/pantheon.settings.php")
+    slug_template = local("cat /opt/pantheon/fabric/templates/import.settings.php")
     for site_name, site_values in sites.iteritems():
-        if site_values['database']['db_password']:
-            site_values['database']['db_password'] = ":" + site_values['database']['db_password']
         slug = Template(slug_template)
         slug = slug.safe_substitute(site_values['database'])
         with open(webroot + "sites/" + site_name + "/settings.php", 'a') as f:

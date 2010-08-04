@@ -1,0 +1,16 @@
+<VirtualHost *:8082>
+	ServerAdmin webmaster@localhost
+	ServerName pantheon_test.*
+
+	DocumentRoot /var/www/html/pantheon_test
+	<Directory />
+		Options FollowSymLinks
+		AllowOverride None
+	</Directory>
+	<Directory /var/www/html/pantheon_test>
+		Options Indexes FollowSymLinks MultiViews
+		AllowOverride All
+		Order allow,deny
+		allow from all
+	</Directory>
+</VirtualHost>

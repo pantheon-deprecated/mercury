@@ -7,6 +7,8 @@
 
 NameVirtualHost *:8080
 Listen 8080
+Listen 8082
+Listen 8083
 
 <IfModule mod_ssl.c>
     # SSL name based virtual hosts are not yet supported, therefore no

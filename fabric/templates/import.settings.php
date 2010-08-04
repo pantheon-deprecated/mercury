@@ -5,7 +5,7 @@
 # Alter With Caution :)
 #
 ##########################
-$db_url = 'mysqli://${db_username}${db_password}@localhost/${db_name}';
+$db_url = 'mysqli://${db_username}:${db_password}@localhost/${db_name}';
 
 # Varnish reverse proxy on localhost
 $conf['reverse_proxy'] = TRUE;
@@ -20,6 +20,6 @@ $conf['memcache_bins'] = array(
           'cache'        => 'default',
           );
 # Key Prefix: edit this for multisite use.
-$conf['memcache_key_prefix'] = 'default';
+$conf['memcache_key_prefix'] = '${site_prefix}';
 
 ### END Mercury settings ###

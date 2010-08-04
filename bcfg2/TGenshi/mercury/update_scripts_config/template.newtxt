@@ -1,0 +1,23 @@
+#!/bin/bash
+
+export DEV_WEBROOT='/var/www/pantheon_dev'
+export DEV_SITE_DIR='default'
+export DEV_DB='pantheon_dev'
+export DEV_DB_USERNAME='root'
+export DEV_DB_PASSWORD=''
+
+export TEST_WEBROOT='/var/www/pantheon_test'
+export TEST_SITE_DIR='default'
+export TEST_DB='pantheon_test'
+export TEST_DB_USERNAME='root'
+export TEST_DB_PASSWORD=''
+
+export LIVE_WEBROOT='/var/www/pantheon_live'
+export LIVE_SITE_DIR='default'
+export LIVE_DB='pantheon_live'
+export LIVE_DB_USERNAME='root'
+export LIVE_DB_PASSWORD=''
+
+export TMP_DIR='/tmp'
+export BACKUP_DIR='/var/backups'
+export DATE=`date +%Y%m%d%H%M%S`; 
