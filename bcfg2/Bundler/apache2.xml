@@ -35,9 +35,9 @@
     <Service name='httpd'/>
   </Group>
 
-  <Path name='/etc/mercury/templates/vhost/dev' altsrc='/apache2/vhost/dev'/>
-  <Path name='/etc/mercury/templates/vhost/test' altsrc='/apache2/vhost/test'/>
-  <Path name='/etc/mercury/templates/vhost/live' altsrc='/apache2/vhost/live'/>
+  <Path name='/etc/mercury/templates/vhost/pantheon_dev' altsrc='/apache2/vhost/pantheon_dev'/>
+  <Path name='/etc/mercury/templates/vhost/pantheon_test' altsrc='/apache2/vhost/pantheon_test'/>
+  <Path name='/etc/mercury/templates/vhost/pantheon_live' altsrc='/apache2/vhost/pantheon_live'/>
 
 </Bundle>
 

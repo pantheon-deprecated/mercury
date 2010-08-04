@@ -5,7 +5,7 @@
 # Alter With Caution :)
 #
 ##########################
-$db_url = 'mysqli://root@localhost/dev';
+$db_url = 'mysqli://root@localhost/pantheon_dev';
 
 if (!is_array($conf)) {
     $conf = array();
@@ -24,7 +24,7 @@ $conf['memcache_bins'] = array(
           'cache'        => 'default',
           );
 # Key Prefix: edit this for multisite use.
-$conf['memcache_key_prefix'] = 'dev';
+$conf['memcache_key_prefix'] = 'pantheon_dev';
 
 $conf['pressflow_smart_start'] = TRUE;
 

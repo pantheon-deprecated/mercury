@@ -74,9 +74,9 @@ done
 if [ -n "$$MYSQL_ROOT_PASSWORD" ]; then
   MYSQL_ROOT_PASSWORD="-p$${MYSQL_ROOT_PASSWORD}"
 fi
-echo "CREATE DATABASE IF NOT EXISTS dev;" | mysql -u root $${MYSQL_ROOT_PASSWORD}
-echo "CREATE DATABASE IF NOT EXISTS test;" | mysql -u root $${MYSQL_ROOT_PASSWORD}
-echo "CREATE DATABASE IF NOT EXISTS live;" | mysql -u root $${MYSQL_ROOT_PASSWORD}
+echo "CREATE DATABASE IF NOT EXISTS pantheon_dev;" | mysql -u root $${MYSQL_ROOT_PASSWORD}
+echo "CREATE DATABASE IF NOT EXISTS pantheon_test;" | mysql -u root $${MYSQL_ROOT_PASSWORD}
+echo "CREATE DATABASE IF NOT EXISTS pantheon_live;" | mysql -u root $${MYSQL_ROOT_PASSWORD}
 
 # Mark incep date. This prevents us from ever running again.
 echo `date` > /etc/mercury/incep

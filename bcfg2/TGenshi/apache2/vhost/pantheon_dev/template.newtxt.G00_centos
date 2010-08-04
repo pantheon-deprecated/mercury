@@ -1,12 +1,12 @@
 <VirtualHost *:8083>
 	ServerAdmin webmaster@localhost
 
-	DocumentRoot /var/www/html/dev
+	DocumentRoot /var/www/html/pantheon_dev
 	<Directory />
 		Options FollowSymLinks
 		AllowOverride None
 	</Directory>
-	<Directory /var/www/html/dev>
+	<Directory /var/www/html/pantheon_dev>
 		Options Indexes FollowSymLinks MultiViews
 		AllowOverride All
 		Order allow,deny
