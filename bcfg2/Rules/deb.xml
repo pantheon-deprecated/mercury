@@ -3,7 +3,7 @@
   <!-- Ubuntu Only -->
   <Group name='ubuntu'>
     
-    <!-- mercury -->
+    <!-- pantheon -->
     <Service type='deb' status='on' name='vnstat'/>
 
     <!-- tomcat6 -->

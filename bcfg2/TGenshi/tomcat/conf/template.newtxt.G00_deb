@@ -1,4 +1,4 @@
-#PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /etc/mercury/server_tuneables
+#PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /etc/pantheon/server_tuneables
 
 # Run Tomcat as this user ID. Not setting this or leaving it blank will use the
 # default of tomcat6.

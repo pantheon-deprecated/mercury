@@ -2,8 +2,8 @@
 
 OUTPUT=""
 
-if [[ -a /etc/mercury/server_tuneables ]]; then
-. /etc/mercury/server_tuneables
+if [[ -a /etc/pantheon/server_tuneables ]]; then
+. /etc/pantheon/server_tuneables
 fi
 
 # Apache Status (Defaults to ON)

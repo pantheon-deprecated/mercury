@@ -1,5 +1,5 @@
 ;
-; PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /etc/mercury/server_tuneables
+; PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /etc/pantheon/server_tuneables
 ;
 ; Enable apc extension module
 extension = apc.so

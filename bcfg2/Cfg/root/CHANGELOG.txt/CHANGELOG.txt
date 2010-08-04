@@ -1,4 +1,4 @@
-MERCURY 1.1 Beta created by Chapter Three (http://chapterthree.com)                                  04/13/10
+PANTHEON 1.1 Beta created by Chapter Three (http://chapterthree.com)                                  04/13/10
 
 Thank you for using this AMI.  Please post any question/comments to http://groups.drupal.org/pantheon/
 
@@ -12,11 +12,11 @@ Using BCFG2 templating system for config files and added support for adding user
 
 1.0:
 Full integration with bcfg2 for config file management
-Mercury checks for (and incorporates )updates from launchpad on first boot
-Added /usr/local/bin/update_mercury.sh to update mercury config from launchpad (and apply changes using bcfg2)
+Pantheon checks for (and incorporates )updates from launchpad on first boot
+Added /usr/local/bin/update_pantheon.sh to update pantheon config from launchpad (and apply changes using bcfg2)
 Added /usr/local/bin/update_pressflow.sh script to update pressflow from launchpad
 Updated drush to 1.0-Beta3
-Added mercury profile to auto-populate pressflow with mercury-specific settings
+Added pantheon profile to auto-populate pressflow with pantheon-specific settings
 
 0.9-Beta:
 Added memcached option and made default over cacherouter

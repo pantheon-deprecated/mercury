@@ -70,7 +70,7 @@ def _initialize_bcfg2():
         with settings(hide('warnings'), warn_only=True):
             server_running = (sudo('netstat -atn | grep :6789')).rstrip('\n')
         sleep(5)
-    sudo('/usr/sbin/bcfg2 -vqed') # @TODO: Add "-p 'mercury-aws'" for EC2 and "-p 'mercury-aws-ebs for EBS'"
+    sudo('/usr/sbin/bcfg2 -vqed') # @TODO: Add "-p 'pantheon-aws'" for EC2 and "-p 'pantheon-aws-ebs for EBS'"
 
 def _initialize_drush():
     sudo('[ ! -d drush ] || rm -rf drush')
@@ -84,7 +84,7 @@ def _initialize_drush():
 
 def _initialize_pantheon():
     sudo('rm -rf /var/www')
-    sudo('drush make --working-copy /etc/mercury/mercury.make /var/www/pantheon_dev/')
+    sudo('drush make --working-copy /etc/pantheon/pantheon.make /var/www/pantheon_dev/')
 
 def _initialize_solr():
     sudo('[ ! -d apache-solr-1.4.1 ] || rm -rf apache-solr-1.4.1')
@@ -102,7 +102,7 @@ def _initialize_solr():
 def _initialize_hudson():
     sudoers = local('cat /etc/sudoers')
     hudson_sudoer = ('hudson ALL = NOPASSWD: /usr/local/bin/drush,'
-                     ' /etc/mercury/init.sh, /usr/bin/fab, /usr/sbin/bcfg2')
+                     ' /etc/pantheon/init.sh, /usr/bin/fab, /usr/sbin/bcfg2')
     if 'hudson ALL = NOPASSWD:' not in sudoers:
         sudo('echo "%s" >> /etc/sudoers' % hudson_sudoer)
     sudo('usermod -a -G shadow hudson')
@@ -123,8 +123,8 @@ def _initialize_pressflow():
     with cd('/var/www/pantheon_test'):
         sudo('git checkout v1.0')
         sudo('git archive master | sudo tar -x -C /var/www/pantheon_live')
-    sudo('sed -i "s/pantheon_dev/pantheon_test/g" /var/www/pantheon_test/sites/default/settings.php /var/www/pantheon_test/profiles/mercury/mercury.profile')
-    sudo('sed -i "s/pantheon_dev/pantheon_live/g" /var/www/pantheon_live/sites/default/settings.php /var/www/pantheon_live/profiles/mercury/mercury.profile')
+    sudo('sed -i "s/pantheon_dev/pantheon_test/g" /var/www/pantheon_test/sites/default/settings.php /var/www/pantheon_test/profiles/pantheon/pantheon.profile')
+    sudo('sed -i "s/pantheon_dev/pantheon_live/g" /var/www/pantheon_live/sites/default/settings.php /var/www/pantheon_live/profiles/pantheon/pantheon.profile')
     sudo('chown -R root:www-data /var/www/*')
     sudo('chown www-data:www-data /var/www/*/sites/default/settings.php')
     sudo('chmod 660 /var/www/*/sites/default/settings.php')
