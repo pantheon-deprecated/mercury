@@ -129,4 +129,3 @@ def _initialize_pressflow():
     sudo('chown www-data:www-data /var/www/*/sites/default/settings.php')
     sudo('chmod 660 /var/www/*/sites/default/settings.php')
     sudo('chmod 775 /var/www/*/sites/default/files')
-    sudo('chmod 775 /var/www/*/sites/default')
