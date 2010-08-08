@@ -14,17 +14,17 @@ cp /etc/pantheon/templates/vhost/pantheon_dev /etc/apache2/sites-available/panth
 cp /etc/pantheon/templates/vhost/pantheon_test /etc/apache2/sites-available/pantheon_test
 cp /etc/pantheon/templates/vhost/pantheon_live /etc/apache2/sites-available/pantheon_live
 ln -sf /etc/apache2/sites-available/pantheon_live /etc/apache2/sites-available/default
+
+a2ensite pantheon_dev
+a2ensite pantheon_test
 {% end %}\
 
 {% if "centos" in metadata.groups %}\
 cp /etc/pantheon/templates/vhost/pantheon_dev /etc/httpd/conf/vhosts/pantheon_dev.conf
 cp /etc/pantheon/templates/vhost/pantheon_test /etc/httpd/conf/vhosts/pantheon_test.conf
 cp /etc/pantheon/templates/vhost/pantheon_live /etc/httpd/conf/vhosts/pantheon_live.conf
-ln -sf /etc/httpd/conf/vhosts/pantheon_live.conf /etc/httpd/conf/vhosts/pantheon_default.conf
 {% end %}\
 
-a2ensite pantheon_dev
-a2ensite pantheon_test
 
 # Postfix
 if [[ -a /usr/local/bin/ec2-metadata ]]; then
