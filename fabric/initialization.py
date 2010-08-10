@@ -97,7 +97,7 @@ def _initialize_solr():
     sudo('cp /var/www/pantheon_dev/sites/all/modules/apachesolr/solrconfig.xml /opt/pantheon/fabric/templates/solr/conf/')
     sudo('rm -rf apache-solr-1.4.1')
     sudo('rm apache-solr-1.4.1.tgz')
-    sudo('cp -R /opt/pantheon/templates/solr /var/solr/pantheon_dev')
+    sudo('cp -R /opt/pantheon/fabric/templates/solr /var/solr/pantheon_dev')
     sudo('cp -a /var/solr/pantheon_dev /var/solr/pantheon_test')
     sudo('cp -a /var/solr/pantheon_dev /var/solr/pantheon_live')
     sudo('chown -R tomcat6:root /var/solr/')
