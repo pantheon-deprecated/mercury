@@ -31,7 +31,11 @@ def _setup_databases(archive, environment):
     # Add environmental suffix (dev/test/live)
     if environment:
         for site in archive.sites:
+            # MySQL allows 64 character names. Slice to 59 chars before adding suffix.
+            # TODO: make sure this doesn't cause database name collisions.
+            site.database.name = site.database.name[:59]
             site.database.name += "_" + environment
+
 
     # Create databases. If multiple sites use same db, only create once.
     databases = set([database for database in [site.database.name for site in archive.sites]])
@@ -55,6 +59,7 @@ def _setup_databases(archive, environment):
         if site.database.dump not in imported:
             # Strip cache tables, convert MyISAM to InnoDB, and import.
             local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | \
+                    grep -v '^USE `' | \
                     sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | \
                     mysql -u pantheon-admin %s" % \
                    (archive.location + site.database.dump, site.database.name))
