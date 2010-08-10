@@ -1,5 +1,5 @@
 from fabric.api import *
-from pantheon import get_server_settings, get_site_settings
+from pantheon import PantheonServer, DrupalInstallation
 from tempfile import mkdtemp
 import subprocess
 import pipes
@@ -9,7 +9,8 @@ def export_site(webroot = None):
 
     if (webroot == None):
         print('Using default webroot.')
-        webroot = get_server_settings()['webroot']
+        server = PantheonServer()
+        webroot = server.webroot
 
     print('Exporting to temporary directory %s' % temporary_directory)
     _export_files(webroot, temporary_directory)
@@ -21,17 +22,16 @@ def _export_files(webroot, temporary_directory):
     local('rm -rf %s/htdocs/.git' % temporary_directory)
 
 def _export_data(webroot, temporary_directory):
-    all_settings = get_site_settings(webroot)
+    drupal = DrupalInstallation(webroot)
     with cd(temporary_directory + "/htdocs"):
-        for site in all_settings:
-            site_settings = all_settings[site]
+        for site in drupal.sites:
             local('mysqldump --single-transaction --user=%s --password=%s --host=%s %s > %s.sql' % \
               (
-                pipes.quote(site_settings['db_username']),
-                pipes.quote(site_settings['db_password']),
-                pipes.quote(site_settings['db_hostname']),
-                pipes.quote(site_settings['db_name']),
-                pipes.quote(site_settings['db_name']),
+                pipes.quote(site.database.username),
+                pipes.quote(site.database.password),
+                pipes.quote(site.database.hostname),
+                pipes.quote(site.database.name),
+                pipes.quote(site.database.name),
               )    
             )
 
