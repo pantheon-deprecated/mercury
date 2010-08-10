@@ -17,10 +17,11 @@ def unarchive(archive, destination):
 
     with cd(destination):
         local("bzr import " + archive)
-        local("rm -r ./.bzr")
-        local("rm -r ./.git")
-        local("find . -depth -name .svn -exec rm -fr {} \;")
-        local("find . -depth -name CVS -exec rm -fr {} \;")
+        with settings(warn_only=True):
+            local("rm -r ./.bzr")
+            local("rm -r ./.git")
+            local("find . -depth -name .svn -exec rm -fr {} \;")
+            local("find . -depth -name CVS -exec rm -fr {} \;")
 
 class DrupalInstallation:
 
