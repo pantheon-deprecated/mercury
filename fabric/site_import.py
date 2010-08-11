@@ -17,9 +17,9 @@ def import_site(site_archive, base_dir = 'pantheon', environment = 'dev'):
 
     _setup_databases(archive, environment)
     _setup_site_files(archive)
+    _setup_settings_files(archive)
     _setup_modules(archive)
     _setup_files_directory(archive)
-    _setup_settings_files(archive)
     _setup_permissions(server, archive)
 
     server.restart_services()
