@@ -192,6 +192,10 @@ def _setup_modules(archive):
         drupal_vars['preprocess_js'] = True
         drupal_vars['preprocess_css'] = True
 
+        # CAS variables
+        drupal_vars['cas_server'] = 'login.getpatheon.com'
+        drupal_vars['cas_uri'] = '/cas'
+
         # Set Drupal variables
         with settings(warn_only=True):
             site.set_variables(drupal_vars)
@@ -218,6 +222,9 @@ def _setup_permissions(server, archive):
             local("chmod 770 .")
             local("find . -type d -exec find '{}' -type f \; | while read FILE; do chmod 660 \"$FILE\"; done")
             local("find . -type d -exec find '{}' -type d \; | while read DIR; do chmod 770 \"$DIR\"; done")
+        # Solr Index permissions
+        with cd("/var/solr"):
+            local("chown -R %s:%s *" % (server.tomcat_owner, server.tomcat_owner))
 
 def _setup_settings_files(archive):
     slug_template = local("cat /opt/pantheon/fabric/templates/import.settings.php")

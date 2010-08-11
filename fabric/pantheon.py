@@ -191,12 +191,14 @@ class PantheonServer:
             self.owner = 'root'
             self.group = 'www-data'
             self.distro = 'ubuntu'
+            self.tomcat_owner = 'tomcat6'
         # Centos
         elif exists('/etc/redhat-release'):
             self.webroot = '/var/www/html/'
             self.owner = 'root'
             self.group = 'apache'
             self.distro = 'centos'
+            self.tomcat_owner = 'tomcat'
         self.ip = (local('hostname --ip-address')).rstrip('\n')
 
     def restart_services(self):
