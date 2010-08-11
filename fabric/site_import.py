@@ -17,7 +17,6 @@ def import_site(site_archive, base_dir = 'pantheon', environment = 'dev'):
 
     _setup_databases(archive, environment)
     _setup_site_files(archive)
-    _update_databases(archive)
     _setup_modules(archive)
     _setup_files_directory(archive)
     _setup_settings_files(archive)
@@ -129,6 +128,9 @@ def _setup_modules(archive):
         local("drush dl -y memcache")
         local("cp -R memcache " + archive.destination + "sites/all/modules/")
     local("rm -rf " + temporary_directory)
+    
+    # Run updatedb
+    _update_databases(archive)
 
     # Make sure all required modules exist in sites/all/modules
     with cd(archive.destination + "sites/all/modules/"):
@@ -138,9 +140,8 @@ def _setup_modules(archive):
             local("drush -y solr-phpclient")
 
         local("wget http://downloads.jasig.org/cas-clients/php/current/CAS-1.1.2.tgz")
-        local("tar xzvf CAS-1.1.2.tgz")
-        local("cp -R CAS-1.1.2/CAS ./cas/")
-        local("rm -rf CAS-1.1.2")
+        local("mkdir ./cas/CAS")
+        local("tar xzvf CAS-1.1.2.tgz -C ./cas/CAS")
         local("rm CAS-1.1.2.tgz")
 
     for site in archive.sites:
