@@ -4,6 +4,7 @@ from urlparse import urlparse
 from re import search
 from tempfile import mkdtemp
 from copy import deepcopy
+import pdb
 
 def unarchive(archive, destination):
     '''Extract archive to destination directory and remove VCS files'''
@@ -120,6 +121,7 @@ class DrupalSite:
         self.file_location = path
 
     def set_variables(self, variables = dict()):
+        pdb.set_trace()
         with cd(self.webroot):
             for key, value in variables.iteritems():
                 # normalize strings and bools
@@ -138,9 +140,10 @@ class DrupalSite:
                 local("drush -y --uri=" + self.name + " updatedb")
 
     def enable_modules(self, modules):
-        with settings(warn_only=True):
-            local("drush en -y " + " ".join(["%s" % module for module in modules]))
-
+        with cd(self.webroot):
+            with settings(warn_only=True):
+                for module in modules:
+                    local("drush -y --uri=%s en %s" % (self.name, module))
 
     class DrupalDB:
 

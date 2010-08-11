@@ -3,6 +3,7 @@ from os.path import exists
 from string import Template
 from re import search
 from tempfile import mkdtemp
+from time import sleep
 from pantheon import *
 
 def import_site(site_archive, base_dir = 'pantheon', environment = 'dev'):
@@ -137,12 +138,20 @@ def _setup_modules(archive):
         # Warn only. Drush complains if modules already exist.
         with settings(warn_only=True):
             local("drush dl -y apachesolr cas varnish")
-            local("drush -y solr-phpclient")
 
-        local("wget http://downloads.jasig.org/cas-clients/php/current/CAS-1.1.2.tgz")
-        local("mkdir ./cas/CAS")
-        local("tar xzvf CAS-1.1.2.tgz -C ./cas/CAS")
+        local("wget http://solr-php-client.googlecode.com/files/SolrPhpClient.r22.2009-11-09.tgz")
+        local("mkdir -p ./apachesolr/SolrPhpClient/")
+        local("tar xzf SolrPhpClient.r22.2009-11-09.tgz -C ./apachesolr/")
+        local("rm SolrPhpClient.r22.2009-11-09.tgz")
+
+        # Download CAS php library
+        local("wget http://downloads.jasig.org/cas-clients/php/1.1.2/CAS-1.1.2.tgz")
+        local("tar xzf CAS-1.1.2.tgz")
+        if not exists("./cas/CAS"):
+            local("mkdir ./cas/CAS")
+        local("mv ./CAS-1.1.2/* ./cas/CAS")
         local("rm CAS-1.1.2.tgz")
+        local("rm -r CAS-1.1.2")
 
     for site in archive.sites:
 
@@ -165,27 +174,27 @@ def _setup_modules(archive):
                     if exists("varnish"):
                         local("drush dl -y varnish")
 
-            # Enable all required modules
-            site.enable_modules(required_modules)
+        # Enable all required modules
+        site.enable_modules(required_modules)
 
-            # Solr variables
-            drupal_vars = {}
-            drupal_vars['apachesolr_path'] = '/' + solr_path
-            drupal_vars['apachesolr_port'] = 8983
-            drupal_vars['apachesolr_search_make_default'] = 1
-            drupal_vars['apachesolr_search_spellcheck'] = True
+        # Solr variables
+        drupal_vars = {}
+        drupal_vars['apachesolr_path'] = '/' + solr_path
+        drupal_vars['apachesolr_port'] = 8983
+        drupal_vars['apachesolr_search_make_default'] = 1
+        drupal_vars['apachesolr_search_spellcheck'] = True
 
-            # admin/settings/performance variables
-            drupal_vars['cache'] = 'CACHE_EXTERNAL'
-            drupal_vars['page_cache_max_age'] = 900
-            drupal_vars['block_cache'] = True
-            drupal_vars['page_compression'] = 0
-            drupal_vars['preprocess_js'] = True
-            drupal_vars['preprocess_css'] = True
+        # admin/settings/performance variables
+        drupal_vars['cache'] = 'CACHE_EXTERNAL'
+        drupal_vars['page_cache_max_age'] = 900
+        drupal_vars['block_cache'] = True
+        drupal_vars['page_compression'] = 0
+        drupal_vars['preprocess_js'] = True
+        drupal_vars['preprocess_css'] = True
 
-            # Set Drupal variables
-            with settings(warn_only=True):
-                site.set_variables(drupal_vars)
+        # Set Drupal variables
+        with settings(warn_only=True):
+            site.set_variables(drupal_vars)
 
 def _setup_files_directory(archive):
     for site in archive.sites:
