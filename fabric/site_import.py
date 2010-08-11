@@ -141,7 +141,7 @@ def _setup_modules(archive):
         local("tar xzvf CAS-1.1.2.tgz")
         local("cp -R CAS-1.1.2/CAS ./cas/")
         local("rm -rf CAS-1.1.2")
-        local("CAS-1.1.2.tgz")
+        local("rm CAS-1.1.2.tgz")
 
     for site in archive.sites:
 
