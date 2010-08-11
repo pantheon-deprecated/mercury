@@ -137,6 +137,12 @@ def _setup_modules(archive):
             local("drush dl -y apachesolr cas varnish")
             local("drush -y solr-phpclient")
 
+        local("wget http://downloads.jasig.org/cas-clients/php/current/CAS-1.1.2.tgz")
+        local("tar xzvf CAS-1.1.2.tgz")
+        local("cp -R CAS-1.1.2/CAS ./cas/")
+        local("rm -rf CAS-1.1.2")
+        local("CAS-1.1.2.tgz")
+
     for site in archive.sites:
 
         # Create new solr index
