@@ -165,10 +165,12 @@ class DrupalSite:
                 url = url.split('\n')
                 url = urlparse(url[len(url)-1])
 
-            if url.password == None: url.password = ''
+            if url.password == None:
+                self.password = ''
+            else:
+                self.password = url.password
 
             self.username = url.username
-            self.password = url.password
             self.name = url.path[1:].replace('\n','')
             self.hostname = url.hostname
 
