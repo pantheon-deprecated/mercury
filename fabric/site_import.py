@@ -22,6 +22,8 @@ def import_site(site_archive, base_dir = 'pantheon', environment = 'live'):
     _setup_modules(archive)
     _setup_files_directory(archive)
     _setup_permissions(server, archive)
+    _run_on_sites(archive.sites, 'cc all')
+    _run_on_sites(archive.sites, 'cron')
 
     server.restart_services()
     local("rm -rf " + archive_directory)
@@ -36,9 +38,8 @@ def _setup_databases(archive, environment):
             site.database.name = site.database.name[:59]
             site.database.name += "_" + environment
 
-
     # Create databases. If multiple sites use same db, only create once.
-    databases = set([database for database in [site.database.name for site in archive.sites]])
+    databases = set([site.database.name for site in archive.sites])
     for database in databases:
         local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % (database))
         local("mysql -u root -e 'CREATE DATABASE %s'" % (database))
@@ -114,9 +115,9 @@ def _setup_site_files(archive):
         # TODO: Is this necessary?
         #local("rm -r ./.git")
 
-def _update_databases(archive):
-    for site in archive.sites:
-        site.updatedb()
+def _run_on_sites(sites, cmd):
+    for site in sites:
+        site.drush(cmd)
 
 def _setup_modules(archive):
 
@@ -133,8 +134,8 @@ def _setup_modules(archive):
         local("cp -R * " + archive.destination + "sites/all/modules/")
     local("rm -rf " + temporary_directory)
     
-    # Run updatedb
-    _update_databases(archive)
+    # Run updatedb on all sites
+    _run_on_sites(archive.sites, 'updatedb')
 
     # Make sure all required modules exist in sites/all/modules
     with cd(archive.destination + "sites/all/modules/"):
@@ -173,7 +174,7 @@ def _setup_modules(archive):
                         local("drush dl -y varnish")
 
         # Enable all required modules
-        site.enable_modules(required_modules)
+        site.drush('enable', required_modules)
 
         # Solr variables
         drupal_vars = {}

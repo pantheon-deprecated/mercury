@@ -128,16 +128,11 @@ class DrupalSite:
                         value= 'FALSE'
                 local("drush --uri=%s php-eval \"variable_set('%s',%s);\"" % (self.name, key, value))
 
-    def updatedb(self):
+    def drush(self, cmd, options = [' ']):
         with cd(self.webroot):
             with settings(warn_only=True):
-                local("drush -y --uri=" + self.name + " updatedb")
-
-    def enable_modules(self, modules):
-        with cd(self.webroot):
-            with settings(warn_only=True):
-                for module in modules:
-                    local("drush -y --uri=%s en %s" % (self.name, module))
+                for option in options:
+                    local("drush -y --uri=%s %s %s" % (self.name, cmd, option))
 
     class DrupalDB:
 
