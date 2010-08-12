@@ -27,11 +27,12 @@ class DrupalInstallation:
 
     def __init__(self, location):
         self.location = location
-        if exists(location):
-            self.version = self.get_drupal_version()
-            self.platform =  self.get_drupal_platform()
-            self.set_branch_and_revision()
-            self.sites = self.get_sites()
+
+    def set_drupal_info(self):
+        self.version = self.get_drupal_version()
+        self.platform =  self.get_drupal_platform()
+        self.set_branch_and_revision()
+        self.sites = self.get_sites()
 
     def get_sites(self):
         sites = []
@@ -214,6 +215,7 @@ class SiteImport:
             self.env_dir = env_dir
             self.destination = webroot + env_dir + '/'
             self.drupal = DrupalInstallation(location)
+            self.drupal.set_drupal_info()
             self.sql_dumps = self.get_sql_files()
             self.sites = self.get_matched_sites()
     
