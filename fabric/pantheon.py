@@ -4,7 +4,6 @@ from urlparse import urlparse
 from re import search
 from tempfile import mkdtemp
 from copy import deepcopy
-import pdb
 
 def unarchive(archive, destination):
     '''Extract archive to destination directory and remove VCS files'''
@@ -110,18 +109,12 @@ class DrupalSite:
         self.valid = False
 
     def get_file_location(self):
-        return (local("drush --uri=%s variable-get file_directory_path | \
-            grep 'file_directory_path: \"' | \
-            sed 's/^file_directory_path: \"\(.*\)\".*/\\1/'" % self.name)).rstrip('\n')
-
-    def set_file_location(self, path):
-        with settings(warn_only=True):
-            with cd(self.webroot):
-                local("drush --uri=%s variable-set --always-set file_directory_path %s" % (self.name, path))
-        self.file_location = path
+        with cd(self.webroot):
+            return (local("drush --uri=%s variable-get file_directory_path | \
+                grep 'file_directory_path: \"' | \
+                sed 's/^file_directory_path: \"\(.*\)\".*/\\1/'" % self.name)).rstrip('\n')
 
     def set_variables(self, variables = dict()):
-        pdb.set_trace()
         with cd(self.webroot):
             for key, value in variables.iteritems():
                 # normalize strings and bools

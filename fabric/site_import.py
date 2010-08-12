@@ -6,7 +6,7 @@ from tempfile import mkdtemp
 from time import sleep
 from pantheon import *
 
-def import_site(site_archive, base_dir = 'pantheon', environment = 'dev'):
+def import_site(site_archive, base_dir = 'pantheon', environment = 'live'):
     '''Import site archive into a Pantheon server'''
     archive_directory = mkdtemp() + '/'
     destination = base_dir + '_' + environment
@@ -59,6 +59,9 @@ def _setup_databases(archive, environment):
         if site.database.dump not in imported:
             # Strip cache tables, convert MyISAM to InnoDB, and import.
             local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | \
+                    grep -v '^INSERT INTO `ctools_object_cache`' | \
+                    grep -v '^INSERT INTO `watchdog`' | \
+                    grep -v '^INSERT INTO `accesslog`' | \
                     grep -v '^USE `' | \
                     sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | \
                     mysql -u pantheon-admin %s" % \
@@ -117,17 +120,17 @@ def _update_databases(archive):
 
 def _setup_modules(archive):
 
-    required_modules = ['apachesolr', 'apachesolr_search', 'cas', 'cookie_cache_bypass', 'locale', 'syslog', 'varnish']
+    required_modules = ['apachesolr', 'apachesolr_search', 'cookie_cache_bypass', 'locale', 'syslog', 'varnish']
 
     if not exists(archive.destination + "sites/all/modules/"):
         local("mkdir " + archive.destination + "sites/all/modules/")
 
     # Drush will fail if it can't find memcache within drupal install. But we use drush to download memcache. 
-    # Solve race condition by downloading outside drupal install.
+    # Solve race condition by downloading outside drupal install. Download other prereqs also.
     temporary_directory = mkdtemp()
     with cd(temporary_directory):
-        local("drush dl -y memcache")
-        local("cp -R memcache " + archive.destination + "sites/all/modules/")
+        local("drush dl -y memcache apachesolr cas varnish")
+        local("cp -R * " + archive.destination + "sites/all/modules/")
     local("rm -rf " + temporary_directory)
     
     # Run updatedb
@@ -135,10 +138,8 @@ def _setup_modules(archive):
 
     # Make sure all required modules exist in sites/all/modules
     with cd(archive.destination + "sites/all/modules/"):
-        # Warn only. Drush complains if modules already exist.
-        with settings(warn_only=True):
-            local("drush dl -y apachesolr cas varnish")
 
+        # Download SolrPhpClient library
         local("wget http://solr-php-client.googlecode.com/files/SolrPhpClient.r22.2009-11-09.tgz")
         local("mkdir -p ./apachesolr/SolrPhpClient/")
         local("tar xzf SolrPhpClient.r22.2009-11-09.tgz -C ./apachesolr/")
@@ -147,16 +148,13 @@ def _setup_modules(archive):
         # Download CAS php library
         local("wget http://downloads.jasig.org/cas-clients/php/1.1.2/CAS-1.1.2.tgz")
         local("tar xzf CAS-1.1.2.tgz")
-        if not exists("./cas/CAS"):
-            local("mkdir ./cas/CAS")
-        local("mv ./CAS-1.1.2/* ./cas/CAS")
+        local("mv ./CAS-1.1.2 ./cas/CAS")
         local("rm CAS-1.1.2.tgz")
-        local("rm -r CAS-1.1.2")
 
     for site in archive.sites:
 
         # Create new solr index
-        solr_path = archive.env_dir.replace('/','_')
+        solr_path = archive.env_dir.replace('/','_') + '_' +site.name
         if exists("/var/solr/" + solr_path):
             local("rm -rf /var/solr/" + solr_path)
         local("cp -R /opt/pantheon/fabric/templates/solr/ /var/solr/" + solr_path)
@@ -204,12 +202,13 @@ def _setup_files_directory(archive):
     for site in archive.sites:
         site.file_location = site.get_file_location()
         with cd(archive.destination + "sites/" + site.name):
-            # if file_directory_path is not set, create one and set variable.
+            # if file_directory_path is not set.
             if not site.file_location:
-                site.set_file_location("sites/" + site.name + "/files")
+                site.file_location = 'sites/' + site.name + '/files'
+                site.set_variables({'file_directory_path':site.file_location})
             # if file_directory_path is set, but doesn't exist, create it.
             if not exists(archive.destination + site.file_location):
-                local("mkdir -p " + archive.destination + self.file_location)
+                local("mkdir -p " + archive.destination + site.file_location)
 
 def _setup_permissions(server, archive):
     local("chown -R %s:%s %s" % (server.owner, server.group, archive.destination))
@@ -230,10 +229,11 @@ def _setup_settings_files(archive):
     slug_template = local("cat /opt/pantheon/fabric/templates/import.settings.php")
     for site in archive.sites:
         # Add env_dir (e.g. pantheon_dev) as memcached prefix.
-        site.database.site_location = archive.env_dir.replace('/','_')
+        site.database.site_location = archive.env_dir.replace('/','_') + '_' + site.name
         slug = Template(slug_template)
         slug = slug.safe_substitute(site.database.__dict__)
         with open(archive.destination + "sites/" + site.name + "/settings.php", 'a') as f:
             f.write(slug)
         f.close
+
 
