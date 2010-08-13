@@ -1,22 +1,30 @@
 from fabric.api import *
 from os.path import exists
-from string import Template
 from re import search
 from tempfile import mkdtemp
 from time import sleep
 from pantheon import *
+import string
+import random
+import pdb
 
-def import_site(site_archive, base_dir = 'pantheon', environment = 'live'):
+def import_site(site_archive, project = None, environment = None):
     '''Import site archive into a Pantheon server'''
     archive_directory = mkdtemp() + '/'
-    destination = base_dir + '_' + environment
+
+    if (project == None):
+        print("No project selected. Using 'pantheon'")
+        project = 'pantheon'
+    if (environment == None):
+        print("No environment selected. Using 'dev'")
+        environment = 'dev'
 
     unarchive(site_archive, archive_directory)
 
     server = PantheonServer()
-    archive = SiteImport(archive_directory, server.webroot, destination)
+    archive = SiteImport(archive_directory, server.webroot, project, environment)
 
-    _setup_databases(archive, environment)
+    _setup_databases(archive)
     _setup_site_files(archive)
     _setup_settings_files(archive)
     _setup_modules(archive)
@@ -24,20 +32,29 @@ def import_site(site_archive, base_dir = 'pantheon', environment = 'live'):
     _setup_permissions(server, archive)
     _run_on_sites(archive.sites, 'cc all')
     _run_on_sites(archive.sites, 'cron')
-
     server.restart_services()
+
     local("rm -rf " + archive_directory)
 
-def _setup_databases(archive, environment):
-
-    # Add environmental suffix (dev/test/live)
-    if environment:
-        for site in archive.sites:
-            # MySQL allows 64 character names. Slice to 59 chars before adding suffix.
-            # TODO: make sure this doesn't cause database name collisions.
-            site.database.name = site.database.name[:59]
-            site.database.name += "_" + environment
-
+def _setup_databases(archive):
+    pdb.set_trace()
+    # Sites are matched to databases. Replace database name with: "project_environment_sitename"
+    names = list()
+    for site in archive.sites:
+        # MySQL allows db names up to 64 chars. Check for & fix name collisions, assuming: 
+        # project (up to 16chars) and environment (up to 5chars).
+        for length in range(43,0,-1):
+            #TODO: Write better fix for collisions
+            name = archive.project + '_' + archive.environment + '_' + \
+                    site.get_safe_name()[:length] + \
+                    str(random.randint(0,9))*(43-length)
+            if name not in names:
+                break
+            if length == 0:
+                abort("Database name collision")
+        site.database.name = name
+        names.append(name)
+   
     # Create databases. If multiple sites use same db, only create once.
     databases = set([site.database.name for site in archive.sites])
     for database in databases:
@@ -50,24 +67,20 @@ def _setup_databases(archive, environment):
     local("mysql -u root -e \"CREATE USER 'pantheon-admin'@'localhost' IDENTIFIED BY '';\"")
     local("mysql -u root -e \"GRANT ALL PRIVILEGES ON *.* TO 'pantheon-admin'@'localhost' WITH GRANT OPTION;\"")
 
-    imported = []
     for site in archive.sites:
         # Set grants
         local("mysql -u pantheon-admin -e \"GRANT ALL ON %s.* TO '%s'@'localhost' IDENTIFIED BY '%s';\"" % \
                 (site.database.name, site.database.username, site.database.password))
 
-        # If multiple sites use same db, no need to import again.
-        if site.database.dump not in imported:
-            # Strip cache tables, convert MyISAM to InnoDB, and import.
-            local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | \
-                    grep -v '^INSERT INTO `ctools_object_cache`' | \
-                    grep -v '^INSERT INTO `watchdog`' | \
-                    grep -v '^INSERT INTO `accesslog`' | \
-                    grep -v '^USE `' | \
-                    sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | \
-                    mysql -u pantheon-admin %s" % \
-                   (archive.location + site.database.dump, site.database.name))
-            imported.append(site.database.dump)
+        # Strip cache tables, convert MyISAM to InnoDB, and import.
+        local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | \
+                grep -v '^INSERT INTO `ctools_object_cache`' | \
+                grep -v '^INSERT INTO `watchdog`' | \
+                grep -v '^INSERT INTO `accesslog`' | \
+                grep -v '^USE `' | \
+                sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | \
+                mysql -u pantheon-admin %s" % \
+               (archive.location + site.database.dump, site.database.name))
 
     # Cleanup
     local("mysql -u pantheon-admin -e \"DROP USER 'pantheon-admin'@'localhost'\"")
@@ -121,6 +134,7 @@ def _run_on_sites(sites, cmd):
 
 def _setup_modules(archive):
 
+    # TODO: add CAS back into the required module list when backend working.
     required_modules = ['apachesolr', 'apachesolr_search', 'cookie_cache_bypass', 'locale', 'syslog', 'varnish']
 
     if not exists(archive.destination + "sites/all/modules/"):
@@ -155,7 +169,7 @@ def _setup_modules(archive):
     for site in archive.sites:
 
         # Create new solr index
-        solr_path = archive.env_dir.replace('/','_') + '_' +site.name
+        solr_path = archive.project + '_' + archive.environment + '_' + site.get_safe_name()
         if exists("/var/solr/" + solr_path):
             local("rm -rf /var/solr/" + solr_path)
         local("cp -R /opt/pantheon/fabric/templates/solr/ /var/solr/" + solr_path)
@@ -229,9 +243,10 @@ def _setup_permissions(server, archive):
 def _setup_settings_files(archive):
     slug_template = local("cat /opt/pantheon/fabric/templates/import.settings.php")
     for site in archive.sites:
-        # Add env_dir (e.g. pantheon_dev) as memcached prefix.
-        site.database.site_location = archive.env_dir.replace('/','_') + '_' + site.name
-        slug = Template(slug_template)
+        # Add project + random string as memcached prefix.
+        site.database.memcache_prefix = archive.project + \
+                ''.join(["%s" % random.choice(string.ascii_letters + string.digits) for i in range(8)])
+        slug = string.Template(slug_template)
         slug = slug.safe_substitute(site.database.__dict__)
         with open(archive.destination + "sites/" + site.name + "/settings.php", 'a') as f:
             f.write(slug)

@@ -3,6 +3,7 @@ from os.path import exists
 from urlparse import urlparse
 from re import search
 from tempfile import mkdtemp
+import string
 from copy import deepcopy
 
 def unarchive(archive, destination):
@@ -28,7 +29,7 @@ class DrupalInstallation:
     def __init__(self, location):
         self.location = location
 
-    def set_drupal_info(self):
+    def init_drupal_data(self):
         self.version = self.get_drupal_version()
         self.platform =  self.get_drupal_platform()
         self.set_branch_and_revision()
@@ -134,6 +135,10 @@ class DrupalSite:
                 for option in options:
                     local("drush -y --uri=%s %s %s" % (self.name, cmd, option))
 
+    def get_safe_name(self):
+        ''' Replace invalid filename/database chars with underscores '''
+        return self.name.translate(string.maketrans('\/?%*:|"<>.-','____________'))
+
     class DrupalDB:
 
         def __init__(self):
@@ -169,7 +174,7 @@ class DrupalSite:
             if self.name == "databasename" \
                     and self.username == "username" \
                     and self.password == "password" \
-                    and self.hostname == "hostname": 
+                    and self.hostname == "localhost": 
                 return False
             return True
 
@@ -204,13 +209,14 @@ class PantheonServer:
 
 class SiteImport:
     
-    def __init__(self, location, webroot, env_dir):
+    def __init__(self, location, webroot, project, environment):
         if exists(location):
             self.location = location
-            self.env_dir = env_dir
-            self.destination = webroot + env_dir + '/'
+            self.project = project
+            self.environment = environment
+            self.destination = webroot + project + '_' + environment + '/'
             self.drupal = DrupalInstallation(location)
-            self.drupal.set_drupal_info()
+            self.drupal.init_drupal_data()
             self.sql_dumps = self.get_sql_files()
             self.sites = self.get_matched_sites()
     
@@ -248,7 +254,7 @@ class SiteImport:
                             match.database.dump = dump.file_name
                             matches.append(match)
 
-        # Set site webroot to new destination
+        # Set site webroot to new destinationi (webroot + project + environment)
         for match in matches:
             match.webroot = self.destination
 

@@ -20,6 +20,6 @@ $conf['memcache_bins'] = array(
           'cache'        => 'default',
           );
 # Key Prefix: edit this for multisite use.
-$conf['memcache_key_prefix'] = '${site_location}';
+$conf['memcache_key_prefix'] = '${memcache_prefix}';
 
 ### END Mercury settings ###
