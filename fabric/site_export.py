@@ -1,8 +1,6 @@
 from fabric.api import *
 from pantheon import PantheonServer, DrupalInstallation
 from tempfile import mkdtemp
-import subprocess
-import pipes
 
 def export_site(project = None ,environment = None):
     temporary_directory = mkdtemp()
@@ -24,8 +22,7 @@ def export_site(project = None ,environment = None):
     _make_archive(temporary_directory)
 
 def _export_files(webroot, temporary_directory):
-    local('git clone %s %s/htdocs' % (webroot, temporary_directory))
-    local('rm -rf %s/htdocs/.git' % temporary_directory)
+    local('cp -R %s %s/htdocs' % (webroot, temporary_directory))
 
 def _export_data(webroot, temporary_directory):
     sites = DrupalInstallation(webroot).get_sites()

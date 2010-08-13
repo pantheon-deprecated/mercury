@@ -20,7 +20,7 @@ def import_site(site_archive, project = None, environment = None):
         environment = 'dev'
 
     unarchive(site_archive, archive_directory)
-
+    pdb.set_trace()
     server = PantheonServer()
     archive = SiteImport(archive_directory, server.webroot, project, environment)
 
@@ -63,8 +63,7 @@ def _setup_databases(archive):
 
     # Create temporary superuser to perform import operations
     with settings(warn_only=True):
-        local("mysql -u root -e \"DROP USER 'pantheon-admin'@'localhost';\"")
-    local("mysql -u root -e \"CREATE USER 'pantheon-admin'@'localhost' IDENTIFIED BY '';\"")
+        local("mysql -u root -e \"CREATE USER 'pantheon-admin'@'localhost' IDENTIFIED BY '';\"")
     local("mysql -u root -e \"GRANT ALL PRIVILEGES ON *.* TO 'pantheon-admin'@'localhost' WITH GRANT OPTION;\"")
 
     for site in archive.sites:
@@ -84,9 +83,8 @@ def _setup_databases(archive):
 
     # Cleanup
     local("mysql -u pantheon-admin -e \"DROP USER 'pantheon-admin'@'localhost'\"")
-    db_dumps = set(site.database.dump for site in archive.sites)
     with cd(archive.location):
-        local("rm -f " + " ".join(["%s" % db_dump for db_dump in db_dumps]))
+        local("rm -f *.sql")
 
 def _setup_site_files(archive):
     #TODO: add large file size sanity check (no commits over 20mb)
