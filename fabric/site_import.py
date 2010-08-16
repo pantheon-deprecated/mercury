@@ -6,7 +6,6 @@ from time import sleep
 from pantheon import *
 import string
 import random
-import pdb
 
 def import_site(site_archive, project = None, environment = None):
     '''Import site archive into a Pantheon server'''
@@ -20,7 +19,6 @@ def import_site(site_archive, project = None, environment = None):
         environment = 'dev'
 
     unarchive(site_archive, archive_directory)
-    pdb.set_trace()
     server = PantheonServer()
     archive = SiteImport(archive_directory, server.webroot, project, environment)
 
@@ -37,7 +35,6 @@ def import_site(site_archive, project = None, environment = None):
     local("rm -rf " + archive_directory)
 
 def _setup_databases(archive):
-    pdb.set_trace()
     # Sites are matched to databases. Replace database name with: "project_environment_sitename"
     names = list()
     for site in archive.sites:
