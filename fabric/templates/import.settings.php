@@ -1,11 +1,12 @@
+
 ##########################
 #
-# Pantheon Settings
+# Mercury Settings
 #
 # Alter With Caution :)
 #
 ##########################
-$db_url = 'mysqli://${db_username}:${db_password}@localhost/${db_name}';
+$db_url = 'mysqli://${username}:${password}@localhost/${name}';
 
 # Varnish reverse proxy on localhost
 $conf['reverse_proxy'] = TRUE;
@@ -20,6 +21,6 @@ $conf['memcache_bins'] = array(
           'cache'        => 'default',
           );
 # Key Prefix: edit this for multisite use.
-$conf['memcache_key_prefix'] = '${site_prefix}';
+$conf['memcache_key_prefix'] = '${memcache_prefix}';
 
-### END Pantheon settings ###
+### END Mercury settings ###
