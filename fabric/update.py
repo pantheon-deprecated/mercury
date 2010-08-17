@@ -52,12 +52,12 @@ def update_data(source_project = None, source_environment = None, target_project
 
        source_location = webroot + source_project + '_' + source_environment + "/"
        target_location = webroot + target_project + '_' + target_environment + "/"
-       print('Exporting ' + source_project + '/' + source_environment + 'to temporary directory %s' % source_temporary_directory)
+       print('Exporting ' + source_project + '/' + source_environment + ' to temporary directory %s' % source_temporary_directory)
        _export_data(source_location, source_temporary_directory)
-       print('Exporting ' + target_project + '/' + target_environment + 'to temporary directory %s' % target_temporary_directory)
+       print('Exporting ' + target_project + '/' + target_environment + ' to temporary directory %s' % target_temporary_directory)
        _export_data(target_location, target_temporary_directory)
        _setup_databases(target_location, source_temporary_directory)
-       print(target_project + '_' + target_environment + 'database updated with database from ' + source_project + '_' + source_environment)
+       print(target_project + '_' + target_environment + ' database updated with database from ' + source_project + '_' + source_environment)
 
 def update_code(source_project = None, source_environment = None, target_project = None, target_environment = None):
        webroot = PantheonServer().webroot
@@ -113,7 +113,7 @@ def update_files(source_project = None, source_environment = None, target_projec
 
 def _export_data(webroot, temporary_directory):
        sites = DrupalInstallation(webroot).get_sites()
-       with cd(temporary_directory + "/htdocs"):
+       with cd(temporary_directory):
               exported = list()
               for site in sites:
                      if site.valid:
