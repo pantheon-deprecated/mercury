@@ -42,7 +42,7 @@ def update_data(source_project = None, source_environment = None, target_project
               source_project = 'pantheon'
        if (source_environment == None):
               print("No source_environment selected. Using 'live'")
-              source_environment = 'live'
+               source_environment = 'live'
        if (target_project == None):
               print("No target_project selected. Using 'pantheon'")
               target_project = 'pantheon'
@@ -56,7 +56,8 @@ def update_data(source_project = None, source_environment = None, target_project
        _export_data(source_location, source_temporary_directory)
        print('Exporting ' + target_project + '/' + target_environment + ' to temporary directory %s' % target_temporary_directory)
        _export_data(target_location, target_temporary_directory)
-       _setup_databases(target_location, source_temporary_directory)
+       archive = SiteImport(source_temporary_directory, server.webroot, target_project, target_environment)
+       _setup_databases(archive, source_temporary_directory)
        print(target_project + '_' + target_environment + ' database updated with database from ' + source_project + '_' + source_environment)
 
 def update_code(source_project = None, source_environment = None, target_project = None, target_environment = None):
@@ -111,7 +112,7 @@ def update_files(source_project = None, source_environment = None, target_projec
        local('rsync -av '+ webroot + source_project + '_' + source_environment + '/sites/all/files ' + webroot + target_project + '_' + target_environment + '/sites/all/')
        print(target_project + '_' + target_environment + ' files updated from ' + source_project + '_' + source_environment)
 
-def _export_data(webroot, temporary_directory):
+def _export_data(archive, temporary_directory):
        sites = DrupalInstallation(webroot).get_sites()
        with cd(temporary_directory):
               exported = list()
@@ -127,9 +128,9 @@ def _export_data(webroot, temporary_directory):
                                                   site.database.name,
                                                   )    
                                          )
-                                   exported.append(site.database.name)
-                                   
-def _setup_databases(archive, temporary_directory):
+                                         exported.append(site.database.name)
+
+def _setup_databases(archive):
        # Sites are matched to databases. Replace database name with: "project_environment_sitename"
        names = list()
        for site in archive.sites:
@@ -162,9 +163,9 @@ def _setup_databases(archive, temporary_directory):
               # Set grants
               local("mysql -u pantheon-admin -e \"GRANT ALL ON %s.* TO '%s'@'localhost' IDENTIFIED BY '%s';\"" % \
                            (site.database.name, site.database.username, site.database.password))
-
-        # Strip cache tables, convert MyISAM to InnoDB, and import.
-              local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | \
+              
+       # Strip cache tables, convert MyISAM to InnoDB, and import.
+       local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | \
                 grep -v '^INSERT INTO `ctools_object_cache`' | \
                 grep -v '^INSERT INTO `watchdog`' | \
                 grep -v '^INSERT INTO `accesslog`' | \
@@ -172,8 +173,8 @@ def _setup_databases(archive, temporary_directory):
                 sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | \
                 mysql -u pantheon-admin %s" % \
                 (archive.location + site.database.dump, site.database.name))
-              
-    # Cleanup
+                
+       # Cleanup
        local("mysql -u pantheon-admin -e \"DROP USER 'pantheon-admin'@'localhost'\"")
        with cd(archive.location):
               local("rm -f *.sql")
