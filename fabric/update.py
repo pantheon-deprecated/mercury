@@ -17,6 +17,8 @@ def update_pantheon():
        '''Pantheon Updated'''
 
 def update_pressflow(project = None, environment = None):
+       webroot = PantheonServer().webroot
+       
        '''Updating Pressflow'''
        if (project == None):
               print("No project selected. Using 'pantheon'")
@@ -24,7 +26,7 @@ def update_pressflow(project = None, environment = None):
        if (environment == None):
               print("No environment selected. Using 'dev'")
               environment = 'dev'
-       with cd(server.webroot + '/' + project + '/' + environment):
+       with cd(webroot + '/' + project + '/' + environment):
               local('bzr up')
        '''Pressflow Updated'''
 
