@@ -85,7 +85,7 @@ def update_code(source_project = None, source_environment = None, target_project
 
        if exists(target_location + '.git'):
               with cd(target_location):
-                     local('git update')
+                     local('git fetch')
        else:
               with cd(source_location):
                      local('git archive master | sudo tar -x -C ' + temporary_directory)
