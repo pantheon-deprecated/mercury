@@ -41,20 +41,14 @@ if [[ "--headless" != $$1 ]]; then
   echo "Creating a log of the output of this script at /etc/pantheon/logs/init.log"
   exec &> /etc/pantheon/logs/init.log
 
-  # Update Packages
-  ${pmupdate}
-
-  # Get any Pantheon/Pressflow updates.
-  bash /usr/local/bin/update_pantheon
-  bash /usr/local/bin/update_pressflow
-else
-  # Update Packages
-  ${pmupdate}
-
-  # Get any Pantheon/Pressflow updates.
-  bash /usr/local/bin/update_pantheon --headless
-  bash /usr/local/bin/update_pressflow --headless
 fi
+
+# Update Packages
+${pmupdate}
+
+# Get any Pantheon/Pressflow updates.
+cd /opt/pantheon/fabric; fab update_pantheon
+cd /opt/pantheon/fabric; fab update_pressflow
 
 # Run any other startup scripts
 for script in $$( ls /etc/pantheon/boot.d/S* ) ; do
