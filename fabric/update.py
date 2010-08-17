@@ -128,7 +128,7 @@ def _export_data(archive, temporary_directory):
                                                   site.database.name,
                                                   )    
                                          )
-                                         exported.append(site.database.name)
+                                   exported.append(site.database.name)
 
 def _setup_databases(archive):
        # Sites are matched to databases. Replace database name with: "project_environment_sitename"
