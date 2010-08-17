@@ -33,9 +33,9 @@ def update_pressflow(project = None, environment = None):
        '''Pressflow Updated'''
 
 def update_data(source_project = None, source_environment = None, target_project = None, target_environment = None):
+       webroot = PantheonServer().webroot
        source_temporary_directory = mkdtemp()
        target_temporary_directory = mkdtemp()
-       webroot = PantheonServer().webroot
 
        if (source_project == None):
               print("No source_project selected. Using 'pantheon'")
@@ -52,9 +52,9 @@ def update_data(source_project = None, source_environment = None, target_project
 
        source_location = webroot + source_project + '_' + source_environment + "/"
        target_location = webroot + target_project + '_' + target_environment + "/"
-       print('Exporting ' + source_project + '/' + source_environment + ' to temporary directory %s' % source_temporary_directory)
+       print('Exporting ' + source_project + '/' + source_environment + ' database to temporary directory %s' % source_temporary_directory)
        _export_data(source_location, source_temporary_directory)
-       print('Exporting ' + target_project + '/' + target_environment + ' to temporary directory %s' % target_temporary_directory)
+       print('Exporting ' + target_project + '/' + target_environment + ' database to temporary directory %s' % target_temporary_directory)
        _export_data(target_location, target_temporary_directory)
        archive = SiteImport(source_temporary_directory, server.webroot, target_project, target_environment)
        _setup_databases(archive, source_temporary_directory)
