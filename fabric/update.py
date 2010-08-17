@@ -37,16 +37,16 @@ def update_data(source_project = None, source_environment = None, target_project
        target_temporary_directory = mkdtemp()
        webroot = PantheonServer().webroot
 
-       if (project == None):
+       if (source_project == None):
               print("No source_project selected. Using 'pantheon'")
               source_project = 'pantheon'
-       if (environment == None):
+       if (source_environment == None):
               print("No source_environment selected. Using 'live'")
               source_environment = 'live'
-       if (project == None):
+       if (target_project == None):
               print("No target_project selected. Using 'pantheon'")
               target_project = 'pantheon'
-       if (environment == None):
+       if (target_environment == None):
               print("No target_environment selected. Using 'test'")
               target_environment = 'test'
 
@@ -63,16 +63,16 @@ def update_code(source_project = None, source_environment = None, target_project
        webroot = PantheonServer().webroot
        temporary_directory = mkdtemp()
        
-       if (project == None):
+       if (source_project == None):
               print("No source_project selected. Using 'pantheon'")
               source_project = 'pantheon'
-       if (environment == None):
+       if (source_environment == None):
               print("No source_environment selected. Using 'live'")
               source_environment = 'dev'
-       if (project == None):
+       if (target_project == None):
               print("No target_project selected. Using 'pantheon'")
               target_project = 'pantheon'
-       if (environment == None):
+       if (target_environment == None):
               print("No target_environment selected. Using 'test'")
               target_environment = 'test'
 
@@ -95,16 +95,16 @@ def update_code(source_project = None, source_environment = None, target_project
 def update_files(source_project = None, source_environment = None, target_project = None, target_environment = None):
        webroot = PantheonServer().webroot
        
-       if (project == None):
+       if (source_project == None):
               print("No source_project selected. Using 'pantheon'")
               source_project = 'pantheon'
-       if (environment == None):
+       if (source_environment == None):
               print("No source_environment selected. Using 'live'")
               source_environment = 'live'
-       if (project == None):
+       if (target_project == None):
               print("No target_project selected. Using 'pantheon'")
               target_project = 'pantheon'
-       if (environment == None):
+       if (target_environment == None):
               print("No target_environment selected. Using 'test'")
               target_environment = 'test'
 
