@@ -139,7 +139,7 @@ class DrupalSite:
         ''' Replace invalid filename/database chars with underscores '''
         return self.name.translate(string.maketrans('\/?%*:|"<>.-','____________'))
 
-class DrupalDB:
+    class DrupalDB:
 
         def __init__(self):
             self.name = ''
