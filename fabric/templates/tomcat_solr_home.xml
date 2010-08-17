@@ -1,0 +1,3 @@
+<Context docBase="/var/solr/solr.war" debug="0" privileged="true" allowLinking="true" crossContext="true">
+        <Environment name="solr/home" type="java.lang.String" value="/var/solr/${solr_path}" override="true" />
+</Context>
