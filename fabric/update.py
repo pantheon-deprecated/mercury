@@ -112,7 +112,7 @@ def update_files(source_project = None, source_environment = None, target_projec
        local('rsync -av '+ webroot + source_project + '_' + source_environment + '/sites/all/files ' + webroot + target_project + '_' + target_environment + '/sites/all/')
        print(target_project + '_' + target_environment + ' files updated from ' + source_project + '_' + source_environment)
 
-def _export_data(archive, temporary_directory):
+def _export_data(webroot, temporary_directory):
        sites = DrupalInstallation(webroot).get_sites()
        with cd(temporary_directory):
               exported = list()
