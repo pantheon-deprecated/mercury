@@ -166,10 +166,10 @@ def _setup_databases(archive, temporary_directory):
                 grep -v '^INSERT INTO `accesslog`' | \
                 grep -v '^USE `' | \
                 sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | \
-                mysql -u pantheon-admin %s" % \               
-                    (archive.location + site.database.dump, site.database.name))
+                mysql -u pantheon-admin %s" % \
+                (archive.location + site.database.dump, site.database.name))
               
     # Cleanup
-              local("mysql -u pantheon-admin -e \"DROP USER 'pantheon-admin'@'localhost'\"")
-              with cd(archive.location):
-                     local("rm -f *.sql")
+       local("mysql -u pantheon-admin -e \"DROP USER 'pantheon-admin'@'localhost'\"")
+       with cd(archive.location):
+              local("rm -f *.sql")
