@@ -1,6 +1,7 @@
 from fabric.api import *
 from fabric.contrib.console import confirm
 from time import sleep
+from pantheon import PantheonServer, DrupalInstallation
 
 def update_pantheon():
        '''Updating Pantheon from Launchpad'''
