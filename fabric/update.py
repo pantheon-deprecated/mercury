@@ -27,7 +27,7 @@ def update_pressflow(project = None, environment = None):
        if (environment == None):
               print("No environment selected. Using 'dev'")
               environment = 'dev'
-       with cd(webroot + '/' + project + '/' + environment):
+       with cd(webroot + project + '_' + environment):
               local('bzr up')
        '''Pressflow Updated'''
 
@@ -107,7 +107,7 @@ def update_files(source_project = None, source_environment = None, target_projec
               print("No target_environment selected. Using 'test'")
               target_environment = 'test'
 
-       local('rsync -av '+ webroot + '/'  + source_project + '_' + source_environment + '/sites/all/files/ ' + webroot + '/' + target_project + '_' + target_environment + '/sites/all/files/')
+       local('rsync -av '+ webroot + source_project + '_' + source_environment + '/sites/all/files/ ' + webroot + target_project + '_' + target_environment + '/sites/all/files/')
        print(target_project + '_' + target_environment + 'files updated from ' + target_project + '_' + target_environment)
 
 def _export_data(webroot, temporary_directory):
