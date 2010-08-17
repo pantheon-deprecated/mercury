@@ -42,7 +42,7 @@ def update_data(source_project = None, source_environment = None, target_project
               source_project = 'pantheon'
        if (source_environment == None):
               print("No source_environment selected. Using 'live'")
-               source_environment = 'live'
+              source_environment = 'live'
        if (target_project == None):
               print("No target_project selected. Using 'pantheon'")
               target_project = 'pantheon'
