@@ -57,7 +57,7 @@ def update_data(source_project = None, source_environment = None, target_project
        print('Exporting ' + target_project + '/' + target_environment + 'to temporary directory %s' % target_temporary_directory)
        _export_data(target_location, target_temporary_directory)
        _setup_databases(target_location, source_temporary_directory)
-       print(target_project + '_' + target_environment + 'database updated with database from ' + target_project + '_' + target_environment)
+       print(target_project + '_' + target_environment + 'database updated with database from ' + source_project + '_' + source_environment)
 
 def update_code(source_project = None, source_environment = None, target_project = None, target_environment = None):
        webroot = PantheonServer().webroot
@@ -67,7 +67,7 @@ def update_code(source_project = None, source_environment = None, target_project
               print("No source_project selected. Using 'pantheon'")
               source_project = 'pantheon'
        if (source_environment == None):
-              print("No source_environment selected. Using 'live'")
+              print("No source_environment selected. Using 'dev'")
               source_environment = 'dev'
        if (target_project == None):
               print("No target_project selected. Using 'pantheon'")
@@ -90,7 +90,7 @@ def update_code(source_project = None, source_environment = None, target_project
               with cd(source_location):
                      local('git archive master | sudo tar -x -C ' + temporary_directory)
                      local('rsync -av --exclude=settings.php' + temporary_directory + ' ' + target_location)
-       print(target_project + '_' + target_environment + 'project updated from ' + target_project + '_' + target_environment)
+       print(target_project + '_' + target_environment + ' project updated from ' + source_project + '_' + source_environment)
        
 def update_files(source_project = None, source_environment = None, target_project = None, target_environment = None):
        webroot = PantheonServer().webroot
@@ -108,8 +108,8 @@ def update_files(source_project = None, source_environment = None, target_projec
               print("No target_environment selected. Using 'test'")
               target_environment = 'test'
 
-       local('rsync -av '+ webroot + source_project + '_' + source_environment + '/sites/all/files/ ' + webroot + target_project + '_' + target_environment + '/sites/all/files/')
-       print(target_project + '_' + target_environment + 'files updated from ' + target_project + '_' + target_environment)
+       local('rsync -av '+ webroot + source_project + '_' + source_environment + '/sites/all/files ' + webroot + target_project + '_' + target_environment + '/sites/all/')
+       print(target_project + '_' + target_environment + ' files updated from ' + source_project + '_' + source_environment)
 
 def _export_data(webroot, temporary_directory):
        sites = DrupalInstallation(webroot).get_sites()
