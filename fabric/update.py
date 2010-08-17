@@ -24,8 +24,8 @@ def update_pressflow(project = None, environment = None):
        if (environment == None):
               print("No environment selected. Using 'dev'")
               environment = 'dev'
-       with('cd ' + server.webroot + '/' + project + '/' + environment):
-              sudo('bzr up')
+       with cd(server.webroot + '/' + project + '/' + environment):
+              local('bzr up')
        '''Pressflow Updated'''
 
 def update_data(source_project = None, source_environment = None, target_project = None, target_environment = None):
@@ -80,10 +80,10 @@ def update_code(source_project = None, source_environment = None, target_project
               abort("Source target not in version control.")
 
        if exists(target_location + '.git'):
-              with(cd target_location):
+              with cd(target_location):
                      local('git update')
        else:
-              with(cd source_location):
+              with cd(source_location):
                      local('git archive master | sudo tar -x -C ' + temporary_directory)
                      local('rsync -av --exclude=settings.php' + temporary_directory + ' ' target_location)
        print(target_project + '_' + target_environment + 'project updated from ' + target_project + '_' + target_environment)
