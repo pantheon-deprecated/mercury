@@ -2,7 +2,7 @@ from fabric.api import *
 from fabric.contrib.console import confirm
 from time import sleep
 
-def update_pantheon:
+def update_pantheon():
        '''Updating Pantheon from Launchpad'''
        sudo('/etc/init.d/bcfg2-server stop')
        sudo('cd /opt/pantheon; bzr up')
