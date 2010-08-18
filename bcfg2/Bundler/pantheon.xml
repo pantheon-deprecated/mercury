@@ -6,15 +6,6 @@
    <Path name='/etc/pantheon/templates/cron' altsrc='/pantheon/cron'/>
    <Path name='/etc/pantheon/templates/iptables' altsrc='/pantheon/iptables'/>
    <Path name='/etc/pantheon/templates/tuneables' altsrc='/pantheon/tuneables'/>
-   <Path name='/etc/pantheon/update_scripts_config' altsrc='/pantheon/update_scripts_config'/>
-   <Path name='/usr/local/bin/update_code_from_dev_to_test' altsrc='/pantheon/update_code_from_dev_to_test'/>
-   <Path name='/usr/local/bin/update_code_from_test_to_live' altsrc='/pantheon/update_code_from_test_to_live'/>
-   <Path name='/usr/local/bin/update_db_from_live_to_test' altsrc='/pantheon/update_db_from_live_to_test'/>
-   <Path name='/usr/local/bin/update_db_from_test_to_dev' altsrc='/pantheon/update_db_from_test_to_dev'/>
-   <Path name='/usr/local/bin/update_files_from_live_to_test' altsrc='/pantheon/update_files_from_live_to_test'/>
-   <Path name='/usr/local/bin/update_files_from_test_to_dev' altsrc='/pantheon/update_files_from_test_to_dev'/>
-   <Path name='/usr/local/bin/update_pantheon' altsrc='/pantheon/update_pantheon'/>
-   <Path name='/usr/local/bin/update_pressflow' altsrc='/pantheon/update_pressflow'/>
 
    <BoundPath type='directory' owner='root' group='root' perms='0700' name='/etc/pantheon/logs'/>
 
