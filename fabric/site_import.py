@@ -1,11 +1,25 @@
 from fabric.api import *
+from os.path import basename
 from os.path import exists
+from os.path import join
 from re import search
 from tempfile import mkdtemp
 from time import sleep
 from pantheon import *
 import string
 import random
+
+def import_siteurl(url, project = None, environment = None):
+    download_dir = mkdtemp()
+    filebase = basename(url)
+    filename = join(download_dir, filebase)
+  
+    try:
+        curl(url, filename)
+        import_site(filename, project, environment)
+    finally:
+        os.unlink(download_dir)
+
 
 def import_site(site_archive, project = None, environment = None):
     '''Import site archive into a Pantheon server'''
