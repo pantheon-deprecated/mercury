@@ -6,16 +6,16 @@ from pantheon import *
 
 def update_pantheon():
        '''Updating Pantheon from Launchpad'''
-       sudo('/etc/init.d/bcfg2-server stop')
-       sudo('cd /opt/pantheon; bzr up')
-       sudo('/etc/init.d/bcfg2-server restart')
+       local('/etc/init.d/bcfg2-server stop')
+       local('cd /opt/pantheon; bzr up')
+       local('/etc/init.d/bcfg2-server restart')
        server_running = False
        warn('Waiting for bcfg2 server to start')
        while not server_running:
               with settings(hide('warnings'), warn_only=True):
-                     server_running = (sudo('netstat -atn | grep :6789')).rstrip('\n')
+                     server_running = (local('netstat -atn | grep :6789')).rstrip('\n')
               sleep(5)
-       sudo('/usr/sbin/bcfg2 -vq')
+       local('/usr/sbin/bcfg2 -vq')
        '''Pantheon Updated'''
 
 def update_pressflow(project = None, environment = None):
@@ -89,7 +89,7 @@ def update_code(source_project = None, source_environment = None, target_project
                      local('git fetch')
        else:
               with cd(source_location):
-                     local('git archive master | sudo tar -x -C ' + temporary_directory)
+                     local('git archive master | local tar -x -C ' + temporary_directory)
                      local('rsync -av --exclude=settings.php' + temporary_directory + ' ' + target_location)
        print(target_project + '_' + target_environment + ' project updated from ' + source_project + '_' + source_environment)
        
