@@ -65,7 +65,7 @@ def _initialize_bcfg2():
     sudo('ln -sf /opt/pantheon/bcfg2 /var/lib/')
     sudo('cp /opt/pantheon/fabric/clients.xml /var/lib/bcfg2/Metadata/')
     sudo('sed -i "s/^plugins = .*$/plugins = Bundler,Cfg,Metadata,Packages,Probes,Rules,TGenshi\\nfilemonitor = gamin/" /etc/bcfg2.conf')
-    Pantheon.restart_bcfg2
+    Pantheon.restart_bcfg2()
     sudo('/usr/sbin/bcfg2 -vqed') # @TODO: Add "-p 'pantheon-aws'" for EC2 and "-p 'pantheon-aws-ebs for EBS'"
 
 def _initialize_drush():
