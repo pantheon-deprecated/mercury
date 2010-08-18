@@ -1,28 +1,110 @@
+# vim: tabstop=4 shiftwidth=4 softtabstop=4
 from fabric.api import *
+from copy import deepcopy
 from os.path import exists
-from urlparse import urlparse
 from re import search
 from tempfile import mkdtemp
+from time import sleep
+from urlparse import urlparse
 import string
-from copy import deepcopy
 
-def unarchive(archive, destination):
-    '''Extract archive to destination directory and remove VCS files'''
-    if not exists(archive):
-        abort("Archive file \"" + archive + "\" does not exist.")
 
-    if exists(destination):
-        local("rm -rf " + destination)
+class Pantheon:
 
-    local("bzr init " + destination)
+    def unarchive(archive, destination):
+        '''Extract archive to destination directory and remove VCS files'''
+        if not os.path.exists(archive):
+            abort("Archive file \"" + archive + "\" does not exist.")
+            
+        if os.path.exists(destination):
+            local("rm -rf " + destination)
+            
+        local("bzr init " + destination)
+                
+        with cd(destination):
+            local("bzr import " + archive)
+            with settings(warn_only=True):
+                local("rm -r ./.bzr")
+                local("rm -r ./.git")
+                local("find . -depth -name .svn -exec rm -fr {} \;")
+                local("find . -depth -name CVS -exec rm -fr {} \;")
 
-    with cd(destination):
-        local("bzr import " + archive)
+    def export_data(webroot, temporary_directory):
+        sites = DrupalInstallation(webroot).get_sites()
+        with cd(temporary_directory):
+            exported = list()
+            for site in sites:
+                if site.valid:
+                    # If multiple sites use same db, only export once.
+                    if site.database.name not in exported:
+                        local("mysqldump --single-transaction --user='%s' --password='%s' --host='%s' %s > %s.sql" % \
+                                  ( site.database.username, 
+                                    site.database.password, 
+                                    site.database.hostname, 
+                                    site.database.name,
+                                    site.database.name,
+                                    )    
+                              )
+                        exported.append(site.database.name)
+
+    def setup_databases(archive):
+        # Sites are matched to databases. Replace database name with: "project_environment_sitename"
+        names = list()
+        for site in archive.sites:
+            # MySQL allows db names up to 64 chars. Check for & fix name collisions, assuming: 
+            # project (up to 16chars) and environment (up to 5chars).
+            for length in range(43,0,-1):
+                #TODO: Write better fix for collisions
+                name = archive.project + '_' + archive.environment + '_' + \
+                    site.get_safe_name()[:length] + \
+                    str(random.randint(0,9))*(43-length)
+                if name not in names:
+                    break
+                if length == 0:
+                    abort("Database name collision")
+            site.database.name = name
+            names.append(name)
+   
+        # Create databases. If multiple sites use same db, only create once.
+        databases = set([site.database.name for site in archive.sites])
+        for database in databases:
+            local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % (database))
+            local("mysql -u root -e 'CREATE DATABASE %s'" % (database))
+
+        # Create temporary superuser to perform import operations
         with settings(warn_only=True):
-            local("rm -r ./.bzr")
-            local("rm -r ./.git")
-            local("find . -depth -name .svn -exec rm -fr {} \;")
-            local("find . -depth -name CVS -exec rm -fr {} \;")
+            local("mysql -u root -e \"CREATE USER 'pantheon-admin'@'localhost' IDENTIFIED BY '';\"")
+        local("mysql -u root -e \"GRANT ALL PRIVILEGES ON *.* TO 'pantheon-admin'@'localhost' WITH GRANT OPTION;\"")
+
+        for site in archive.sites:
+            # Set grants
+            local("mysql -u pantheon-admin -e \"GRANT ALL ON %s.* TO '%s'@'localhost' IDENTIFIED BY '%s';\"" % \
+                      (site.database.name, site.database.username, site.database.password))
+              
+            # Strip cache tables, convert MyISAM to InnoDB, and import.
+            local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | \
+                grep -v '^INSERT INTO `ctools_object_cache`' | \
+                grep -v '^INSERT INTO `watchdog`' | \
+                grep -v '^INSERT INTO `accesslog`' | \
+                grep -v '^USE `' | \
+                sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | \
+                mysql -u pantheon-admin %s" % \
+                      (archive.location + site.database.dump, site.database.name))
+                
+        # Cleanup
+        local("mysql -u pantheon-admin -e \"DROP USER 'pantheon-admin'@'localhost'\"")
+        with cd(archive.location):
+            local("rm -f *.sql")
+
+    def restart_bcfg2():
+        sudo('/etc/init.d/bcfg2-server restart')
+        server_running = False
+        warn('Waiting for bcfg2 server to start')
+        while not server_running:
+            with settings(hide('warnings'), warn_only=True):
+                server_running = (sudo('netstat -atn | grep :6789')).rstrip('\n')
+            sleep(5)
+
 
 class DrupalInstallation:
 
@@ -49,12 +131,12 @@ class DrupalInstallation:
             settings_files = (local('find sites/ -name settings.php -type f')).rstrip('\n')
         # Single site
         if '\n' not in settings_files:
-            names.append((search(r'^.*sites/(.*)/settings.php', settings_files)).group(1))
+            names.append((rc.search(r'^.*sites/(.*)/settings.php', settings_files)).group(1))
         # Multiple sites
         else:
             settings_files = settings_files.split('\n')
             for sfile in settings_files:
-                names.append((search(r'^.*sites/(.*)/settings.php',sfile)).group(1))
+                names.append((re.search(r'^.*sites/(.*)/settings.php',sfile)).group(1))
         return names
 
     def get_site_data(self, name):
@@ -74,7 +156,7 @@ class DrupalInstallation:
     def get_pressflow_revision(self):
         #TODO: Optimize this (restrict search to revisions within Drupal minor version)
         #TODO: Add check for Bazaar or git metadata
-        temporary_directory = mkdtemp()
+        temporary_directory = tempfile.mkdtemp()
         local("git clone git://gitorious.org/pressflow/6.git " + temporary_directory)
         with cd(temporary_directory):
             match = {'difference': None, 'commit': None}
@@ -182,7 +264,7 @@ class PantheonServer:
 
     def __init__(self):
         # Ubuntu / Debian
-        if exists('/etc/debian_version'):
+        if os.path.exists('/etc/debian_version'):
             self.webroot = '/var/www/'
             self.owner = 'root'
             self.group = 'www-data'
@@ -190,7 +272,7 @@ class PantheonServer:
             self.tomcat_owner = 'tomcat6'
             self.tomcat_version = '6'
         # Centos
-        elif exists('/etc/redhat-release'):
+        elif os.path.exists('/etc/redhat-release'):
             self.webroot = '/var/www/html/'
             self.owner = 'root'
             self.group = 'apache'
@@ -212,7 +294,7 @@ class PantheonServer:
 class SiteImport:
     
     def __init__(self, location, webroot, project, environment):
-        if exists(location):
+        if os.path.exists(location):
             self.location = location
             self.project = project
             self.environment = environment
@@ -243,7 +325,7 @@ class SiteImport:
         if self.drupal.valid_site_count() == 1 and self.database_count() == 1:
             for site in self.drupal.sites:
                 if site.valid:
-                    match = deepcopy(site)
+                    match = copy.deepcopy(site)
                     match.database.dump = self.sql_dumps[0].file_name
                     matches.append(match)
         # More than one site and/or database
@@ -252,7 +334,7 @@ class SiteImport:
                 if site.valid:
                     for dump in self.sql_dumps:
                         if site.database.name == dump.database_name:
-                            match = deepcopy(site)
+                            match = copy.deepcopy(site)
                             match.database.dump = dump.file_name
                             matches.append(match)
 

@@ -1,7 +1,9 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 from fabric.api import *
 from fabric.contrib.console import confirm
-from time import sleep
+
+from pantheon import Pantheon
+
 
 def initialize():
     '''Initialize the Pantheon system.'''
@@ -63,13 +65,7 @@ def _initialize_bcfg2():
     sudo('ln -sf /opt/pantheon/bcfg2 /var/lib/')
     sudo('cp /opt/pantheon/fabric/clients.xml /var/lib/bcfg2/Metadata/')
     sudo('sed -i "s/^plugins = .*$/plugins = Bundler,Cfg,Metadata,Packages,Probes,Rules,TGenshi\\nfilemonitor = gamin/" /etc/bcfg2.conf')
-    sudo('/etc/init.d/bcfg2-server restart')
-    server_running = False
-    warn('Waiting for bcfg2 server to start')
-    while not server_running:
-        with settings(hide('warnings'), warn_only=True):
-            server_running = (sudo('netstat -atn | grep :6789')).rstrip('\n')
-        sleep(5)
+    Pantheon.restart_bcfg2
     sudo('/usr/sbin/bcfg2 -vqed') # @TODO: Add "-p 'pantheon-aws'" for EC2 and "-p 'pantheon-aws-ebs for EBS'"
 
 def _initialize_drush():
