@@ -265,7 +265,7 @@ class SiteImport:
     def database_count(self):
         return len(self.sql_dumps)
 
-class SQLDump:
+    class SQLDump:
 
         def __init__(self, location, file_name):
             self.file_name = file_name
