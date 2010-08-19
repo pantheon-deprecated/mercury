@@ -1,16 +1,16 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 from fabric.api import *
-from copy import deepcopy
-from os.path import exists
-from re import search
-from tempfile import mkdtemp
-from time import sleep
-from urlparse import urlparse
+import copy
+import os
+import re
 import string
-
+import tempfile
+import time
+import urlparse
 
 class Pantheon:
 
+    @staticmethod
     def unarchive(archive, destination):
         '''Extract archive to destination directory and remove VCS files'''
         if not os.path.exists(archive):
@@ -29,6 +29,7 @@ class Pantheon:
                 local("find . -depth -name .svn -exec rm -fr {} \;")
                 local("find . -depth -name CVS -exec rm -fr {} \;")
 
+    @staticmethod
     def export_data(webroot, temporary_directory):
         sites = DrupalInstallation(webroot).get_sites()
         with cd(temporary_directory):
@@ -47,6 +48,7 @@ class Pantheon:
                               )
                         exported.append(site.database.name)
 
+    @staticmethod
     def setup_databases(archive):
         # Sites are matched to databases. Replace database name with: "project_environment_sitename"
         names = list()
@@ -96,6 +98,7 @@ class Pantheon:
         with cd(archive.location):
             local("rm -f *.sql")
 
+    @staticmethod
     def restart_bcfg2():
         sudo('/etc/init.d/bcfg2-server restart')
         server_running = False
@@ -103,7 +106,7 @@ class Pantheon:
         while not server_running:
             with settings(hide('warnings'), warn_only=True):
                 server_running = (sudo('netstat -atn | grep :6789')).rstrip('\n')
-            sleep(5)
+            time.sleep(5)
 
 
 class DrupalInstallation:
@@ -131,7 +134,7 @@ class DrupalInstallation:
             settings_files = (local('find sites/ -name settings.php -type f')).rstrip('\n')
         # Single site
         if '\n' not in settings_files:
-            names.append((rc.search(r'^.*sites/(.*)/settings.php', settings_files)).group(1))
+            names.append((re.search(r'^.*sites/(.*)/settings.php', settings_files)).group(1))
         # Multiple sites
         else:
             settings_files = settings_files.split('\n')

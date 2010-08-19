@@ -1,9 +1,9 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 from fabric.api import *
-from os.path import exists
-from tempfile import mkdtemp
+import os
 import string
 import random
+import tempfile
 
 from pantheon import *
 

@@ -1,7 +1,7 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 from fabric.api import *
-from fabric.contrib.console import confirm
-from tempfile import mkdtemp
+import tempfile
+import os
 
 from pantheon import *
 
@@ -77,10 +77,10 @@ def update_code(source_project = None, source_environment = None, target_project
        source_location = webroot + source_project + '_' + source_environment + "/"
        target_location = webroot + target_project + '_' + target_environment + "/"
 
-       if not exists(source_location + '.git'):
+       if not os.path.exists(source_location + '.git'):
               abort("Source target not in version control.")
 
-       if exists(target_location + '.git'):
+       if os.path.exists(target_location + '.git'):
               with cd(target_location):
                      local('git fetch')
        else:
