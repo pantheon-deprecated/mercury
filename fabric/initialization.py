@@ -1,7 +1,7 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 from fabric.api import *
 
-import Pantheon
+from pantheon import *
 
 
 def initialize():
