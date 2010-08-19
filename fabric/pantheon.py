@@ -268,31 +268,56 @@ class PantheonServer:
     def __init__(self):
         # Ubuntu / Debian
         if os.path.exists('/etc/debian_version'):
-            self.webroot = '/var/www/'
-            self.owner = 'root'
-            self.group = 'www-data'
             self.distro = 'ubuntu'
+            self.group = 'www-data'
+            self.mysql = 'mysql'
+            self.mysql_cp = local('mv /var/log/mysql /mnt/mysql/log') \
+                local('ln -s /mnt/mysql/log /var/log/mysql') \
+                local('mv /var/lib/mysql /mnt/mysql/lib') \
+                local('ln -s /mnt/mysql/lib /var/lib/mysql')
+            self.owner = 'root'
+            self.pmupdate = 'apt-get -y update; apt-get -y dist-upgrade'
             self.tomcat_owner = 'tomcat6'
             self.tomcat_version = '6'
+            self.vhost_cp = local('cp /etc/pantheon/templates/vhost/pantheon_dev /etc/apache2/sites-available/pantheon_dev') \
+                local('cp /etc/pantheon/templates/vhost/pantheon_test /etc/apache2/sites-available/pantheon_test') \
+                local('cp /etc/pantheon/templates/vhost/pantheon_live /etc/apache2/sites-available/pantheon_live') \
+                local('ln -sf /etc/apache2/sites-available/pantheon_live /etc/apache2/sites-available/default')
+            self.webroot = '/var/www/'
         # Centos
         elif os.path.exists('/etc/redhat-release'):
-            self.webroot = '/var/www/html/'
-            self.owner = 'root'
-            self.group = 'apache'
             self.distro = 'centos'
+            self.group = 'apache'
+            self.mysql = 'mysqld'
+            self.mysql_cp = local('mv /var/log/mysqld.log /mnt/mysql/') \
+                local('ln -s /mnt/mysql/mysqld.log /var/log/mysqld.log') \
+                local('mv /var/lib/mysql /mnt/mysql/lib') \
+                local('ln -s /mnt/mysql/lib /var/lib/mysql')
+            self.owner = 'root'
+            self.pmupdate = 'yum clean all; yum -u update'
             self.tomcat_owner = 'tomcat'
-            self.tomcat_version = 5
+            self.tomcat_version = '5'
+            self.vhost_cp = local('cp /etc/pantheon/templates/vhost/pantheon_dev /etc/httpd/conf/vhosts/pantheon_dev.conf') \
+                local('cp /etc/pantheon/templates/vhost/pantheon_test /etc/httpd/conf/vhosts/pantheon_test.conf') \
+                local('cp /etc/pantheon/templates/vhost/pantheon_live /etc/httpd/conf/vhosts/pantheon_live.conf') 
+            self.webroot = '/var/www/html/'
         self.ip = (local('hostname --ip-address')).rstrip('\n')
 
     def restart_services(self):
         if self.distro == 'ubuntu':
+            local('/sbin/iptables-save')
             local('/etc/init.d/apache2 restart')
             local('/etc/init.d/memcached restart')
             local('/etc/init.d/tomcat6 restart')
+            local('/etc/init.d/varnish restart')
+            local('/etc/init.d/mysql restart')
         elif self.distro == 'centos':
+            local('/sbin/service iptables save; /etc/init.d/iptables stop')
             local('/etc/init.d/httpd restart')
             local('/etc/init.d/memcached restart')
             local('/etc/init.d/tomcat5 restart')
+            local('/etc/init.d/varnish restart')
+            local('/etc/init.d/mysqld restart')
 
 class SiteImport:
     
