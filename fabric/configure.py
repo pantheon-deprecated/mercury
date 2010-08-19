@@ -10,7 +10,8 @@ def configure(vps="none"):
     server = PantheonServer()
     _test_for_previous_run()
     _update_server()
-    _setup_ec2_config() if (vps == "aws")
+    if (vps == "aws"):
+        _setup_ec2_config()
     _setup_main_config()
     _setup_postfix()
     _restart_services()
