@@ -8,10 +8,10 @@ from pantheon import *
 
 def update_pantheon():
        '''Updating Pantheon from Launchpad'''
-       sudo('/etc/init.d/bcfg2-server stop')
-       sudo('cd /opt/pantheon; bzr up')
+       local('/etc/init.d/bcfg2-server stop')
+       local('cd /opt/pantheon; bzr up')
        Pantheon.restart_bcfg2()
-       sudo('/usr/sbin/bcfg2 -vq')
+       local('/usr/sbin/bcfg2 -vq')
        '''Pantheon Updated'''
 
 def update_pressflow(project = None, environment = None):

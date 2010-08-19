@@ -100,12 +100,12 @@ class Pantheon:
 
     @staticmethod
     def restart_bcfg2():
-        sudo('/etc/init.d/bcfg2-server restart')
+        local('/etc/init.d/bcfg2-server restart')
         server_running = False
         warn('Waiting for bcfg2 server to start')
         while not server_running:
             with settings(hide('warnings'), warn_only=True):
-                server_running = (sudo('netstat -atn | grep :6789')).rstrip('\n')
+                server_running = (local('netstat -atn | grep :6789')).rstrip('\n')
             time.sleep(5)
 
 
