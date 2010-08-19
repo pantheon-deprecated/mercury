@@ -29,7 +29,14 @@ def _update_server():
 
 def  _setup_ec2_config():
     local('chmod 1777 /tmp')
-    local('/etc/init.d/$mysql stop')
+    if(server.distro == 'centos'):
+        local('mv /var/log/mysqld.log /mnt/mysql/')
+        local('ln -s /mnt/mysql/mysqld.log /var/log/mysqld.log')
+    else:
+        local('mv /var/log/mysql /mnt/mysql/log')
+        local('ln -s /mnt/mysql/log /var/log/mysql')
+    local('mv /var/lib/mysql /mnt/mysql/lib')
+    local('ln -s /mnt/mysql/lib /var/lib/mysql')
     local('/etc/init.d/varnish stop')
     local('mv /var/lib/varnish /mnt/varnish/lib')
     local('ln -s /mnt/varnish/lib /var/lib/varnish')
@@ -38,7 +45,9 @@ def  _setup_ec2_config():
 def _setup_main_config():
     local('cp /etc/pantheon/templates/tuneables /etc/pantheon/server_tuneables')
     local('chmod 755 /etc/pantheon/server_tuneables')
-    server.vhost_cp()
+#    server.create_vhost(pantheon,dev)
+#    server.create_vhost(pantheon,live)
+#    server.create_vhost(pantheon,test)
     local('a2ensite pantheon_dev')
     local('a2ensite pantheon_test')
     local('/usr/sbin/usermod -a -G shadow hudson')
