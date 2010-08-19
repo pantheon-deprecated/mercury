@@ -10,7 +10,7 @@ def update_pantheon():
        '''Updating Pantheon from Launchpad'''
        sudo('/etc/init.d/bcfg2-server stop')
        sudo('cd /opt/pantheon; bzr up')
-       Pantheon.restart_bcfg2
+       Pantheon.restart_bcfg2()
        sudo('/usr/sbin/bcfg2 -vq')
        '''Pantheon Updated'''
 
