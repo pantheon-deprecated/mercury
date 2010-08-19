@@ -5,12 +5,12 @@ import os
 from pantheon import *
 from update import *
 
-def configure():
+def configure(vps):
     '''configure the Pantheon system.'''
     server = PantheonServer()
     _test_for_previous_run()
     _update_server()
-    _setup_ec2_config()
+    _setup_ec2_config() if (vps == "aws")
     _setup_main_config()
     _setup_postfix()
     _restart_services()
@@ -20,7 +20,7 @@ def configure():
 
 def _test_for_previous_run():
     if os.path.exists("/etc/pantheon/incep"):
-        abort(Pantheon init has already run. Exiting.)
+        abort(Pantheon config has already run. Exiting.)
 
 def _update_server():
     server.pmupdate()
@@ -70,14 +70,13 @@ def _create_databases():
     local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_live;'")
 
 def _mark_incep():
-# Mark incep date. This prevents us from ever running again.
+    # Mark incep date. This prevents us from ever running again.
     f = open('/etc/pantheon/incep', 'w')
     f.write(hostname)
     f.close()
 
 def _report():
-# Phone home - helps us to know how many users there are without passing any 
-# identifying or personal information to us.
+    # Phone home - helps us to know how many users there are without passing any identifying or personal information to us.
     id = local(`hostname -f | md5sum | sed 's/[^a-zA-Z0-9]//g'`)
     local(`curl "http://getpantheon.com/pantheon.php?id=id&product=pantheon")
     

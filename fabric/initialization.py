@@ -4,7 +4,7 @@ from fabric.api import *
 from pantheon import *
 
 
-def initialize():
+def initialize(vps):
     '''Initialize the Pantheon system.'''
     _initialize_support_account()
     _initialize_aptitude()
@@ -65,7 +65,12 @@ def _initialize_bcfg2():
     local('cp /opt/pantheon/fabric/clients.xml /var/lib/bcfg2/Metadata/')
     local('sed -i "s/^plugins = .*$/plugins = Bundler,Cfg,Metadata,Packages,Probes,Rules,TGenshi\\nfilemonitor = gamin/" /etc/bcfg2.conf')
     Pantheon.restart_bcfg2()
-    local('/usr/sbin/bcfg2 -vqed') # @TODO: Add "-p 'pantheon-aws'" for EC2 and "-p 'pantheon-aws-ebs for EBS'"
+    if (vps == "aws"):
+        local('/usr/sbin/bcfg2 -vqed -p pantheon-aws')
+    elif (vps == "ebs"):
+        local('/usr/sbin/bcfg2 -vqed -p pantheon-aws-ebs')
+    else:
+        local('/usr/sbin/bcfg2 -vqed')
 
 def _initialize_drush():
     local('[ ! -d drush ] || rm -rf drush')
