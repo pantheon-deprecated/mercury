@@ -1,12 +1,12 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 from fabric.api import *
+from urlparse import urlparse
 import copy
 import os
 import re
 import string
 import tempfile
 import time
-import urlparse
 
 class Pantheon:
 
