@@ -21,7 +21,7 @@ def export_site(project = None ,environment = None):
 
     print('Exporting to temporary directory %s' % temporary_directory)
     _export_files(location, temporary_directory)
-    Pantheon.export_data(location, temporary_directory)
+    Pantheon.export_data(location + '/htdocs', temporary_directory)
     _make_archive(temporary_directory)
 
 def _export_files(webroot, temporary_directory):

@@ -31,7 +31,7 @@ class Pantheon:
 
     @staticmethod
     def export_data(webroot, temporary_directory):
-        sites = DrupalInstallation(webroot).get_sites()
+        sites = DrupalInstallation(webroot).sites()
         with cd(temporary_directory):
             exported = list()
             for site in sites:
@@ -341,7 +341,7 @@ class SiteImport:
                             match.database.dump = dump.file_name
                             matches.append(match)
 
-        # Set site webroot to new destinationi (webroot + project + environment)
+        # Set site webroot to new destination (webroot + project + environment)
         for match in matches:
             match.webroot = self.destination
 
