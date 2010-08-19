@@ -4,7 +4,7 @@ from fabric.api import *
 from pantheon import *
 
 
-def initialize(vps):
+def initialize(vps="none"):
     '''Initialize the Pantheon system.'''
     _initialize_support_account()
     _initialize_aptitude()

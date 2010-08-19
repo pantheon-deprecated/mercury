@@ -5,7 +5,7 @@ import os
 from pantheon import *
 from update import *
 
-def configure(vps):
+def configure(vps="none"):
     '''configure the Pantheon system.'''
     server = PantheonServer()
     _test_for_previous_run()
