@@ -8,7 +8,7 @@ def initialize(vps="none"):
     '''Initialize the Pantheon system.'''
     _initialize_support_account()
     _initialize_aptitude()
-    _initialize_bcfg2()
+    _initialize_bcfg2(vps)
     _initialize_drush()
     _initialize_pantheon()
     _initialize_solr()
@@ -50,7 +50,7 @@ def _initialize_aptitude():
     local('apt-get update')
     local('apt-get -y dist-upgrade')
 
-def _initialize_bcfg2():
+def _initialize_bcfg2(vps):
     local('apt-get install -y bcfg2-server gamin python-gamin python-genshi')
     with cd('/opt/pantheon/fabric'):
         local('cp bcfg2.conf /etc/')
