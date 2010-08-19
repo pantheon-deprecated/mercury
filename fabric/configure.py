@@ -45,18 +45,20 @@ def  _setup_ec2_config():
 def _setup_main_config():
     local('cp /etc/pantheon/templates/tuneables /etc/pantheon/server_tuneables')
     local('chmod 755 /etc/pantheon/server_tuneables')
-#    server.create_vhost(pantheon,dev)
-#    server.create_vhost(pantheon,live)
-#    server.create_vhost(pantheon,test)
-    local('a2ensite pantheon_dev')
-    local('a2ensite pantheon_test')
+    if(server.distro == 'centos'):
+        local('cp /etc/pantheon/templates/vhost/* /etc/httpd/conf/vhosts/')
+    else:
+        local('cp /etc/pantheon/templates/vhost/* /etc/apache2/sites-available/')
+        local('ln -sf /etc/apache2/sites-available/pantheon_live /etc/apache2/sites-available/default')
+        local('a2ensite pantheon_dev')
+        local('a2ensite pantheon_test')
     local('/usr/sbin/usermod -a -G shadow hudson')
 
 def _setup_postconf():
     if os.path.exists("/usr/local/bin/ec2-metadata"):
-        hostname = local(`/usr/local/bin/ec2-metadata -p | sed "s/public-hostname: //"`)
+        hostname = local(/usr/local/bin/ec2-metadata -p | sed "s/public-hostname: //")
     else
-    hostname = local(`hostname`)
+    hostname = local('hostname')
     f = open('/etc/mailname', 'w')
     f.write(hostname)
     f.close()
@@ -86,11 +88,11 @@ def _mark_incep():
 
 def _report():
     # Phone home - helps us to know how many users there are without passing any identifying or personal information to us.
-    id = local(`hostname -f | md5sum | sed 's/[^a-zA-Z0-9]//g'`)
-    local(`curl "http://getpantheon.com/pantheon.php?id=id&product=pantheon")
+    id = local(hostname -f | md5sum | sed "s/[^a-zA-Z0-9]//g"')
+    local('curl "http://getpantheon.com/pantheon.php?id="' + id + '"&product=pantheon"')
     
     print('##############################')
     print('#   Pantheon Setup Complete! #')
     print('##############################')
 
-    local('DEAR SYSADMIN: PANTHEON IS READY FOR YOU NOW.  Do not forget the README.txt, CHANGELOG.txt and docs!' | `wall`)
+    local('echo "DEAR SYSADMIN: PANTHEON IS READY FOR YOU NOW.  Do not forget the README.txt, CHANGELOG.txt and docs!" | wall')

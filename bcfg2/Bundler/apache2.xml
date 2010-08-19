@@ -35,9 +35,9 @@
     <Service name='httpd'/>
   </Group>
 
-  <Path name='/etc/pantheon/templates/vhost/pantheon_dev' altsrc='/apache2/vhost/pantheon_dev'/>
-  <Path name='/etc/pantheon/templates/vhost/pantheon_test' altsrc='/apache2/vhost/pantheon_test'/>
-  <Path name='/etc/pantheon/templates/vhost/pantheon_live' altsrc='/apache2/vhost/pantheon_live'/>
+  <Path name='/etc/pantheon/templates/vhost/pantheon_dev.conf' altsrc='/apache2/vhost/pantheon_dev'/>
+  <Path name='/etc/pantheon/templates/vhost/pantheon_test.conf' altsrc='/apache2/vhost/pantheon_test'/>
+  <Path name='/etc/pantheon/templates/vhost/pantheon_live.conf' altsrc='/apache2/vhost/pantheon_live'/>
 
 </Bundle>
 
