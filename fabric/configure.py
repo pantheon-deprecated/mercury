@@ -21,7 +21,7 @@ def configure(vps="none"):
 
 def _test_for_previous_run():
     if os.path.exists("/etc/pantheon/incep"):
-        abort(Pantheon config has already run. Exiting.)
+        abort("Pantheon config has already run. Exiting.")
 
 def _update_server():
     server.pmupdate()
