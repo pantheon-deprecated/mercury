@@ -86,7 +86,7 @@ def _mark_incep():
 
 def _report():
     # Phone home - helps us to know how many users there are without passing any identifying or personal information to us.
-    id = local(hostname -f | md5sum | sed "s/[^a-zA-Z0-9]//g"')
+    id = local('hostname -f | md5sum | sed "s/[^a-zA-Z0-9]//g"')
     local('curl "http://getpantheon.com/pantheon.php?id="' + id + '"&product=pantheon"')
     
     print('##############################')

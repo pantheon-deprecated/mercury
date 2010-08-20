@@ -7,17 +7,17 @@ from pantheon import *
 
 
 def update_pantheon():
-       '''Updating Pantheon from Launchpad'''
+       print("Updating Pantheon from Launchpad")
        local('/etc/init.d/bcfg2-server stop')
        local('cd /opt/pantheon; bzr up')
        Pantheon.restart_bcfg2()
        local('/usr/sbin/bcfg2 -vq')
-       '''Pantheon Updated'''
+       print("Pantheon Updated")
 
 def update_pressflow(project = None, environment = None):
        webroot = PantheonServer().webroot
        
-       '''Updating Pressflow'''
+       print ("Updating Pressflow"_
        if (project == None):
               print("No project selected. Using 'pantheon'")
               project = 'pantheon'
@@ -26,7 +26,7 @@ def update_pressflow(project = None, environment = None):
               environment = 'dev'
        with cd(webroot + project + '_' + environment):
               local('bzr up')
-       '''Pressflow Updated'''
+       print("Pressflow Updated")
 
 def update_data(source_project = None, source_environment = None, target_project = None, target_environment = None):
        webroot = PantheonServer().webroot
