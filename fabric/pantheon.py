@@ -62,24 +62,23 @@ class Pantheon:
                 local("mysql -u root -e \"CREATE USER 'pantheon-admin'@'localhost' IDENTIFIED BY '';\"")
             local("mysql -u root -e \"GRANT ALL PRIVILEGES ON *.* TO 'pantheon-admin'@'localhost' WITH GRANT OPTION;\"")
 
-            for site in archive.sites:
-                # Set grants
-                local("mysql -u pantheon-admin -e \"GRANT ALL ON %s.* TO '%s'@'localhost' IDENTIFIED BY '%s';\"" % \
-                          (site.database.name, site.database.username, site.database.password))
-              
-                # Strip cache tables, convert MyISAM to InnoDB, and import.
-                local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | \
+            # Set grants
+            local("mysql -u pantheon-admin -e \"GRANT ALL ON %s.* TO '%s'@'localhost' IDENTIFIED BY '%s';\"" % \
+                      (site.database.name, site.database.username, site.database.password))
+        
+            # Strip cache tables, convert MyISAM to InnoDB, and import.
+            local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | \
                 grep -v '^INSERT INTO `ctools_object_cache`' | \
                 grep -v '^INSERT INTO `watchdog`' | \
                 grep -v '^INSERT INTO `accesslog`' | \
                 grep -v '^USE `' | \
                 sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | \
                 mysql -u pantheon-admin %s" % \
-                          (archive.location + site.database.dump, site.database.name))
+                      (sites.location + site.database.dump, site.database.name))
                 
         # Cleanup
         local("mysql -u pantheon-admin -e \"DROP USER 'pantheon-admin'@'localhost'\"")
-        with cd(archive.location):
+        with cd(sites.location):
             local("rm -f *.sql")
 
     @staticmethod
