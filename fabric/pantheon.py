@@ -64,7 +64,7 @@ class Pantheon:
 
             # Set grants
             local("mysql -u pantheon-admin -e \"GRANT ALL ON %s.* TO '%s'@'localhost' IDENTIFIED BY '%s';\"" % \
-                      (site.database.name, site.database.username, site.database.password))
+                      (site.database.dump, site.database.username, site.database.password))
         
             # Strip cache tables, convert MyISAM to InnoDB, and import.
             local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | \
@@ -74,12 +74,11 @@ class Pantheon:
                 grep -v '^USE `' | \
                 sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | \
                 mysql -u pantheon-admin %s" % \
-                      (sites.location + site.database.dump, site.database.name))
+                      (site.database.dump, site.database.name))
                 
         # Cleanup
         local("mysql -u pantheon-admin -e \"DROP USER 'pantheon-admin'@'localhost'\"")
-        with cd(sites.location):
-            local("rm -f *.sql")
+        local("rm -f %s" %(site.database.dump)
 
     @staticmethod
     def setup_databases(archive):
