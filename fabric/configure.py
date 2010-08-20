@@ -5,11 +5,12 @@ import os
 from pantheon import *
 from update import *
 
-'''configure the Pantheon system.'''
-
 if os.path.exists("/etc/pantheon/incep"):
     abort("Pantheon config has already run. Exiting.")
 
+'''configure the Pantheon system.'''
+
+server = PantheonServer()
 server.pmupdate()
 update_pressflow()
 update_pantheon()
