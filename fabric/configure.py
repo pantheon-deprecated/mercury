@@ -58,7 +58,7 @@ def _setup_main_config():
 def _setup_postconf():
     if os.path.exists("/usr/local/bin/ec2-metadata"):
         hostname = local('/usr/local/bin/ec2-metadata -p | sed "s/public-hostname: //"')
-    else
+    else:
     hostname = local('hostname')
     f = open('/etc/mailname', 'w')
     f.write(hostname)
@@ -73,10 +73,7 @@ def _restart_services():
     server.restart_services()
 
 def _create_databases():
-# Create database
-#if [ -n "$$MYSQL_ROOT_PASSWORD" ]; then
-#  MYSQL_ROOT_PASSWORD="-p$${MYSQL_ROOT_PASSWORD}"
-#fi
+    #TODO: allow for mysql already having a password
     local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_dev'")
     local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_test;'")
     local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_live;'")
