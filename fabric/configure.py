@@ -5,17 +5,30 @@ import os
 from pantheon import *
 from update import *
 
-if os.path.exists("/etc/pantheon/incep"):
-    abort("Pantheon config has already run. Exiting.")
+def configure(vps="none"):
+    '''configure the Pantheon system.'''
+    server = PantheonServer()
+    _test_for_previous_run()
+    _update_server(server)
+    if (vps == "aws"):
+        _setup_ec2_config(server)
+    _setup_main_config(server)
+    _setup_postfix()
+    _restart_services(server)
+    _create_databases()
+    _mark_incep()
+    _report()
 
-'''configure the Pantheon system.'''
+def _test_for_previous_run():
+    if os.path.exists("/etc/pantheon/incep"):
+        abort("Pantheon config has already run. Exiting.")
 
-server = PantheonServer()
-server.pmupdate()
-update_pressflow()
-update_pantheon()
+def _update_server(server):
+    local(server.pmupdate())
+    update_pressflow()
+    update_pantheon()
 
-if (vps == "aws"):
+def  _setup_ec2_config(server):
     local('chmod 1777 /tmp')
     if(server.distro == 'centos'):
         local('mv /var/log/mysqld.log /mnt/mysql/')
@@ -30,45 +43,54 @@ if (vps == "aws"):
     local('ln -s /mnt/varnish/lib /var/lib/varnish')
     local('chown varnish:varnish /mnt/varnish/lib/pressflow/')
 
-local('cp /etc/pantheon/templates/tuneables /etc/pantheon/server_tuneables')
-local('chmod 755 /etc/pantheon/server_tuneables')
+def _setup_main_config(server):
+    local('cp /etc/pantheon/templates/tuneables /etc/pantheon/server_tuneables')
+    local('chmod 755 /etc/pantheon/server_tuneables')
+    if(server.distro == 'centos'):
+        local('cp /etc/pantheon/templates/vhost/* /etc/httpd/conf/vhosts/')
+    else:
+        local('cp /etc/pantheon/templates/vhost/* /etc/apache2/sites-available/')
+        local('ln -sf /etc/apache2/sites-available/pantheon_live /etc/apache2/sites-available/default')
+        local('a2ensite pantheon_dev')
+        local('a2ensite pantheon_test')
+    local('/usr/sbin/usermod -a -G shadow hudson')
 
-if(server.distro == 'centos'):
-    local('cp /etc/pantheon/templates/vhost/* /etc/httpd/conf/vhosts/')
-else:
-    local('cp /etc/pantheon/templates/vhost/* /etc/apache2/sites-available/')
-    local('ln -sf /etc/apache2/sites-available/pantheon_live /etc/apache2/sites-available/default')
-    local('a2ensite pantheon_dev')
-    local('a2ensite pantheon_test')
+def _setup_postconf():
+    if os.path.exists("/usr/local/bin/ec2-metadata"):
+        hostname = local('/usr/local/bin/ec2-metadata -p | sed "s/public-hostname: //"')
+    else:
+        hostname = local('hostname')
+    f = open('/etc/mailname', 'w')
+    f.write(hostname)
+    f.close()
+    local('/usr/sbin/postconf -e myhostname = ' + hostname)
+    local('/usr/sbin/postconf -e mydomain = ' + hostname)
+    local('/usr/sbin/postconf -e mydestination = ' + hostname)
+    local('/etc/init.d/postfix restart')
 
-local('/usr/sbin/usermod -a -G shadow hudson')
+def _restart_services(server):
+    local('/sbin/iptables-restore < /etc/pantheon/templates/iptables')
+    server.restart_services()
 
-if os.path.exists("/usr/local/bin/ec2-metadata"):
-    hostname = local('/usr/local/bin/ec2-metadata -p | sed "s/public-hostname: //"')
-else:
-    hostname = local('hostname')
+def _create_databases():
+    #TODO: allow for mysql already having a password
+    local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_dev'")
+    local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_test;'")
+    local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_live;'")
 
-f = open('/etc/mailname', 'w')
-f.write(hostname)
-f.close()
-local('/usr/sbin/postconf -e myhostname = ' + hostname)
-local('/usr/sbin/postconf -e mydomain = ' + hostname)
-local('/usr/sbin/postconf -e mydestination = ' + hostname)
-local('/etc/init.d/postfix restart')
-local('/sbin/iptables-restore < /etc/pantheon/templates/iptables')
-server.restart_services()
-#TODO: allow for mysql already having a password
-local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_dev'")
-local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_test;'")
-local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_live;'")
-'''Mark incep date. This prevents us from ever running again.'''
-f = open('/etc/pantheon/incep', 'w')
-f.write(hostname)
-f.close()
-'''Phone home - helps us to know how many users there are without passing any identifying or personal information to us.'''
-id = local('hostname -f | md5sum | sed "s/[^a-zA-Z0-9]//g"')
-local('curl "http://getpantheon.com/pantheon.php?id="' + id + '"&product=pantheon"')
-print('##############################')
-print('#   Pantheon Setup Complete! #')
-print('##############################')
-local('echo "DEAR SYSADMIN: PANTHEON IS READY FOR YOU NOW.  Do not forget the README.txt, CHANGELOG.txt and docs!" | wall')
+def _mark_incep():
+    # Mark incep date. This prevents us from ever running again.
+    f = open('/etc/pantheon/incep', 'w')
+    f.write(hostname)
+    f.close()
+
+def _report():
+    # Phone home - helps us to know how many users there are without passing any identifying or personal information to us.
+    id = local('hostname -f | md5sum | sed "s/[^a-zA-Z0-9]//g"')
+    local('curl "http://getpantheon.com/pantheon.php?id="' + id + '"&product=pantheon"')
+    
+    print('##############################')
+    print('#   Pantheon Setup Complete! #')
+    print('##############################')
+
+    local('echo "DEAR SYSADMIN: PANTHEON IS READY FOR YOU NOW.  Do not forget the README.txt, CHANGELOG.txt and docs!" | wall')
