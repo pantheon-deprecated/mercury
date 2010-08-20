@@ -319,6 +319,10 @@ class PantheonServer:
             self.tomcat_version = '5'
             self.webroot = '/var/www/html/'
         self.ip = (local('hostname --ip-address')).rstrip('\n')
+        if os.path.exists("/usr/local/bin/ec2-metadata"):
+            self.hostname = local('/usr/local/bin/ec2-metadata -p | sed "s/public-hostname: //"').rstrip('\n')
+        else:
+            self.hostname = local('hostname').rstrip('\n')
 
     def update_packages(self):
         if (self.distro == "centos"):

@@ -56,10 +56,6 @@ def _setup_main_config(server):
     local('/usr/sbin/usermod -a -G shadow hudson')
 
 def _setup_postfix(server):
-#    if os.path.exists("/usr/local/bin/ec2-metadata"):
-#        hostname = local('/usr/local/bin/ec2-metadata -p | sed "s/public-hostname: //"').rstrip('\n')
-#    else:
-#        hostname = local('hostname').rstrip('\n')
     f = open('/etc/mailname', 'w')
     f.write(server.hostname)
     f.close()
