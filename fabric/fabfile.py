@@ -1,7 +1,7 @@
 from fabric.api import env
-import configure
-import initialization
-import site_export
-import site_import
-import update
+from configure import *
+from initialization import *
+from site_export import *
+from site_import import *
+from update import *
 env.hosts = ['pantheon@localhost']
