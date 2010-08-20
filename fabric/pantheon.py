@@ -78,7 +78,7 @@ class Pantheon:
                 
         # Cleanup
         local("mysql -u pantheon-admin -e \"DROP USER 'pantheon-admin'@'localhost'\"")
-        local("rm -f %s" %(site.database.dump)
+        local("rm -f %s" % site.database.dump)
 
     @staticmethod
     def setup_databases(archive):
