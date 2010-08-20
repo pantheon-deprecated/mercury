@@ -11,7 +11,7 @@ def update_pantheon():
        local('/etc/init.d/bcfg2-server stop')
        local('cd /opt/pantheon; bzr up')
        Pantheon.restart_bcfg2()
-       sudo('/usr/sbin/bcfg2 -vq')
+       local('/usr/sbin/bcfg2 -vq')
        print("Pantheon Updated")
 
 def update_pressflow(project = None, environment = None):
