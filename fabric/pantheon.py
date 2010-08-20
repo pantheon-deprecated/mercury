@@ -272,7 +272,6 @@ class PantheonServer:
             self.group = 'www-data'
             self.mysql = 'mysql'
             self.owner = 'root'
-            self.pmupdate = 'apt-get -y update; apt-get -y dist-upgrade'
             self.tomcat_owner = 'tomcat6'
             self.tomcat_version = '6'
             self.webroot = '/var/www/'
@@ -282,11 +281,16 @@ class PantheonServer:
             self.group = 'apache'
             self.mysql = 'mysqld'
             self.owner = 'root'
-            self.pmupdate = 'yum clean all; yum -u update'
             self.tomcat_owner = 'tomcat'
             self.tomcat_version = '5'
             self.webroot = '/var/www/html/'
         self.ip = (local('hostname --ip-address')).rstrip('\n')
+
+    def update_packages(self):
+        if (self.distro == "centos"):
+            local('yum clean all; yum -u update')
+        else:
+            local('apt-get -y update; apt-get -y dist-upgrade')
 
     def restart_services(self):
         if self.distro == 'ubuntu':

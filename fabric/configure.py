@@ -24,7 +24,7 @@ def _test_for_previous_run():
         abort("Pantheon config has already run. Exiting.")
 
 def _update_server(server):
-    local(server.pmupdate())
+    server.update_packages()
     update_pressflow()
     update_pantheon()
 
@@ -79,13 +79,13 @@ def _create_databases():
     local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_live;'")
 
 def _mark_incep():
-    # Mark incep date. This prevents us from ever running again.
+    '''Mark incep date. This prevents us from ever running again.'''
     f = open('/etc/pantheon/incep', 'w')
     f.write(hostname)
     f.close()
 
 def _report():
-    # Phone home - helps us to know how many users there are without passing any identifying or personal information to us.
+    '''Phone home - helps us to know how many users there are without passing any identifying or personal information to us.'''
     id = local('hostname -f | md5sum | sed "s/[^a-zA-Z0-9]//g"')
     local('curl "http://getpantheon.com/pantheon.php?id="' + id + '"&product=pantheon"')
     
