@@ -216,10 +216,10 @@ class DrupalSite:
 
             # Use last db connection string
             if '\n' not in url:
-                url = urlparse(url)
+                url = urlparse.urlparse(url)
             else:
                 url = url.split('\n')
-                url = urlparse(url[len(url)-1])
+                url = urlparse.urlparse(url[len(url)-1])
 
             if url.password == None:
                 self.password = ''
