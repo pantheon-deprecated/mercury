@@ -63,9 +63,9 @@ def _setup_postfix():
     f = open('/etc/mailname', 'w')
     f.write(hostname)
     f.close()
-    local('/usr/sbin/postconf -e myhostname = ' + hostname)
-    local('/usr/sbin/postconf -e mydomain = ' + hostname)
-    local('/usr/sbin/postconf -e mydestination = ' + hostname)
+    local('/usr/sbin/postconf -e "myhostname = %s"') (hostname)
+    local('/usr/sbin/postconf -e "mydomain = %s"') (hostname)
+    local('/usr/sbin/postconf -e "mydestination = %s"') (hostname)
     local('/etc/init.d/postfix restart')
 
 def _restart_services(server):
