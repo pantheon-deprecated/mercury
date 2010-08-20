@@ -48,7 +48,7 @@ class Pantheon:
                                     )    
                               )
                         exported.append(site.database.name)
-                        site.database.dump = "(temporary_directory" + site.database.name + ".sql"
+                        site.database.dump = temporary_directory + "/" + site.database.name + ".sql"
         return(sites)
 
     @staticmethod
