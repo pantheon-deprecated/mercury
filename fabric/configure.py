@@ -13,7 +13,7 @@ def configure(vps="none"):
     if (vps == "aws"):
         _setup_ec2_config(server)
     _setup_main_config(server)
-    _setup_postfix()
+    _setup_postfix(server)
     _restart_services(server)
     _create_databases()
     _mark_incep(server)
@@ -55,7 +55,7 @@ def _setup_main_config(server):
         local('a2ensite pantheon_test')
     local('/usr/sbin/usermod -a -G shadow hudson')
 
-def _setup_postfix():
+def _setup_postfix(server):
 #    if os.path.exists("/usr/local/bin/ec2-metadata"):
 #        hostname = local('/usr/local/bin/ec2-metadata -p | sed "s/public-hostname: //"').rstrip('\n')
 #    else:
