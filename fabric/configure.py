@@ -55,7 +55,7 @@ def _setup_main_config(server):
         local('a2ensite pantheon_test')
     local('/usr/sbin/usermod -a -G shadow hudson')
 
-def _setup_postconf():
+def _setup_postfix():
     if os.path.exists("/usr/local/bin/ec2-metadata"):
         hostname = local('/usr/local/bin/ec2-metadata -p | sed "s/public-hostname: //"')
     else:
