@@ -9,12 +9,12 @@ def configure(vps="none"):
     '''configure the Pantheon system.'''
     server = PantheonServer()
     _test_for_previous_run()
-    _update_server()
+    _update_server(server)
     if (vps == "aws"):
-        _setup_ec2_config()
-    _setup_main_config()
+        _setup_ec2_config(server)
+    _setup_main_config(server)
     _setup_postfix()
-    _restart_services()
+    _restart_services(server)
     _create_databases()
     _mark_incep()
     _report()
@@ -23,12 +23,12 @@ def _test_for_previous_run():
     if os.path.exists("/etc/pantheon/incep"):
         abort("Pantheon config has already run. Exiting.")
 
-def _update_server():
+def _update_server(server):
     server.pmupdate()
     update_pressflow()
     update_pantheon()
 
-def  _setup_ec2_config():
+def  _setup_ec2_config(server):
     local('chmod 1777 /tmp')
     if(server.distro == 'centos'):
         local('mv /var/log/mysqld.log /mnt/mysql/')
@@ -43,7 +43,7 @@ def  _setup_ec2_config():
     local('ln -s /mnt/varnish/lib /var/lib/varnish')
     local('chown varnish:varnish /mnt/varnish/lib/pressflow/')
 
-def _setup_main_config():
+def _setup_main_config(server):
     local('cp /etc/pantheon/templates/tuneables /etc/pantheon/server_tuneables')
     local('chmod 755 /etc/pantheon/server_tuneables')
     if(server.distro == 'centos'):
@@ -68,7 +68,7 @@ def _setup_postconf():
     local('/usr/sbin/postconf -e mydestination = ' + hostname)
     local('/etc/init.d/postfix restart')
 
-def _restart_services():
+def _restart_services(server):
     local('/sbin/iptables-restore < /etc/pantheon/templates/iptables')
     server.restart_services()
 
