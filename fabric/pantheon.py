@@ -82,56 +82,6 @@ class Pantheon:
         local("rm -f %s" % site.database.dump)
 
     @staticmethod
-    def setup_databases(archive):
-        # Sites are matched to databases. Replace database name with: "project_environment_sitename"
-        names = list()
-        for site in archive.sites:
-            # MySQL allows db names up to 64 chars. Check for & fix name collisions, assuming: 
-            # project (up to 16chars) and environment (up to 5chars).
-            for length in range(43,0,-1):
-                #TODO: Write better fix for collisions
-                name = archive.project + '_' + archive.environment + '_' + \
-                    site.get_safe_name()[:length] + \
-                    str(random.randint(0,9))*(43-length)
-                if name not in names:
-                    break
-                if length == 0:
-                    abort("Database name collision")
-            site.database.name = name
-            names.append(name)
-   
-        # Create databases. If multiple sites use same db, only create once.
-        databases = set([site.database.name for site in archive.sites])
-        for database in databases:
-            local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % (database))
-            local("mysql -u root -e 'CREATE DATABASE %s'" % (database))
-
-        # Create temporary superuser to perform import operations
-        with settings(warn_only=True):
-            local("mysql -u root -e \"CREATE USER 'pantheon-admin'@'localhost' IDENTIFIED BY '';\"")
-        local("mysql -u root -e \"GRANT ALL PRIVILEGES ON *.* TO 'pantheon-admin'@'localhost' WITH GRANT OPTION;\"")
-
-        for site in archive.sites:
-            # Set grants
-            local("mysql -u pantheon-admin -e \"GRANT ALL ON %s.* TO '%s'@'localhost' IDENTIFIED BY '%s';\"" % \
-                      (site.database.name, site.database.username, site.database.password))
-              
-            # Strip cache tables, convert MyISAM to InnoDB, and import.
-            local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | \
-                grep -v '^INSERT INTO `ctools_object_cache`' | \
-                grep -v '^INSERT INTO `watchdog`' | \
-                grep -v '^INSERT INTO `accesslog`' | \
-                grep -v '^USE `' | \
-                sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | \
-                mysql -u pantheon-admin %s" % \
-                      (archive.location + site.database.dump, site.database.name))
-                
-        # Cleanup
-        local("mysql -u pantheon-admin -e \"DROP USER 'pantheon-admin'@'localhost'\"")
-        with cd(archive.location):
-            local("rm -f *.sql")
-
-    @staticmethod
     def restart_bcfg2():
         local('/etc/init.d/bcfg2-server restart')
         server_running = False

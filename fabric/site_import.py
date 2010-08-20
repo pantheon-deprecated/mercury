@@ -23,7 +23,7 @@ def import_site(site_archive, project = None, environment = None):
     server = PantheonServer()
     archive = SiteImport(archive_directory, server.webroot, project, environment)
 
-    Pantheon.setup_databases(archive)
+    _setup_databases(archive)
     _setup_site_files(archive)
     _setup_settings_files(archive)
     _setup_modules(archive)
@@ -34,6 +34,25 @@ def import_site(site_archive, project = None, environment = None):
     server.restart_services()
 
     local("rm -rf " + archive_directory)
+
+def setup_databases(archive):
+    # Sites are matched to databases. Replace database name with: "project_environment_sitename"
+    names = list()
+    for site in archive.sites:
+        # MySQL allows db names up to 64 chars. Check for & fix name collisions, assuming: 
+        # project (up to 16chars) and environment (up to 5chars).
+        for length in range(43,0,-1):
+            #TODO: Write better fix for collisions
+            name = archive.project + '_' + archive.environment + '_' + \
+                site.get_safe_name()[:length] + \
+                str(random.randint(0,9))*(43-length)
+            if name not in names:
+                break
+            if length == 0:
+                abort("Database name collision")
+        site.database.name = name
+        names.append(name)
+        Pantheon.import_data(sites, archive.project, archive.environment)
 
 def _setup_site_files(archive):
     #TODO: add large file size sanity check (no commits over 20mb)
