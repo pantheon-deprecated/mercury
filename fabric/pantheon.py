@@ -8,84 +8,82 @@ import tempfile
 import time
 import urlparse
 
-class Pantheon:
-
-    def unarchive(archive, destination):
-        '''Extract archive to destination directory and remove VCS files'''
-        if not os.path.exists(archive):
-            abort("Archive file \"" + archive + "\" does not exist.")
+def unarchive(archive, destination):
+    '''Extract archive to destination directory and remove VCS files'''
+    if not os.path.exists(archive):
+        abort("Archive file \"" + archive + "\" does not exist.")
             
-        if os.path.exists(destination):
-            local("rm -rf " + destination)
+    if os.path.exists(destination):
+        local("rm -rf " + destination)
             
-        local("bzr init " + destination)
+    local("bzr init " + destination)
                 
-        with cd(destination):
-            local("bzr import " + archive)
-            with settings(warn_only=True):
-                local("rm -r ./.bzr")
-                local("rm -r ./.git")
-                local("find . -depth -name .svn -exec rm -fr {} \;")
-                local("find . -depth -name CVS -exec rm -fr {} \;")
-
-    def export_data(webroot, temporary_directory):
-        sites = DrupalInstallation(webroot).get_sites()
-        with cd(temporary_directory):
-            exported = list()
-            saved_data = list()
-            for site in sites:
-                if site.valid:
-                    # If multiple sites use same db, only export once.
-                    if site.database.name not in exported:
-                        local("mysqldump --single-transaction --user='%s' --password='%s' --host='%s' %s > %s.sql" % \
-                                  ( site.database.username, 
-                                    site.database.password, 
-                                    site.database.hostname, 
-                                    site.database.name,
-                                    site.database.name,
-                                    )    
-                              )
-                        exported.append(site.database.name)
-                        site.database.dump = temporary_directory + "/" + site.database.name + ".sql"
-        return(sites)
-
-    def import_data(sites, target_project, target_environment):
-        # Create temporary superuser to perform import operations
+    with cd(destination):
+        local("bzr import " + archive)
         with settings(warn_only=True):
-            local("mysql -u root -e \"CREATE USER 'pantheon-admin'@'localhost' IDENTIFIED BY '';\"")
-        local("mysql -u root -e \"GRANT ALL PRIVILEGES ON *.* TO 'pantheon-admin'@'localhost' WITH GRANT OPTION;\"")
+            local("rm -r ./.bzr")
+            local("rm -r ./.git")
+            local("find . -depth -name .svn -exec rm -fr {} \;")
+            local("find . -depth -name CVS -exec rm -fr {} \;")
 
+def export_data(webroot, temporary_directory):
+    sites = DrupalInstallation(webroot).get_sites()
+    with cd(temporary_directory):
+        exported = list()
+        saved_data = list()
         for site in sites:
-            site.database.new_name = target_project + "_" + target_environment
-            local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % (site.database.new_name))
-            local("mysql -u root -e 'CREATE DATABASE %s'" % (site.database.new_name))
+            if site.valid:
+                # If multiple sites use same db, only export once.
+                if site.database.name not in exported:
+                    local("mysqldump --single-transaction --user='%s' --password='%s' --host='%s' %s > %s.sql" % \
+                              ( site.database.username, 
+                                site.database.password, 
+                                site.database.hostname, 
+                                site.database.name,
+                                site.database.name,
+                                )    
+                          )
+                    exported.append(site.database.name)
+                    site.database.dump = temporary_directory + "/" + site.database.name + ".sql"
+    return(sites)
 
-            # Set grants
-            local("mysql -u pantheon-admin -e \"GRANT ALL ON %s.* TO '%s'@'localhost' IDENTIFIED BY '%s';\"" % \
-                      (site.database.new_name, site.database.username, site.database.password))
+def import_data(sites, target_project, target_environment):
+    # Create temporary superuser to perform import operations
+    with settings(warn_only=True):
+        local("mysql -u root -e \"CREATE USER 'pantheon-admin'@'localhost' IDENTIFIED BY '';\"")
+    local("mysql -u root -e \"GRANT ALL PRIVILEGES ON *.* TO 'pantheon-admin'@'localhost' WITH GRANT OPTION;\"")
+
+    for site in sites:
+        site.database.new_name = target_project + "_" + target_environment
+        local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % (site.database.new_name))
+        local("mysql -u root -e 'CREATE DATABASE %s'" % (site.database.new_name))
+
+        # Set grants
+        local("mysql -u pantheon-admin -e \"GRANT ALL ON %s.* TO '%s'@'localhost' IDENTIFIED BY '%s';\"" % \
+                  (site.database.new_name, site.database.username, site.database.password))
         
-            # Strip cache tables, convert MyISAM to InnoDB, and import.
-            local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | \
+        # Strip cache tables, convert MyISAM to InnoDB, and import.
+        local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | \
                 grep -v '^INSERT INTO `ctools_object_cache`' | \
                 grep -v '^INSERT INTO `watchdog`' | \
                 grep -v '^INSERT INTO `accesslog`' | \
                 grep -v '^USE `' | \
                 sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | \
                 mysql -u pantheon-admin %s" % \
-                      (site.database.dump, site.database.new_name))
+                  (site.database.dump, site.database.new_name))
                 
-        # Cleanup
-        local("mysql -u pantheon-admin -e \"DROP USER 'pantheon-admin'@'localhost'\"")
-        local("rm -f %s" % site.database.dump)
+    # Cleanup
+    local("mysql -u pantheon-admin -e \"DROP USER 'pantheon-admin'@'localhost'\"")
+    local("rm -f %s" % site.database.dump)
 
-    def restart_bcfg2():
-        local('/etc/init.d/bcfg2-server restart')
-        server_running = False
-        warn('Waiting for bcfg2 server to start')
-        while not server_running:
-            with settings(hide('warnings'), warn_only=True):
-                server_running = (local('netstat -atn | grep :6789')).rstrip('\n')
-            time.sleep(5)
+def restart_bcfg2():
+    local('/etc/init.d/bcfg2-server restart')
+    server_running = False
+    warn('Waiting for bcfg2 server to start')
+    while not server_running:
+        with settings(hide('warnings'), warn_only=True):
+            server_running = (local('netstat -atn | grep :6789')).rstrip('\n')
+        time.sleep(5)
 
 
 class DrupalInstallation:
