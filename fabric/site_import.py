@@ -20,7 +20,7 @@ def import_site(site_archive, project=None, environment=None):
         environment = 'dev'
 
     pantheon.unarchive(site_archive, archive_directory)
-    server = PantheonServer()
+    server = pantheon.PantheonServer()
     archive = SiteImport(archive_directory, server.webroot, project, environment)
 
     _setup_databases(archive)
@@ -141,7 +141,7 @@ def _setup_modules(archive):
         local("cp -R /opt/pantheon/fabric/templates/solr/ /var/solr/" + solr_path)
 
         # tomcat config to set solr home dir.
-        tomcat_solr_home = "/etc/tomcat%s/Catalina/localhost/%s.xml" % (PantheonServer().tomcat_version, solr_path)
+        tomcat_solr_home = "/etc/tomcat%s/Catalina/localhost/%s.xml" % (pantheon.PantheonServer().tomcat_version, solr_path)
         solr_template = local("cat /opt/pantheon/fabric/templates/tomcat_solr_home.xml")
         solr_home = string.Template(solr_template)
         solr_home = solr_home.safe_substitute({'solr_path':solr_path})

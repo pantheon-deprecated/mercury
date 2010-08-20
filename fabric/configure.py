@@ -7,7 +7,7 @@ import update
 
 def configure(vps="none"):
     '''configure the Pantheon system.'''
-    server = PantheonServer()
+    server = pantheon.PantheonServer()
     _test_for_previous_run()
     _update_server(server)
     if (vps == "aws"):
@@ -25,8 +25,8 @@ def _test_for_previous_run():
 
 def _update_server(server):
     server.update_packages()
-    update_pressflow()
-    update_pantheon()
+    update.update_pressflow()
+    update.update_pantheon()
 
 def  _setup_ec2_config(server):
     local('chmod 1777 /tmp')

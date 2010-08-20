@@ -7,7 +7,7 @@ import pantheon
 
 def export_site(project=None, environment=None):
     temporary_directory = tempfile.mkdtemp()
-    webroot = PantheonServer().webroot
+    webroot = pantheon.PantheonServer().webroot
 
     if (project == None):
         print("No project set. Using 'pantheon'")

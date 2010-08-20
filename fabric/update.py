@@ -15,7 +15,7 @@ def update_pantheon():
        print("Pantheon Updated")
 
 def update_pressflow(project=None, environment=None):
-       webroot = PantheonServer().webroot
+       webroot = pantheon.PantheonServer().webroot
        
        print ("Updating Pressflow")
        if (project == None):
@@ -29,7 +29,7 @@ def update_pressflow(project=None, environment=None):
        print("Pressflow Updated")
 
 def update_data(source_project=None, source_environment=None, target_project=None, target_environment=None):
-       webroot = PantheonServer().webroot
+       webroot = pantheon.PantheonServer().webroot
        source_temporary_directory = tempfile.mkdtemp()
        target_temporary_directory = tempfile.mkdtemp()
 
@@ -56,7 +56,7 @@ def update_data(source_project=None, source_environment=None, target_project=Non
        print(target_project + '_' + target_environment + ' database updated with database from ' + source_project + '_' + source_environment)
 
 def update_code(source_project=None, source_environment=None, target_project=None, target_environment=None):
-       webroot = PantheonServer().webroot
+       webroot = pantheon.PantheonServer().webroot
        temporary_directory = tempfile.mkdtemp()
        
        if (source_project == None):
@@ -89,7 +89,7 @@ def update_code(source_project=None, source_environment=None, target_project=Non
        print(target_project + '_' + target_environment + ' project updated from ' + source_project + '_' + source_environment)
        
 def update_files(source_project=None, source_environment=None, target_project=None, target_environment=None):
-       webroot = PantheonServer().webroot
+       webroot = pantheon.PantheonServer().webroot
        
        if (source_project == None):
               print("No source_project selected. Using 'pantheon'")
