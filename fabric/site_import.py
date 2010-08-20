@@ -5,10 +5,10 @@ import string
 import random
 import tempfile
 
-from pantheon import *
+import pantheon
 
 
-def import_site(site_archive, project = None, environment = None):
+def import_site(site_archive, project=None, environment=None):
     '''Import site archive into a Pantheon server'''
     archive_directory = tempfile.mkdtemp() + '/'
 
@@ -19,7 +19,7 @@ def import_site(site_archive, project = None, environment = None):
         print("No environment selected. Using 'dev'")
         environment = 'dev'
 
-    Pantheon.unarchive(site_archive, archive_directory)
+    pantheon.unarchive(site_archive, archive_directory)
     server = PantheonServer()
     archive = SiteImport(archive_directory, server.webroot, project, environment)
 
@@ -52,7 +52,7 @@ def setup_databases(archive):
                 abort("Database name collision")
         site.database.name = name
         names.append(name)
-        Pantheon.import_data(sites, archive.project, archive.environment)
+        pantheon.import_data(sites, archive.project, archive.environment)
 
 def _setup_site_files(archive):
     #TODO: add large file size sanity check (no commits over 20mb)

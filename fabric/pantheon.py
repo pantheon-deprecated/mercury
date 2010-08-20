@@ -1,16 +1,15 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 from fabric.api import *
-from urlparse import urlparse
 import copy
 import os
 import re
 import string
 import tempfile
 import time
+import urlparse
 
 class Pantheon:
 
-    @staticmethod
     def unarchive(archive, destination):
         '''Extract archive to destination directory and remove VCS files'''
         if not os.path.exists(archive):
@@ -29,7 +28,6 @@ class Pantheon:
                 local("find . -depth -name .svn -exec rm -fr {} \;")
                 local("find . -depth -name CVS -exec rm -fr {} \;")
 
-    @staticmethod
     def export_data(webroot, temporary_directory):
         sites = DrupalInstallation(webroot).get_sites()
         with cd(temporary_directory):
@@ -51,7 +49,6 @@ class Pantheon:
                         site.database.dump = temporary_directory + "/" + site.database.name + ".sql"
         return(sites)
 
-    @staticmethod
     def import_data(sites, target_project, target_environment):
         # Create temporary superuser to perform import operations
         with settings(warn_only=True):
@@ -81,7 +78,6 @@ class Pantheon:
         local("mysql -u pantheon-admin -e \"DROP USER 'pantheon-admin'@'localhost'\"")
         local("rm -f %s" % site.database.dump)
 
-    @staticmethod
     def restart_bcfg2():
         local('/etc/init.d/bcfg2-server restart')
         server_running = False

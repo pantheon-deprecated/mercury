@@ -1,7 +1,7 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 from fabric.api import *
 
-from pantheon import *
+import pantheon
 
 
 def initialize(vps="none"):
@@ -64,7 +64,7 @@ def _initialize_bcfg2(vps):
     local('ln -sf /opt/pantheon/bcfg2 /var/lib/')
     local('cp /opt/pantheon/fabric/clients.xml /var/lib/bcfg2/Metadata/')
     local('sed -i "s/^plugins = .*$/plugins = Bundler,Cfg,Metadata,Packages,Probes,Rules,TGenshi\\nfilemonitor = gamin/" /etc/bcfg2.conf')
-    Pantheon.restart_bcfg2()
+    pantheon.restart_bcfg2()
     if (vps == "aws"):
         sudo('/usr/sbin/bcfg2 -vqed -p pantheon-aws')
     elif (vps == "ebs"):

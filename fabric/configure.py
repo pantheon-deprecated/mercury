@@ -2,8 +2,8 @@
 from fabric.api import *
 import os
 
-from pantheon import *
-from update import *
+import pantheon
+import update
 
 def configure(vps="none"):
     '''configure the Pantheon system.'''
