@@ -57,15 +57,15 @@ def _setup_main_config(server):
 
 def _setup_postfix():
     if os.path.exists("/usr/local/bin/ec2-metadata"):
-        hostname = local('/usr/local/bin/ec2-metadata -p | sed "s/public-hostname: //"')
+        hostname = local('/usr/local/bin/ec2-metadata -p | sed "s/public-hostname: //"').rstrip('\n')
     else:
-        hostname = local('hostname')
+        hostname = local('hostname').rstrip('\n')
     f = open('/etc/mailname', 'w')
     f.write(hostname)
     f.close()
-    local('/usr/sbin/postconf -e "myhostname = %s"' %hostname)
-    local('/usr/sbin/postconf -e "mydomain = %s"' %hostname)
-    local('/usr/sbin/postconf -e "mydestination = %s"' %hostname)
+    local('/usr/sbin/postconf -e "myhostname = %s"' % hostname)
+    local('/usr/sbin/postconf -e "mydomain = %s"' % hostname)
+    local('/usr/sbin/postconf -e "mydestination = %s"' % hostname)
     local('/etc/init.d/postfix restart')
 
 def _restart_services(server):
