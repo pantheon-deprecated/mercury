@@ -16,7 +16,7 @@ def configure(vps="none"):
     _setup_postfix()
     _restart_services(server)
     _create_databases()
-    _mark_incep()
+    _mark_incep(server)
     _report()
 
 def _test_for_previous_run():
