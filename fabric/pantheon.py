@@ -53,18 +53,19 @@ class Pantheon:
 
     @staticmethod
     def import_data(sites, target_project, target_environment):
+        # Create temporary superuser to perform import operations
+        with settings(warn_only=True):
+            local("mysql -u root -e \"CREATE USER 'pantheon-admin'@'localhost' IDENTIFIED BY '';\"")
+        local("mysql -u root -e \"GRANT ALL PRIVILEGES ON *.* TO 'pantheon-admin'@'localhost' WITH GRANT OPTION;\"")
+
         for site in sites:
             site.database.new_name = target_project + "_" + target_environment
             local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % (site.database.new_name))
             local("mysql -u root -e 'CREATE DATABASE %s'" % (site.database.new_name))
-            # Create temporary superuser to perform import operations
-            with settings(warn_only=True):
-                local("mysql -u root -e \"CREATE USER 'pantheon-admin'@'localhost' IDENTIFIED BY '';\"")
-            local("mysql -u root -e \"GRANT ALL PRIVILEGES ON *.* TO 'pantheon-admin'@'localhost' WITH GRANT OPTION;\"")
 
             # Set grants
             local("mysql -u pantheon-admin -e \"GRANT ALL ON %s.* TO '%s'@'localhost' IDENTIFIED BY '%s';\"" % \
-                      (site.database.dump, site.database.username, site.database.password))
+                      (site.database.new_name, site.database.username, site.database.password))
         
             # Strip cache tables, convert MyISAM to InnoDB, and import.
             local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | \
@@ -74,7 +75,7 @@ class Pantheon:
                 grep -v '^USE `' | \
                 sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | \
                 mysql -u pantheon-admin %s" % \
-                      (site.database.dump, site.database.name))
+                      (site.database.dump, site.database.new_name))
                 
         # Cleanup
         local("mysql -u pantheon-admin -e \"DROP USER 'pantheon-admin'@'localhost'\"")
