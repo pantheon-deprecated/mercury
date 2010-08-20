@@ -14,12 +14,8 @@ def import_siteurl(url, project = None, environment = None):
     filebase = basename(url)
     filename = join(download_dir, filebase)
   
-    try:
-        curl(url, filename)
-        import_site(filename, project, environment)
-    finally:
-        os.unlink(download_dir)
-
+    curl(url, filename)
+    import_site(filename, project, environment)
 
 def import_site(site_archive, project = None, environment = None):
     '''Import site archive into a Pantheon server'''

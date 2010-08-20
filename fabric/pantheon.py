@@ -13,7 +13,7 @@ def curl(url, destination):
     are giving this sanitized input.
 
     """
-    local('curl "%s" -o "%s"' % url, destination)
+    local('curl "%s" -o "%s"' % (url, destination))
 
 def unarchive(archive, destination):
     '''Extract archive to destination directory and remove VCS files'''
