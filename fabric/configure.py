@@ -56,16 +56,16 @@ def _setup_main_config(server):
     local('/usr/sbin/usermod -a -G shadow hudson')
 
 def _setup_postfix():
-    if os.path.exists("/usr/local/bin/ec2-metadata"):
-        hostname = local('/usr/local/bin/ec2-metadata -p | sed "s/public-hostname: //"').rstrip('\n')
-    else:
-        hostname = local('hostname').rstrip('\n')
+#    if os.path.exists("/usr/local/bin/ec2-metadata"):
+#        hostname = local('/usr/local/bin/ec2-metadata -p | sed "s/public-hostname: //"').rstrip('\n')
+#    else:
+#        hostname = local('hostname').rstrip('\n')
     f = open('/etc/mailname', 'w')
-    f.write(hostname)
+    f.write(server.hostname)
     f.close()
-    local('/usr/sbin/postconf -e "myhostname = %s"' % hostname)
-    local('/usr/sbin/postconf -e "mydomain = %s"' % hostname)
-    local('/usr/sbin/postconf -e "mydestination = %s"' % hostname)
+    local('/usr/sbin/postconf -e "myhostname = %s"' % server.hostname)
+    local('/usr/sbin/postconf -e "mydomain = %s"' % server.hostname)
+    local('/usr/sbin/postconf -e "mydestination = %s"' % server.hostname)
     local('/etc/init.d/postfix restart')
 
 def _restart_services(server):
@@ -78,10 +78,10 @@ def _create_databases():
     local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_test;'")
     local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_live;'")
 
-def _mark_incep():
+def _mark_incep(server):
     '''Mark incep date. This prevents us from ever running again.'''
     f = open('/etc/pantheon/incep', 'w')
-    f.write(hostname)
+    f.write(server.hostname)
     f.close()
 
 def _report():
