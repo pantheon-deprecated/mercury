@@ -59,7 +59,7 @@ def _setup_postconf():
     if os.path.exists("/usr/local/bin/ec2-metadata"):
         hostname = local('/usr/local/bin/ec2-metadata -p | sed "s/public-hostname: //"')
     else:
-    hostname = local('hostname')
+        hostname = local('hostname')
     f = open('/etc/mailname', 'w')
     f.write(hostname)
     f.close()
