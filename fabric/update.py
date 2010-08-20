@@ -17,7 +17,7 @@ def update_pantheon():
 def update_pressflow(project = None, environment = None):
        webroot = PantheonServer().webroot
        
-       print ("Updating Pressflow"_
+       print ("Updating Pressflow")
        if (project == None):
               print("No project selected. Using 'pantheon'")
               project = 'pantheon'
