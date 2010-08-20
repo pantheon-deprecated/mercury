@@ -15,13 +15,8 @@
 # ADDED BY PANTHEON #
 
 if [ ! -f /etc/pantheon/incep ]; then
-  # Wait for Hudson to spin Up
-  while [ "`curl -sL --connect-timeout 1 -w "%{http_code}\\n" "127.0.0.1:8081" -o /dev/null`" != "200" ]; do
-    sleep 5
-  done
-
-  # Run the pantheon_init Hudson build
-  java -jar /var/run/hudson/war/WEB-INF/hudson-cli.jar -s http://127.0.0.1:8081/ build pantheon_init
+    exec &> /etc/pantheon/logs/init.log
+    cd /opt/pantheon/fabric; fab configure
 fi
 
 exit 0
