@@ -25,7 +25,7 @@ if __name__ == '__main__':
     responsedict = {'uuid': uuid.uuid4().hex,
                     'command': 'request',
                     'method': 'POST',
-                    'url': results.['callback_url'],
+                    'url': results['callback_url'],
                     'body': responsebody,
                    }
 
