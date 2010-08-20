@@ -14,14 +14,14 @@
   <Group name='centos'>
     <BoundPath type='directory' name='/var/lib/hudson/jobs' owner='hudson' group='hudson' perms='0755'/>
 
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/pantheon_init' owner='hudson' group='hudson' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/pantheon_config' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/pantheon_cron' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/import_site' owner='hudson' group='hudson' perms='0755'/>
   </Group>    
   
   <!-- Jobs -->
   <Path name='/var/lib/hudson/jobs/import_site/config.xml' altsrc='/hudson/jobs/import_site/config.xml'/>
-  <Path name='/var/lib/hudson/jobs/pantheon_init/config.xml' altsrc='/hudson/jobs/pantheon_init/config.xml'/>
+  <Path name='/var/lib/hudson/jobs/pantheon_config/config.xml' altsrc='/hudson/jobs/pantheon_config/config.xml'/>
   <Path name='/var/lib/hudson/jobs/pantheon_cron/config.xml' altsrc='/hudson/jobs/pantheon_cron/config.xml'/>
   
 </Bundle>
