@@ -11,7 +11,7 @@ def update_pantheon():
        local('/etc/init.d/bcfg2-server stop')
        local('cd /opt/pantheon; bzr up')
        Pantheon.restart_bcfg2()
-       run('/usr/sbin/bcfg2 -vq')
+       sudo('/usr/sbin/bcfg2 -vq')
        print("Pantheon Updated")
 
 def update_pressflow(project = None, environment = None):
@@ -49,11 +49,10 @@ def update_data(source_project = None, source_environment = None, target_project
        source_location = webroot + source_project + '_' + source_environment + "/"
        target_location = webroot + target_project + '_' + target_environment + "/"
        print('Exporting ' + source_project + '/' + source_environment + ' database to temporary directory %s' % source_temporary_directory)
-       Pantheon.export_data(source_location, source_temporary_directory)
+       sites = Pantheon.export_data(source_location, source_temporary_directory)
        print('Exporting ' + target_project + '/' + target_environment + ' database to temporary directory %s' % target_temporary_directory)
        Pantheon.export_data(target_location, target_temporary_directory)
-       archive = SiteImport(source_temporary_directory, webroot, target_project, target_environment)
-       Pantheon.setup_databases(archive, source_temporary_directory)
+       Pantheon.import_data(sites, target_project, target_environment)
        print(target_project + '_' + target_environment + ' database updated with database from ' + source_project + '_' + source_environment)
 
 def update_code(source_project = None, source_environment = None, target_project = None, target_environment = None):

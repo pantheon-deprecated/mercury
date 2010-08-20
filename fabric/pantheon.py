@@ -31,9 +31,10 @@ class Pantheon:
 
     @staticmethod
     def export_data(webroot, temporary_directory):
-        sites = DrupalInstallation(webroot).sites()
+        sites = DrupalInstallation(webroot).get_sites()
         with cd(temporary_directory):
             exported = list()
+            saved_data = list()
             for site in sites:
                 if site.valid:
                     # If multiple sites use same db, only export once.
@@ -47,6 +48,39 @@ class Pantheon:
                                     )    
                               )
                         exported.append(site.database.name)
+                        site.database.dump = "(temporary_directory" + site.database.name + ".sql"
+        return(sites)
+
+    @staticmethod
+    def import_data(sites, target_project, target_environment):
+        for site in sites:
+            site.database.new_name = target_project + "_" + target_environment
+            local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % (site.database.new_name))
+            local("mysql -u root -e 'CREATE DATABASE %s'" % (site.database.new_name))
+            # Create temporary superuser to perform import operations
+            with settings(warn_only=True):
+                local("mysql -u root -e \"CREATE USER 'pantheon-admin'@'localhost' IDENTIFIED BY '';\"")
+            local("mysql -u root -e \"GRANT ALL PRIVILEGES ON *.* TO 'pantheon-admin'@'localhost' WITH GRANT OPTION;\"")
+
+            for site in archive.sites:
+                # Set grants
+                local("mysql -u pantheon-admin -e \"GRANT ALL ON %s.* TO '%s'@'localhost' IDENTIFIED BY '%s';\"" % \
+                          (site.database.name, site.database.username, site.database.password))
+              
+                # Strip cache tables, convert MyISAM to InnoDB, and import.
+                local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | \
+                grep -v '^INSERT INTO `ctools_object_cache`' | \
+                grep -v '^INSERT INTO `watchdog`' | \
+                grep -v '^INSERT INTO `accesslog`' | \
+                grep -v '^USE `' | \
+                sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | \
+                mysql -u pantheon-admin %s" % \
+                          (archive.location + site.database.dump, site.database.name))
+                
+        # Cleanup
+        local("mysql -u pantheon-admin -e \"DROP USER 'pantheon-admin'@'localhost'\"")
+        with cd(archive.location):
+            local("rm -f *.sql")
 
     @staticmethod
     def setup_databases(archive):
