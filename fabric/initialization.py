@@ -66,11 +66,11 @@ def _initialize_bcfg2(vps):
     local('sed -i "s/^plugins = .*$/plugins = Bundler,Cfg,Metadata,Packages,Probes,Rules,TGenshi\\nfilemonitor = gamin/" /etc/bcfg2.conf')
     Pantheon.restart_bcfg2()
     if (vps == "aws"):
-        run('/usr/sbin/bcfg2 -vqed -p pantheon-aws')
+        sudo('/usr/sbin/bcfg2 -vqed -p pantheon-aws')
     elif (vps == "ebs"):
-        run('/usr/sbin/bcfg2 -vqed -p pantheon-aws-ebs')
+        sudo('/usr/sbin/bcfg2 -vqed -p pantheon-aws-ebs')
     else:
-        run('/usr/sbin/bcfg2 -vqed')
+        sudo('/usr/sbin/bcfg2 -vqed')
 
 def _initialize_drush():
     local('[ ! -d drush ] || rm -rf drush')
