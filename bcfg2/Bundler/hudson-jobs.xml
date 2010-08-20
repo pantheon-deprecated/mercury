@@ -4,7 +4,7 @@
   <Group name='deb'>
     <BoundPath type='directory' name='/var/lib/hudson/jobs' owner='hudson' group='root' perms='0755'/>
 
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/pantheon_init' owner='hudson' group='root' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/pantheon_config' owner='hudson' group='root' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/pantheon_cron' owner='hudson' group='root' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/import_site' owner='hudson' group='root' perms='0755'/>
   </Group>
