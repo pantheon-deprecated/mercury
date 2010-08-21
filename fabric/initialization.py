@@ -74,8 +74,8 @@ def _initialize_bcfg2():
 
 def _initialize_drush():
     sudo('[ ! -d drush ] || rm -rf drush')
-    run('wget http://ftp.drupal.org/files/projects/drush-All-versions-3.0.tar.gz')
-    run('tar xvzf drush-All-versions-3.0.tar.gz')
+    run('wget http://ftp.drupal.org/files/projects/drush-6.x-3.3.tar.gz')
+    run('tar xvzf drush-6.x-3.3.tar.gz')
     sudo('chmod 555 drush/drush')
     sudo('chown -R root: drush')
     sudo('rm -rf /opt/drush && mv drush /opt/')
