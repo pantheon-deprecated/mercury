@@ -128,7 +128,7 @@ def _initialize_pressflow():
         local('git checkout master')
     local('git clone /var/www/pantheon_dev /var/www/pantheon_test')
     with cd('/var/www/pantheon_test'):
-        local('git checkout test')
+        local('git checkout pantheon_test')
         local('git archive pantheon_live | sudo tar -x -C /var/www/pantheon_live')
     local('sed -i "s/pantheon_dev/pantheon_test/g" /var/www/pantheon_test/sites/default/settings.php /var/www/pantheon_test/profiles/pantheon/pantheon.profile')
     local('sed -i "s/pantheon_dev/pantheon_live/g" /var/www/pantheon_live/sites/default/settings.php /var/www/pantheon_live/profiles/pantheon/pantheon.profile')
