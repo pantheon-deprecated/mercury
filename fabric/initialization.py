@@ -123,16 +123,17 @@ def _initialize_pressflow():
         local('git init')
         local('git add .')
         local('git commit -m "initial branch commit"')
-        # make copies
+        # make a copy
         local('git checkout -b pantheon_test')
-        #go back to the original
+        #go back to the original branch
         local('git checkout master')
     local('git clone /var/www/pantheon_dev /var/www/pantheon_test')
     with cd('/var/www/pantheon_test'):
         local('git checkout pantheon_test')
+        # make a copy
         local('git checkout -b pantheon_live')
         local('git archive pantheon_live | sudo tar -x -C /var/www/pantheon_live')
-        #go back to the original for this dir
+        #go back to the original branch for this dir
         local('git checkout master')
     local('sed -i "s/pantheon_dev/pantheon_test/g" /var/www/pantheon_test/sites/default/settings.php /var/www/pantheon_test/profiles/pantheon/pantheon.profile')
     local('sed -i "s/pantheon_dev/pantheon_live/g" /var/www/pantheon_live/sites/default/settings.php /var/www/pantheon_live/profiles/pantheon/pantheon.profile')
