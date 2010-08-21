@@ -84,7 +84,7 @@ def update_code(source_project=None, source_environment=None, target_project=Non
                      local('git fetch')
        else:
               with cd(source_location):
-                     local('git archive master | sudo tar -x -C ' + temporary_directory)
+                     local('git archive ' + target_project + "_" +target_environment + '| sudo tar -x -C ' + temporary_directory)
                      local('rsync -av --exclude=settings.php' + temporary_directory + ' ' + target_location)
        print(target_project + '_' + target_environment + ' project updated from ' + source_project + '_' + source_environment)
        
