@@ -87,6 +87,7 @@ def update_code(source_project=None, source_environment=None, target_project=Non
                      local('git archive ' + target_project + "_" +target_environment + '| sudo tar -x -C ' + temporary_directory)
                      local('rsync -av --exclude=settings.php' + temporary_directory + ' ' + target_location)
        print(target_project + '_' + target_environment + ' project updated from ' + source_project + '_' + source_environment)
+       local('rm -rf temporary_directory')
        
 def update_files(source_project=None, source_environment=None, target_project=None, target_environment=None):
        webroot = pantheon.PantheonServer().webroot
