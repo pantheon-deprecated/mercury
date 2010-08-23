@@ -130,6 +130,7 @@ def _initialize_pressflow():
     local('git clone /var/www/pantheon_dev /var/www/pantheon_test')
     with cd('/var/www/pantheon_test'):
         # make a copy
+        local('git checkout -b pantheon_dev')
         local('git checkout -b pantheon_live')
         #go back to the original branch for this dir
         local('git checkout pantheon_test')

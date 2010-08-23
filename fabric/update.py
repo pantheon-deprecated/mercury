@@ -57,7 +57,6 @@ def update_data(source_project=None, source_environment=None, target_project=Non
 
 def update_code(source_project=None, source_environment=None, target_project=None, target_environment=None):
        webroot = pantheon.PantheonServer().webroot
-       temporary_directory = tempfile.mkdtemp()
        
        if (source_project == None):
               print("No source_project selected. Using 'pantheon'")
@@ -85,10 +84,11 @@ def update_code(source_project=None, source_environment=None, target_project=Non
                      local('git commit -m "updates from %s"' % target_project + '_' + target_environment)
        else:
               with cd(source_location):
+                     temporary_directory = tempfile.mkdtemp()
                      local('git archive ' + target_project + "_" +target_environment + '| sudo tar -x -C ' + temporary_directory)
                      local('rsync -av --exclude=settings.php' + temporary_directory + ' ' + target_location)
+                      local('rm -rf temporary_directory')
        print(target_project + '_' + target_environment + ' project updated from ' + source_project + '_' + source_environment)
-       local('rm -rf temporary_directory')
        
 def update_files(source_project=None, source_environment=None, target_project=None, target_environment=None):
        webroot = pantheon.PantheonServer().webroot
