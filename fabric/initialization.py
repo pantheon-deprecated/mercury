@@ -84,7 +84,7 @@ def _initialize_drush():
 
 def _initialize_pantheon():
     local('rm -rf /var/www')
-    local('drush make --working-copy /etc/pantheon/pantheon.make /var/www/pantheon_dev/')
+    local('drush make /etc/pantheon/pantheon.make /var/www/pantheon_dev/')
 
 def _initialize_solr():
     local('[ ! -d apache-solr-1.4.1 ] || rm -rf apache-solr-1.4.1')
