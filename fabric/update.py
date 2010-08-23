@@ -81,7 +81,7 @@ def update_code(source_project=None, source_environment=None, target_project=Non
 
        if os.path.exists(target_location + '.git'):
               with cd(target_location):
-                     local('git pull --rebase origin master)
+                     local('git pull --rebase origin master')
        else:
               with cd(source_location):
                      local('git archive ' + target_project + "_" +target_environment + '| sudo tar -x -C ' + temporary_directory)
