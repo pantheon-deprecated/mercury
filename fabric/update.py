@@ -25,7 +25,9 @@ def update_pressflow(project=None, environment=None):
               print("No environment selected. Using 'dev'")
               environment = 'dev'
        with cd(webroot + project + '_' + environment):
-              local('git pull git://gitorious.org/pantheon-pressflow/pantheon-pressflow.git')
+              
+              local('git pull --rebase origin git://gitorious.org/pantheon-pressflow/pantheon-pressflow.git')
+              local('git commit -m "updates from the Pantheon gitorious project"')
        print("Pressflow Updated")
 
 def update_data(source_project=None, source_environment=None, target_project=None, target_environment=None):
