@@ -3,8 +3,8 @@ core = 6.x
 ; Pressflow
 
 projects[pressflow][type] = "core"
-projects[pressflow][download][type] = bzr
-projects[pressflow][download][url] = lp:pressflow
+projects[pressflow][download][type] = git
+projects[pressflow][download][url] = git://gitorious.org/pantheon-pressflow/pantheon-pressflow.git
 
 ; Pantheon
 projects[pantheon][type] = "profile"
