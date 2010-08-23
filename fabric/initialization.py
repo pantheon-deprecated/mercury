@@ -134,10 +134,10 @@ def _initialize_pressflow():
         local('git checkout -b pantheon_live')
         #go back to the original branch for this dir
         local('git checkout pantheon_test')
-        local('git update-index --assume-unchanged profiles/pantheon/pantheon.profile sites/default/settings.php')
+        local('git update-index --assume-unchanged profiles/default/default.profile sites/default/settings.php')
         local('git archive pantheon_live | sudo tar -x -C /var/www/pantheon_live')
-    local('sed -i "s/pantheon_dev/pantheon_test/g" /var/www/pantheon_test/sites/default/settings.php /var/www/pantheon_test/profiles/pantheon/pantheon.profile')
-    local('sed -i "s/pantheon_dev/pantheon_live/g" /var/www/pantheon_live/sites/default/settings.php /var/www/pantheon_live/profiles/pantheon/pantheon.profile')
+    local('sed -i "s/pantheon_dev/pantheon_test/g" /var/www/pantheon_test/sites/default/settings.php /var/www/pantheon_test/profiles/default/default.profile')
+    local('sed -i "s/pantheon_dev/pantheon_live/g" /var/www/pantheon_live/sites/default/settings.php /var/www/pantheon_live/profiles/default/default.profile')
     local('chown -R root:www-data /var/www/*')
     local('chown www-data:www-data /var/www/*/sites/default/settings.php')
     local('chmod 660 /var/www/*/sites/default/settings.php')
