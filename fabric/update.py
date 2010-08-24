@@ -82,10 +82,7 @@ def update_code(source_project=None, source_environment=None, target_project=Non
               with cd(source_location):
                      with settings(warn_only=True):
                             local('git commit -av -m "committing found changes"')
-                     branch = local('git branch | grep "*"').lstrip('* ')
-                     print('Branch is ' + branch + 'and thats all')
-                     branch = branch.rstrip('/n')
-                     print('Branch is now ' + branch + 'and thats all')
+                     branch = local('git branch | grep "*"').lstrip('* ').rsrtip('\n')
                      if branch != 'master':
                             print("current source git branch is " + branch + " - merging into master branch")
                             with settings(warn_only=True):
