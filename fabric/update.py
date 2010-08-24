@@ -83,12 +83,12 @@ def update_code(source_project=None, source_environment=None, target_project=Non
 
        if os.path.exists(target_location + '.git'):
               with cd(target_location):
-                     local('git pull --rebase origin ' + source_project + '_' + source_environment)
+                     local('git pull master')
                      local('git commit -m "updates from %s"' % source_location)
        else:
               with cd(source_location):
                      temporary_directory = tempfile.mkdtemp()
-                     local('git archive ' + target_project + "_" + target_environment + '| sudo tar -x -C ' + temporary_directory)
+                     local('git archive master | sudo tar -x -C ' + temporary_directory)
                      local('rsync -av --exclude=settings.php' + temporary_directory + ' ' + target_location)
                      local('rm -rf temporary_directory')
        print(target_project + '_' + target_environment + ' project updated from ' + source_project + '_' + source_environment)
