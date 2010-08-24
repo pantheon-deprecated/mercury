@@ -3,6 +3,7 @@
   <!-- All Distros -->
   <Package name='hudson'/>
   <Path name='/var/lib/hudson/config.xml' altsrc='/hudson/config.xml'/>
+  <Path name='/var/lib/hudson/plugins/postbuild-task.hpi'/>
     
   <!--Ubuntu Only -->
   <Group name='ubuntu'>
