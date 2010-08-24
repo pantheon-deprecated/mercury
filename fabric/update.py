@@ -114,7 +114,7 @@ def update_files(source_project=None, source_environment=None, target_project=No
        local('rsync -av '+ webroot + source_project + '_' + source_environment + '/sites/all/files ' + webroot + target_project + '_' + target_environment + '/sites/all/')
        print(target_project + '_' + target_environment + ' files updated from ' + source_project + '_' + source_environment)
 
-def update_permission(dir):
+def update_permissions(dir):
        with cd(dir):
               local('chown -R root:www-data *')
               local('chown www-data:www-data sites/default/settings.php')
