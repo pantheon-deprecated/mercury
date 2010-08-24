@@ -26,9 +26,9 @@ def update_pressflow(project=None, environment=None):
               environment = 'dev'
        with cd(webroot + project + '_' + environment):
               local('git pull --rebase git://gitorious.org/pantheon-pressflow/pantheon-pressflow.git')
-              update_permissions('%s' % (webroot + project + '_' + environment))
               with settings(warn_only=True):
                      local('git commit -m "updates from the Pantheon gitorious project"')
+       update_permissions('%s' % (webroot + project + '_' + environment + '/'))
        print("Pressflow Updated")
 
 def update_data(source_project=None, source_environment=None, target_project=None, target_environment=None):
