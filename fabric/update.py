@@ -88,8 +88,7 @@ def update_code(source_project=None, source_environment=None, target_project=Non
 
        if os.path.exists(target_location + '.git'):
               with cd(target_location):
-                     local('git pull master')
-                     local('git commit -m "updates from %s"' % source_location)
+                     local('git pull')
        else:
               with cd(source_location):
                      temporary_directory = tempfile.mkdtemp()
