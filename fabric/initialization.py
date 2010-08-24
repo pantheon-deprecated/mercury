@@ -134,5 +134,5 @@ def _initialize_pressflow():
     local('chown -R root:www-data /var/www/*')
     local('chown www-data:www-data /var/www/*/sites/default/settings.php')
     local('chmod 660 /var/www/*/sites/default/settings.php')
-    local('find /var/www/pantheon_live -type d -exec chmod 755 {} \;')
+    local('find /var/www -type d -exec chmod 755 {} \;')
     local('chmod 775 /var/www/*/sites/*/files')

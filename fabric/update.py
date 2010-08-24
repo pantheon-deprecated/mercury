@@ -27,6 +27,11 @@ def update_pressflow(project=None, environment=None):
        with cd(webroot + project + '_' + environment):
               
               local('git pull --rebase git://gitorious.org/pantheon-pressflow/pantheon-pressflow.git')
+              local('chown -R root:www-data *')
+              local('chown www-data:www-data sites/default/settings.php')
+              local('chmod 660 sites/default/settings.php')
+              local('find . -type d -exec chmod 755 {} \;')
+              local('chmod 775 sites/*/files')
               with settings(warn_only=True):
                      local('git commit -m "updates from the Pantheon gitorious project"')
        print("Pressflow Updated")
