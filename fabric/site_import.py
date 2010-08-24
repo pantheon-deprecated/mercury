@@ -8,11 +8,11 @@ import tempfile
 import pantheon
 
 def import_siteurl(url, project = None, environment = None):
-    download_dir = mkdtemp()
-    filebase = basename(url)
-    filename = join(download_dir, filebase)
+    download_dir = tempfile.mkdtemp()
+    filebase = os.path.basename(url)
+    filename = os.path.join(download_dir, filebase)
   
-    curl(url, filename)
+    pantheon.curl(url, filename)
     import_site(filename, project, environment)
 
 def import_site(site_archive, project = None, environment = None):
@@ -28,7 +28,7 @@ def import_site(site_archive, project = None, environment = None):
 
     pantheon.unarchive(site_archive, archive_directory)
     server = pantheon.PantheonServer()
-    archive = SiteImport(archive_directory, server.webroot, project, environment)
+    archive = pantheon.SiteImport(archive_directory, server.webroot, project, environment)
 
     _setup_databases(archive)
     _setup_site_files(archive)
@@ -42,7 +42,7 @@ def import_site(site_archive, project = None, environment = None):
 
     local("rm -rf " + archive_directory)
 
-def setup_databases(archive):
+def _setup_databases(archive):
     # Sites are matched to databases. Replace database name with: "project_environment_sitename"
     names = list()
     for site in archive.sites:
@@ -59,7 +59,7 @@ def setup_databases(archive):
                 abort("Database name collision")
         site.database.name = name
         names.append(name)
-        pantheon.import_data(sites, archive.project, archive.environment)
+        pantheon.import_data(archive.sites, archive.project, archive.environment)
 
 def _setup_site_files(archive):
     #TODO: add large file size sanity check (no commits over 20mb)
