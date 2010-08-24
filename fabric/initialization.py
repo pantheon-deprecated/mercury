@@ -123,23 +123,14 @@ def _initialize_pressflow():
         local('git init')
         local('git add .')
         local('git commit -m "initial branch commit"')
-        # make a copy
-        local('git checkout -b pantheon_test')
-        #go back to the original branch
         local('git checkout -b pantheon_dev')
     local('git clone /var/www/pantheon_dev /var/www/pantheon_test')
     with cd('/var/www/pantheon_test'):
-        # make a copy
-        local('git checkout -b pantheon_dev')
-        local('git checkout -b pantheon_live')
-        #go back to the original branch for this dir
-        local('git checkout pantheon_test')
+        local('git checkout master')
         local('git update-index --assume-unchanged profiles/default/default.profile sites/default/settings.php')
-        local('git archive pantheon_live | sudo tar -x -C /var/www/pantheon_live')
+        local('git archive master | sudo tar -x -C /var/www/pantheon_live')
     local('sed -i "s/pantheon_dev/pantheon_test/g" /var/www/pantheon_test/sites/default/settings.php /var/www/pantheon_test/profiles/default/default.profile')
     local('sed -i "s/pantheon_dev/pantheon_live/g" /var/www/pantheon_live/sites/default/settings.php /var/www/pantheon_live/profiles/default/default.profile')
-    local('chown -R root:www-data /var/www/*')
-    local('chown www-data:www-data /var/www/*/sites/default/settings.php')
-    local('chmod 660 /var/www/*/sites/default/settings.php')
-    local('find /var/www/pantheon_live -type d -exec chmod 755 {} \;')
-    local('chmod 775 /var/www/*/sites/*/files')
+    update.update_permissions('/var/www/pantheon_dev')
+    update.update_permissions('/var/www/pantheon_test')
+    update.update_permissions('/var/www/pantheon_live')
