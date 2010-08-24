@@ -1,0 +1,16 @@
+<FileInfo>
+
+  <Group name='ubuntu'>
+    <Info owner='hudson' group='hudson' perms='0755' encoding='base64'/>
+  </Group> 
+
+  <Group name='debian'>
+    <Info owner='hudson' group='hudson' perms='0755' encoding='base64'/>
+  </Group> 
+
+  <Group name='centos'>
+    <Info owner='hudson' group='root' perms='0755' encoding='base64'/>
+  </Group> 
+
+</FileInfo>
+
