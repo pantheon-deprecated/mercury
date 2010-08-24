@@ -7,8 +7,15 @@ import tempfile
 
 import pantheon
 
+def import_siteurl(url, project = None, environment = None):
+    download_dir = mkdtemp()
+    filebase = basename(url)
+    filename = join(download_dir, filebase)
+  
+    curl(url, filename)
+    import_site(filename, project, environment)
 
-def import_site(site_archive, project=None, environment=None):
+def import_site(site_archive, project = None, environment = None):
     '''Import site archive into a Pantheon server'''
     archive_directory = tempfile.mkdtemp() + '/'
 

@@ -105,7 +105,6 @@ def update_code(source_project=None, source_environment=None, target_project=Non
                      local('rm -rf temporary_directory')
 
        update_permissions(target_location)
-
        print(target_project + '_' + target_environment + ' project updated from ' + source_project + '_' + source_environment)
        
 def update_files(source_project=None, source_environment=None, target_project=None, target_environment=None):
