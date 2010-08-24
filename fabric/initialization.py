@@ -2,7 +2,7 @@
 from fabric.api import *
 
 import pantheon
-
+import update
 
 def initialize(vps="none"):
     '''Initialize the Pantheon system.'''
