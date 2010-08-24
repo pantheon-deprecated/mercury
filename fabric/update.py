@@ -25,7 +25,7 @@ def update_pressflow(project=None, environment=None):
               print("No environment selected. Using 'dev'")
               environment = 'dev'
        with cd(webroot + project + '_' + environment):
-              local('git pull --rebase git://gitorious.org/pantheon-pressflow/pantheon-pressflow.git')
+              local('git pull git://gitorious.org/pantheon-pressflow/pantheon-pressflow.git')
               with settings(warn_only=True):
                      local('git commit -m "updates from the Pantheon gitorious project"')
        update_permissions('%s' % (webroot + project + '_' + environment + '/'))
@@ -81,6 +81,7 @@ def update_code(source_project=None, source_environment=None, target_project=Non
        if os.path.exists(source_location + '.git'):
               with cd(source_location):
                      with settings(warn_only=True):
+                            local('git add -A .')
                             local('git commit -av -m "committing found changes"')
                      branch = local('git branch | grep "*"').lstrip('* ').rstrip('\n')
                      if branch != 'master':
