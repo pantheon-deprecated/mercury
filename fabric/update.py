@@ -80,10 +80,11 @@ def update_code(source_project=None, source_environment=None, target_project=Non
        #commit any changes in source dir:
        if os.path.exists(source_location + '.git'):
               with cd(source_location):
-                     local('git commit -av -m "committing found changes"')
+                     with settings(warn_only=True):
+                            local('git commit -av -m "committing found changes"')
                      branch = local('got branch | grep "*"').rstrip('/n')
                      if branch != 'master':
-                            print("current source git branch is " + branch + " - merging into master")
+                            print("current source git branch is " + branch + " - merging into master branch")
                             with settings(warn_only=True):
                                    local('git branch master')
                                    local('git merge ' + branch)
