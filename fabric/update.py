@@ -74,13 +74,24 @@ def update_code(source_project=None, source_environment=None, target_project=Non
               print("No target_environment selected. Using 'test'")
               target_environment = 'test'
 
-       #todo: add test for uncommitted code in source_environment
        source_location = webroot + source_project + '_' + source_environment + "/"
        target_location = webroot + target_project + '_' + target_environment + "/"
 
-       if not os.path.exists(source_location + '.git'):
+       #commit any changes in source dir:
+       if os.path.exists(source_location + '.git'):
+              with cd(source_location):
+                     local('git commit -av -m "committing found changes"')
+                     branch = local('got branch | grep "*"').rstrip('/n')
+                     if branch != 'master':
+                            print("current source git branch is " + branch + " - merging into master")
+                            with settings(warn_only=True):
+                                   local('git branch master')
+                                   local('git merge ' + branch)
+                                   local('git branch' + branch)
+       else:
               abort("Source target not in version control.")
 
+       #update target dir:
        if os.path.exists(target_location + '.git'):
               with cd(target_location):
                      local('git pull')
