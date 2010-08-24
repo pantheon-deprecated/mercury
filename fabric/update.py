@@ -25,13 +25,8 @@ def update_pressflow(project=None, environment=None):
               print("No environment selected. Using 'dev'")
               environment = 'dev'
        with cd(webroot + project + '_' + environment):
-              
               local('git pull --rebase git://gitorious.org/pantheon-pressflow/pantheon-pressflow.git')
-              local('chown -R root:www-data *')
-              local('chown www-data:www-data sites/default/settings.php')
-              local('chmod 660 sites/default/settings.php')
-              local('find . -type d -exec chmod 755 {} \;')
-              local('chmod 775 sites/*/files')
+              update.update_permissions(webroot + project + '_' + environment)
               with settings(warn_only=True):
                      local('git commit -m "updates from the Pantheon gitorious project"')
        print("Pressflow Updated")
@@ -93,8 +88,11 @@ def update_code(source_project=None, source_environment=None, target_project=Non
               with cd(source_location):
                      temporary_directory = tempfile.mkdtemp()
                      local('git archive master | sudo tar -x -C ' + temporary_directory)
-                     local('rsync -av --exclude=settings.php' + temporary_directory + ' ' + target_location)
+                     local('rsync -av --exclude=settings.php ' + temporary_directory + ' ' + target_location)
                      local('rm -rf temporary_directory')
+
+       update.update_permissions(target_location)
+
        print(target_project + '_' + target_environment + ' project updated from ' + source_project + '_' + source_environment)
        
 def update_files(source_project=None, source_environment=None, target_project=None, target_environment=None):
@@ -116,3 +114,10 @@ def update_files(source_project=None, source_environment=None, target_project=No
        local('rsync -av '+ webroot + source_project + '_' + source_environment + '/sites/all/files ' + webroot + target_project + '_' + target_environment + '/sites/all/')
        print(target_project + '_' + target_environment + ' files updated from ' + source_project + '_' + source_environment)
 
+def update_permission(dir):
+       with cd(dir):
+              local('chown -R root:www-data *')
+              local('chown www-data:www-data sites/default/settings.php')
+              local('chmod 660 sites/default/settings.php')
+              local('find . -type d -exec chmod 755 {} \;')
+              local('chmod 775 sites/*/files')
