@@ -132,4 +132,6 @@ def update_permissions(dir):
               local('chown www-data:www-data sites/default/settings.php')
               local('chmod 660 sites/default/settings.php')
               local('find . -type d -exec chmod 755 {} \;')
-              local('chmod 775 sites/*/files')
+              local('find sites/*/files -type d -exec chmod 775 {} \;')
+              local('find sites/*/files -type f -exec chmod 660 {} \;')
+
