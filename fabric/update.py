@@ -26,7 +26,7 @@ def update_pressflow(project=None, environment=None):
               environment = 'dev'
        with cd(webroot + project + '_' + environment):
               local('git pull --rebase git://gitorious.org/pantheon-pressflow/pantheon-pressflow.git')
-              update.update_permissions(webroot + project + '_' + environment)
+              update_permissions(webroot + project + '_' + environment)
               with settings(warn_only=True):
                      local('git commit -m "updates from the Pantheon gitorious project"')
        print("Pressflow Updated")
@@ -91,7 +91,7 @@ def update_code(source_project=None, source_environment=None, target_project=Non
                      local('rsync -av --exclude=settings.php ' + temporary_directory + ' ' + target_location)
                      local('rm -rf temporary_directory')
 
-       update.update_permissions(target_location)
+       update_permissions(target_location)
 
        print(target_project + '_' + target_environment + ' project updated from ' + source_project + '_' + source_environment)
        
