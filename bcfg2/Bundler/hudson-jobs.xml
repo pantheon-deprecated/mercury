@@ -3,12 +3,11 @@
   <!-- Ubuntu/Debian Only -->
   <Group name='deb'>
     <BoundPath type='directory' name='/var/lib/hudson/jobs' owner='hudson' group='root' perms='0755'/>
-
     <BoundPath type='directory' name='/var/lib/hudson/jobs/pantheon_config' owner='hudson' group='root' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/cron_pantheon_dev' owner='hudson' group='root' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/cron_pantheon_test' owner='hudson' group='root' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/cron_pantheon_live' owner='hudson' group='root' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/import_site' owner='hudson' group='root' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/import' owner='hudson' group='root' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/update_code_from_dev_to_test' owner='hudson' group='root' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/update_code_from_test_to_live' owner='hudson' group='root' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/update_data_from_live_to_test' owner='hudson' group='root' perms='0755'/>
@@ -21,12 +20,11 @@
   <!-- Centos Only -->
   <Group name='centos'>
     <BoundPath type='directory' name='/var/lib/hudson/jobs' owner='hudson' group='hudson' perms='0755'/>
-
     <BoundPath type='directory' name='/var/lib/hudson/jobs/pantheon_config' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/cron_pantheon_dev' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/cron_pantheon_test' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/cron_pantheon_live' owner='hudson' group='hudson' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/import_site' owner='hudson' group='hudson' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/import' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/update_code_from_dev_to_test' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/update_code_from_test_to_live' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/update_data_from_live_to_test' owner='hudson' group='hudson' perms='0755'/>
@@ -36,7 +34,7 @@
   </Group>    
   
   <!-- Jobs -->
-  <Path name='/var/lib/hudson/jobs/import_site/config.xml' altsrc='/hudson/jobs/import_site/config.xml'/>
+  <Path name='/var/lib/hudson/jobs/import_site/config.xml' altsrc='/hudson/jobs/import/config.xml'/>
   <Path name='/var/lib/hudson/jobs/pantheon_config/config.xml' altsrc='/hudson/jobs/pantheon_config/config.xml'/>
   <Path name='/var/lib/hudson/jobs/cron_pantheon_dev/config.xml' altsrc='/hudson/jobs/cron_pantheon_dev/config.xml'/>
   <Path name='/var/lib/hudson/jobs/cron_pantheon_test/config.xml' altsrc='/hudson/jobs/cron_pantheon_test/config.xml'/>
@@ -47,5 +45,5 @@
   <Path name='/var/lib/hudson/jobs/update_data_from_test_to_dev/config.xml' altsrc='/hudson/jobs/update_data_from_test_to_dev/config.xml'/>
   <Path name='/var/lib/hudson/jobs/update_files_from_live_to_test/config.xml' altsrc='/hudson/jobs/update_files_from_live_to_test/config.xml'/>
   <Path name='/var/lib/hudson/jobs/update_files_from_test_to_dev/config.xml' altsrc='/hudson/jobs/update_files_from_test_to_dev/config.xml'/>
-  
+
 </Bundle>
