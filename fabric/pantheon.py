@@ -8,6 +8,15 @@ import tempfile
 import time
 import urlparse
 
+def curl(url, destination):
+    """Fetch a file at a url and save to destination.
+    
+    WARNING: Does not do any escaping besides the basic, make sure you
+    are giving this sanitized input.
+    
+    """
+    local('curl "%s" -o "%s"' % (url, destination))
+    
 def unarchive(archive, destination):
     '''Extract archive to destination directory and remove VCS files'''
     if not os.path.exists(archive):

@@ -15,7 +15,7 @@ def update_pantheon():
        print("Pantheon Updated")
 
 def update_pressflow(project=None, environment=None):
-       webroot = pantheon.PantheonServer().webroot
+       webroot = pantheon.PantheonServer().webroot 
        
        print ("Updating Pressflow")
        if (project == None):
@@ -26,7 +26,7 @@ def update_pressflow(project=None, environment=None):
               environment = 'dev'
        with cd(webroot + project + '_' + environment):
               local('git pull --rebase git://gitorious.org/pantheon-pressflow/pantheon-pressflow.git')
-              update_permissions(webroot + project + '_' + environment)
+             update_permissions(webroot + project + '_' + environment)
               with settings(warn_only=True):
                      local('git commit -m "updates from the Pantheon gitorious project"')
        print("Pressflow Updated")

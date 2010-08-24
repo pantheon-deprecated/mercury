@@ -74,7 +74,7 @@ def _initialize_bcfg2(vps):
 
 def _initialize_drush():
     local('[ ! -d drush ] || rm -rf drush')
-    local('wget http://ftp.drupal.org/files/projects/drush-All-versions-3.0.tar.gz')
+    local('wget http://ftp.drupal.org/files/projects/drush-6.x-3.3.tar.gz')
     local('tar xvzf drush-All-versions-3.0.tar.gz')
     local('chmod 555 drush/drush')
     local('chown -R root: drush')
