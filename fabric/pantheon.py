@@ -317,6 +317,8 @@ class SiteImport:
         with cd(self.drupal.location):
             with settings(warn_only=True):
                 sql_dumps = (local("find . -maxdepth 1 -type f | grep '\.sql'")).replace('./','').rstrip('\n')
+                if not sql_dumps:
+                    abort("No .sql files found")
         # One database file
         if '\n' not in sql_dumps:
             databases.append(self.SQLDump(self.drupal.location + sql_dumps))

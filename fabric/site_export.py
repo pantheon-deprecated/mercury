@@ -4,7 +4,6 @@ import tempfile
 
 import pantheon
 
-
 def export_site(project=None, environment=None):
     temporary_directory = tempfile.mkdtemp()
     webroot = pantheon.PantheonServer().webroot
@@ -21,7 +20,7 @@ def export_site(project=None, environment=None):
 
     print('Exporting to temporary directory %s' % temporary_directory)
     _export_files(location, temporary_directory)
-    pantheon.export_data(location + '/htdocs', temporary_directory)
+    pantheon.export_data(location, temporary_directory + '/htdocs')
     _make_archive(temporary_directory)
 
 def _export_files(webroot, temporary_directory):
