@@ -59,7 +59,7 @@ def _setup_databases(archive):
                 abort("Database name collision")
         site.database.name = name
         names.append(name)
-        pantheon.import_data(archive.sites, archive.project, archive.environment)
+        pantheon.import_data(archive.sites)
 
 def _setup_site_files(archive):
     #TODO: add large file size sanity check (no commits over 20mb)
@@ -92,7 +92,8 @@ def _setup_site_files(archive):
         
         # Merge in Latest Pressflow
         local("git checkout master")
-        local("git pull git://gitorious.org/pantheon-pressflow/pantheon-pressflow.git master")
+        local("git pull git://gitorious.org/pressflow/6.git master")
+        #local("git pull git://gitorious.org/pantheon-pressflow/pantheon-pressflow.git master")
         local("git checkout pantheon")
         local("git pull . master") # Fails on conflict, commits otherwise.
         
