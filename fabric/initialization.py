@@ -114,7 +114,7 @@ def _initialize_hudson():
 def _initialize_pressflow():
     local('mkdir -p /var/www/pantheon_dev/sites/default/files')
     local('mkdir -p /var/www/pantheon_dev/sites/all/files')
-    local('echo "files/" > /var/www/pantheon_dev/sites/.gitignore')
+    local('echo "files/*" > /var/www/pantheon_dev/sites/.gitignore')
     local('cp /var/www/pantheon_dev/sites/default/default.settings.php /var/www/pantheon_dev/sites/default/settings.php')
     local('cat /opt/pantheon/fabric/templates/newsite.settings.php >> /var/www/pantheon_dev/sites/default/settings.php')
     local('mkdir /var/www/pantheon_live')
@@ -130,8 +130,6 @@ def _initialize_pressflow():
         local('git archive master | sudo tar -x -C /var/www/pantheon_live')
     local('sed -i "s/pantheon_dev/pantheon_test/g" /var/www/pantheon_test/sites/default/settings.php /var/www/pantheon_test/profiles/default/default.profile')
     local('sed -i "s/pantheon_dev/pantheon_live/g" /var/www/pantheon_live/sites/default/settings.php /var/www/pantheon_live/profiles/default/default.profile')
-    local("mkdir /var/www/pantheon_test/sites/all/files")
-    local("mkdir /var/www/pantheon_live/sites/all/files")
     update.update_permissions('/var/www/pantheon_dev')
     update.update_permissions('/var/www/pantheon_test')
     update.update_permissions('/var/www/pantheon_live')
