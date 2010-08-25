@@ -140,10 +140,11 @@ def update_files(source_project=None, source_environment=None, target_project=No
 
 def update_permissions(dir):
        with cd(dir):
-              local('chown -R root:www-data *')
-              local('chown www-data:www-data sites/default/settings.php')
-              local('chmod 660 sites/default/settings.php')
-              local('find . -type d -exec chmod 755 {} \;')
-              local('find sites/*/files -type d -exec chmod 775 {} \;')
-              local('find sites/*/files -type f -exec chmod 660 {} \;')
+              with settings(warn_only=True):
+                     local('chown -R root:www-data *')
+                     local('chown www-data:www-data sites/default/settings.php')
+                     local('chmod 660 sites/default/settings.php')
+                     local('find . -type d -exec chmod 755 {} \;')
+                     local('find sites/*/files -type d -exec chmod 775 {} \;')
+                     local('find sites/*/files -type f -exec chmod 660 {} \;')
 
