@@ -320,12 +320,12 @@ class SiteImport:
                 sql_dumps = (local("find . -maxdepth 1 -type f | grep '\.sql'")).replace('./','').rstrip('\n')
         # One database file
         if '\n' not in sql_dumps:
-            databases.append(self.SQLDump(self.drupal.location, sql_dumps))
+            databases.append(self.SQLDump(self.drupal.location + sql_dumps))
         # Multiple database file
         else:
             sql_dumps = sql_dumps.split('\n')
             for dump in sql_dumps:
-                databases.append(self.SQLDump(self.drupal.location, dump))
+                databases.append(self.SQLDump(self.drupal.location + dump))
         return databases
 
     def get_matched_sites(self):
@@ -335,7 +335,7 @@ class SiteImport:
             for site in self.drupal.sites:
                 if site.valid:
                     match = copy.deepcopy(site)
-                    match.database.dump = self.sql_dumps[0].file_name
+                    match.database.dump = self.sql_dumps[0].sql_file
                     matches.append(match)
         # More than one site and/or database
         else:
@@ -344,7 +344,7 @@ class SiteImport:
                     for dump in self.sql_dumps:
                         if site.database.name == dump.database_name:
                             match = copy.deepcopy(site)
-                            match.database.dump = dump.file_name
+                            match.database.dump = dump.sql_file
                             matches.append(match)
 
         # Set site webroot to new destination (webroot + project + environment)
@@ -358,9 +358,9 @@ class SiteImport:
 
     class SQLDump:
 
-        def __init__(self, location, file_name):
-            self.file_name = file_name
-            self.database_name = self.get_database_name(location + file_name)
+        def __init__(self, sql_file):
+            self.sql_file = sql_file
+            self.database_name = self.get_database_name(sql_file)
 
         def get_database_name(self, sql_file):
             # Check for 'USE' statement
