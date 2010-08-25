@@ -1,10 +1,12 @@
+# vim: tabstop=4 shiftwidth=4 softtabstop=4
 from fabric.api import *
-from pantheon import PantheonServer, DrupalInstallation
-from tempfile import mkdtemp
+import tempfile
 
-def export_site(project = None ,environment = None):
-    temporary_directory = mkdtemp()
-    webroot = PantheonServer().webroot
+import pantheon
+
+def export_site(project=None, environment=None):
+    temporary_directory = tempfile.mkdtemp()
+    webroot = pantheon.PantheonServer().webroot
 
     if (project == None):
         print("No project set. Using 'pantheon'")
@@ -18,29 +20,11 @@ def export_site(project = None ,environment = None):
 
     print('Exporting to temporary directory %s' % temporary_directory)
     _export_files(location, temporary_directory)
-    _export_data(location, temporary_directory)
+    pantheon.export_data(location, temporary_directory + '/htdocs')
     _make_archive(temporary_directory)
 
 def _export_files(webroot, temporary_directory):
     local('cp -R %s %s/htdocs' % (webroot, temporary_directory))
-
-def _export_data(webroot, temporary_directory):
-    sites = DrupalInstallation(webroot).get_sites()
-    with cd(temporary_directory + "/htdocs"):
-        exported = list()
-        for site in sites:
-            if site.valid:
-                # If multiple sites use same db, only export once.
-                if site.database.name not in exported:
-                    local("mysqldump --single-transaction --user='%s' --password='%s' --host='%s' %s > %s.sql" % \
-                      ( site.database.username, 
-                        site.database.password, 
-                        site.database.hostname, 
-                        site.database.name,
-                        site.database.name,
-                      )    
-                    )
-                    exported.append(site.database.name)
 
 def _make_archive(directory):
     file = directory + ".tar.gz"

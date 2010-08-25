@@ -1,10 +1,12 @@
+# vim: tabstop=4 shiftwidth=4 softtabstop=4
 from fabric.api import *
-from os.path import exists
-from urlparse import urlparse
-from re import search
-from tempfile import mkdtemp
+import copy
+import os
+import re
 import string
-from copy import deepcopy
+import tempfile
+import time
+import urlparse
 
 def curl(url, destination):
     """Fetch a file at a url and save to destination.
@@ -17,14 +19,14 @@ def curl(url, destination):
 
 def unarchive(archive, destination):
     '''Extract archive to destination directory and remove VCS files'''
-    if not exists(archive):
+    if not os.path.exists(archive):
         abort("Archive file \"" + archive + "\" does not exist.")
-
-    if exists(destination):
+            
+    if os.path.exists(destination):
         local("rm -rf " + destination)
-
+            
     local("bzr init " + destination)
-
+                
     with cd(destination):
         local("bzr import " + archive)
         with settings(warn_only=True):
@@ -32,6 +34,67 @@ def unarchive(archive, destination):
             local("rm -r ./.git")
             local("find . -depth -name .svn -exec rm -fr {} \;")
             local("find . -depth -name CVS -exec rm -fr {} \;")
+
+def export_data(webroot, temporary_directory):
+    sites = DrupalInstallation(webroot).get_sites()
+    with cd(temporary_directory):
+        exported = list()
+        saved_data = list()
+        for site in sites:
+            if site.valid:
+                # If multiple sites use same db, only export once.
+                if site.database.name not in exported:
+                    local("mysqldump --single-transaction --user='%s' --password='%s' --host='%s' %s > %s.sql" % \
+                              ( site.database.username, 
+                                site.database.password, 
+                                site.database.hostname, 
+                                site.database.name,
+                                site.database.name,
+                                )    
+                          )
+                    exported.append(site.database.name)
+                    site.database.dump = temporary_directory + "/" + site.database.name + ".sql"
+    return(sites)
+
+def import_data(sites):
+    # Create temporary superuser to perform import operations
+    with settings(warn_only=True):
+        local("mysql -u root -e \"CREATE USER 'pantheon-admin'@'localhost' IDENTIFIED BY '';\"")
+    local("mysql -u root -e \"GRANT ALL PRIVILEGES ON *.* TO 'pantheon-admin'@'localhost' WITH GRANT OPTION;\"")
+
+    for site in sites:
+        local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % (site.database.name))
+        local("mysql -u root -e 'CREATE DATABASE %s'" % (site.database.name))
+
+        #TODO: if db username is root, change it. 
+
+        # Set grants
+        local("mysql -u pantheon-admin -e \"GRANT ALL ON %s.* TO '%s'@'localhost' IDENTIFIED BY '%s';\"" % \
+                  (site.database.name, site.database.username, site.database.password))
+        
+        # Strip cache tables, convert MyISAM to InnoDB, and import.
+        local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | \
+                grep -v '^INSERT INTO `ctools_object_cache`' | \
+                grep -v '^INSERT INTO `watchdog`' | \
+                grep -v '^INSERT INTO `accesslog`' | \
+                grep -v '^USE `' | \
+                sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | \
+                mysql -u pantheon-admin %s" % \
+                  (site.database.dump, site.database.name))
+                
+    # Cleanup
+    local("mysql -u pantheon-admin -e \"DROP USER 'pantheon-admin'@'localhost'\"")
+    local("rm -f %s" % site.database.dump)
+
+def restart_bcfg2():
+    local('/etc/init.d/bcfg2-server restart')
+    server_running = False
+    warn('Waiting for bcfg2 server to start')
+    while not server_running:
+        with settings(hide('warnings'), warn_only=True):
+            server_running = (local('netstat -atn | grep :6789')).rstrip('\n')
+        time.sleep(5)
+
 
 class DrupalInstallation:
 
@@ -58,12 +121,12 @@ class DrupalInstallation:
             settings_files = (local('find sites/ -name settings.php -type f')).rstrip('\n')
         # Single site
         if '\n' not in settings_files:
-            names.append((search(r'^.*sites/(.*)/settings.php', settings_files)).group(1))
+            names.append((re.search(r'^.*sites/(.*)/settings.php', settings_files)).group(1))
         # Multiple sites
         else:
             settings_files = settings_files.split('\n')
             for sfile in settings_files:
-                names.append((search(r'^.*sites/(.*)/settings.php',sfile)).group(1))
+                names.append((re.search(r'^.*sites/(.*)/settings.php',sfile)).group(1))
         return names
 
     def get_site_data(self, name):
@@ -83,7 +146,7 @@ class DrupalInstallation:
     def get_pressflow_revision(self):
         #TODO: Optimize this (restrict search to revisions within Drupal minor version)
         #TODO: Add check for Bazaar or git metadata
-        temporary_directory = mkdtemp()
+        temporary_directory = tempfile.mkdtemp()
         local("git clone git://gitorious.org/pressflow/6.git " + temporary_directory)
         with cd(temporary_directory):
             match = {'difference': None, 'commit': None}
@@ -163,10 +226,10 @@ class DrupalSite:
 
             # Use last db connection string
             if '\n' not in url:
-                url = urlparse(url)
+                url = urlparse.urlparse(url)
             else:
                 url = url.split('\n')
-                url = urlparse(url[len(url)-1])
+                url = urlparse.urlparse(url[len(url)-1])
 
             if url.password == None:
                 self.password = ''
@@ -191,37 +254,55 @@ class PantheonServer:
 
     def __init__(self):
         # Ubuntu / Debian
-        if exists('/etc/debian_version'):
-            self.webroot = '/var/www/'
-            self.owner = 'root'
-            self.group = 'www-data'
+        if os.path.exists('/etc/debian_version'):
             self.distro = 'ubuntu'
+            self.group = 'www-data'
+            self.mysql = 'mysql'
+            self.owner = 'root'
             self.tomcat_owner = 'tomcat6'
             self.tomcat_version = '6'
+            self.webroot = '/var/www/'
         # Centos
-        elif exists('/etc/redhat-release'):
-            self.webroot = '/var/www/html/'
-            self.owner = 'root'
-            self.group = 'apache'
+        elif os.path.exists('/etc/redhat-release'):
             self.distro = 'centos'
+            self.group = 'apache'
+            self.mysql = 'mysqld'
+            self.owner = 'root'
             self.tomcat_owner = 'tomcat'
-            self.tomcat_version = 5
+            self.tomcat_version = '5'
+            self.webroot = '/var/www/html/'
         self.ip = (local('hostname --ip-address')).rstrip('\n')
+        if os.path.exists("/usr/local/bin/ec2-metadata"):
+            self.hostname = local('/usr/local/bin/ec2-metadata -p | sed "s/public-hostname: //"').rstrip('\n')
+        else:
+            self.hostname = local('hostname').rstrip('\n')
+
+    def update_packages(self):
+        if (self.distro == "centos"):
+            local('yum clean all')
+            local('yum -u update')
+        else:
+            local('apt-get -y update')
+            local('apt-get -y dist-upgrade')
 
     def restart_services(self):
         if self.distro == 'ubuntu':
             local('/etc/init.d/apache2 restart')
             local('/etc/init.d/memcached restart')
             local('/etc/init.d/tomcat6 restart')
+            local('/etc/init.d/varnish restart')
+            local('/etc/init.d/mysql restart')
         elif self.distro == 'centos':
             local('/etc/init.d/httpd restart')
             local('/etc/init.d/memcached restart')
             local('/etc/init.d/tomcat5 restart')
+            local('/etc/init.d/varnish restart')
+            local('/etc/init.d/mysqld restart')
 
 class SiteImport:
     
     def __init__(self, location, webroot, project, environment):
-        if exists(location):
+        if os.path.exists(location):
             self.location = location
             self.project = project
             self.environment = environment
@@ -236,14 +317,16 @@ class SiteImport:
         with cd(self.drupal.location):
             with settings(warn_only=True):
                 sql_dumps = (local("find . -maxdepth 1 -type f | grep '\.sql'")).replace('./','').rstrip('\n')
+                if not sql_dumps:
+                    abort("No .sql files found")
         # One database file
         if '\n' not in sql_dumps:
-            databases.append(self.SQLDump(self.drupal.location, sql_dumps))
+            databases.append(self.SQLDump(self.drupal.location + sql_dumps))
         # Multiple database file
         else:
             sql_dumps = sql_dumps.split('\n')
             for dump in sql_dumps:
-                databases.append(self.SQLDump(self.drupal.location, dump))
+                databases.append(self.SQLDump(self.drupal.location + dump))
         return databases
 
     def get_matched_sites(self):
@@ -252,8 +335,8 @@ class SiteImport:
         if self.drupal.valid_site_count() == 1 and self.database_count() == 1:
             for site in self.drupal.sites:
                 if site.valid:
-                    match = deepcopy(site)
-                    match.database.dump = self.sql_dumps[0].file_name
+                    match = copy.deepcopy(site)
+                    match.database.dump = self.sql_dumps[0].sql_file
                     matches.append(match)
         # More than one site and/or database
         else:
@@ -261,11 +344,11 @@ class SiteImport:
                 if site.valid:
                     for dump in self.sql_dumps:
                         if site.database.name == dump.database_name:
-                            match = deepcopy(site)
-                            match.database.dump = dump.file_name
+                            match = copy.deepcopy(site)
+                            match.database.dump = dump.sql_file
                             matches.append(match)
 
-        # Set site webroot to new destinationi (webroot + project + environment)
+        # Set site webroot to new destination (webroot + project + environment)
         for match in matches:
             match.webroot = self.destination
 
@@ -276,9 +359,9 @@ class SiteImport:
 
     class SQLDump:
 
-        def __init__(self, location, file_name):
-            self.file_name = file_name
-            self.database_name = self.get_database_name(location + file_name)
+        def __init__(self, sql_file):
+            self.sql_file = sql_file
+            self.database_name = self.get_database_name(sql_file)
 
         def get_database_name(self, sql_file):
             # Check for 'USE' statement

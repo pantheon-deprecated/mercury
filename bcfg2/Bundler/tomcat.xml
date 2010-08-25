@@ -8,6 +8,7 @@
     <Package name='openjdk-6-jre-lib'/>
     <Package name='ttf-dejavu-core'/>
     <Package name='tomcat6'/>
+    <Package name='tomcat6-common'/>
     <Path name='/etc/default/tomcat6' altsrc='/tomcat/conf'/>
     <Path name='/etc/tomcat6/Catalina/localhost/pantheon_dev.xml' altsrc='/tomcat/solr/pantheon_dev'/>
     <Path name='/etc/tomcat6/Catalina/localhost/pantheon_test.xml' altsrc='/tomcat/solr/pantheon_test'/>

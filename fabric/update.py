@@ -1,27 +1,23 @@
+# vim: tabstop=4 shiftwidth=4 softtabstop=4
 from fabric.api import *
-from fabric.contrib.console import confirm
-from time import sleep
-from tempfile import mkdtemp
-from pantheon import *
+import tempfile
+import os
+
+import pantheon
+
 
 def update_pantheon():
-       '''Updating Pantheon from Launchpad'''
+       print("Updating Pantheon from Launchpad")
        local('/etc/init.d/bcfg2-server stop')
        local('cd /opt/pantheon; bzr up')
-       local('/etc/init.d/bcfg2-server restart')
-       server_running = False
-       warn('Waiting for bcfg2 server to start')
-       while not server_running:
-              with settings(hide('warnings'), warn_only=True):
-                     server_running = (local('netstat -atn | grep :6789')).rstrip('\n')
-              sleep(5)
+       pantheon.restart_bcfg2()
        local('/usr/sbin/bcfg2 -vq')
-       '''Pantheon Updated'''
+       print("Pantheon Updated")
 
-def update_pressflow(project = None, environment = None):
-       webroot = PantheonServer().webroot
+def update_pressflow(project=None, environment=None):
+       webroot = pantheon.PantheonServer().webroot 
        
-       '''Updating Pressflow'''
+       print ("Updating Pressflow")
        if (project == None):
               print("No project selected. Using 'pantheon'")
               project = 'pantheon'
@@ -29,13 +25,16 @@ def update_pressflow(project = None, environment = None):
               print("No environment selected. Using 'dev'")
               environment = 'dev'
        with cd(webroot + project + '_' + environment):
-              local('bzr up')
-       '''Pressflow Updated'''
+              local('git pull git://gitorious.org/pantheon-pressflow/pantheon-pressflow.git')
+              with settings(warn_only=True):
+                     local('git commit -m "updates from the Pantheon gitorious project"')
+       update_permissions('%s' % (webroot + project + '_' + environment + '/'))
+       print("Pressflow Updated")
 
-def update_data(source_project = None, source_environment = None, target_project = None, target_environment = None):
-       webroot = PantheonServer().webroot
-       source_temporary_directory = mkdtemp()
-       target_temporary_directory = mkdtemp()
+def update_data(source_project=None, source_environment=None, target_project=None, target_environment=None):
+       webroot = pantheon.PantheonServer().webroot
+       source_temporary_directory = tempfile.mkdtemp()
+       target_temporary_directory = tempfile.mkdtemp()
 
        if (source_project == None):
               print("No source_project selected. Using 'pantheon'")
@@ -52,17 +51,27 @@ def update_data(source_project = None, source_environment = None, target_project
 
        source_location = webroot + source_project + '_' + source_environment + "/"
        target_location = webroot + target_project + '_' + target_environment + "/"
+
        print('Exporting ' + source_project + '/' + source_environment + ' database to temporary directory %s' % source_temporary_directory)
-       _export_data(source_location, source_temporary_directory)
+       sites = pantheon.export_data(source_location, source_temporary_directory)
        print('Exporting ' + target_project + '/' + target_environment + ' database to temporary directory %s' % target_temporary_directory)
-       _export_data(target_location, target_temporary_directory)
-       archive = SiteImport(source_temporary_directory, webroot, target_project, target_environment)
-       _setup_databases(archive, source_temporary_directory)
+       pantheon.export_data(target_location, target_temporary_directory)
+
+       # NOTE: Name changes should be done outside the import function (no logic, just import).
+       #       Added the below as a temporary stop-gap until the TODO is fixed.
+       for site in sites:
+           site.database.name = target_project + "_" + target_environment
+
+       # TODO: update process needs to be multi-site friendly. Can't use project_environment (e.g. pantheon_dev) for database name.
+       #       instead we should use project_environment_sitename (e.g. pantheon_dev_getpantheon_com for sites/getpantheon.com)
+       #       this namespacing will allow multi-codebase & multi-site installs. Once supported, can use:
+       #       project + "_" + environment + "_" + site.get_safe_name()
+
+       pantheon.import_data(sites)
        print(target_project + '_' + target_environment + ' database updated with database from ' + source_project + '_' + source_environment)
 
-def update_code(source_project = None, source_environment = None, target_project = None, target_environment = None):
-       webroot = PantheonServer().webroot
-       temporary_directory = mkdtemp()
+def update_code(source_project=None, source_environment=None, target_project=None, target_environment=None):
+       webroot = pantheon.PantheonServer().webroot
        
        if (source_project == None):
               print("No source_project selected. Using 'pantheon'")
@@ -77,24 +86,41 @@ def update_code(source_project = None, source_environment = None, target_project
               print("No target_environment selected. Using 'test'")
               target_environment = 'test'
 
-       #todo: add test for uncommitted code in source_environment
        source_location = webroot + source_project + '_' + source_environment + "/"
        target_location = webroot + target_project + '_' + target_environment + "/"
 
-       if not exists(source_location + '.git'):
+       #commit any changes in source dir:
+       if os.path.exists(source_location + '.git'):
+              with cd(source_location):
+                     with settings(warn_only=True):
+                            local('git add -A .')
+                            local('git commit -av -m "committing found changes"')
+                     branch = local('git branch | grep "*"').lstrip('* ').rstrip('\n')
+                     if branch != 'master':
+                            print("current source git branch is " + branch + " - merging into master branch")
+                            with settings(warn_only=True):
+                                   local('git checkout master')
+                                   local('git merge ' + branch)
+                                   local('git checkout ' + branch)
+       else:
               abort("Source target not in version control.")
 
-       if exists(target_location + '.git'):
+       #update target dir:
+       if os.path.exists(target_location + '.git'):
               with cd(target_location):
-                     local('git fetch')
+                     local('git pull')
        else:
               with cd(source_location):
-                     local('git archive master | local tar -x -C ' + temporary_directory)
-                     local('rsync -av --exclude=settings.php' + temporary_directory + ' ' + target_location)
+                     temporary_directory = tempfile.mkdtemp()
+                     local('git archive master | sudo tar -x -C ' + temporary_directory)
+                     local('rsync -av --exclude=settings.php ' + temporary_directory + '/* ' + target_location)
+                     local('rm -rf temporary_directory')
+
+       update_permissions(target_location)
        print(target_project + '_' + target_environment + ' project updated from ' + source_project + '_' + source_environment)
        
-def update_files(source_project = None, source_environment = None, target_project = None, target_environment = None):
-       webroot = PantheonServer().webroot
+def update_files(source_project=None, source_environment=None, target_project=None, target_environment=None):
+       webroot = pantheon.PantheonServer().webroot
        
        if (source_project == None):
               print("No source_project selected. Using 'pantheon'")
@@ -112,69 +138,12 @@ def update_files(source_project = None, source_environment = None, target_projec
        local('rsync -av '+ webroot + source_project + '_' + source_environment + '/sites/all/files ' + webroot + target_project + '_' + target_environment + '/sites/all/')
        print(target_project + '_' + target_environment + ' files updated from ' + source_project + '_' + source_environment)
 
-def _export_data(webroot, temporary_directory):
-       sites = DrupalInstallation(webroot).get_sites()
-       with cd(temporary_directory):
-              exported = list()
-              for site in sites:
-                     if site.valid:
-                            # If multiple sites use same db, only export once.
-                            if site.database.name not in exported:
-                                   local("mysqldump --single-transaction --user='%s' --password='%s' --host='%s' %s > %s.sql" % \
-                                                ( site.database.username, 
-                                                  site.database.password, 
-                                                  site.database.hostname, 
-                                                  site.database.name,
-                                                  site.database.name,
-                                                  )    
-                                         )
-                                   exported.append(site.database.name)
+def update_permissions(dir):
+       with cd(dir):
+              local('chown -R root:www-data *')
+              local('chown www-data:www-data sites/default/settings.php')
+              local('chmod 660 sites/default/settings.php')
+              local('find . -type d -exec chmod 755 {} \;')
+              local('find sites/*/files -type d -exec chmod 775 {} \;')
+              local('find sites/*/files -type f -exec chmod 660 {} \;')
 
-def _setup_databases(archive):
-       # Sites are matched to databases. Replace database name with: "project_environment_sitename"
-       names = list()
-       for site in archive.sites:
-              # MySQL allows db names up to 64 chars. Check for & fix name collisions, assuming: 
-              # project (up to 16chars) and environment (up to 5chars).
-              for length in range(43,0,-1):
-                     #TODO: Write better fix for collisions
-                     name = archive.project + '_' + archive.environment + '_' + \
-                         site.get_safe_name()[:length] + \
-                         str(random.randint(0,9))*(43-length)
-                     if name not in names:
-                            break
-                     if length == 0:
-                            abort("Database name collision")
-              site.database.name = name
-              names.append(name)
-   
-       # Create databases. If multiple sites use same db, only create once.
-       databases = set([site.database.name for site in archive.sites])
-       for database in databases:
-              local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % (database))
-              local("mysql -u root -e 'CREATE DATABASE %s'" % (database))
-
-       # Create temporary superuser to perform import operations
-       with settings(warn_only=True):
-              local("mysql -u root -e \"CREATE USER 'pantheon-admin'@'localhost' IDENTIFIED BY '';\"")
-       local("mysql -u root -e \"GRANT ALL PRIVILEGES ON *.* TO 'pantheon-admin'@'localhost' WITH GRANT OPTION;\"")
-
-       for site in archive.sites:
-              # Set grants
-              local("mysql -u pantheon-admin -e \"GRANT ALL ON %s.* TO '%s'@'localhost' IDENTIFIED BY '%s';\"" % \
-                           (site.database.name, site.database.username, site.database.password))
-              
-       # Strip cache tables, convert MyISAM to InnoDB, and import.
-       local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | \
-                grep -v '^INSERT INTO `ctools_object_cache`' | \
-                grep -v '^INSERT INTO `watchdog`' | \
-                grep -v '^INSERT INTO `accesslog`' | \
-                grep -v '^USE `' | \
-                sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | \
-                mysql -u pantheon-admin %s" % \
-                (archive.location + site.database.dump, site.database.name))
-                
-       # Cleanup
-       local("mysql -u pantheon-admin -e \"DROP USER 'pantheon-admin'@'localhost'\"")
-       with cd(archive.location):
-              local("rm -f *.sql")

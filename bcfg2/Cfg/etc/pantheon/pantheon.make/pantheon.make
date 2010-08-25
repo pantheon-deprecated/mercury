@@ -3,14 +3,8 @@ core = 6.x
 ; Pressflow
 
 projects[pressflow][type] = "core"
-projects[pressflow][download][type] = bzr
-projects[pressflow][download][url] = lp:pressflow
-
-; Pantheon
-projects[pantheon][type] = "profile"
-projects[pantheon][download][type] = "cvs"
-projects[pantheon][download][module] = "contributions/profiles/pantheon/"
-projects[pantheon][download][revision] = "HEAD"
+projects[pressflow][download][type] = git
+projects[pressflow][download][url] = git://gitorious.org/pantheon-pressflow/pantheon-pressflow.git
 
 ; Modules
 projects[] = apachesolr

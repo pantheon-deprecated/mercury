@@ -1,25 +1,23 @@
+# vim: tabstop=4 shiftwidth=4 softtabstop=4
 from fabric.api import *
-from os.path import basename
-from os.path import exists
-from os.path import join
-from re import search
-from tempfile import mkdtemp
-from time import sleep
-from pantheon import *
+import os
 import string
 import random
+import tempfile
+
+import pantheon
 
 def import_siteurl(url, project = None, environment = None):
-    download_dir = mkdtemp()
-    filebase = basename(url)
-    filename = join(download_dir, filebase)
+    download_dir = tempfile.mkdtemp()
+    filebase = os.path.basename(url)
+    filename = os.path.join(download_dir, filebase)
   
-    curl(url, filename)
+    pantheon.curl(url, filename)
     import_site(filename, project, environment)
 
 def import_site(site_archive, project = None, environment = None):
     '''Import site archive into a Pantheon server'''
-    archive_directory = mkdtemp() + '/'
+    archive_directory = tempfile.mkdtemp() + '/'
 
     if (project == None):
         print("No project selected. Using 'pantheon'")
@@ -28,9 +26,9 @@ def import_site(site_archive, project = None, environment = None):
         print("No environment selected. Using 'dev'")
         environment = 'dev'
 
-    unarchive(site_archive, archive_directory)
-    server = PantheonServer()
-    archive = SiteImport(archive_directory, server.webroot, project, environment)
+    pantheon.unarchive(site_archive, archive_directory)
+    server = pantheon.PantheonServer()
+    archive = pantheon.SiteImport(archive_directory, server.webroot, project, environment)
 
     _setup_databases(archive)
     _setup_site_files(archive)
@@ -53,52 +51,22 @@ def _setup_databases(archive):
         for length in range(43,0,-1):
             #TODO: Write better fix for collisions
             name = archive.project + '_' + archive.environment + '_' + \
-                    site.get_safe_name()[:length] + \
-                    str(random.randint(0,9))*(43-length)
+                site.get_safe_name()[:length] + \
+                str(random.randint(0,9))*(43-length)
             if name not in names:
                 break
             if length == 0:
                 abort("Database name collision")
         site.database.name = name
         names.append(name)
-   
-    # Create databases. If multiple sites use same db, only create once.
-    databases = set([site.database.name for site in archive.sites])
-    for database in databases:
-        local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % (database))
-        local("mysql -u root -e 'CREATE DATABASE %s'" % (database))
-
-    # Create temporary superuser to perform import operations
-    with settings(warn_only=True):
-        local("mysql -u root -e \"CREATE USER 'pantheon-admin'@'localhost' IDENTIFIED BY '';\"")
-    local("mysql -u root -e \"GRANT ALL PRIVILEGES ON *.* TO 'pantheon-admin'@'localhost' WITH GRANT OPTION;\"")
-
-    for site in archive.sites:
-        # Set grants
-        local("mysql -u pantheon-admin -e \"GRANT ALL ON %s.* TO '%s'@'localhost' IDENTIFIED BY '%s';\"" % \
-                (site.database.name, site.database.username, site.database.password))
-
-        # Strip cache tables, convert MyISAM to InnoDB, and import.
-        local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | \
-                grep -v '^INSERT INTO `ctools_object_cache`' | \
-                grep -v '^INSERT INTO `watchdog`' | \
-                grep -v '^INSERT INTO `accesslog`' | \
-                grep -v '^USE `' | \
-                sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | \
-                mysql -u pantheon-admin %s" % \
-               (archive.location + site.database.dump, site.database.name))
-
-    # Cleanup
-    local("mysql -u pantheon-admin -e \"DROP USER 'pantheon-admin'@'localhost'\"")
-    with cd(archive.location):
-        local("rm -f *.sql")
+        pantheon.import_data(archive.sites)
 
 def _setup_site_files(archive):
     #TODO: add large file size sanity check (no commits over 20mb)
     #TODO: sanity check for versions prior to 6.6 (no pressflow branch).
     #TODO: look into ignoreing files directory
     #TODO: check for conflicts (hacked core)
-    if exists(archive.destination):
+    if os.path.exists(archive.destination):
         local('rm -r ' + archive.destination)
 
     # Create vanilla drupal/pressflow branch of same version as import site
@@ -125,6 +93,7 @@ def _setup_site_files(archive):
         # Merge in Latest Pressflow
         local("git checkout master")
         local("git pull git://gitorious.org/pressflow/6.git master")
+        #local("git pull git://gitorious.org/pantheon-pressflow/pantheon-pressflow.git master")
         local("git checkout pantheon")
         local("git pull . master") # Fails on conflict, commits otherwise.
         
@@ -142,12 +111,12 @@ def _setup_modules(archive):
     # TODO: add CAS back into the required module list when backend working.
     required_modules = ['apachesolr', 'apachesolr_search', 'cookie_cache_bypass', 'locale', 'syslog', 'varnish']
 
-    if not exists(archive.destination + "sites/all/modules/"):
+    if not os.path.exists(archive.destination + "sites/all/modules/"):
         local("mkdir " + archive.destination + "sites/all/modules/")
 
     # Drush will fail if it can't find memcache within drupal install. But we use drush to download memcache. 
     # Solve race condition by downloading outside drupal install. Download other prereqs also.
-    temporary_directory = mkdtemp()
+    temporary_directory = tempfile.mkdtemp()
     with cd(temporary_directory):
         local("drush dl -y memcache apachesolr cas varnish")
         local("cp -R * " + archive.destination + "sites/all/modules/")
@@ -175,12 +144,12 @@ def _setup_modules(archive):
 
         # Create new solr index
         solr_path = archive.project + '_' + archive.environment + '_' + site.get_safe_name()
-        if exists("/var/solr/" + solr_path):
+        if os.path.exists("/var/solr/" + solr_path):
             local("rm -rf /var/solr/" + solr_path)
         local("cp -R /opt/pantheon/fabric/templates/solr/ /var/solr/" + solr_path)
 
         # tomcat config to set solr home dir.
-        tomcat_solr_home = "/etc/tomcat%s/Catalina/localhost/%s.xml" % (PantheonServer().tomcat_version, solr_path)
+        tomcat_solr_home = "/etc/tomcat%s/Catalina/localhost/%s.xml" % (pantheon.PantheonServer().tomcat_version, solr_path)
         solr_template = local("cat /opt/pantheon/fabric/templates/tomcat_solr_home.xml")
         solr_home = string.Template(solr_template)
         solr_home = solr_home.safe_substitute({'solr_path':solr_path})
@@ -190,15 +159,15 @@ def _setup_modules(archive):
 
         with cd(archive.destination + "sites/" + site.name):
            # If required modules exist in specific site directory, make sure they are on latest version.
-            if exists("modules"):
+            if os.path.exists("modules"):
                 with cd("modules"):
-                    if exists("apachesolr"):
+                    if os.path.exists("apachesolr"):
                         local("drush dl -y apachesolr")
-                    if exists("cas"):
+                    if os.path.exists("cas"):
                         local("drush dl -y cas")
-                    if exists("memcache"):
+                    if os.path.exists("memcache"):
                         local("drush dl -y memcache")
-                    if exists("varnish"):
+                    if os.path.exists("varnish"):
                         local("drush dl -y varnish")
 
         # Enable all required modules
@@ -236,7 +205,7 @@ def _setup_files_directory(archive):
                 site.file_location = 'sites/' + site.name + '/files'
                 site.set_variables({'file_directory_path':site.file_location})
             # if file_directory_path is set, but doesn't exist, create it.
-            if not exists(archive.destination + site.file_location):
+            if not os.path.exists(archive.destination + site.file_location):
                 local("mkdir -p " + archive.destination + site.file_location)
 
 def _setup_permissions(server, archive):
