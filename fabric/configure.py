@@ -66,6 +66,10 @@ def _setup_postfix(server):
 
 def _restart_services(server):
     local('/sbin/iptables-restore < /etc/pantheon/templates/iptables')
+    if server.distro == 'ubuntu':
+        local('/sbin/iptables-save')
+    elif server.distro == 'centos':
+        local('/sbin/service iptables save; /etc/init.d/iptables stop')
     server.restart_services()
 
 def _create_databases():

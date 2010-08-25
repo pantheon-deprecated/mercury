@@ -287,14 +287,12 @@ class PantheonServer:
 
     def restart_services(self):
         if self.distro == 'ubuntu':
-            local('/sbin/iptables-save')
             local('/etc/init.d/apache2 restart')
             local('/etc/init.d/memcached restart')
             local('/etc/init.d/tomcat6 restart')
             local('/etc/init.d/varnish restart')
             local('/etc/init.d/mysql restart')
         elif self.distro == 'centos':
-            local('/sbin/service iptables save; /etc/init.d/iptables stop')
             local('/etc/init.d/httpd restart')
             local('/etc/init.d/memcached restart')
             local('/etc/init.d/tomcat5 restart')
