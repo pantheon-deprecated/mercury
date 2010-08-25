@@ -130,6 +130,8 @@ def _initialize_pressflow():
         local('git archive master | sudo tar -x -C /var/www/pantheon_live')
     local('sed -i "s/pantheon_dev/pantheon_test/g" /var/www/pantheon_test/sites/default/settings.php /var/www/pantheon_test/profiles/default/default.profile')
     local('sed -i "s/pantheon_dev/pantheon_live/g" /var/www/pantheon_live/sites/default/settings.php /var/www/pantheon_live/profiles/default/default.profile')
+    local("mkdir /var/www/pantheon_test/sites/all/files")
+    local("mkdir /var/www/pantheon_live/sites/all/files")
     update.update_permissions('/var/www/pantheon_dev')
     update.update_permissions('/var/www/pantheon_test')
     update.update_permissions('/var/www/pantheon_live')
