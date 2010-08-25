@@ -116,6 +116,8 @@ def _initialize_pressflow():
     local('mkdir -p /var/www/pantheon_dev/sites/all/files')
     local('echo "files/*" > /var/www/pantheon_dev/sites/.gitignore')
     local('echo "!.gitignore" >> /var/www/pantheon_dev/sites/.gitignore')
+    local('touch /var/www/pantheon_dev/sites/all/files/.gitignore')
+    local('touch /var/www/pantheon_dev/sites/default/files/.gitignore')
     local('cp /var/www/pantheon_dev/sites/default/default.settings.php /var/www/pantheon_dev/sites/default/settings.php')
     local('cat /opt/pantheon/fabric/templates/newsite.settings.php >> /var/www/pantheon_dev/sites/default/settings.php')
     local('mkdir /var/www/pantheon_live')
