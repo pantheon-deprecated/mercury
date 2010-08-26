@@ -15,7 +15,13 @@
 # ADDED BY PANTHEON #
 
 if [ ! -f /etc/pantheon/incep ]; then
-    cd /opt/pantheon/fabric; fab configure 2>&1 >> /etc/pantheon/logs/init.log
+  # Wait for Hudson to spin Up
+  while [ "`curl -sL --connect-timeout 1 -w "%{http_code}\\n" "127.0.0.1:8081" -o /dev/null`" != "200" ]; do
+    sleep 5
+  done
+  
+  # Run the pantheon_config Hudson job
+  curl http://127.0.0.1:8081/job/pantheon_config/build?token='INIT'
 fi
 
 exit 0
