@@ -59,7 +59,7 @@ def _initialize_package_manager(server):
         local('rpm -Uvh http://yum.fourkitchens.com/pub/centos/5/noarch/fourkitchens-release-5-6.noarch.rpm')
         local('rpm --import http://hudson-ci.org/redhat/hudson-ci.org.key')
         local('wget http://hudson-ci.org/redhat/hudson.repo -O /etc/yum.repos.d/hudson.repo')
-        local('sudo sed -i -e "s/\[main\].*$/[main]\n\n### Added by PANTHEON ###\n@@here@@\n/" -e "s/@@here@@/exclude=yum3 $EXCL_ARCH/" /etc/yum.conf')
+        local("sudo sed -i -e 's/\[main\].*$/[main]\n\n### Added by PANTHEON ###\n@@here@@\n/' -e 's/@@here@@/exclude=yum3 $EXCL_ARCH/' /etc/yum.conf")
         local('sudo yum -y remove glibc.i686 libgcc.i386')
     server.update_packages()
         
