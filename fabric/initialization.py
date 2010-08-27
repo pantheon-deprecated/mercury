@@ -6,6 +6,7 @@ import update
 
 def initialize(vps="none"):
     '''Initialize the Pantheon system.'''
+    server = pantheon.PantheonServer()
     _initialize_support_account()
     _initialize_aptitude()
     _initialize_bcfg2(vps)
@@ -13,6 +14,7 @@ def initialize(vps="none"):
     _initialize_pantheon()
     _initialize_solr()
     _initialize_hudson()
+    _initialize_iptables(server)
     _initialize_pressflow()
 
 def init():
@@ -110,6 +112,9 @@ def _initialize_hudson():
         local('echo "%s" >> /etc/sudoers' % hudson_sudoer)
     local('usermod -a -G shadow hudson')
     local('/etc/init.d/hudson restart')
+
+def _initialize_iptables(server):
+    server.setup_iptables()
 
 def _initialize_pressflow():
     local('mkdir -p /var/www/pantheon_dev/sites/default/files')

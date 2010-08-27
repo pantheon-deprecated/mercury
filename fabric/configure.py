@@ -9,14 +9,14 @@ def configure(vps="none"):
     '''configure the Pantheon system.'''
     server = pantheon.PantheonServer()
     _test_for_previous_run()
-    _update_server(server)
+    _configure_server(server)
     if (vps == "aws"):
-        _setup_ec2_config(server)
-    _setup_main_config(server)
-    _setup_postfix(server)
+        _config_ec2_(server)
+    _configure_apache(server)
+    _configure_postfix(server)
     _restart_services(server)
-    _create_databases()
-    _open_hudson()
+    _configure_databases()
+    _configure_iptables(server)
     _mark_incep(server)
     _report()
 
@@ -24,12 +24,14 @@ def _test_for_previous_run():
     if os.path.exists("/etc/pantheon/incep"):
         abort("Pantheon config has already run. Exiting.")
 
-def _update_server(server):
+def _configure_server(server):
     server.update_packages()
     update.update_pressflow()
     update.update_pantheon()
+    local('cp /etc/pantheon/templates/tuneables /etc/pantheon/server_tuneables')
+    local('chmod 755 /etc/pantheon/server_tuneables')
 
-def  _setup_ec2_config(server):
+def  _configure_ec2(server):
     local('chmod 1777 /tmp')
     if(server.distro == 'centos'):
         local('mv /var/log/mysqld.log /mnt/mysql/')
@@ -44,9 +46,7 @@ def  _setup_ec2_config(server):
     local('ln -s /mnt/varnish/lib /var/lib/varnish')
     local('chown varnish:varnish /mnt/varnish/lib/pressflow/')
 
-def _setup_main_config(server):
-    local('cp /etc/pantheon/templates/tuneables /etc/pantheon/server_tuneables')
-    local('chmod 755 /etc/pantheon/server_tuneables')
+def _configure_apache(server):
     if(server.distro == 'centos'):
         local('cp /etc/pantheon/templates/vhost/* /etc/httpd/conf/vhosts/')
     else:
@@ -54,9 +54,8 @@ def _setup_main_config(server):
         local('ln -sf /etc/apache2/sites-available/pantheon_live /etc/apache2/sites-available/default')
         local('a2ensite pantheon_dev')
         local('a2ensite pantheon_test')
-    local('/usr/sbin/usermod -a -G shadow hudson')
 
-def _setup_postfix(server):
+def _configure_postfix(server):
     f = open('/etc/mailname', 'w')
     f.write(server.hostname)
     f.close()
@@ -68,19 +67,15 @@ def _setup_postfix(server):
 def _restart_services(server):
      server.restart_services()
 
-def _create_databases():
+def _configure_databases():
     #TODO: allow for mysql already having a password
     local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_dev'")
     local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_test;'")
     local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_live;'")
 
-def _open_hudson():
+def _configure_iptables(server):
     local('sed -i "s/#-A/-A/g" /etc/pantheon/templates/iptables')
-    local('/sbin/iptables-restore < /etc/pantheon/templates/iptables')
-    if server.distro == 'ubuntu':
-        local('/sbin/iptables-save')
-    elif server.distro == 'centos':
-        local('/sbin/service iptables save; /etc/init.d/iptables restart')
+    server.setup_iptables()
 
 def _mark_incep(server):
     '''Mark incep date. This prevents us from ever running again.'''
