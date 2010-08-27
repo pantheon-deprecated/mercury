@@ -127,7 +127,7 @@ def _initialize_pressflow():
     local('echo "files/*" > ' + server.webroot() + 'pantheon_dev/sites/.gitignore')
     local('echo "!.gitignore" >> ' + server.webroot() + 'pantheon_dev/sites/.gitignore')
     local('touch pantheon_dev/sites/all/files/.gitignore')
-    local('touch ' + server.webroo()t + 'pantheon_dev/sites/default/files/.gitignore')
+    local('touch ' + server.webroot() + 'pantheon_dev/sites/default/files/.gitignore')
     local('cp ' + server.webroot() + 'pantheon_dev/sites/default/default.settings.php ' + server.webroot() + 'pantheon_dev/sites/default/settings.php')
     local('cat /opt/pantheon/fabric/templates/newsite.settings.php >> ' + server.webroot() + 'pantheon_dev/sites/default/settings.php')
     local('mkdir ' + server.webroot() + 'pantheon_live')
