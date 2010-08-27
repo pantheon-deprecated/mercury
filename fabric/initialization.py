@@ -58,7 +58,10 @@ def _initialize_package_manager(server):
     server.update_packages()
         
 def _initialize_bcfg2(vps):
-    local('apt-get install -y bcfg2-server gamin python-gamin python-genshi')
+    if server.distro == 'ubuntu':
+        local('apt-get install -y bcfg2-server gamin python-gamin python-genshi')
+    elif self.distro == 'centos':
+        local('yum -y install bcfg2 bcfg2-server gamin gamin-python python-genshi python-ssl python-lxml libxslt')
     with cd('/opt/pantheon/fabric'):
         local('cp bcfg2.conf /etc/')
     local('rm -f /etc/bcfg2.key bcfg2.crt')
