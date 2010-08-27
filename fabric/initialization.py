@@ -9,7 +9,7 @@ def initialize(vps="none"):
     server = pantheon.PantheonServer()
     _initialize_support_account(server)
     _initialize_package_manager(server)
-    _initialize_bcfg2(vps)
+    _initialize_bcfg2(vps, server)
     _initialize_drush()
     _initialize_pantheon(server)
     _initialize_solr(server)
@@ -61,7 +61,7 @@ def _initialize_package_manager(server):
         local('wget http://hudson-ci.org/redhat/hudson.repo -O /etc/yum.repos.d/hudson.repo')
     server.update_packages()
         
-def _initialize_bcfg2(vps):
+def _initialize_bcfg2(vps, server):
     if server.distro == 'ubuntu':
         local('apt-get install -y bcfg2-server gamin python-gamin python-genshi')
     elif server.distro == 'centos':
