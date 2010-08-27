@@ -90,8 +90,8 @@ def _initialize_drush():
     local('drush dl drush_make')
 
 def _initialize_pantheon(server):
-    local('rm -rf ' server.webroot)
-    local('drush make /etc/pantheon/pantheon.make ' + server.webroot + 'pantheon_dev/')
+    local('rm -rf ' server.webroot())
+    local('drush make /etc/pantheon/pantheon.make ' + server.webroot() + 'pantheon_dev/')
 
 def _initialize_solr(server):
     local('[ ! -d apache-solr-1.4.1 ] || rm -rf apache-solr-1.4.1')
@@ -100,8 +100,8 @@ def _initialize_solr(server):
     local('mkdir -p /var/solr')
     local('mv apache-solr-1.4.1/dist/apache-solr-1.4.1.war /var/solr/solr.war')
     local('cp -R apache-solr-1.4.1/example/solr /opt/pantheon/fabric/templates/')
-    local('cp ' + server.webroot + 'pantheon_dev/sites/all/modules/apachesolr/schema.xml /opt/pantheon/fabric/templates/solr/conf/')
-    local('cp ' + server.webroot + 'pantheon_dev/sites/all/modules/apachesolr/solrconfig.xml /opt/pantheon/fabric/templates/solr/conf/')
+    local('cp ' + server.webroot() + 'pantheon_dev/sites/all/modules/apachesolr/schema.xml /opt/pantheon/fabric/templates/solr/conf/')
+    local('cp ' + server.webroot() + 'pantheon_dev/sites/all/modules/apachesolr/solrconfig.xml /opt/pantheon/fabric/templates/solr/conf/')
     local('rm -rf apache-solr-1.4.1')
     local('rm apache-solr-1.4.1.tgz')
     local('cp -R /opt/pantheon/fabric/templates/solr /var/solr/pantheon_dev')
@@ -122,27 +122,27 @@ def _initialize_iptables(server):
     server.setup_iptables()
 
 def _initialize_pressflow():
-    local('mkdir -p ' + server.webroot + 'pantheon_dev/sites/default/files')
-    local('mkdir -p ' +server.webroot  + 'pantheon_dev/sites/all/files')
-    local('echo "files/*" > ' + server.webroot + 'pantheon_dev/sites/.gitignore')
-    local('echo "!.gitignore" >> ' + server.webroot + 'pantheon_dev/sites/.gitignore')
+    local('mkdir -p ' + server.webroot() + 'pantheon_dev/sites/default/files')
+    local('mkdir -p ' +server.webroot()  + 'pantheon_dev/sites/all/files')
+    local('echo "files/*" > ' + server.webroot() + 'pantheon_dev/sites/.gitignore')
+    local('echo "!.gitignore" >> ' + server.webroot() + 'pantheon_dev/sites/.gitignore')
     local('touch pantheon_dev/sites/all/files/.gitignore')
-    local('touch ' + server.webroot + 'pantheon_dev/sites/default/files/.gitignore')
-    local('cp ' + server.webroot + 'pantheon_dev/sites/default/default.settings.php ' + server.webroot + 'pantheon_dev/sites/default/settings.php')
-    local('cat /opt/pantheon/fabric/templates/newsite.settings.php >> ' + server.webroot + 'pantheon_dev/sites/default/settings.php')
-    local('mkdir ' + server.webroot + 'pantheon_live')
-    with cd(server.webroot + 'pantheon_dev'):
+    local('touch ' + server.webroo()t + 'pantheon_dev/sites/default/files/.gitignore')
+    local('cp ' + server.webroot() + 'pantheon_dev/sites/default/default.settings.php ' + server.webroot() + 'pantheon_dev/sites/default/settings.php')
+    local('cat /opt/pantheon/fabric/templates/newsite.settings.php >> ' + server.webroot() + 'pantheon_dev/sites/default/settings.php')
+    local('mkdir ' + server.webroot() + 'pantheon_live')
+    with cd(server.webroot() + 'pantheon_dev'):
         local('git init')
         local('git add .')
         local('git commit -m "initial branch commit"')
         local('git checkout -b pantheon_dev')
-    local('git clone ' + server.webroot + 'pantheon_dev ' + server.webroot + 'pantheon_test')
-    with cd(server.webroot + 'pantheon_test'):
+    local('git clone ' + server.webroot() + 'pantheon_dev ' + server.webroo()t + 'pantheon_test')
+    with cd(server.webroot() + 'pantheon_test'):
         local('git checkout master')
         local('git update-index --assume-unchanged profiles/default/default.profile sites/default/settings.php')
-        local('git archive master | sudo tar -x -C ' + server.webroot + 'pantheon_live')
-    local('sed -i "s/pantheon_dev/pantheon_test/g" ' + server.webroot + 'pantheon_test/sites/default/settings.php ' + server.webroot + 'pantheon_test/profiles/default/default.profile')
-    local('sed -i "s/pantheon_dev/pantheon_live/g" ' + server.webroot + 'pantheon_live/sites/default/settings.php ' + server.webroot + 'pantheon_live/profiles/default/default.profile')
-    update.update_permissions(server.webroot + 'pantheon_dev')
-    update.update_permissions(server.webroot + 'pantheon_test')
-    update.update_permissions(server.webroot + 'pantheon_live')
+        local('git archive master | sudo tar -x -C ' + server.webroot() + 'pantheon_live')
+    local('sed -i "s/pantheon_dev/pantheon_test/g" ' + server.webroot() + 'pantheon_test/sites/default/settings.php ' + server.webroot() + 'pantheon_test/profiles/default/default.profile')
+    local('sed -i "s/pantheon_dev/pantheon_live/g" ' + server.webroot() + 'pantheon_live/sites/default/settings.php ' + server.webroot() + 'pantheon_live/profiles/default/default.profile')
+    update.update_permissions(server.webroot() + 'pantheon_dev')
+    update.update_permissions(server.webroot() + 'pantheon_test')
+    update.update_permissions(server.webroot() + 'pantheon_live')
