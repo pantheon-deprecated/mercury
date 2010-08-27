@@ -300,6 +300,7 @@ class PantheonServer:
             local('/etc/init.d/mysqld restart')
 
     def setup_iptables(self):
+        local('/sbin/iptables-restore < /etc/pantheon/templates/iptables')
         if self.distro == 'centos':
             local('/sbin/service iptables save; /etc/init.d/iptables restart')
         else:
