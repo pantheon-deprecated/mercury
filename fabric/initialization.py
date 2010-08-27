@@ -36,7 +36,7 @@ def _initialize_support_account(server):
         if server.distro == 'ubuntu':
             local('useradd pantheon --base-dir=/var --comment="Pantheon Support"'
                   ' --create-home --groups=www-data,sudo --shell=/bin/bash')
-        elif self.distro == 'centos':
+        elif server.distro == 'centos':
             local('useradd pantheon --base-dir=/var --comment="Pantheon Support"'
                   ' --create-home --shell=/bin/bash')
     with cd('~pantheon'):
@@ -54,7 +54,7 @@ def _initialize_package_manager(server):
             local('cp lucid /etc/apt/preferences.d/')
             local('apt-key add gpgkeys.txt')
         local('echo \'APT::Install-Recommends "0";\' >>  /etc/apt/apt.conf')
-    elif self.distro == 'centos':
+    elif server.distro == 'centos':
         local('rpm -Uvh http://dl.iuscommunity.org/pub/ius/stable/Redhat/5/x86_64/ius-release-1-4.ius.el5.noarch.rpm')
         local('rpm -Uvh http://yum.fourkitchens.com/pub/centos/5/noarch/fourkitchens-release-5-6.noarch.rpm')
         local('rpm --import http://hudson-ci.org/redhat/hudson-ci.org.key')
@@ -64,7 +64,7 @@ def _initialize_package_manager(server):
 def _initialize_bcfg2(vps):
     if server.distro == 'ubuntu':
         local('apt-get install -y bcfg2-server gamin python-gamin python-genshi')
-    elif self.distro == 'centos':
+    elif server.distro == 'centos':
         local('yum -y install bcfg2 bcfg2-server gamin gamin-python python-genshi python-ssl python-lxml libxslt')
     with cd('/opt/pantheon/fabric'):
         local('cp bcfg2.conf /etc/')
