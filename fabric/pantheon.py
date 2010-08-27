@@ -299,6 +299,12 @@ class PantheonServer:
             local('/etc/init.d/varnish restart')
             local('/etc/init.d/mysqld restart')
 
+    def setup_iptables(self):
+        if self.distro == 'centos':
+            local('/sbin/service iptables save; /etc/init.d/iptables restart')
+        else:
+            local('/sbin/iptables-save')
+
 class SiteImport:
     
     def __init__(self, location, webroot, project, environment):

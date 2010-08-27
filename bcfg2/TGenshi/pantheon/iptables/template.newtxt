@@ -13,7 +13,7 @@
 -A INPUT -p tcp --dport 80 -j ACCEPT
 -A INPUT -p tcp --dport 443 -j ACCEPT
 -A INPUT -p tcp --dport 8080 -j ACCEPT
--A INPUT -p tcp --dport 8081 -j ACCEPT
+#-A INPUT -p tcp --dport 8081 -j ACCEPT
 -A INPUT -p tcp --dport 8082 -j ACCEPT
 -A INPUT -p tcp --dport 8083 -j ACCEPT
 
