@@ -33,8 +33,12 @@ def _initialize_support_account():
     if '%sudo ALL=(ALL) NOPASSWD: ALL' not in sudoers:
         local('echo "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers')
     if 'pantheon' not in local('cat /etc/passwd'):
-        local('useradd pantheon --base-dir=/var --comment="Pantheon Support"'
-            ' --create-home --groups=www-data,sudo --shell=/bin/bash')
+        if server.distro == 'ubuntu':
+            local('useradd pantheon --base-dir=/var --comment="Pantheon Support"'
+                  ' --create-home --groups=www-data,sudo --shell=/bin/bash')
+         elif self.distro == 'centos':
+             local('useradd pantheon --base-dir=/var --comment="Pantheon Support"'
+                  ' --create-home --shell=/bin/bash')
     with cd('~pantheon'):
         local('mkdir -p .ssh')
         local('chmod 700 .ssh')
