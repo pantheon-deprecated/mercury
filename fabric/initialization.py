@@ -97,7 +97,7 @@ def _initialize_drush():
     local('drush dl drush_make')
 
 def _initialize_pantheon(server):
-    local('rm -rf %s' % server.webroot())
+    local('rm -rf ' + server.webroot())
     local('drush make /etc/pantheon/pantheon.make ' + server.webroot() + 'pantheon_dev/')
 
 def _initialize_solr(server):
