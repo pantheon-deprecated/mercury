@@ -7,7 +7,7 @@ import update
 def initialize(vps="none"):
     '''Initialize the Pantheon system.'''
     server = pantheon.PantheonServer()
-    _initialize_support_account()
+    _initialize_support_account(server)
     _initialize_package_manager(server)
     _initialize_bcfg2(vps)
     _initialize_drush()
@@ -21,7 +21,7 @@ def init():
     '''Alias of "initialize"'''
     initialize()
 
-def _initialize_support_account():
+def _initialize_support_account(server):
     '''Generate a public/private key pair for root.'''
     local('mkdir -p ~/.ssh')
     with cd('~/.ssh'):
