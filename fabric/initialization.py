@@ -62,11 +62,10 @@ def _initialize_package_manager(server):
         arch = local('uname -m').rstrip('\n')
         if (arch == "x86_64"):
             exclude_arch = "*.i?86"
-        elif (arch == "i386" || arch == "i586" || arch == "i686"):
+        elif (arch == "i386" or arch == "i586" or arch == "i686"):
             exclude_arch = "*.x86_64"
         if exclude_arch:
             local('echo "exclude=%s" >> /etc/yum.conf' % exclude_arch)
-            local('sudo sed -i -e "s/\[main\].*$/[main]\n\n### Added by PANTHEON ###\n@@here@@\n/" -e "s/@@here@@/exclude=yum3 $EXCL_ARCH/" /etc/yum.conf')
         local('sudo yum -y remove glibc.i686 libgcc.i386')
     server.update_packages()
         
