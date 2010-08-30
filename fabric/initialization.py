@@ -35,10 +35,10 @@ def _initialize_support_account(server):
     if 'pantheon' not in local('cat /etc/passwd'):
         if server.distro == 'ubuntu':
             local('useradd pantheon --base-dir=/var --comment="Pantheon Support"'
-                  ' --create-home --groups=www-data,sudo --shell=/bin/bash')
+                  ' --create-home --groups=' + server.group + ',sudo --shell=/bin/bash')
         elif server.distro == 'centos':
             local('useradd pantheon --base-dir=/var --comment="Pantheon Support"'
-                  ' --create-home --shell=/bin/bash')
+                  ' --create-home  --groups=' + server.group + ' --shell=/bin/bash')
     with cd('~pantheon'):
         local('mkdir -p .ssh')
         local('chmod 700 .ssh')
@@ -163,6 +163,6 @@ def _initialize_pressflow(server):
         local('git archive master | sudo tar -x -C ' + server.webroot + 'pantheon_live')
     local('sed -i "s/pantheon_dev/pantheon_test/g" ' + server.webroot + 'pantheon_test/sites/default/settings.php ' + server.webroot + 'pantheon_test/profiles/default/default.profile')
     local('sed -i "s/pantheon_dev/pantheon_live/g" ' + server.webroot + 'pantheon_live/sites/default/settings.php ' + server.webroot + 'pantheon_live/profiles/default/default.profile')
-    update.update_permissions(server.webroot + 'pantheon_dev')
-    update.update_permissions(server.webroot + 'pantheon_test')
-    update.update_permissions(server.webroot + 'pantheon_live')
+    update.update_permissions(server.webroot + 'pantheon_dev', server)
+    update.update_permissions(server.webroot + 'pantheon_test', server)
+    update.update_permissions(server.webroot + 'pantheon_live', server)
