@@ -92,11 +92,11 @@ def _initialize_bcfg2(vps, server):
     
     pantheon.restart_bcfg2()
     if (vps == "aws"):
-        sudo('/usr/sbin/bcfg2 -vqed -p pantheon-aws')
+        local('/usr/sbin/bcfg2 -vqed -p pantheon-aws')
     elif (vps == "ebs"):
-        sudo('/usr/sbin/bcfg2 -vqed -p pantheon-aws-ebs')
+        local('/usr/sbin/bcfg2 -vqed -p pantheon-aws-ebs')
     else:
-        sudo('/usr/sbin/bcfg2 -vqed')
+        local('/usr/sbin/bcfg2 -vqed')
 
 def _initialize_drush():
     local('[ ! -d drush ] || rm -rf drush')
