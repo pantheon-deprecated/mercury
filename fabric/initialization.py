@@ -38,7 +38,7 @@ def _initialize_support_account(server):
                   ' --create-home --groups=' + server.group + ',sudo --shell=/bin/bash')
         elif server.distro == 'centos':
             local('useradd pantheon --base-dir=/var --comment="Pantheon Support"'
-                  ' --create-home  --groups=' + server.group + ' --shell=/bin/bash')
+                  ' --create-home  --shell=/bin/bash')
     with cd('~pantheon'):
         local('mkdir -p .ssh')
         local('chmod 700 .ssh')
