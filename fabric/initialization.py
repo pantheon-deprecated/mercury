@@ -126,7 +126,7 @@ def _initialize_solr(server):
     local('cp -R /opt/pantheon/fabric/templates/solr /var/solr/pantheon_dev')
     local('cp -a /var/solr/pantheon_dev /var/solr/pantheon_test')
     local('cp -a /var/solr/pantheon_dev /var/solr/pantheon_live')
-    local('chown -R tomcat6:root /var/solr/')
+    local('chown -R ' + server.tomcat_owner + ':root /var/solr/')
 
 def _initialize_hudson():
     sudoers = local('cat /etc/sudoers')
