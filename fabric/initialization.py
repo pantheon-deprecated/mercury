@@ -86,6 +86,10 @@ def _initialize_bcfg2(vps, server):
     local('ln -sf /opt/pantheon/bcfg2 /var/lib/')
     local('cp /opt/pantheon/fabric/clients.xml /var/lib/bcfg2/Metadata/')
     local('sed -i "s/^plugins = .*$/plugins = Bundler,Cfg,Metadata,Packages,Probes,Rules,TGenshi\\nfilemonitor = gamin/" /etc/bcfg2.conf')
+    
+    '''temp bug fix for upstream tab issue in TGenshi'''
+    local('sed -i "s/\t/        /" /usr/lib/python2.4/site-packages/Bcfg2/Server/Plugins/TGenshi.py')
+    
     pantheon.restart_bcfg2()
     if (vps == "aws"):
         sudo('/usr/sbin/bcfg2 -vqed -p pantheon-aws')

@@ -101,8 +101,6 @@
     <Arch>i386</Arch>
   </APTSource>
 
-  <!-- Uncomment for CentOS Support
-
   <YUMSource>
     <Group>centos5.5</Group>
     <URL>http://mirror.rackspace.com/CentOS</URL>
@@ -143,8 +141,6 @@
     <RawURL>http://yum.fourkitchens.com/pub/centos/5/noarch</RawURL>
     <Arch>i386</Arch>
   </YUMSource>
-
-  -->
 
   <!-- Uncomment for Debian Support
 
