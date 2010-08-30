@@ -13,7 +13,7 @@ def initialize(vps="none"):
     _initialize_drush()
     _initialize_pantheon(server)
     _initialize_solr(server)
-    _initialize_hudson()
+    _initialize_hudson(server)
     _initialize_iptables(server)
     _initialize_pressflow(server)
 
@@ -128,13 +128,14 @@ def _initialize_solr(server):
     local('cp -a /var/solr/pantheon_dev /var/solr/pantheon_live')
     local('chown -R ' + server.tomcat_owner + ':root /var/solr/')
 
-def _initialize_hudson():
+def _initialize_hudson(server):
     sudoers = local('cat /etc/sudoers')
     hudson_sudoer = ('hudson ALL = NOPASSWD: /usr/local/bin/drush,'
                      ' /etc/pantheon/init.sh, /usr/bin/fab, /usr/sbin/bcfg2')
     if 'hudson ALL = NOPASSWD:' not in sudoers:
         local('echo "%s" >> /etc/sudoers' % hudson_sudoer)
-    local('usermod -a -G shadow hudson')
+    if server.distro != 'centos':
+        local('usermod -a -G shadow hudson')
     local('/etc/init.d/hudson restart')
 
 def _initialize_iptables(server):
