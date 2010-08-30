@@ -60,7 +60,7 @@ def _initialize_package_manager(server):
 
         '''temp'''
         local('rpm -Uvh http://repo.webtatic.com/yum/centos/5/`uname -i`/webtatic-release-5-0.noarch.rpm')
-        local('yum install --enablerepo=webtatic git')
+        local('yum install -y --enablerepo=webtatic git')
         
         local('rpm --import http://hudson-ci.org/redhat/hudson-ci.org.key')
         local('wget http://hudson-ci.org/redhat/hudson.repo -O /etc/yum.repos.d/hudson.repo')
