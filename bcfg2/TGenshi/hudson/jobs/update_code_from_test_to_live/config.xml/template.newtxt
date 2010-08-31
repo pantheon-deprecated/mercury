@@ -12,7 +12,7 @@ Run once on first boot.</description>
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>cd /opt/pantheon/fabric; /usr/bin/fab update_code:pantheon,test,pantheon,live </command>
+      <command>cd /opt/pantheon/fabric; /usr/bin/sudo /usr/bin/fab update_code:pantheon,test,pantheon,live </command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
