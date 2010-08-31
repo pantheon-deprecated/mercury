@@ -140,7 +140,10 @@ def _initialize_hudson(server):
                      ' /etc/pantheon/init.sh, /usr/bin/fab, /usr/sbin/bcfg2')
     if 'hudson ALL = NOPASSWD:' not in sudoers:
         local('echo "%s" >> /etc/sudoers' % hudson_sudoer)
-    if server.distro != 'centos':
+    if server.distro == 'centos':
+        local('usermod -a -G root hudson')
+        local('chmod g+r /etc/shadow')
+    else:
         local('usermod -a -G shadow hudson')
     local('/etc/init.d/hudson restart')
 
