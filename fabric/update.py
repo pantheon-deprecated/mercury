@@ -116,6 +116,7 @@ def update_code(source_project=None, source_environment=None, target_project=Non
                      local('rsync -av --exclude=settings.php ' + temporary_directory + '/* ' + target_location)
                      local('rm -rf temporary_directory')
 
+       update_permissions(source_location, server)
        update_permissions(target_location, server)
        print(target_project + '_' + target_environment + ' project updated from ' + source_project + '_' + source_environment)
        
