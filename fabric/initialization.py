@@ -7,21 +7,21 @@ import update
 def initialize(vps="none"):
     '''Initialize the Pantheon system.'''
     server = pantheon.PantheonServer()
-    _initialize_support_account()
-    _initialize_aptitude()
-    _initialize_bcfg2(vps)
+    _initialize_support_account(server)
+    _initialize_package_manager(server)
+    _initialize_bcfg2(vps, server)
     _initialize_drush()
-    _initialize_pantheon()
-    _initialize_solr()
-    _initialize_hudson()
+    _initialize_pantheon(server)
+    _initialize_solr(server)
+    _initialize_hudson(server)
     _initialize_iptables(server)
-    _initialize_pressflow()
+    _initialize_pressflow(server)
 
 def init():
     '''Alias of "initialize"'''
     initialize()
 
-def _initialize_support_account():
+def _initialize_support_account(server):
     '''Generate a public/private key pair for root.'''
     local('mkdir -p ~/.ssh')
     with cd('~/.ssh'):
@@ -33,8 +33,12 @@ def _initialize_support_account():
     if '%sudo ALL=(ALL) NOPASSWD: ALL' not in sudoers:
         local('echo "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers')
     if 'pantheon' not in local('cat /etc/passwd'):
-        local('useradd pantheon --base-dir=/var --comment="Pantheon Support"'
-            ' --create-home --groups=www-data,sudo --shell=/bin/bash')
+        if server.distro == 'ubuntu':
+            local('useradd pantheon --base-dir=/var --comment="Pantheon Support"'
+                  ' --create-home --groups=' + server.group + ',sudo --shell=/bin/bash')
+        elif server.distro == 'centos':
+            local('useradd pantheon --base-dir=/var --comment="Pantheon Support"'
+                  ' --create-home  --shell=/bin/bash')
     with cd('~pantheon'):
         local('mkdir -p .ssh')
         local('chmod 700 .ssh')
@@ -43,17 +47,38 @@ def _initialize_support_account():
         local('chmod 600 .ssh/authorized_keys')
         local('chown -R pantheon: .ssh')
 
-def _initialize_aptitude():
-    with cd('/opt/pantheon/fabric'):
-        local('cp pantheon.list /etc/apt/sources.list.d/')
-        local('cp lucid /etc/apt/preferences.d/')
-        local('apt-key add gpgkeys.txt')
-    local('echo \'APT::Install-Recommends "0";\' >>  /etc/apt/apt.conf')
-    local('apt-get update')
-    local('apt-get -y dist-upgrade')
+def _initialize_package_manager(server):
+    if server.distro == 'ubuntu':
+        with cd('/opt/pantheon/fabric'):
+            local('cp pantheon.list /etc/apt/sources.list.d/')
+            local('cp lucid /etc/apt/preferences.d/')
+            local('apt-key add gpgkeys.txt')
+        local('echo \'APT::Install-Recommends "0";\' >>  /etc/apt/apt.conf')
+    elif server.distro == 'centos':
+        local('rpm -Uvh http://dl.iuscommunity.org/pub/ius/stable/Redhat/5/x86_64/ius-release-1.0-6.ius.el5.noarch.rpm')
+        local('rpm -Uvh http://yum.fourkitchens.com/pub/centos/5/noarch/fourkitchens-release-5-6.noarch.rpm')
 
-def _initialize_bcfg2(vps):
-    local('apt-get install -y bcfg2-server gamin python-gamin python-genshi')
+        '''temp'''
+        local('rpm -Uvh http://repo.webtatic.com/yum/centos/5/`uname -i`/webtatic-release-5-0.noarch.rpm')
+        local('yum install -y --enablerepo=webtatic git')
+        
+        local('rpm --import http://hudson-ci.org/redhat/hudson-ci.org.key')
+        local('wget http://hudson-ci.org/redhat/hudson.repo -O /etc/yum.repos.d/hudson.repo')
+        arch = local('uname -m').rstrip('\n')
+        if (arch == "x86_64"):
+            exclude_arch = "*.i?86"
+        elif (arch == "i386" or arch == "i586" or arch == "i686"):
+            exclude_arch = "*.x86_64"
+        if exclude_arch:
+            local('echo "exclude=%s" >> /etc/yum.conf' % exclude_arch)
+        local('sudo yum -y remove glibc.i686 libgcc.i386')
+    server.update_packages()
+        
+def _initialize_bcfg2(vps, server):
+    if server.distro == 'ubuntu':
+        local('apt-get install -y bcfg2-server gamin python-gamin python-genshi')
+    elif server.distro == 'centos':
+        local('yum -y install bcfg2 bcfg2-server gamin gamin-python python-genshi python-ssl python-lxml libxslt')
     with cd('/opt/pantheon/fabric'):
         local('cp bcfg2.conf /etc/')
     local('rm -f /etc/bcfg2.key bcfg2.crt')
@@ -66,13 +91,18 @@ def _initialize_bcfg2(vps):
     local('ln -sf /opt/pantheon/bcfg2 /var/lib/')
     local('cp /opt/pantheon/fabric/clients.xml /var/lib/bcfg2/Metadata/')
     local('sed -i "s/^plugins = .*$/plugins = Bundler,Cfg,Metadata,Packages,Probes,Rules,TGenshi\\nfilemonitor = gamin/" /etc/bcfg2.conf')
+    
+    if server.distro == 'centos':
+        '''temp bug fix for upstream tab issue in TGenshi'''
+        local('sed -i "s/\t/    /" /usr/lib/python2.4/site-packages/Bcfg2/Server/Plugins/TGenshi.py')
+    
     pantheon.restart_bcfg2()
     if (vps == "aws"):
-        sudo('/usr/sbin/bcfg2 -vqed -p pantheon-aws')
+        local('/usr/sbin/bcfg2 -vqed -p pantheon-aws')
     elif (vps == "ebs"):
-        sudo('/usr/sbin/bcfg2 -vqed -p pantheon-aws-ebs')
+        local('/usr/sbin/bcfg2 -vqed -p pantheon-aws-ebs')
     else:
-        sudo('/usr/sbin/bcfg2 -vqed')
+        local('/usr/sbin/bcfg2 -vqed')
 
 def _initialize_drush():
     local('[ ! -d drush ] || rm -rf drush')
@@ -84,60 +114,65 @@ def _initialize_drush():
     local('ln -sf /opt/drush/drush /usr/local/bin/drush')
     local('drush dl drush_make')
 
-def _initialize_pantheon():
-    local('rm -rf /var/www')
-    local('drush make /etc/pantheon/pantheon.make /var/www/pantheon_dev/')
+def _initialize_pantheon(server):
+    local('rm -rf ' + server.webroot)
+    local('drush make /etc/pantheon/pantheon.make ' + server.webroot + 'pantheon_dev/')
 
-def _initialize_solr():
+def _initialize_solr(server):
     local('[ ! -d apache-solr-1.4.1 ] || rm -rf apache-solr-1.4.1')
     local('wget http://apache.osuosl.org/lucene/solr/1.4.1/apache-solr-1.4.1.tgz')
     local('tar xvzf apache-solr-1.4.1.tgz')
     local('mkdir -p /var/solr')
     local('mv apache-solr-1.4.1/dist/apache-solr-1.4.1.war /var/solr/solr.war')
     local('cp -R apache-solr-1.4.1/example/solr /opt/pantheon/fabric/templates/')
-    local('cp /var/www/pantheon_dev/sites/all/modules/apachesolr/schema.xml /opt/pantheon/fabric/templates/solr/conf/')
-    local('cp /var/www/pantheon_dev/sites/all/modules/apachesolr/solrconfig.xml /opt/pantheon/fabric/templates/solr/conf/')
+    local('cp ' + server.webroot + 'pantheon_dev/sites/all/modules/apachesolr/schema.xml /opt/pantheon/fabric/templates/solr/conf/')
+    local('cp ' + server.webroot + 'pantheon_dev/sites/all/modules/apachesolr/solrconfig.xml /opt/pantheon/fabric/templates/solr/conf/')
     local('rm -rf apache-solr-1.4.1')
     local('rm apache-solr-1.4.1.tgz')
     local('cp -R /opt/pantheon/fabric/templates/solr /var/solr/pantheon_dev')
     local('cp -a /var/solr/pantheon_dev /var/solr/pantheon_test')
     local('cp -a /var/solr/pantheon_dev /var/solr/pantheon_live')
-    local('chown -R tomcat6:root /var/solr/')
+    local('chown -R ' + server.tomcat_owner + ':root /var/solr/')
 
-def _initialize_hudson():
+def _initialize_hudson(server):
     sudoers = local('cat /etc/sudoers')
     hudson_sudoer = ('hudson ALL = NOPASSWD: /usr/local/bin/drush,'
                      ' /etc/pantheon/init.sh, /usr/bin/fab, /usr/sbin/bcfg2')
     if 'hudson ALL = NOPASSWD:' not in sudoers:
         local('echo "%s" >> /etc/sudoers' % hudson_sudoer)
-    local('usermod -a -G shadow hudson')
+    if server.distro == 'centos':
+        local('usermod -a -G root hudson')
+        local('chmod g+r /etc/shadow')
+        local('sed -i "s/Defaults    requiretty/#Defaults    requiretty/" /etc/sudoers')
+    else:
+        local('usermod -a -G shadow hudson')
     local('/etc/init.d/hudson restart')
 
 def _initialize_iptables(server):
     server.setup_iptables()
 
-def _initialize_pressflow():
-    local('mkdir -p /var/www/pantheon_dev/sites/default/files')
-    local('mkdir -p /var/www/pantheon_dev/sites/all/files')
-    local('echo "files/*" > /var/www/pantheon_dev/sites/.gitignore')
-    local('echo "!.gitignore" >> /var/www/pantheon_dev/sites/.gitignore')
-    local('touch /var/www/pantheon_dev/sites/all/files/.gitignore')
-    local('touch /var/www/pantheon_dev/sites/default/files/.gitignore')
-    local('cp /var/www/pantheon_dev/sites/default/default.settings.php /var/www/pantheon_dev/sites/default/settings.php')
-    local('cat /opt/pantheon/fabric/templates/newsite.settings.php >> /var/www/pantheon_dev/sites/default/settings.php')
-    local('mkdir /var/www/pantheon_live')
-    with cd('/var/www/pantheon_dev'):
+def _initialize_pressflow(server):
+    local('mkdir -p ' + server.webroot + 'pantheon_dev/sites/default/files')
+    local('mkdir -p ' +server.webroot  + 'pantheon_dev/sites/all/files')
+    local('echo "files/*" > ' + server.webroot + 'pantheon_dev/sites/.gitignore')
+    local('echo "!.gitignore" >> ' + server.webroot + 'pantheon_dev/sites/.gitignore')
+    local('touch ' + server.webroot + 'pantheon_dev/sites/all/files/.gitignore')
+    local('touch ' + server.webroot + 'pantheon_dev/sites/default/files/.gitignore')
+    local('cp ' + server.webroot + 'pantheon_dev/sites/default/default.settings.php ' + server.webroot + 'pantheon_dev/sites/default/settings.php')
+    local('cat /opt/pantheon/fabric/templates/newsite.settings.php >> ' + server.webroot + 'pantheon_dev/sites/default/settings.php')
+    local('mkdir ' + server.webroot + 'pantheon_live')
+    with cd(server.webroot + 'pantheon_dev'):
         local('git init')
         local('git add .')
         local('git commit -m "initial branch commit"')
         local('git checkout -b pantheon_dev')
-    local('git clone /var/www/pantheon_dev /var/www/pantheon_test')
-    with cd('/var/www/pantheon_test'):
+    local('git clone ' + server.webroot + 'pantheon_dev ' + server.webroot + 'pantheon_test')
+    with cd(server.webroot + 'pantheon_test'):
         local('git checkout master')
         local('git update-index --assume-unchanged profiles/default/default.profile sites/default/settings.php')
-        local('git archive master | sudo tar -x -C /var/www/pantheon_live')
-    local('sed -i "s/pantheon_dev/pantheon_test/g" /var/www/pantheon_test/sites/default/settings.php /var/www/pantheon_test/profiles/default/default.profile')
-    local('sed -i "s/pantheon_dev/pantheon_live/g" /var/www/pantheon_live/sites/default/settings.php /var/www/pantheon_live/profiles/default/default.profile')
-    update.update_permissions('/var/www/pantheon_dev')
-    update.update_permissions('/var/www/pantheon_test')
-    update.update_permissions('/var/www/pantheon_live')
+        local('git archive master | sudo tar -x -C ' + server.webroot + 'pantheon_live')
+    local('sed -i "s/pantheon_dev/pantheon_test/g" ' + server.webroot + 'pantheon_test/sites/default/settings.php ' + server.webroot + 'pantheon_test/profiles/default/default.profile')
+    local('sed -i "s/pantheon_dev/pantheon_live/g" ' + server.webroot + 'pantheon_live/sites/default/settings.php ' + server.webroot + 'pantheon_live/profiles/default/default.profile')
+    update.update_permissions(server.webroot + 'pantheon_dev', server)
+    update.update_permissions(server.webroot + 'pantheon_test', server)
+    update.update_permissions(server.webroot + 'pantheon_live', server)

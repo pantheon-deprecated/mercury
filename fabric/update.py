@@ -15,8 +15,8 @@ def update_pantheon():
        print("Pantheon Updated")
 
 def update_pressflow(project=None, environment=None):
-       webroot = pantheon.PantheonServer().webroot 
-       
+       server = pantheon.PantheonServer()
+
        print ("Updating Pressflow")
        if (project == None):
               print("No project selected. Using 'pantheon'")
@@ -24,15 +24,15 @@ def update_pressflow(project=None, environment=None):
        if (environment == None):
               print("No environment selected. Using 'dev'")
               environment = 'dev'
-       with cd(webroot + project + '_' + environment):
+       with cd(server.webroot + project + '_' + environment):
               local('git pull git://gitorious.org/pantheon-pressflow/pantheon-pressflow.git')
               with settings(warn_only=True):
                      local('git commit -m "updates from the Pantheon gitorious project"')
-       update_permissions('%s' % (webroot + project + '_' + environment + '/'))
+       update_permissions('%s' % (server.webroot + project + '_' + environment + '/'), server)
        print("Pressflow Updated")
 
 def update_data(source_project=None, source_environment=None, target_project=None, target_environment=None):
-       webroot = pantheon.PantheonServer().webroot
+       server = pantheon.PantheonServer()
        source_temporary_directory = tempfile.mkdtemp()
        target_temporary_directory = tempfile.mkdtemp()
 
@@ -49,8 +49,8 @@ def update_data(source_project=None, source_environment=None, target_project=Non
               print("No target_environment selected. Using 'test'")
               target_environment = 'test'
 
-       source_location = webroot + source_project + '_' + source_environment + "/"
-       target_location = webroot + target_project + '_' + target_environment + "/"
+       source_location = server.webroot + source_project + '_' + source_environment + "/"
+       target_location = server.webroot + target_project + '_' + target_environment + "/"
 
        print('Exporting ' + source_project + '/' + source_environment + ' database to temporary directory %s' % source_temporary_directory)
        sites = pantheon.export_data(source_location, source_temporary_directory)
@@ -71,8 +71,8 @@ def update_data(source_project=None, source_environment=None, target_project=Non
        print(target_project + '_' + target_environment + ' database updated with database from ' + source_project + '_' + source_environment)
 
 def update_code(source_project=None, source_environment=None, target_project=None, target_environment=None):
-       webroot = pantheon.PantheonServer().webroot
-       
+       server = pantheon.PantheonServer()
+
        if (source_project == None):
               print("No source_project selected. Using 'pantheon'")
               source_project = 'pantheon'
@@ -86,8 +86,8 @@ def update_code(source_project=None, source_environment=None, target_project=Non
               print("No target_environment selected. Using 'test'")
               target_environment = 'test'
 
-       source_location = webroot + source_project + '_' + source_environment + "/"
-       target_location = webroot + target_project + '_' + target_environment + "/"
+       source_location = server.webroot + source_project + '_' + source_environment + "/"
+       target_location = server.webroot + target_project + '_' + target_environment + "/"
 
        #commit any changes in source dir:
        if os.path.exists(source_location + '.git'):
@@ -116,12 +116,13 @@ def update_code(source_project=None, source_environment=None, target_project=Non
                      local('rsync -av --exclude=settings.php ' + temporary_directory + '/* ' + target_location)
                      local('rm -rf temporary_directory')
 
-       update_permissions(target_location)
+       update_permissions(source_location, server)
+       update_permissions(target_location, server)
        print(target_project + '_' + target_environment + ' project updated from ' + source_project + '_' + source_environment)
        
 def update_files(source_project=None, source_environment=None, target_project=None, target_environment=None):
-       webroot = pantheon.PantheonServer().webroot
-       
+       server = pantheon.PantheonServer()
+
        if (source_project == None):
               print("No source_project selected. Using 'pantheon'")
               source_project = 'pantheon'
@@ -135,13 +136,13 @@ def update_files(source_project=None, source_environment=None, target_project=No
               print("No target_environment selected. Using 'test'")
               target_environment = 'test'
 
-       local('rsync -av '+ webroot + source_project + '_' + source_environment + '/sites/all/files ' + webroot + target_project + '_' + target_environment + '/sites/all/')
+       local('rsync -av '+ server.webroot + source_project + '_' + source_environment + '/sites/all/files ' + server.webroot + target_project + '_' + target_environment + '/sites/all/')
        print(target_project + '_' + target_environment + ' files updated from ' + source_project + '_' + source_environment)
 
-def update_permissions(dir):
+def update_permissions(dir, server):
        with cd(dir):
-              local('chown -R root:www-data *')
-              local('chown www-data:www-data sites/default/settings.php')
+              local('chown -R root:' + server.group + ' *')
+              local('chown ' + server.group + ':' + server.group + ' sites/default/settings.php')
               local('chmod 660 sites/default/settings.php')
               local('find . -type d -exec chmod 755 {} \;')
               local('find sites/*/files -type d -exec chmod 775 {} \;')

@@ -14,7 +14,7 @@ Run once on first boot.</description>
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>cd /opt/pantheon/fabric; sudo /usr/bin/fab configure 2&gt;&amp;1</command>
+      <command>cd /opt/pantheon/fabric; /usr/bin/sudo /usr/bin/fab configure 2&gt;&amp;1</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
