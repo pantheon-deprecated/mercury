@@ -71,7 +71,6 @@ def _initialize_package_manager(server):
             exclude_arch = "*.x86_64"
         if exclude_arch:
             local('echo "exclude=%s" >> /etc/yum.conf' % exclude_arch)
-        local('sudo yum -y remove glibc.i686 libgcc.i386')
     server.update_packages()
         
 def _initialize_bcfg2(vps, server):
