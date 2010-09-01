@@ -167,7 +167,6 @@ def _initialize_pressflow(server):
         local('git checkout -b pantheon_dev')
     local('git clone ' + server.webroot + 'pantheon_dev ' + server.webroot + 'pantheon_test')
     with cd(server.webroot + 'pantheon_test'):
-        local('git checkout master')
         local('git update-index --assume-unchanged profiles/default/default.profile sites/default/settings.php')
         local('git archive master | sudo tar -x -C ' + server.webroot + 'pantheon_live')
     local('sed -i "s/pantheon_dev/pantheon_test/g" ' + server.webroot + 'pantheon_test/sites/default/settings.php ' + server.webroot + 'pantheon_test/profiles/default/default.profile')
