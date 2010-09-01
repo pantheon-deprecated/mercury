@@ -3,7 +3,7 @@
   <!-- Ubuntu Only -->
   <Group name='ubuntu'>
     
-    <!-- pantheon -->
+    <!-- tools -->
     <Service type='deb' status='on' name='vnstat'/>
 
     <!-- tomcat6 -->
@@ -80,6 +80,8 @@
     <Group name='lucid' negate='true'>
       <!-- mysql -->
       <Service type='deb' status='on' name='mysql'/>
+      <!-- vsftpd -->
+      <Service type='deb' status='on' name='vsftpd'/>
       <!-- ubuntu -->
       <Service type='deb' status='on' name='cron'/>
       <Service type='deb' status='on' name='dmesg'/>
@@ -91,6 +93,9 @@
   
       <!-- mysql -->
       <Service type='upstart' status='on' name='mysql'/>
+      
+      <!-- vsftp -->
+      <Service type='upstart' status='on' name='vsftpd'/>
 
       <!-- Ubuntu -->
       <Service type='upstart' status='on' name='cron'/>

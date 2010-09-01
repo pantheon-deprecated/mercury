@@ -69,6 +69,9 @@
     <Service type='chkconfig' status='on' name='varnishlog'/>
     <Service type='chkconfig' status='on' name='varnishncsa'/>
 
+    <!-- vsftpd -->
+    <Service type='chkconfig' status='on' name='vsftpd'/>
+
     <!-- CentOS -->
     <Service type='chkconfig' status='on' name='crond'/>
     <Service type='chkconfig' status='off' name='iptables'/>
