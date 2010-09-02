@@ -165,7 +165,7 @@ def _initialize_pressflow(server):
         local('git commit -m "initial branch commit"')
         local('git checkout -b pantheon_dev')
     local('git clone ' + server.webroot + 'pantheon_dev ' + server.webroot + 'pantheon_test')
-    local('mkdir pantheon_live')
+    local('mkdir '  + server.webroot + 'pantheon_live')
     with cd(server.webroot + 'pantheon_test'):
         local('git update-index --assume-unchanged profiles/default/default.profile sites/default/settings.php')
         local('git archive master | sudo tar -x -C ' + server.webroot + 'pantheon_live')
