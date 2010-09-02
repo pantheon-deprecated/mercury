@@ -151,15 +151,17 @@ def _initialize_iptables(server):
     server.setup_iptables()
 
 def _initialize_pressflow(server):
-    local('mkdir -p ' + server.webroot + 'pantheon_dev/sites/default/files')
-    local('mkdir -p ' +server.webroot  + 'pantheon_dev/sites/all/files')
-    local('echo "files/*" > ' + server.webroot + 'pantheon_dev/sites/.gitignore')
-    local('echo "!.gitignore" >> ' + server.webroot + 'pantheon_dev/sites/.gitignore')
-    local('touch ' + server.webroot + 'pantheon_dev/sites/all/files/.gitignore')
-    local('touch ' + server.webroot + 'pantheon_dev/sites/default/files/.gitignore')
-    local('cp ' + server.webroot + 'pantheon_dev/sites/default/default.settings.php ' + server.webroot + 'pantheon_dev/sites/default/settings.php')
-    local('cat /opt/pantheon/fabric/templates/newsite.settings.php >> ' + server.webroot + 'pantheon_dev/sites/default/settings.php')
-    local('mkdir ' + server.webroot + 'pantheon_live')
+    with cd(server.webroot):
+        local('mkdir -p pantheon_dev/sites/default/files')
+        local('mkdir -p pantheon_dev/sites/all/files')
+        local('echo "*" > pantheon_dev/sites/all/files/.gitignore')
+        local('echo "!.gitignore" >> pantheon_dev/sites/all/files/.gitignore')
+        local('cp pantheon_dev/sites/all/files/.gitignore pantheon_dev/sites/default/files/' )
+        local('touch pantheon_dev/sites/all/files/.gitignore')
+        local('touch pantheon_dev/sites/default/files/.gitignore')
+        local('cp pantheon_dev/sites/default/default.settings.php pantheon_dev/sites/default/settings.php')
+        local('cat /opt/pantheon/fabric/templates/newsite.settings.php >> pantheon_dev/sites/default/settings.php')
+        local('mkdir pantheon_live')
     with cd(server.webroot + 'pantheon_dev'):
         local('git init')
         local('git add .')
