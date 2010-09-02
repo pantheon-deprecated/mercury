@@ -8,6 +8,15 @@ import tempfile
 import time
 import urlparse
 
+
+def getfrom_url(url):
+    download_dir = tempfile.mkdtemp()
+    filebase = os.path.basename(url)
+    filename = os.path.join(download_dir, filebase)
+
+    pantheon.curl(url, filename)
+    return filename
+
 def curl(url, destination):
     """Fetch a file at a url and save to destination.
 
@@ -187,6 +196,16 @@ class DrupalSite:
             return (local("drush --uri=%s variable-get file_directory_path | \
                 grep 'file_directory_path: \"' | \
                 sed 's/^file_directory_path: \"\(.*\)\".*/\\1/'" % self.name)).rstrip('\n')
+
+    def set_site_perms(self, webroot = self.webroot):
+        # Settings.php Permissions
+        with cd(webroot + "sites/" + site.name):
+            local("chmod 440 settings.php")
+        # File directory permissions (770 on all child directories, 660 on all files)
+        with cd(webroot + site.file_location):
+            local("chmod 770 .")
+            local("find . -type d -exec find '{}' -type f \; | while read FILE; do chmod 660 \"$FILE\"; done")
+            local("find . -type d -exec find '{}' -type d \; | while read DIR; do chmod 770 \"$DIR\"; done")
 
     def set_variables(self, variables = dict()):
         with cd(self.webroot):

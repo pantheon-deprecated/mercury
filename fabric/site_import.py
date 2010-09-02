@@ -8,11 +8,7 @@ import tempfile
 import pantheon
 
 def import_siteurl(url, project = None, environment = None):
-    download_dir = tempfile.mkdtemp()
-    filebase = os.path.basename(url)
-    filename = os.path.join(download_dir, filebase)
-  
-    pantheon.curl(url, filename)
+    filename = pantheon.getfrom_url(url)
     import_site(filename, project, environment)
 
 def import_site(site_archive, project = None, environment = None):
@@ -211,14 +207,7 @@ def _setup_files_directory(archive):
 def _setup_permissions(server, archive):
     local("chown -R %s:%s %s" % (server.owner, server.group, archive.destination))
     for site in archive.sites:
-        # Settings.php Permissions
-        with cd(archive.destination + "sites/" + site.name):
-            local("chmod 440 settings.php")
-        # File directory permissions (770 on all child directories, 660 on all files)
-        with cd(archive.destination + site.file_location):
-            local("chmod 770 .")
-            local("find . -type d -exec find '{}' -type f \; | while read FILE; do chmod 660 \"$FILE\"; done")
-            local("find . -type d -exec find '{}' -type d \; | while read DIR; do chmod 770 \"$DIR\"; done")
+        site.set_site_perms(archive.destination)
         # Solr Index permissions
         with cd("/var/solr"):
             local("chown -R %s:%s *" % (server.tomcat_owner, server.tomcat_owner))
