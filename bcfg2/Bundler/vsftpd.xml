@@ -4,9 +4,9 @@
   <Service name='vsftpd'/>
  
   <Group name='deb'>
-    <Path name='/etc/vsftpd.conf' altsrc='/vsftp/vsftpd.conf'/>
+    <Path name='/etc/vsftpd.conf' altsrc='/vsftpd/conf'/>
   </Group>
   <Group name = 'centos'>
-    <Path name='/etc/vsftpd/vsftpd.conf' altsrc='/vsftp/vsftpd.conf'/>
+    <Path name='/etc/vsftpd/vsftpd.conf' altsrc='/vsftpd/conf'/>
   </Group> 
 </Bundle>
