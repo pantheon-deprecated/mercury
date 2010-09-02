@@ -151,23 +151,21 @@ def _initialize_iptables(server):
     server.setup_iptables()
 
 def _initialize_pressflow(server):
-    with cd(server.webroot):
-        local('mkdir -p pantheon_dev/sites/default/files')
-        local('mkdir -p pantheon_dev/sites/all/files')
-        local('echo "*" > pantheon_dev/sites/all/files/.gitignore')
-        local('echo "!.gitignore" >> pantheon_dev/sites/all/files/.gitignore')
-        local('cp pantheon_dev/sites/all/files/.gitignore pantheon_dev/sites/default/files/' )
-        local('touch pantheon_dev/sites/all/files/.gitignore')
-        local('touch pantheon_dev/sites/default/files/.gitignore')
-        local('cp pantheon_dev/sites/default/default.settings.php pantheon_dev/sites/default/settings.php')
-        local('cat /opt/pantheon/fabric/templates/newsite.settings.php >> pantheon_dev/sites/default/settings.php')
-        local('mkdir pantheon_live')
     with cd(server.webroot + 'pantheon_dev'):
+        local('mkdir -p sites/default/files')
+        local('mkdir -p sites/all/files')
+        local('echo "*" > sites/all/files/.gitignore')
+        local('echo "!.gitignore" >> sites/all/files/.gitignore')
+        local('cp sites/all/files/.gitignore sites/default/files/' )
+        local('touch sites/all/files/.gitignore sites/default/files/.gitignore')
+        local('cp sites/default/default.settings.php sites/default/settings.php')
+        local('cat /opt/pantheon/fabric/templates/newsite.settings.php >> sites/default/settings.php')
         local('git init')
         local('git add .')
         local('git commit -m "initial branch commit"')
         local('git checkout -b pantheon_dev')
     local('git clone ' + server.webroot + 'pantheon_dev ' + server.webroot + 'pantheon_test')
+    local('mkdir pantheon_live')
     with cd(server.webroot + 'pantheon_test'):
         local('git update-index --assume-unchanged profiles/default/default.profile sites/default/settings.php')
         local('git archive master | sudo tar -x -C ' + server.webroot + 'pantheon_live')
