@@ -3,6 +3,10 @@
   <Package name='vsftpd'/>  
   <Service name='vsftpd'/>
  
-  <BoundPath type='directory' name='/var/ftp/pub/' owner='root' group='root' perms='0755'/>
-
+  <Group name='deb'>
+    <Path name='/etc/vsftpd.conf' altsrc='/vsftp/vsftpd.conf'/>
+  </Group>
+  <Group name = 'centos'>
+    <Path name='/etc/vsftpd/vsftpd.conf' altsrc='/vsftp/vsftpd.conf'/>
+  </Group> 
 </Bundle>
