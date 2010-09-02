@@ -1,0 +1,8 @@
+<Bundle name ='vsftpd'>
+  
+  <Package name='vsftpd'/>  
+  <Service name='vsftpd'/>
+ 
+  <BoundPath type='directory' name='/var/ftp/pub/' owner='root' group='root' perms='0755'/>
+
+</Bundle>

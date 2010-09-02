@@ -48,6 +48,7 @@
     <Bundle name='postfix'/>
     <Bundle name='tomcat'/>
     <Bundle name='varnish'/>
+    <Bundle name='vsftpd'/>
     <Group name='hudson'/>
   </Group>
   

@@ -10,10 +10,7 @@
   <Package name='subversion'/>
   <Package name='unzip'/>
   <Package name='vnstat'/>
-  <Package name='vsftpd'/>  
   
-  <Service name='vsftpd'/>
-
   <Action name='vnstat_db_eth0'/>
   
   <!-- Debian/Ubuntu Only -->
