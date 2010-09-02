@@ -9,7 +9,22 @@
 # capabilities.
 #
 #
+
+# Added by Pantheon
+anonymous_enable=YES
+local_enable=NO
+chmod_enable=NO
+dirlist_enable=NO
+dirmessage_enable=NO
+hide_ids=YES
+write_enable=NO
+max_clients=5
+anon_max_rate=3145728
+cmds_allowed=QUIT,RETR,GET,SYST,PORT
+
+
 # Run standalone?  vsftpd can run either from an inetd or as a standalone
+# Added by Pantheon
 # daemon started from an initscript.
 listen=YES
 #
@@ -18,12 +33,6 @@ listen=YES
 # instead of an IPv4 one. This parameter and the listen parameter are mutually
 # exclusive.
 #listen_ipv6=YES
-#
-# Allow anonymous FTP? (Disabled by default)
-anonymous_enable=NO
-#
-# Uncomment this to allow local users to log in.
-local_enable=YES
 #
 # Uncomment this to enable any form of FTP write command.
 #write_enable=YES
@@ -40,10 +49,6 @@ local_enable=YES
 # Uncomment this if you want the anonymous FTP user to be able to create
 # new directories.
 #anon_mkdir_write_enable=YES
-#
-# Activate directory messages - messages given to remote users when they
-# go into a certain directory.
-dirmessage_enable=YES
 #
 # If enabled, vsftpd will display directory listings with the time
 # in  your  local  time  zone.  The default is to display GMT. The

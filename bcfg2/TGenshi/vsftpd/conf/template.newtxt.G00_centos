@@ -8,15 +8,19 @@
 # Please read the vsftpd.conf.5 manual page to get a full idea of vsftpd's
 # capabilities.
 #
-# Allow anonymous FTP? (Beware - allowed by default if you comment this out).
+
+# Added by Pantheon
 anonymous_enable=YES
-#
-# Uncomment this to allow local users to log in.
-local_enable=YES
-#
-# Uncomment this to enable any form of FTP write command.
-write_enable=YES
-#
+local_enable=NO
+chmod_enable=NO
+dirlist_enable=NO
+dirmessage_enable=NO
+hide_ids=YES
+write_enable=NO
+max_clients=5
+anon_max_rate=3145728
+cmds_allowed=QUIT,RETR,GET,SYST,PORT
+
 # Default umask for local users is 077. You may wish to change this to 022,
 # if your users expect that (022 is used by most other ftpd's)
 local_umask=022
@@ -29,10 +33,6 @@ local_umask=022
 # Uncomment this if you want the anonymous FTP user to be able to create
 # new directories.
 #anon_mkdir_write_enable=YES
-#
-# Activate directory messages - messages given to remote users when they
-# go into a certain directory.
-dirmessage_enable=YES
 #
 # The target log file can be vsftpd_log_file or xferlog_file.
 # This depends on setting xferlog_std_format parameter
