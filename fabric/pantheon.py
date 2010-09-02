@@ -197,7 +197,9 @@ class DrupalSite:
                 grep 'file_directory_path: \"' | \
                 sed 's/^file_directory_path: \"\(.*\)\".*/\\1/'" % self.name)).rstrip('\n')
 
-    def set_site_perms(self, webroot = self.webroot):
+    def set_site_perms(self, webroot = None):
+        if webroot == None:
+            webroot = self.webroot
         # Settings.php Permissions
         with cd(webroot + "sites/" + site.name):
             local("chmod 440 settings.php")
