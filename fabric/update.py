@@ -25,7 +25,7 @@ def update_pressflow(project=None, environment=None):
               print("No environment selected. Using 'dev'")
               environment = 'dev'
        with cd(server.webroot + project + '_' + environment):
-              local('git pull git://gitorious.org/pantheon-pressflow/pantheon-pressflow.git')
+              local('git pull git://gitorious.org/pantheon/6.git')
               with settings(warn_only=True):
                      local('git commit -m "updates from the Pantheon gitorious project"')
        update_permissions('%s' % (server.webroot + project + '_' + environment + '/'), server)

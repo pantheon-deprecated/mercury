@@ -93,7 +93,7 @@ def _setup_site_files(archive):
         # Merge in Latest Pressflow
         local("git checkout master")
         local("git pull git://gitorious.org/pressflow/6.git master")
-        #local("git pull git://gitorious.org/pantheon-pressflow/pantheon-pressflow.git master")
+        #local("git pull git://gitorious.org/pantheon/6.git master")
         local("git checkout pantheon")
         local("git pull . master") # Fails on conflict, commits otherwise.
         

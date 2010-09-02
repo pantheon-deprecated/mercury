@@ -157,7 +157,6 @@ def _initialize_pressflow(server):
         local('echo "*" > sites/all/files/.gitignore')
         local('echo "!.gitignore" >> sites/all/files/.gitignore')
         local('cp sites/all/files/.gitignore sites/default/files/' )
-        local('touch sites/all/files/.gitignore sites/default/files/.gitignore')
         local('cp sites/default/default.settings.php sites/default/settings.php')
         local('cat /opt/pantheon/fabric/templates/newsite.settings.php >> sites/default/settings.php')
         local('git init')
