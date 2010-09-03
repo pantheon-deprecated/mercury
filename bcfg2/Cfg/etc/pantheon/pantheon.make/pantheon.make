@@ -4,7 +4,7 @@ core = 6.x
 
 projects[pressflow][type] = "core"
 projects[pressflow][download][type] = git
-projects[pressflow][download][url] = git://gitorious.org/pantheon-pressflow/pantheon-pressflow.git
+projects[pressflow][download][url] = git://gitorious.org/pantheon/6.git
 
 ; Modules
 projects[] = apachesolr
