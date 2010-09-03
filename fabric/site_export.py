@@ -4,31 +4,29 @@ import tempfile
 
 import pantheon
 
-def export_site(project=None, environment=None):
+def export_site(export_name, project='pantheon', environment='dev', export_to=None):
     temporary_directory = tempfile.mkdtemp()
-    webroot = pantheon.PantheonServer().webroot
-
-    if (project == None):
-        print("No project set. Using 'pantheon'")
-        project = 'pantheon'
-    if (environment == None):
-        print("No environment set. Using 'live' environment")
-        environment = 'live'
+    server = pantheon.PantheonServer()
 
     #TODO: change _ to / when we update the vhosts
-    location = webroot + project + '_' + environment + "/"
+    location = server.webroot + project + '_' + environment + "/"
 
     print('Exporting to temporary directory %s' % temporary_directory)
     _export_files(location, temporary_directory)
     pantheon.export_data(location, temporary_directory + '/htdocs')
-    _make_archive(temporary_directory)
+    archive = _make_archive(temporary_directory, export_name)
+    
+    if not export_to:
+        export_to = server.ftproot
+    local("mv %s %s" % (archive, export_to))
+    local("rm -rf %s" % (temporary_directory))
+        
 
 def _export_files(webroot, temporary_directory):
     local('cp -R %s %s/htdocs' % (webroot, temporary_directory))
 
-def _make_archive(directory):
-    file = directory + ".tar.gz"
+def _make_archive(directory, name):
+    file = name + ".tar.gz"
     with cd(directory):
       local('tar czf %s htdocs' % file)
-    print('Archived to %s' % file)
     return file

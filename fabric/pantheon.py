@@ -191,7 +191,9 @@ class DrupalSite:
         self.file_location = ''
         self.valid = False
 
-    def get_file_location(self):
+    def get_file_location(self, webroot = None):
+        if webroot == None:
+            webroot = self.webroot
         with cd(self.webroot):
             return (local("drush --uri=%s variable-get file_directory_path | \
                 grep 'file_directory_path: \"' | \
@@ -201,10 +203,10 @@ class DrupalSite:
         if webroot == None:
             webroot = self.webroot
         # Settings.php Permissions
-        with cd(webroot + "sites/" + site.name):
+        with cd(webroot + "sites/" + self.name):
             local("chmod 440 settings.php")
         # File directory permissions (770 on all child directories, 660 on all files)
-        with cd(webroot + site.file_location):
+        with cd(webroot + self.get_file_location(webroot)):
             local("chmod 770 .")
             local("find . -type d -exec find '{}' -type f \; | while read FILE; do chmod 660 \"$FILE\"; done")
             local("find . -type d -exec find '{}' -type d \; | while read DIR; do chmod 770 \"$DIR\"; done")
@@ -283,6 +285,7 @@ class PantheonServer:
             self.tomcat_owner = 'tomcat6'
             self.tomcat_version = '6'
             self.webroot = '/var/www/'
+            self.ftproot = '/srv/ftp/pantheon/'
         # Centos
         elif os.path.exists('/etc/redhat-release'):
             self.distro = 'centos'
@@ -292,6 +295,7 @@ class PantheonServer:
             self.tomcat_owner = 'tomcat'
             self.tomcat_version = '5'
             self.webroot = '/var/www/html/'
+            self.ftproot = '/var/ftp/pantheon/'
         self.ip = (local('hostname --ip-address')).rstrip('\n')
         if os.path.exists("/usr/local/bin/ec2-metadata"):
             self.hostname = local('/usr/local/bin/ec2-metadata -p | sed "s/public-hostname: //"').rstrip('\n')
