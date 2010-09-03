@@ -43,7 +43,9 @@ def _setup_site_files(archive):
         local("git commit -a -m 'Site Restore'")
 
 def _setup_settings_files(archive):
-    
+    for site in archive.sites:
+        settings_dict = site.get_settings_dict(archive.project)
+        site.build_settings_file(settings_dict, archive.destination)
 
 def _setup_permissions(server, archive):
     local("chown -R %s:%s %s" % (server.owner, server.group, archive.destination))

@@ -205,15 +205,8 @@ def _setup_permissions(server, archive):
             local("chown -R %s:%s *" % (server.tomcat_owner, server.tomcat_owner))
 
 def _setup_settings_files(archive):
-    slug_template = local("cat /opt/pantheon/fabric/templates/import.settings.php")
     for site in archive.sites:
-        # Add project + random string as memcached prefix.
-        site.database.memcache_prefix = archive.project + \
-                ''.join(["%s" % random.choice(string.ascii_letters + string.digits) for i in range(8)])
-        slug = string.Template(slug_template)
-        slug = slug.safe_substitute(site.database.__dict__)
-        with open(archive.destination + "sites/" + site.name + "/settings.php", 'a') as f:
-            f.write(slug)
-        f.close
+        settings_dict = site.get_settings_dict(archive.project)
+        site.build_settings_file(settings_dict, archive.destination)
 
 

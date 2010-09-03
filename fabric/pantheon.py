@@ -192,7 +192,7 @@ class DrupalSite:
         self.valid = False
 
     def get_file_location(self, webroot = None):
-        if webroot == None:
+        if not webroot:
             webroot = self.webroot
         with cd(self.webroot):
             return (local("drush --uri=%s variable-get file_directory_path | \
@@ -200,7 +200,7 @@ class DrupalSite:
                 sed 's/^file_directory_path: \"\(.*\)\".*/\\1/'" % self.name)).rstrip('\n')
 
     def set_site_perms(self, webroot = None):
-        if webroot == None:
+        if not webroot:
             webroot = self.webroot
         # Settings.php Permissions
         with cd(webroot + "sites/" + self.name):
@@ -210,6 +210,37 @@ class DrupalSite:
             local("chmod 770 .")
             local("find . -type d -exec find '{}' -type f \; | while read FILE; do chmod 660 \"$FILE\"; done")
             local("find . -type d -exec find '{}' -type d \; | while read DIR; do chmod 770 \"$DIR\"; done")
+
+    def build_settings_file(self, settings_dict, webroot = None):
+        """ Replace settings.php template with values from settings_dict
+        settings_dict: 'username'
+                       'password'
+                       'name'
+                       'memcache_prefix'
+
+        """
+        if not webroot:
+            webroot = self.webroot
+        slug_template = local("cat /opt/pantheon/fabric/templates/import.settings.php")
+        slug = string.Template(slug_template)
+        slug = slug.safe_substitute(settings_dict)
+        with open(webroot + "sites/" + self.name + "/settings.php", 'a') as f:
+            f.write(slug)
+        f.close
+
+    def get_settings_dict(self, project):
+       ret = {'username':self.database.username,
+               'password':self.database.password,
+               'name':self.database.name,
+               'memcache_prefix':self._get_memcache_prefix(project)}
+       return ret
+
+    def _get_memcache_prefix(name):
+        """Return name + 8 character random string (ascii + digits)
+        name: identifier for memcahe prefix. Generally 'project' name is used.
+
+        """
+        return name + ''.join(["%s" % random.choice(string.ascii_letters + string.digits) for i in range(8)])
 
     def set_variables(self, variables = dict()):
         with cd(self.webroot):
@@ -332,7 +363,7 @@ class PantheonServer:
             local('/sbin/iptables-save')
 
     def create_solr_index(self, name):
-        """ Create Solr indexes and tell Tomcat where to locate them.
+        """ Create Solr index and tell Tomcat where it is located. 
         name: Index directory. Standard format is: site_project_environment
 
         """
