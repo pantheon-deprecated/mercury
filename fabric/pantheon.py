@@ -15,7 +15,7 @@ def getfrom_url(url):
     filebase = os.path.basename(url)
     filename = os.path.join(download_dir, filebase)
 
-    pantheon.curl(url, filename)
+    curl(url, filename)
     return filename
 
 def curl(url, destination):

@@ -5,7 +5,7 @@ import pantheon
 
 from fabric.api import *
 
-def restore_siteurl(site_archive, project='pantheon', environment = 'dev'):
+def restore_siteurl(url, project='pantheon', environment = 'dev'):
     filename = pantheon.getfrom_url(url)
     restore_site(filename, project, environment)
 
