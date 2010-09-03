@@ -19,9 +19,10 @@ def restore_site(archive_file, project='pantheon', environment = 'dev'):
     _setup_databases(archive)
     _setup_site_files(archive)
     _setup_settings_files(archive)
-    _setup_permissions(archive)
+    _setup_permissions(archive, server)
     _setup_solr(archive, server)
-    _run_on_sites(archive.sites, 'cc all')
+    for site in archive.sites:
+        site.drush('cc all')
     server.restart_services()
 
     local("rm -rf " + working_dir)
@@ -37,8 +38,10 @@ def _setup_site_files(archive):
     if os.path.exists(archive.destination):
         local('rm -r ' + archive.destination)
 
+    local("mkdir " + archive.destination)
     with cd(archive.destination):
         local("rsync -avz " + archive.location + " " + archive.destination)
+        local("git init")
         local("git add .")
         local("git commit -a -m 'Site Restore'")
 
@@ -47,19 +50,15 @@ def _setup_settings_files(archive):
         settings_dict = site.get_settings_dict(archive.project)
         site.build_settings_file(settings_dict, archive.destination)
 
-def _setup_permissions(server, archive):
+def _setup_permissions(archive, server):
     local("chown -R %s:%s %s" % (server.owner, server.group, archive.destination))
     for site in archive.sites:
         site.set_site_perms(archive.destination)
 
 def _setup_solr(archive, server):
     for site in archive.sites:
-        solr_path = project + '_' + environment + '_' + site.get_safe_name()
+        solr_path = archive.project + '_' + archive.environment + '_' + site.get_safe_name()
         server.create_solr_index(solr_path)
-
-def _run_on_sites(sites, cmd):
-    for site in sites:
-        site.drush(cmd)
 
     
 
