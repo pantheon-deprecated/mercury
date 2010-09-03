@@ -2,18 +2,20 @@
 
   <!-- Ubuntu/Debian Only -->
   <Group name='deb'>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs' owner='hudson' group='root' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/pantheon_config' owner='hudson' group='root' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/cron_pantheon_dev' owner='hudson' group='root' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/cron_pantheon_test' owner='hudson' group='root' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/cron_pantheon_live' owner='hudson' group='root' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/import_site' owner='hudson' group='root' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_code_from_dev_to_test' owner='hudson' group='root' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_code_from_test_to_live' owner='hudson' group='root' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_data_from_live_to_test' owner='hudson' group='root' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_data_from_test_to_dev' owner='hudson' group='root' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_files_from_live_to_test' owner='hudson' group='root' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_files_from_test_to_dev' owner='hudson' group='root' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs' owner='hudson' group='nogroup' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/pantheon_config' owner='hudson' group='nogroup' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/cron_pantheon_dev' owner='hudson' group='nogroup' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/cron_pantheon_test' owner='hudson' group='nogroup' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/cron_pantheon_live' owner='hudson' group='nogroup' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/import_site' owner='hudson' group='nogroup' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/export_site' owner='hudson' group='nogroup' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/restore_site' owner='hudson' group='nogroup' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_code_from_dev_to_test' owner='hudson' group='nogroup' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_code_from_test_to_live' owner='hudson' group='nogroup' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_data_from_live_to_test' owner='hudson' group='nogroup' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_data_from_test_to_dev' owner='hudson' group='nogroup' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_files_from_live_to_test' owner='hudson' group='nogroup' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_files_from_test_to_dev' owner='hudson' group='nogroup' perms='0755'/>
   </Group>
   
   
@@ -35,6 +37,8 @@
   
   <!-- Jobs -->
   <Path name='/var/lib/hudson/jobs/import_site/config.xml' altsrc='/hudson/jobs/import_site/config.xml'/>
+  <Path name='/var/lib/hudson/jobs/export_site/config.xml' altsrc='/hudson/jobs/export_site/config.xml'/>
+  <Path name='/var/lib/hudson/jobs/restore_site/config.xml' altsrc='/hudson/jobs/restore_site/config.xml'/>
   <Path name='/var/lib/hudson/jobs/pantheon_config/config.xml' altsrc='/hudson/jobs/pantheon_config/config.xml'/>
   <Path name='/var/lib/hudson/jobs/cron_pantheon_dev/config.xml' altsrc='/hudson/jobs/cron_pantheon_dev/config.xml'/>
   <Path name='/var/lib/hudson/jobs/cron_pantheon_test/config.xml' altsrc='/hudson/jobs/cron_pantheon_test/config.xml'/>
