@@ -18,9 +18,10 @@ def export_site(export_name, project='pantheon', environment='dev', export_to=No
     
     if not export_to:
         export_to = server.ftproot
-    local("mv %s %s" % (archive, export_to))
+    local("mv %s/%s %s" % (temporary_directory, archive, export_to))
     local("rm -rf %s" % (temporary_directory))
         
+    print "Exported to: " + export_to
 
 def _export_files(webroot, temporary_directory):
     local('cp -R %s %s/htdocs' % (webroot, temporary_directory))

@@ -82,9 +82,9 @@ def _setup_site_files(archive):
 
         # Commit the imported site on top of the closest-match core
         local("git add .")
-        print(local("git status"))
+        #print(local("git status"))
         local("git commit -a -m 'Imported site.'")
-        print(local("git status"))
+        #print(local("git status"))
         
         # Merge in Latest Pressflow
         local("git checkout master")
