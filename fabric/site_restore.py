@@ -16,9 +16,9 @@ def restore_site(archive_file, project='pantheon', environment = 'dev'):
 
     archive = pantheon.SiteImport(working_dir, server.webroot, project, environment)
 
-    _setup_databases(archive):
-    _setup_site_files(archive):
-    _setup_permissions(archive):
+    _setup_databases(archive)
+    _setup_site_files(archive)
+    _setup_permissions(archive)
     _run_on_sites(archive.sites, 'cc all')
     server.restart_services()
 
