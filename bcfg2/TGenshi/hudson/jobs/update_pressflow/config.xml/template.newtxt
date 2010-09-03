@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>Running bcfg2-client from hudson for better error reporting</description>
+  <description>Running update_pressflow from hudson for better error reporting</description>
   <keepDependencies>false</keepDependencies>
   <properties/>
   <scm class="hudson.scm.NullSCM"/>
@@ -16,7 +16,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>sudo /usr/sbin/bcfg2 -vq</command>
+      <command>cd /opt/pantheon/fabric; /usr/bin/sudo /usr/bin/fab update_pressflow</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
