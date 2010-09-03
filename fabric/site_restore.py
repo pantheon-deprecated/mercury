@@ -18,15 +18,19 @@ def restore_site(archive_file, project='pantheon', environment = 'dev'):
 
     _setup_databases(archive)
     _setup_site_files(archive)
+    _setup_settings_files(archive)
     _setup_permissions(archive)
+    _setup_solr(archive, server)
     _run_on_sites(archive.sites, 'cc all')
     server.restart_services()
 
     local("rm -rf " + working_dir)
     #TODO: create vhosts for new project/env on restore
-    #TODO: create solr index for new project/env on restore
 
 def _setup_databases(archive):
+    for site in archive.sites:
+        name = archive.project + '_' + archive.environment + '_' + site.get_safe_name()
+        site.database.name = name
     pantheon.import_data(archive.sites)
 
 def _setup_site_files(archive):
@@ -38,10 +42,18 @@ def _setup_site_files(archive):
         local("git add .")
         local("git commit -a -m 'Site Restore'")
 
+def _setup_settings_files(archive):
+    
+
 def _setup_permissions(server, archive):
     local("chown -R %s:%s %s" % (server.owner, server.group, archive.destination))
     for site in archive.sites:
         site.set_site_perms(archive.destination)
+
+def _setup_solr(archive, server):
+    for site in archive.sites:
+        solr_path = project + '_' + environment + '_' + site.get_safe_name()
+        server.create_solr_index(solr_path)
 
 def _run_on_sites(sites, cmd):
     for site in sites:
