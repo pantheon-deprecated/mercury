@@ -331,6 +331,34 @@ class PantheonServer:
         else:
             local('/sbin/iptables-save')
 
+    def create_solr_index(self, name):
+        """ Create Solr indexes and tell Tomcat where to locate them.
+        name: Index directory. Standard format is: site_project_environment
+
+        """
+        # Setup indexes
+        solr_dir = '/var/solr/' + name
+        if os.path.exists(solr_dir):
+            local("rm -rf %s" % solr_dir)
+        solr_template = '/opt/pantheon/fabric/templates/solr/'
+        local("cp -R %s %s" % (solr_template, solr_dir))
+        local('chown -R %s:%s %s' % (
+                self.tomcat_owner,
+                self.tomcat_group,
+                solr_dir))
+
+        # Tell Tomcat where the indexes are located
+        tomcat_template = local("cat /opt/pantheon/fabric/templates/tomcat_solr_home.xml")
+        template = string.Template(tomcat_template)
+        template = template.safe_substitute({'solr_path':name})
+        tomcat_dir = "/etc/tomcat%s/Catalina/localhost/%s.xml" % (
+                self.tomcat_version,
+                name)
+
+        with open(tomcat_dir, 'w') as f:
+            f.write(template)
+        f.close()
+
 class SiteImport:
     
     def __init__(self, location, webroot, project, environment):

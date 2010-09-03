@@ -112,9 +112,10 @@ def _setup_modules(archive):
 
     # Drush will fail if it can't find memcache within drupal install. But we use drush to download memcache. 
     # Solve race condition by downloading outside drupal install. Download other prereqs also.
+    # TODO: Add CAS module here too
     temporary_directory = tempfile.mkdtemp()
     with cd(temporary_directory):
-        local("drush dl -y memcache apachesolr cas varnish")
+        local("drush dl -y memcache apachesolr varnish")
         local("cp -R * " + archive.destination + "sites/all/modules/")
     local("rm -rf " + temporary_directory)
     
@@ -136,22 +137,13 @@ def _setup_modules(archive):
         local("mv ./CAS-1.1.2 ./cas/CAS")
         local("rm CAS-1.1.2.tgz")
 
+    server = PantheonServer()
+
     for site in archive.sites:
 
         # Create new solr index
         solr_path = archive.project + '_' + archive.environment + '_' + site.get_safe_name()
-        if os.path.exists("/var/solr/" + solr_path):
-            local("rm -rf /var/solr/" + solr_path)
-        local("cp -R /opt/pantheon/fabric/templates/solr/ /var/solr/" + solr_path)
-
-        # tomcat config to set solr home dir.
-        tomcat_solr_home = "/etc/tomcat%s/Catalina/localhost/%s.xml" % (pantheon.PantheonServer().tomcat_version, solr_path)
-        solr_template = local("cat /opt/pantheon/fabric/templates/tomcat_solr_home.xml")
-        solr_home = string.Template(solr_template)
-        solr_home = solr_home.safe_substitute({'solr_path':solr_path})
-        with open(tomcat_solr_home, 'w') as f:
-            f.write(solr_home)
-        f.close
+        server.create_solr_index(solr_path)
 
         with cd(archive.destination + "sites/" + site.name):
            # If required modules exist in specific site directory, make sure they are on latest version.
@@ -159,8 +151,8 @@ def _setup_modules(archive):
                 with cd("modules"):
                     if os.path.exists("apachesolr"):
                         local("drush dl -y apachesolr")
-                    if os.path.exists("cas"):
-                        local("drush dl -y cas")
+                    #if os.path.exists("cas"):
+                    #    local("drush dl -y cas")
                     if os.path.exists("memcache"):
                         local("drush dl -y memcache")
                     if os.path.exists("varnish"):
@@ -185,8 +177,8 @@ def _setup_modules(archive):
         drupal_vars['preprocess_css'] = True
 
         # CAS variables
-        drupal_vars['cas_server'] = 'login.getpatheon.com'
-        drupal_vars['cas_uri'] = '/cas'
+        #drupal_vars['cas_server'] = 'login.getpatheon.com'
+        #drupal_vars['cas_uri'] = '/cas'
 
         # Set Drupal variables
         with settings(warn_only=True):
