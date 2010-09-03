@@ -132,12 +132,12 @@ def _setup_modules(archive):
         local("rm SolrPhpClient.r22.2009-11-09.tgz")
 
         # Download CAS php library
-        local("wget http://downloads.jasig.org/cas-clients/php/1.1.2/CAS-1.1.2.tgz")
-        local("tar xzf CAS-1.1.2.tgz")
-        local("mv ./CAS-1.1.2 ./cas/CAS")
-        local("rm CAS-1.1.2.tgz")
+        #local("wget http://downloads.jasig.org/cas-clients/php/1.1.2/CAS-1.1.2.tgz")
+        #local("tar xzf CAS-1.1.2.tgz")
+        #local("mv ./CAS-1.1.2 ./cas/CAS")
+        #local("rm CAS-1.1.2.tgz")
 
-    server = PantheonServer()
+    server = pantheon.PantheonServer()
 
     for site in archive.sites:
 

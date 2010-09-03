@@ -2,6 +2,7 @@
 from fabric.api import *
 import copy
 import os
+import random
 import re
 import string
 import tempfile
@@ -235,7 +236,7 @@ class DrupalSite:
                'memcache_prefix':self._get_memcache_prefix(project)}
        return ret
 
-    def _get_memcache_prefix(name):
+    def _get_memcache_prefix(self, name):
         """Return name + 8 character random string (ascii + digits)
         name: identifier for memcahe prefix. Generally 'project' name is used.
 
@@ -375,7 +376,7 @@ class PantheonServer:
         local("cp -R %s %s" % (solr_template, solr_dir))
         local('chown -R %s:%s %s' % (
                 self.tomcat_owner,
-                self.tomcat_group,
+                self.tomcat_owner,
                 solr_dir))
 
         # Tell Tomcat where the indexes are located
