@@ -113,7 +113,7 @@ def update_code(source_project=None, source_environment=None, target_project=Non
               with cd(source_location):
                      temporary_directory = tempfile.mkdtemp()
                      local('git archive master | sudo tar -x -C ' + temporary_directory)
-                     local('rsync -av --exclude=settings.php ' + temporary_directory + '/* ' + target_location)
+                     local('rsync -av --exclude=settings.php --exclude=files' + temporary_directory + '/* ' + target_location)
                      local('rm -rf temporary_directory')
 
        update_permissions(source_location, server)
@@ -136,7 +136,8 @@ def update_files(source_project=None, source_environment=None, target_project=No
               print("No target_environment selected. Using 'test'")
               target_environment = 'test'
 
-       local('rsync -av '+ server.webroot + source_project + '_' + source_environment + '/sites/all/files ' + server.webroot + target_project + '_' + target_environment + '/sites/all/')
+       local('rsync -av --delete '+ server.webroot + source_project + '_' + source_environment + '/sites/all/files ' + server.webroot + target_project + '_' + target_environment + '/sites/all/')
+       local('rsync -av --delete '+ server.webroot + source_project + '_' + source_environment + '/sites/default/files ' + server.webroot + target_project + '_' + target_environment + '/sites/default/')
        print(target_project + '_' + target_environment + ' files updated from ' + source_project + '_' + source_environment)
 
 def update_permissions(dir, server):
