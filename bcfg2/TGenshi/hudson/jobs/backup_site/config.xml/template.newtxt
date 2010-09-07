@@ -33,7 +33,7 @@
   <canRoam>true</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-  <authToken>EXPORTTOKEN</authToken>
+  <authToken>BACKUPTOKEN</authToken>
   <triggers class="vector"/>
   <concurrentBuild>false</concurrentBuild>
   <builders>
