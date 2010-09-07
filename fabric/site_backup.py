@@ -4,14 +4,7 @@ import tempfile
 
 import pantheon
 
-
 def backup_site(export_name, project='pantheon', environment='dev', export_to=None):
-    """Alias of export_site
-
-     """
-    export_site(export_name, project, environment, export_to)
-
-def export_site(export_name, project='pantheon', environment='dev', export_to=None):
     temporary_directory = tempfile.mkdtemp()
     server = pantheon.PantheonServer()
 
