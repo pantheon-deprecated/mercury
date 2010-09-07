@@ -10,11 +10,11 @@ def initialize(vps="none"):
     _initialize_support_account(server)
     _initialize_package_manager(server)
     _initialize_bcfg2(vps, server)
+    _initialize_iptables(server)
     _initialize_drush()
     _initialize_pantheon(server)
     _initialize_solr(server)
     _initialize_hudson(server)
-    _initialize_iptables(server)
     _initialize_pressflow(server)
 
 def init():
@@ -103,6 +103,9 @@ def _initialize_bcfg2(vps, server):
     else:
         local('/usr/sbin/bcfg2 -vqed')
 
+def _initialize_iptables(server):
+    server.setup_iptables()
+
 def _initialize_drush():
     local('[ ! -d drush ] || rm -rf drush')
     local('wget http://ftp.drupal.org/files/projects/drush-6.x-3.3.tar.gz')
@@ -146,9 +149,6 @@ def _initialize_hudson(server):
     else:
         local('usermod -a -G shadow hudson')
     local('/etc/init.d/hudson restart')
-
-def _initialize_iptables(server):
-    server.setup_iptables()
 
 def _initialize_pressflow(server):
     with cd(server.webroot + 'pantheon_dev'):
