@@ -162,7 +162,7 @@ def _initialize_pressflow(server):
         local('git init')
         local('git add .')
         local('git commit -m "initial branch commit"')
-        local('git checkout -b pantheon_dev')
+        local('git config receive.denycurrentbranch ignore')
     local('git clone ' + server.webroot + 'pantheon_dev ' + server.webroot + 'pantheon_test')
     local('mkdir '  + server.webroot + 'pantheon_live')
     with cd(server.webroot + 'pantheon_test'):
