@@ -1,3 +1,18 @@
+#This file is initially copied into iptables from /etc/pantheon/templates/iptables.
+
+#After being applied to iptables, these rules are then saved in:
+#ubuntu: /etc/uptables.rules
+#centos: /etc/sysconfig/iptables
+#and restored from there upon reboot of the system.
+
+#If you make changes to iptables, those changes are not automatically saved (nor restored 
+#upon restart of the system).  This allows you to recover a broken iptables by restarting 
+#the system
+
+#if you wish toi save your new iptables rules (after testing), issue the following: 
+#ubuntu: iptables-save > /etc/iptables.rules 
+#centos: /sbin/service iptables save
+
 *filter
 
 #  Allows all loopback

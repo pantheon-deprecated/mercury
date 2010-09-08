@@ -104,7 +104,13 @@ def _initialize_bcfg2(vps, server):
         local('/usr/sbin/bcfg2 -vqed')
 
 def _initialize_iptables(server):
-    server.setup_iptables()
+    local('/sbin/iptables-restore < /etc/pantheon/templates/iptables')
+    if server.distro == 'centos':
+        local('/sbin/service iptables save')
+        local('chkconfig iptables on')
+        local('service iptables start')
+    else:
+        local('/sbin/iptables-save > /etc/iptables.rules')
 
 def _initialize_drush():
     local('[ ! -d drush ] || rm -rf drush')

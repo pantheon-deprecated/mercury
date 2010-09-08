@@ -68,8 +68,12 @@ def _restart_services(server):
      server.restart_services()
 
 def _configure_iptables(server):
-    local('sed -i "s/#-A/-A/g" /etc/pantheon/templates/iptables')
-    server.setup_iptables()
+    if server.distro == 'centos':
+         local('sed -i "s/#-A/-A/g" /etc/sysconfig/iptables')
+         local('/sbin/iptables-restore < /etc/sysconfig/iptables')
+    else:
+        local('sed -i "s/#-A/-A/g" /etc/iptables.rules')
+        local('/sbin/iptables-restore </etc/iptables.rules')
 
 def _configure_databases():
     #TODO: allow for mysql already having a password
