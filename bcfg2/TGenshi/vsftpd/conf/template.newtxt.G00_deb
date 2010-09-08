@@ -12,6 +12,7 @@
 
 # Added by Pantheon
 anonymous_enable=YES
+anon_root=pantheon
 local_enable=NO
 chmod_enable=NO
 dirlist_enable=NO
