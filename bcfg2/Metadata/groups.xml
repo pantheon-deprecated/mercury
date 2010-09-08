@@ -43,8 +43,7 @@
     <Bundle name='memcached'/>
     <Bundle name='tools'/>
     <Bundle name='pantheon'/>
-    <Bundle name='mysql-packages'/>
-    <Bundle name='mysql-services'/>
+    <Bundle name='mysql'/>
     <Bundle name='postfix'/>
     <Bundle name='tomcat'/>
     <Bundle name='varnish'/>

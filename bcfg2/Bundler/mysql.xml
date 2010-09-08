@@ -1,4 +1,4 @@
-<Bundle name='mysql-packages'>
+<Bundle name='mysql'>
 
   <!-- Debian Only -->
   <Group name='debian'>
@@ -7,13 +7,16 @@
     <Package name='mysql-server-core-5.1'/>
   </Group>
 
-
-  <!-- Ubuntu/Deb Only -->
-  <Group name='deb'>
+  <!-- Ubuntu Only -->
+  <Group name='ubuntu'>
     <Package name='mysql-client'/>
     <Package name='mysql-server'/>
+  </Group>
 
-    <Action name='clear_ib_logfiles'/>
+  <!-- Ubuntu & Debian -->
+  <Group name='deb'>
+    <Path name='/etc/mysql/my.cnf' altsrc='/mysql/conf'/>
+    <Service name='mysql'/>
   </Group>
 
   <!-- CentOS Only -->
@@ -25,6 +28,9 @@
     <Package name='mysqlclient15-devel'/>
     <Package name='php52-mysql'/>
     <Package name='php52-pdo'/>
+
+    <Path name='/etc/my.cnf' altsrc='/mysql/conf'/>
+    <Service name='mysqld'/>
   </Group>
 </Bundle>
 
