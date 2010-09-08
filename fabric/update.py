@@ -113,7 +113,7 @@ def update_code(source_project=None, source_environment=None, target_project=Non
               with cd(source_location):
                      temporary_directory = tempfile.mkdtemp()
                      local('git archive master | sudo tar -x -C ' + temporary_directory)
-                     local('rsync -av --exclude=settings.php --exclude=files' + temporary_directory + '/* ' + target_location)
+                     local('rsync -av --delete --exclude=settings.php --exclude=files' + temporary_directory + '/* ' + target_location)
                      local('rm -rf temporary_directory')
 
        update_permissions(source_location, server)
