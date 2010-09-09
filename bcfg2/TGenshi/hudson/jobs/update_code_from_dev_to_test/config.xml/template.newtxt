@@ -26,6 +26,12 @@
           <description>environment to copy code to</description>
           <defaultValue>test</defaultValue>
         </hudson.model.StringParameterDefinition>
+	<hudson.model.StringParameterDefinition>
+          <name>uuid</name>
+          <description>Job Id</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
           <name>callback_url</name>
           <description>Where to send response</description>
           <defaultValue></defaultValue>
@@ -35,7 +41,9 @@
   </properties>
   <scm class="hudson.scm.NullSCM"/>
   <canRoam>true</canRoam>
+  <disabled>false</disabled>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <authToken>IMPORTTOKEN</authToken>
   <triggers class="vector"/>
   <concurrentBuild>false</concurrentBuild>
   <builders>
