@@ -3,7 +3,7 @@
   <!-- Ubuntu Only -->
   <Group name='ubuntu'>
     
-    <!-- pantheon -->
+    <!-- tools -->
     <Service type='deb' status='on' name='vnstat'/>
 
     <!-- tomcat6 -->
@@ -80,6 +80,8 @@
     <Group name='lucid' negate='true'>
       <!-- mysql -->
       <Service type='deb' status='on' name='mysql'/>
+      <!-- vsftpd -->
+      <Service type='deb' status='on' name='vsftpd'/>
       <!-- ubuntu -->
       <Service type='deb' status='on' name='cron'/>
       <Service type='deb' status='on' name='dmesg'/>
@@ -91,6 +93,9 @@
   
       <!-- mysql -->
       <Service type='upstart' status='on' name='mysql'/>
+      
+      <!-- vsftp -->
+      <Service type='upstart' status='on' name='vsftpd'/>
 
       <!-- Ubuntu -->
       <Service type='upstart' status='on' name='cron'/>
@@ -135,7 +140,6 @@
     </Group> 
     
     <!-- ACTIONS -->
-    <Action timing='post' when='always' name='clear_ib_logfiles' command='bash /var/lib/bcfg2/Probes/innodb_log_file_size' status='ignore'/>
     <Action timing='post' when='always' name='vnstat_db_eth0' command='vnstat -u -i eth0' status='ignore'/>
     
     <!-- AWS Only -->

@@ -8,11 +8,7 @@ import tempfile
 import pantheon
 
 def import_siteurl(url, project = None, environment = None):
-    download_dir = tempfile.mkdtemp()
-    filebase = os.path.basename(url)
-    filename = os.path.join(download_dir, filebase)
-  
-    pantheon.curl(url, filename)
+    filename = pantheon.getfrom_url(url)
     import_site(filename, project, environment)
 
 def import_site(site_archive, project = None, environment = None):
@@ -86,9 +82,9 @@ def _setup_site_files(archive):
 
         # Commit the imported site on top of the closest-match core
         local("git add .")
-        print(local("git status"))
+        #print(local("git status"))
         local("git commit -a -m 'Imported site.'")
-        print(local("git status"))
+        #print(local("git status"))
         
         # Merge in Latest Pressflow
         local("git checkout master")
@@ -116,9 +112,10 @@ def _setup_modules(archive):
 
     # Drush will fail if it can't find memcache within drupal install. But we use drush to download memcache. 
     # Solve race condition by downloading outside drupal install. Download other prereqs also.
+    # TODO: Add CAS module here too
     temporary_directory = tempfile.mkdtemp()
     with cd(temporary_directory):
-        local("drush dl -y memcache apachesolr cas varnish")
+        local("drush dl -y memcache apachesolr varnish")
         local("cp -R * " + archive.destination + "sites/all/modules/")
     local("rm -rf " + temporary_directory)
     
@@ -135,27 +132,18 @@ def _setup_modules(archive):
         local("rm SolrPhpClient.r22.2009-11-09.tgz")
 
         # Download CAS php library
-        local("wget http://downloads.jasig.org/cas-clients/php/1.1.2/CAS-1.1.2.tgz")
-        local("tar xzf CAS-1.1.2.tgz")
-        local("mv ./CAS-1.1.2 ./cas/CAS")
-        local("rm CAS-1.1.2.tgz")
+        #local("wget http://downloads.jasig.org/cas-clients/php/1.1.2/CAS-1.1.2.tgz")
+        #local("tar xzf CAS-1.1.2.tgz")
+        #local("mv ./CAS-1.1.2 ./cas/CAS")
+        #local("rm CAS-1.1.2.tgz")
+
+    server = pantheon.PantheonServer()
 
     for site in archive.sites:
 
         # Create new solr index
         solr_path = archive.project + '_' + archive.environment + '_' + site.get_safe_name()
-        if os.path.exists("/var/solr/" + solr_path):
-            local("rm -rf /var/solr/" + solr_path)
-        local("cp -R /opt/pantheon/fabric/templates/solr/ /var/solr/" + solr_path)
-
-        # tomcat config to set solr home dir.
-        tomcat_solr_home = "/etc/tomcat%s/Catalina/localhost/%s.xml" % (pantheon.PantheonServer().tomcat_version, solr_path)
-        solr_template = local("cat /opt/pantheon/fabric/templates/tomcat_solr_home.xml")
-        solr_home = string.Template(solr_template)
-        solr_home = solr_home.safe_substitute({'solr_path':solr_path})
-        with open(tomcat_solr_home, 'w') as f:
-            f.write(solr_home)
-        f.close
+        server.create_solr_index(solr_path)
 
         with cd(archive.destination + "sites/" + site.name):
            # If required modules exist in specific site directory, make sure they are on latest version.
@@ -163,8 +151,8 @@ def _setup_modules(archive):
                 with cd("modules"):
                     if os.path.exists("apachesolr"):
                         local("drush dl -y apachesolr")
-                    if os.path.exists("cas"):
-                        local("drush dl -y cas")
+                    #if os.path.exists("cas"):
+                    #    local("drush dl -y cas")
                     if os.path.exists("memcache"):
                         local("drush dl -y memcache")
                     if os.path.exists("varnish"):
@@ -189,8 +177,8 @@ def _setup_modules(archive):
         drupal_vars['preprocess_css'] = True
 
         # CAS variables
-        drupal_vars['cas_server'] = 'login.getpatheon.com'
-        drupal_vars['cas_uri'] = '/cas'
+        #drupal_vars['cas_server'] = 'login.getpatheon.com'
+        #drupal_vars['cas_uri'] = '/cas'
 
         # Set Drupal variables
         with settings(warn_only=True):
@@ -211,28 +199,14 @@ def _setup_files_directory(archive):
 def _setup_permissions(server, archive):
     local("chown -R %s:%s %s" % (server.owner, server.group, archive.destination))
     for site in archive.sites:
-        # Settings.php Permissions
-        with cd(archive.destination + "sites/" + site.name):
-            local("chmod 440 settings.php")
-        # File directory permissions (770 on all child directories, 660 on all files)
-        with cd(archive.destination + site.file_location):
-            local("chmod 770 .")
-            local("find . -type d -exec find '{}' -type f \; | while read FILE; do chmod 660 \"$FILE\"; done")
-            local("find . -type d -exec find '{}' -type d \; | while read DIR; do chmod 770 \"$DIR\"; done")
+        site.set_site_perms(archive.destination)
         # Solr Index permissions
         with cd("/var/solr"):
             local("chown -R %s:%s *" % (server.tomcat_owner, server.tomcat_owner))
 
 def _setup_settings_files(archive):
-    slug_template = local("cat /opt/pantheon/fabric/templates/import.settings.php")
     for site in archive.sites:
-        # Add project + random string as memcached prefix.
-        site.database.memcache_prefix = archive.project + \
-                ''.join(["%s" % random.choice(string.ascii_letters + string.digits) for i in range(8)])
-        slug = string.Template(slug_template)
-        slug = slug.safe_substitute(site.database.__dict__)
-        with open(archive.destination + "sites/" + site.name + "/settings.php", 'a') as f:
-            f.write(slug)
-        f.close
+        settings_dict = site.get_settings_dict(archive.project)
+        site.build_settings_file(settings_dict, archive.destination)
 
 
