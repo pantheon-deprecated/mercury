@@ -1,10 +1,38 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>Pantheon Initialization Script. &#xd;
-Run once on first boot.</description>
+  <description>Script to update project code</description>
   <keepDependencies>false</keepDependencies>
-  <properties/>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>source_project</name>
+          <description>project to copy code from</description>
+          <defaultValue>pantheon</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>source_environment</name>
+          <description>environment to copy code from</description>
+          <defaultValue>dev</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>destination_project</name>
+          <description>project to copy code to</description>
+          <defaultValue>pantheon</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>destination_environment</name>
+          <description>environment to copy code to</description>
+          <defaultValue>test</defaultValue>
+        </hudson.model.StringParameterDefinition>
+          <name>callback_url</name>
+          <description>Where to send response</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
   <scm class="hudson.scm.NullSCM"/>
   <canRoam>true</canRoam>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
@@ -12,7 +40,7 @@ Run once on first boot.</description>
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>cd /opt/pantheon/fabric; /usr/bin/sudo /usr/bin/fab update_code:pantheon,dev,pantheon,test </command>
+      <command>cd /opt/pantheon/fabric; /usr/bin/sudo /usr/bin/fab update_code:$$source_project,$$source_environment,$$destination_project,$$destination_environment</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
