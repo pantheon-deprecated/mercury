@@ -2,11 +2,21 @@
 from fabric.api import *
 import copy
 import os
+import random
 import re
 import string
 import tempfile
 import time
 import urlparse
+
+
+def getfrom_url(url):
+    download_dir = tempfile.mkdtemp()
+    filebase = os.path.basename(url)
+    filename = os.path.join(download_dir, filebase)
+
+    curl(url, filename)
+    return filename
 
 def curl(url, destination):
     """Fetch a file at a url and save to destination.
@@ -182,11 +192,56 @@ class DrupalSite:
         self.file_location = ''
         self.valid = False
 
-    def get_file_location(self):
+    def get_file_location(self, webroot = None):
+        if not webroot:
+            webroot = self.webroot
         with cd(self.webroot):
             return (local("drush --uri=%s variable-get file_directory_path | \
                 grep 'file_directory_path: \"' | \
                 sed 's/^file_directory_path: \"\(.*\)\".*/\\1/'" % self.name)).rstrip('\n')
+
+    def set_site_perms(self, webroot = None):
+        if not webroot:
+            webroot = self.webroot
+        # Settings.php Permissions
+        with cd(webroot + "sites/" + self.name):
+            local("chmod 440 settings.php")
+        # File directory permissions (770 on all child directories, 660 on all files)
+        with cd(webroot + self.get_file_location(webroot)):
+            local("chmod 770 .")
+            local("find . -type d -exec find '{}' -type f \; | while read FILE; do chmod 660 \"$FILE\"; done")
+            local("find . -type d -exec find '{}' -type d \; | while read DIR; do chmod 770 \"$DIR\"; done")
+
+    def build_settings_file(self, settings_dict, webroot = None):
+        """ Replace settings.php template with values from settings_dict
+        settings_dict: 'username'
+                       'password'
+                       'name'
+                       'memcache_prefix'
+
+        """
+        if not webroot:
+            webroot = self.webroot
+        slug_template = local("cat /opt/pantheon/fabric/templates/import.settings.php")
+        slug = string.Template(slug_template)
+        slug = slug.safe_substitute(settings_dict)
+        with open(webroot + "sites/" + self.name + "/settings.php", 'a') as f:
+            f.write(slug)
+        f.close
+
+    def get_settings_dict(self, project):
+       ret = {'username':self.database.username,
+               'password':self.database.password,
+               'name':self.database.name,
+               'memcache_prefix':self._get_memcache_prefix(project)}
+       return ret
+
+    def _get_memcache_prefix(self, name):
+        """Return name + 8 character random string (ascii + digits)
+        name: identifier for memcahe prefix. Generally 'project' name is used.
+
+        """
+        return name + ''.join(["%s" % random.choice(string.ascii_letters + string.digits) for i in range(8)])
 
     def set_variables(self, variables = dict()):
         with cd(self.webroot):
@@ -262,6 +317,7 @@ class PantheonServer:
             self.tomcat_owner = 'tomcat6'
             self.tomcat_version = '6'
             self.webroot = '/var/www/'
+            self.ftproot = '/srv/ftp/pantheon/'
         # Centos
         elif os.path.exists('/etc/redhat-release'):
             self.distro = 'centos'
@@ -271,6 +327,7 @@ class PantheonServer:
             self.tomcat_owner = 'tomcat'
             self.tomcat_version = '5'
             self.webroot = '/var/www/html/'
+            self.ftproot = '/var/ftp/pantheon/'
         self.ip = (local('hostname --ip-address')).rstrip('\n')
         if os.path.exists("/usr/local/bin/ec2-metadata"):
             self.hostname = local('/usr/local/bin/ec2-metadata -p | sed "s/public-hostname: //"').rstrip('\n')
@@ -302,6 +359,34 @@ class PantheonServer:
     def setup_iptables(self, file):
         local('/sbin/iptables-restore < ' + file)
         local('/sbin/iptables-save > /etc/iptables.rules')
+
+    def create_solr_index(self, name):
+        """ Create Solr index and tell Tomcat where it is located. 
+        name: Index directory. Standard format is: site_project_environment
+
+        """
+        # Setup indexes
+        solr_dir = '/var/solr/' + name
+        if os.path.exists(solr_dir):
+            local("rm -rf %s" % solr_dir)
+        solr_template = '/opt/pantheon/fabric/templates/solr/'
+        local("cp -R %s %s" % (solr_template, solr_dir))
+        local('chown -R %s:%s %s' % (
+                self.tomcat_owner,
+                self.tomcat_owner,
+                solr_dir))
+
+        # Tell Tomcat where the indexes are located
+        tomcat_template = local("cat /opt/pantheon/fabric/templates/tomcat_solr_home.xml")
+        template = string.Template(tomcat_template)
+        template = template.safe_substitute({'solr_path':name})
+        tomcat_dir = "/etc/tomcat%s/Catalina/localhost/%s.xml" % (
+                self.tomcat_version,
+                name)
+
+        with open(tomcat_dir, 'w') as f:
+            f.write(template)
+        f.close()
 
 class SiteImport:
     

@@ -1,7 +1,7 @@
 <FileInfo>
 
   <Group name='ubuntu'>
-    <Info owner='hudson' group='hudson' perms='0644' encoding='base64'/>
+    <Info owner='hudson' group='nogroup' perms='0644' encoding='base64'/>
   </Group> 
 
   <Group name='debian'>
@@ -9,7 +9,7 @@
   </Group> 
 
   <Group name='centos'>
-    <Info owner='hudson' group='root' perms='0644' encoding='base64'/>
+    <Info owner='hudson' group='hudson' perms='0644' encoding='base64'/>
   </Group> 
 
 </FileInfo>

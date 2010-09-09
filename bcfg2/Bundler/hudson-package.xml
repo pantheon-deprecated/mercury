@@ -7,8 +7,6 @@
     
   <!--Ubuntu Only -->
   <Group name='ubuntu'>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs' owner='hudson' group='hudson' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/plugins' owner='hudson' group='hudson' perms='0755'/>
     <Package name='daemon'/>
     <Package name='gcj-4.4-base'/>
     <Package name='gcj-4.4-jre-headless'/>
@@ -18,15 +16,15 @@
   <!--Debian/Ubuntu Only -->
   <Group name='deb'>
     <Path name='/etc/default/hudson' altsrc='/hudson/conf'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs' owner='hudson' group='hudson' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/plugins' owner='hudson' group='hudson' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs' owner='hudson' group='nogroup' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/plugins' owner='hudson' group='nogroup' perms='0755'/>
   </Group>
 
   <!--Centos Only -->
   <Group name='centos'>
     <Path name='/etc/sysconfig/hudson' altsrc='/hudson/conf'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs' owner='hudson' group='root' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/plugins' owner='hudson' group='root' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs' owner='hudson' group='hudson' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/plugins' owner='hudson' group='hudson' perms='0755'/>
   </Group>
 
 </Bundle>

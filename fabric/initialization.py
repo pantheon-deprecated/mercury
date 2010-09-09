@@ -97,11 +97,11 @@ def _initialize_bcfg2(vps, server):
     
     pantheon.restart_bcfg2()
     if (vps == "aws"):
-        local('/usr/sbin/bcfg2 -vqed -p pantheon-aws')
+        local('/usr/sbin/bcfg2 -vqed -p pantheon-aws', capture=False)
     elif (vps == "ebs"):
-        local('/usr/sbin/bcfg2 -vqed -p pantheon-aws-ebs')
+        local('/usr/sbin/bcfg2 -vqed -p pantheon-aws-ebs', capture=False)
     else:
-        local('/usr/sbin/bcfg2 -vqed')
+        local('/usr/sbin/bcfg2 -vqed', capture=False)
 
 def _initialize_iptables(server):
     local('/sbin/iptables-restore < /etc/pantheon/templates/iptables')

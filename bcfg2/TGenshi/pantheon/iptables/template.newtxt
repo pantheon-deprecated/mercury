@@ -35,6 +35,9 @@
 #  Allows SSH connections
 -A INPUT -p tcp -m state --state NEW --dport 22 -j ACCEPT
 
+# Allows FTP connections
+-A INPUT -p tcp --dport 21 -j ACCEPT
+
 # Allow ping
 -A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT
 
