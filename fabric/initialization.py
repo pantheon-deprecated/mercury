@@ -101,7 +101,7 @@ def _initialize_bcfg2(vps, server):
     elif (vps == "ebs"):
         local('/usr/sbin/bcfg2 -vqed -p pantheon-aws-ebs')
     else:
-        local('/usr/sbin/bcfg2 -vqed')
+        local('/usr/sbin/bcfg2 -vqed', capture=False)
 
 def _initialize_drush():
     local('[ ! -d drush ] || rm -rf drush')
