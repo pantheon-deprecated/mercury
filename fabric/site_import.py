@@ -58,11 +58,11 @@ def _setup_site_files(archive):
     if os.path.exists(archive.destination):
         local('rm -r ' + archive.destination)
 
-    # Clone drupal or pressflow (whichever the imported site uses)
+    # Clone drupal or pressflow (same core as the imported site uses)
     local("git clone " + archive.drupal.branch + " " + archive.destination)
 
     with cd(archive.destination):
-        # Creat branch of core version to match imported site version.
+        # Create branch of core version to match imported site version.
         local("git branch pantheon " + archive.drupal.revision)
         local("git checkout pantheon")
 
@@ -97,8 +97,6 @@ def _setup_site_files(archive):
 
     print "Hacked Core Files: \n"
     print files_modified
-    print "Hacked Core File Diffs: \n"
-    print files_diff
 
 def _run_on_sites(sites, cmd):
     for site in sites:
