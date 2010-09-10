@@ -205,7 +205,7 @@ def _setup_modules(archive):
         drupal_vars['apachesolr_search_spellcheck'] = True
 
         # admin/settings/performance variables
-        drupal_vars['cache'] = 'CACHE_EXTERNAL'
+        drupal_vars['cache'] = '3' # external
         drupal_vars['page_cache_max_age'] = 900
         drupal_vars['block_cache'] = True
         drupal_vars['page_compression'] = 0
