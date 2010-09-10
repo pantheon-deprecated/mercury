@@ -83,6 +83,9 @@ def _setup_site_files(archive):
         # Merge latest Pressflow
         local("git pull git://gitorious.org/pressflow/6.git master")
 
+        # Ignore files directory
+        _ignore_files(archive)
+
         # Add and commit all un-tracked (non-core) files
         local("git add -A .")
         local("git commit -m'Imported Site.'")
@@ -94,9 +97,35 @@ def _setup_site_files(archive):
         files_modified = local("git stash show --name-status")
         files_diff = local("git stash show -p")
         local("git stash clear")
+        
+    # Add static .gitignore directives
+    with open(os.path.join(archive.destination, ".gitignore"), 'a') as f:
+        f.write("!.gitignore\n")
+    f.close
 
     print "Hacked Core Files: \n"
     print files_modified
+
+
+def _ignore_files(archive):
+    file_dirs = ['sites/all/files','sites/default/files']
+    for site in archive.sites:
+        # Get file_directory_path directly from database, as we don't have a working drush yet.
+            file_dirs.append(local("mysql -u %s -p'%s' %s --skip-column-names --batch -e \
+                                  \"SELECT value FROM variable WHERE name='file_directory_path';\" | \
+                                    sed 's/^.*\"\(.*\)\".*$/\\1/'" % (
+                                        site.database.username,
+                                        site.database.password,
+                                        site.database.name)).rstrip('\n'))
+    # Remove duplacates
+    paths = set(file_dirs)
+
+    # Add files directory to gitignore
+    with open(os.path.join(archive.destination, ".gitignore"), 'a') as f:
+        for path in paths:
+            f.write(path + '/*\n')
+    f.close
+        
 
 def _run_on_sites(sites, cmd):
     for site in sites:
