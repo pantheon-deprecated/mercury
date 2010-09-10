@@ -465,5 +465,8 @@ class SiteImport:
             elif not name:
                 name = (local(r"awk '/^-- Host:/' " + sql_file \
                     + r" | sed 's_.*Host:\s*\(.*\)\s*Database:\s*\(.*\)$_\2_'")).rstrip('\n')
+            # If multiple databases defined in dump file, abort.
+            if '\n' in name:
+                abort("Multiple databases found in: " + sql_file)
             return name
 

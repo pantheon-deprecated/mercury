@@ -21,7 +21,6 @@ def import_site(site_archive, project = None, environment = None):
     if (environment == None):
         print("No environment selected. Using 'dev'")
         environment = 'dev'
-
     pantheon.unarchive(site_archive, archive_directory)
     server = pantheon.PantheonServer()
     archive = pantheon.SiteImport(archive_directory, server.webroot, project, environment)
@@ -65,38 +64,47 @@ def _setup_site_files(archive):
     if os.path.exists(archive.destination):
         local('rm -r ' + archive.destination)
 
-    # Create vanilla drupal/pressflow branch of same version as import site
+    # Clone drupal or pressflow (whichever the imported site uses)
     local("git clone " + archive.drupal.branch + " " + archive.destination)
 
     with cd(archive.destination):
+        # Creat branch of core version to match imported site version.
         local("git branch pantheon " + archive.drupal.revision)
         local("git checkout pantheon")
 
-        # Import site and revert any changes to core
-        #local("git import-orig " + working_dir)
+        # Copy imported site files into new repo.
         local("rm -rf " + archive.destination + "*")
         local("rsync -avz " + archive.location + " " + archive.destination)
 
-        # Cleanup potential issues
+        # Cleanup potential issues TODO: is this necessary?
         local("rm -f PRESSFLOW.txt")
+    
+        # Ignore file mode changes. Save setting to be restored after.
+        filemode = local("git config --get core.filemode").rstrip('\n')
+        local("git config core.filemode false")
 
-        # Commit the imported site on top of the closest-match core
-        local("git add .")
-        #print(local("git status"))
-        local("git commit -a -m 'Imported site.'")
-        #print(local("git status"))
-        
-        # Merge in Latest Pressflow
-        local("git checkout master")
+        # Save and remove (stash) hacks to core.
+        local("git stash")
+
+        # Merge latest Pressflow
         local("git pull git://gitorious.org/pressflow/6.git master")
-        #local("git pull git://gitorious.org/pantheon/6.git master")
-        local("git checkout pantheon")
-        local("git pull . master") # Fails on conflict, commits otherwise.
+
+        # Add and commit all un-tracked (non-core) files
+        local("git add -A .")
+        local("git commit -m'Imported Site.'")
+
+        # Restore filemode setting
+        local("git config core.filemode %s" % filemode)
         
-        # TODO: Check for conflicts
-        
-        # TODO: Is this necessary?
-        #local("rm -r ./.git")
+        # Record core hacks and diffs.
+        files_modified = local("git stash show --name-status")
+        files_diff = local("git stash show -p")
+        local("git stash clear")
+
+    print "Hacked Core Files: \n"
+    print files_modified
+    print "Hacked Core File Diffs: \n"
+    print files_diff
 
 def _run_on_sites(sites, cmd):
     for site in sites:
