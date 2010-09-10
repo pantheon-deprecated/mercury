@@ -102,16 +102,13 @@ def _setup_site_files(archive, hudson_workspace):
     # Add static .gitignore directives
     with open(os.path.join(archive.destination, ".gitignore"), 'a') as f:
         f.write("!.gitignore\n")
-    f.close
 
     # Store modified core files and their diffs as hudson build artifacts
     if hudson_workspace:
         with open(os.path.join(hudson_workspace, "modified_core_files.txt"), 'w') as f:
             f.write(files_modified)
-        f.close
         with open(os.path.join(hudson_workspace, "modified_core_diffs.txt"), 'w') as f:
             f.write(files_diff)
-        f.close
     else:
         print "Modified Core Files: \n"
         print files_modified
@@ -135,7 +132,6 @@ def _ignore_files(archive):
         for path in paths:
             if path:
                 f.write(path + '/*\n')
-    f.close
         
 
 def _run_on_sites(sites, cmd):

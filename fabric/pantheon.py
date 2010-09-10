@@ -228,7 +228,6 @@ class DrupalSite:
         slug = slug.safe_substitute(settings_dict)
         with open(webroot + "sites/" + self.name + "/settings.php", 'a') as f:
             f.write(slug)
-        f.close
 
     def get_settings_dict(self, project):
        ret = {'username':self.database.username,
@@ -390,7 +389,6 @@ class PantheonServer:
 
         with open(tomcat_dir, 'w') as f:
             f.write(template)
-        f.close()
 
 class SiteImport:
     
