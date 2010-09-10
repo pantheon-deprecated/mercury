@@ -7,20 +7,14 @@ import tempfile
 
 import pantheon
 
-def import_siteurl(url, project = None, environment = None):
+def import_siteurl(url, project = 'pantheon', environment = 'dev'):
     filename = pantheon.getfrom_url(url)
     import_site(filename, project, environment)
 
-def import_site(site_archive, project = None, environment = None):
+def import_site(site_archive, project = 'pantheon', environment = 'dev'):
     '''Import site archive into a Pantheon server'''
     archive_directory = tempfile.mkdtemp() + '/'
 
-    if (project == None):
-        print("No project selected. Using 'pantheon'")
-        project = 'pantheon'
-    if (environment == None):
-        print("No environment selected. Using 'dev'")
-        environment = 'dev'
     pantheon.unarchive(site_archive, archive_directory)
     server = pantheon.PantheonServer()
     archive = pantheon.SiteImport(archive_directory, server.webroot, project, environment)
@@ -54,7 +48,7 @@ def _setup_databases(archive):
                 abort("Database name collision")
         site.database.name = name
         names.append(name)
-        pantheon.import_data(archive.sites)
+    pantheon.import_data(archive.sites)
 
 def _setup_site_files(archive):
     #TODO: add large file size sanity check (no commits over 20mb)
