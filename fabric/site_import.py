@@ -7,11 +7,11 @@ import tempfile
 
 import pantheon
 
-def import_siteurl(url, project = 'pantheon', environment = 'dev'):
+def import_siteurl(url, project='pantheon', environment='dev', hudson_workspace=None):
     filename = pantheon.getfrom_url(url)
-    import_site(filename, project, environment)
+    import_site(filename, project, environment, hudson_workspace)
 
-def import_site(site_archive, project = 'pantheon', environment = 'dev'):
+def import_site(site_archive, project='pantheon', environment='dev', hudson_workspace=None):
     '''Import site archive into a Pantheon server'''
     archive_directory = tempfile.mkdtemp() + '/'
 
@@ -20,7 +20,7 @@ def import_site(site_archive, project = 'pantheon', environment = 'dev'):
     archive = pantheon.SiteImport(archive_directory, server.webroot, project, environment)
 
     _setup_databases(archive)
-    _setup_site_files(archive)
+    _setup_site_files(archive, hudson_workspace)
     _setup_settings_files(archive)
     _setup_modules(archive)
     _setup_files_directory(archive)
@@ -50,7 +50,7 @@ def _setup_databases(archive):
         names.append(name)
     pantheon.import_data(archive.sites)
 
-def _setup_site_files(archive):
+def _setup_site_files(archive, hudson_workspace):
     #TODO: add large file size sanity check (no commits over 20mb)
     #TODO: sanity check for versions prior to 6.6 (no pressflow branch).
     #TODO: look into ignoreing files directory
@@ -104,8 +104,17 @@ def _setup_site_files(archive):
         f.write("!.gitignore\n")
     f.close
 
-    print "Hacked Core Files: \n"
-    print files_modified
+    # Store modified core files and their diffs as hudson build artifacts
+    if hudson_workspace:
+        with open(os.path.join(hudson_workspace, "modified_core_files.txt"), 'w') as f:
+            f.write(files_modified)
+        f.close
+        with open(os.path.join(hudson_workspace, "modified_core_diffs.txt"), 'w') as f:
+            f.write(files_diff)
+        f.close
+    else:
+        print "Modified Core Files: \n"
+        print files_modified
 
 
 def _ignore_files(archive):
@@ -124,7 +133,8 @@ def _ignore_files(archive):
     # Add files directory to gitignore
     with open(os.path.join(archive.destination, ".gitignore"), 'a') as f:
         for path in paths:
-            f.write(path + '/*\n')
+            if path:
+                f.write(path + '/*\n')
     f.close
         
 
