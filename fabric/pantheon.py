@@ -92,9 +92,10 @@ def import_data(sites):
                 mysql -u pantheon-admin %s" % \
                   (site.database.dump, site.database.name))
                 
-    # Cleanup
+        # Cleanup
+        local("rm -f %s" % site.database.dump)
+
     local("mysql -u pantheon-admin -e \"DROP USER 'pantheon-admin'@'localhost'\"")
-    local("rm -f %s" % site.database.dump)
 
 def restart_bcfg2():
     local('/etc/init.d/bcfg2-server restart')

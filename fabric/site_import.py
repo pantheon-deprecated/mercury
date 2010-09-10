@@ -94,8 +94,9 @@ def _setup_site_files(archive):
         local("git config core.filemode %s" % filemode)
         
         # Record core hacks and diffs.
-        files_modified = local("git stash show --name-status")
-        files_diff = local("git stash show -p")
+        with settings(warn_only=True):
+            files_modified = local("git stash show --name-status")
+            files_diff = local("git stash show -p")
         local("git stash clear")
         
     # Add static .gitignore directives
