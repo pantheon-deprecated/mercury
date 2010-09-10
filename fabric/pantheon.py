@@ -356,12 +356,9 @@ class PantheonServer:
             local('/etc/init.d/varnish restart')
             local('/etc/init.d/mysqld restart')
 
-    def setup_iptables(self):
-        local('/sbin/iptables-restore < /etc/pantheon/templates/iptables')
-        if self.distro == 'centos':
-            local('/sbin/service iptables save; /etc/init.d/iptables restart')
-        else:
-            local('/sbin/iptables-save')
+    def setup_iptables(self, file):
+        local('/sbin/iptables-restore < ' + file)
+        local('/sbin/iptables-save > /etc/iptables.rules')
 
     def create_solr_index(self, name):
         """ Create Solr index and tell Tomcat where it is located. 

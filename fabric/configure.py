@@ -15,8 +15,8 @@ def configure(vps="none"):
     _configure_apache(server)
     _configure_postfix(server)
     _restart_services(server)
-    _configure_databases()
     _configure_iptables(server)
+    _configure_databases()
     _mark_incep(server)
     _report()
 
@@ -67,15 +67,19 @@ def _configure_postfix(server):
 def _restart_services(server):
      server.restart_services()
 
+def _configure_iptables(server):
+    if server.distro == 'centos':
+         local('sed -i "s/#-A/-A/g" /etc/sysconfig/iptables')
+         local('/sbin/iptables-restore < /etc/sysconfig/iptables')
+    else:
+        local('sed -i "s/#-A/-A/g" /etc/iptables.rules')
+        local('/sbin/iptables-restore </etc/iptables.rules')
+
 def _configure_databases():
     #TODO: allow for mysql already having a password
     local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_dev'")
     local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_test;'")
     local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_live;'")
-
-def _configure_iptables(server):
-    local('sed -i "s/#-A/-A/g" /etc/pantheon/templates/iptables')
-    server.setup_iptables()
 
 def _mark_incep(server):
     '''Mark incep date. This prevents us from ever running again.'''

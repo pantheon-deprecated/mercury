@@ -31,6 +31,7 @@
   <Group name='deb'>
     <Path name='/etc/motd.tail' altsrc='/etc/motd'/>
     <Path name='/etc/rc.local' altsrc='/pantheon/rc.local'/>
+    <Path name='/etc/network/if-pre-up.d/iptablesload'/>
   </Group>
 
   <!-- CentOS Only -->

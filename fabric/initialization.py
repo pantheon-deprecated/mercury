@@ -10,11 +10,11 @@ def initialize(vps="none"):
     _initialize_support_account(server)
     _initialize_package_manager(server)
     _initialize_bcfg2(vps, server)
+    _initialize_iptables(server)
     _initialize_drush()
     _initialize_pantheon(server)
     _initialize_solr(server)
     _initialize_hudson(server)
-    _initialize_iptables(server)
     _initialize_pressflow(server)
 
 def init():
@@ -103,6 +103,15 @@ def _initialize_bcfg2(vps, server):
     else:
         local('/usr/sbin/bcfg2 -vqed', capture=False)
 
+def _initialize_iptables(server):
+    local('/sbin/iptables-restore < /etc/pantheon/templates/iptables')
+    if server.distro == 'centos':
+        local('cp /etc/pantheon/templates/iptables /etc/sysconfig/iptables')
+        local('chkconfig iptables on')
+        local('service iptables start')
+    else:
+        local('cp /etc/pantheon/templates/iptables /etc/iptables.rules')
+
 def _initialize_drush():
     local('[ ! -d drush ] || rm -rf drush')
     local('wget http://ftp.drupal.org/files/projects/drush-6.x-3.3.tar.gz')
@@ -147,9 +156,6 @@ def _initialize_hudson(server):
         local('usermod -a -G shadow hudson')
     local('/etc/init.d/hudson restart')
 
-def _initialize_iptables(server):
-    server.setup_iptables()
-
 def _initialize_pressflow(server):
     with cd(server.webroot + 'pantheon_dev'):
         local('mkdir -p sites/default/files')
@@ -163,6 +169,9 @@ def _initialize_pressflow(server):
         local('git add .')
         local('git commit -m "initial branch commit"')
         local('git checkout -b pantheon_dev')
+        local('git config receive.denycurrentbranch ignore')
+        local('cp /opt/pantheon/fabric/templates/git_post-receive .git/hooks/post-receive')
+        local('chmod +x .git/hooks/post-receive')
     local('git clone ' + server.webroot + 'pantheon_dev ' + server.webroot + 'pantheon_test')
     local('mkdir '  + server.webroot + 'pantheon_live')
     with cd(server.webroot + 'pantheon_test'):

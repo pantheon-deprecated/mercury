@@ -12,12 +12,9 @@
     <BoundPath type='directory' name='/var/lib/hudson/jobs/import_site' owner='hudson' group='nogroup' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/backup_site' owner='hudson' group='nogroup' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/restore_site' owner='hudson' group='nogroup' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_code_from_dev_to_test' owner='hudson' group='nogroup' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_code_from_test_to_live' owner='hudson' group='nogroup' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_data_from_live_to_test' owner='hudson' group='nogroup' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_data_from_test_to_dev' owner='hudson' group='nogroup' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_files_from_live_to_test' owner='hudson' group='nogroup' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_files_from_test_to_dev' owner='hudson' group='nogroup' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_code' owner='hudson' group='nogroup' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_data' owner='hudson' group='nogroup' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_files' owner='hudson' group='nogroup' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/update_pantheon' owner='hudson' group='nogroup' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/update_pressflow' owner='hudson' group='nogroup' perms='0755'/>
   </Group>
@@ -34,12 +31,9 @@
     <BoundPath type='directory' name='/var/lib/hudson/jobs/import_site' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/backup_site' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/restore_site' owner='hudson' group='hudson' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_code_from_dev_to_test' owner='hudson' group='hudson' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_code_from_test_to_live' owner='hudson' group='hudson' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_data_from_live_to_test' owner='hudson' group='hudson' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_data_from_test_to_dev' owner='hudson' group='hudson' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_files_from_live_to_test' owner='hudson' group='hudson' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_files_from_test_to_dev' owner='hudson' group='hudson' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_code' owner='hudson' group='hudson' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_data' owner='hudson' group='hudson' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_files' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/update_pantheon' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/update_pressflow' owner='hudson' group='hudson' perms='0755'/>
   </Group>    
@@ -54,12 +48,9 @@
   <Path name='/var/lib/hudson/jobs/cron_pantheon_dev/config.xml' altsrc='/hudson/jobs/cron_pantheon_dev/config.xml'/>
   <Path name='/var/lib/hudson/jobs/cron_pantheon_test/config.xml' altsrc='/hudson/jobs/cron_pantheon_test/config.xml'/>
   <Path name='/var/lib/hudson/jobs/cron_pantheon_live/config.xml' altsrc='/hudson/jobs/cron_pantheon_live/config.xml'/>
-  <Path name='/var/lib/hudson/jobs/update_code_from_dev_to_test/config.xml' altsrc='/hudson/jobs/update_code_from_dev_to_test/config.xml'/>
-  <Path name='/var/lib/hudson/jobs/update_code_from_test_to_live/config.xml' altsrc='/hudson/jobs/update_code_from_test_to_live/config.xml'/>
-  <Path name='/var/lib/hudson/jobs/update_data_from_live_to_test/config.xml' altsrc='/hudson/jobs/update_data_from_live_to_test/config.xml'/>
-  <Path name='/var/lib/hudson/jobs/update_data_from_test_to_dev/config.xml' altsrc='/hudson/jobs/update_data_from_test_to_dev/config.xml'/>
-  <Path name='/var/lib/hudson/jobs/update_files_from_live_to_test/config.xml' altsrc='/hudson/jobs/update_files_from_live_to_test/config.xml'/>
-  <Path name='/var/lib/hudson/jobs/update_files_from_test_to_dev/config.xml' altsrc='/hudson/jobs/update_files_from_test_to_dev/config.xml'/>
+  <Path name='/var/lib/hudson/jobs/update_code/config.xml' altsrc='/hudson/jobs/update_code/config.xml'/>
+  <Path name='/var/lib/hudson/jobs/update_data/config.xml' altsrc='/hudson/jobs/update_data/config.xml'/>
+  <Path name='/var/lib/hudson/jobs/update_files/config.xml' altsrc='/hudson/jobs/update_files/config.xml'/>
   <Path name='/var/lib/hudson/jobs/update_pantheon/config.xml' altsrc='/hudson/jobs/update_pantheon/config.xml'/>
   <Path name='/var/lib/hudson/jobs/update_pressflow/config.xml' altsrc='/hudson/jobs/update_pressflow/config.xml'/>
 
