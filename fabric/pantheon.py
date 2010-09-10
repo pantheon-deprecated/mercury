@@ -395,7 +395,7 @@ class SiteImport:
             self.location = location
             self.project = project
             self.environment = environment
-            self.destination = webroot + project + '_' + environment + '/'
+            self.destination = webroot + project + '/' + environment + '/'
             self.drupal = DrupalInstallation(location)
             self.drupal.init_drupal_data()
             self.sql_dumps = self.get_sql_files()

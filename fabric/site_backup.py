@@ -9,7 +9,7 @@ def backup_site(export_name, project='pantheon', environment='dev', export_to=No
     server = pantheon.PantheonServer()
 
     #TODO: change _ to / when we update the vhosts
-    location = server.webroot + project + '_' + environment + "/"
+    location = server.webroot + project + '/' + environment + "/"
 
     print('Exporting to temporary directory %s' % temporary_directory)
     _export_files(location, temporary_directory)
