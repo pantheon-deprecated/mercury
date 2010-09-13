@@ -137,9 +137,9 @@ def _initialize_solr(server):
     local('cp ' + server.webroot + 'pantheon/dev/sites/all/modules/apachesolr/solrconfig.xml /opt/pantheon/fabric/templates/solr/conf/')
     local('rm -rf apache-solr-1.4.1')
     local('rm apache-solr-1.4.1.tgz')
-    local('cp -R /opt/pantheon/fabric/templates/solr /var/solr/pantheon_dev_default')
-    local('cp -a /var/solr/pantheon_dev_default /var/solr/pantheon_test_default')
-    local('cp -a /var/solr/pantheon_dev_default /var/solr/pantheon_live_default')
+    local('cp -R /opt/pantheon/fabric/templates/solr /var/solr/pantheon_dev')
+    local('cp -a /var/solr/pantheon_dev /var/solr/pantheon_test')
+    local('cp -a /var/solr/pantheon_dev /var/solr/pantheon_live')
     local('chown -R ' + server.tomcat_owner + ':root /var/solr/')
 
 def _initialize_hudson(server):
@@ -177,8 +177,8 @@ def _initialize_pressflow(server):
     with cd(server.webroot + 'pantheon/test'):
         local('git update-index --assume-unchanged profiles/default/default.profile sites/default/settings.php')
         local('git archive master | sudo tar -x -C ' + server.webroot + 'pantheon/live')
-    local('sed -i "s/pantheon_dev_default/pantheon_test_default/g" ' + server.webroot + 'pantheon/test/sites/default/settings.php ' + server.webroot + 'pantheon/test/profiles/default/default.profile')
-    local('sed -i "s/pantheon_dev_default/pantheon_live_default/g" ' + server.webroot + 'pantheon/live/sites/default/settings.php ' + server.webroot + 'pantheon/live/profiles/default/default.profile')
+    local('sed -i "s/pantheon_dev/pantheon_test/g" ' + server.webroot + 'pantheon/test/sites/default/settings.php ' + server.webroot + 'pantheon/test/profiles/default/default.profile')
+    local('sed -i "s/pantheon_dev/pantheon_live/g" ' + server.webroot + 'pantheon/live/sites/default/settings.php ' + server.webroot + 'pantheon/live/profiles/default/default.profile')
     update.update_permissions(server.webroot + 'pantheon/dev', server)
     update.update_permissions(server.webroot + 'pantheon/test', server)
     update.update_permissions(server.webroot + 'pantheon/live', server)
