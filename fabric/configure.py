@@ -77,9 +77,9 @@ def _configure_iptables(server):
 
 def _configure_databases():
     #TODO: allow for mysql already having a password
-    local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_dev'")
-    local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_test;'")
-    local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_live;'")
+    local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_dev_default'")
+    local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_test_default;'")
+    local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_live_default;'")
 
 def _mark_incep(server):
     '''Mark incep date. This prevents us from ever running again.'''

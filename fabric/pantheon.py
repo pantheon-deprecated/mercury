@@ -45,7 +45,7 @@ def unarchive(archive, destination):
             local("find . -depth -name .svn -exec rm -fr {} \;")
             local("find . -depth -name CVS -exec rm -fr {} \;")
 
-def export_data(webroot, temporary_directory):
+def export_data(sites, temporary_directory):
     sites = DrupalInstallation(webroot).get_sites()
     with cd(temporary_directory):
         exported = list()
@@ -362,7 +362,7 @@ class PantheonServer:
 
     def create_solr_index(self, name):
         """ Create Solr index and tell Tomcat where it is located. 
-        name: Index directory. Standard format is: site_project_environment
+        name: Index directory. Standard format is: project_environment_site
 
         """
         # Setup indexes
