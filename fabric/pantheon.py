@@ -49,21 +49,27 @@ def export_data(webroot, temporary_directory):
     sites = DrupalInstallation(webroot).get_sites()
     with cd(temporary_directory):
         exported = list()
-        saved_data = list()
         for site in sites:
             if site.valid:
                 # If multiple sites use same db, only export once.
                 if site.database.name not in exported:
-                    local("mysqldump --single-transaction --user='%s' --password='%s' --host='%s' %s > %s.sql" % \
-                              ( site.database.username, 
-                                site.database.password, 
-                                site.database.hostname, 
-                                site.database.name,
-                                site.database.name,
-                                )    
-                          )
-                    exported.append(site.database.name)
-                    site.database.dump = temporary_directory + "/" + site.database.name + ".sql"
+                    with settings(warn_only=True):
+                        result = local("mysqldump --single-transaction --user='%s' --password='%s' --host='%s' %s > %s.sql" % ( \
+                                    site.database.username,
+                                    site.database.password,
+                                    site.database.hostname,
+                                    site.database.name,
+                                    site.database.name), capture=False)
+                    # It is possible that a settings.php defines a 
+                    # database/user/pass that doesn't exist or doesn't work.
+                    if not result.failed:
+                        print "Exported Database: " + site.database.name
+                        exported.append(site.database.name)
+                        site.database.dump = temporary_directory + "/" + site.database.name + ".sql"
+                    else:
+                        print "Unable to export database '%s' defined for site '%s'. (incorrect database name, username, and/or password)" % (
+                                   site.database.name,
+                                   site.name)
     return(sites)
 
 def import_data(sites):
