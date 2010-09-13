@@ -7,11 +7,11 @@ import tempfile
 
 import pantheon
 
-def import_siteurl(url, project='pantheon', environment='dev', hudson_workspace=None):
+def import_siteurl(url, project='pantheon', environment='dev'):
     filename = pantheon.getfrom_url(url)
-    import_site(filename, project, environment, hudson_workspace)
+    import_site(filename, project, environment)
 
-def import_site(site_archive, project='pantheon', environment='dev', hudson_workspace=None):
+def import_site(site_archive, project='pantheon', environment='dev'):
     '''Import site archive into a Pantheon server'''
     archive_directory = tempfile.mkdtemp() + '/'
 
@@ -20,11 +20,17 @@ def import_site(site_archive, project='pantheon', environment='dev', hudson_work
     archive = pantheon.SiteImport(archive_directory, server.webroot, project, environment)
 
     _setup_databases(archive)
-    _setup_site_files(archive, hudson_workspace)
+    _setup_site_files(archive)
     _setup_settings_files(archive)
     _setup_modules(archive)
     _setup_files_directory(archive)
     _setup_permissions(server, archive)
+    
+    with cd(archive.destination):
+        # Add and commit all files
+        local("git add -A .")
+        local("git commit -m'Imported Site.'")
+
     _run_on_sites(archive.sites, 'cc all')
     _run_on_sites(archive.sites, 'cron')
     server.restart_services()
@@ -50,11 +56,10 @@ def _setup_databases(archive):
         names.append(name)
     pantheon.import_data(archive.sites)
 
-def _setup_site_files(archive, hudson_workspace):
+def _setup_site_files(archive):
     #TODO: add large file size sanity check (no commits over 20mb)
     #TODO: sanity check for versions prior to 6.6 (no pressflow branch).
-    #TODO: look into ignoreing files directory
-    #TODO: check for conflicts (hacked core)
+    #TODO: handle file mode changes (git reports as modifications)
     if os.path.exists(archive.destination):
         local('rm -r ' + archive.destination)
 
@@ -70,48 +75,16 @@ def _setup_site_files(archive, hudson_workspace):
         local("rm -rf " + archive.destination + "*")
         local("rsync -avz " + archive.location + " " + archive.destination)
 
-        # Cleanup potential issues TODO: is this necessary?
+        # Only existed in the tarball distributions of pressflow.
+        # Remove so there is no conflict/confusion.
         local("rm -f PRESSFLOW.txt")
     
-        # Ignore file mode changes. Save setting to be restored after.
-        filemode = local("git config --get core.filemode").rstrip('\n')
-        local("git config core.filemode false")
-
-        # Save and remove (stash) hacks to core.
-        local("git stash")
-
-        # Merge latest Pressflow
-        local("git pull git://gitorious.org/pressflow/6.git master")
-
-        # Ignore files directory
+        # Add files directory to .gitignore
         _ignore_files(archive)
 
-        # Add and commit all un-tracked (non-core) files
-        local("git add -A .")
-        local("git commit -m'Imported Site.'")
-
-        # Restore filemode setting
-        local("git config core.filemode %s" % filemode)
-        
-        # Record core hacks and diffs.
-        with settings(warn_only=True):
-            files_modified = local("git stash show --name-status")
-            files_diff = local("git stash show -p")
-        local("git stash clear")
-        
-    # Add static .gitignore directives
-    with open(os.path.join(archive.destination, ".gitignore"), 'a') as f:
-        f.write("!.gitignore\n")
-
-    # Store modified core files and their diffs as hudson build artifacts
-    if hudson_workspace:
-        with open(os.path.join(hudson_workspace, "modified_core_files.txt"), 'w') as f:
-            f.write(files_modified)
-        with open(os.path.join(hudson_workspace, "modified_core_diffs.txt"), 'w') as f:
-            f.write(files_diff)
-    else:
-        print "Modified Core Files: \n"
-        print files_modified
+        # Add static .gitignore directives
+        with open(os.path.join(archive.destination, ".gitignore"), 'a') as f:
+            f.write("!.gitignore\n")
 
 
 def _ignore_files(archive):
