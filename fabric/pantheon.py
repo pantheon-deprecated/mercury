@@ -45,7 +45,7 @@ def unarchive(archive, destination):
             local("find . -depth -name .svn -exec rm -fr {} \;")
             local("find . -depth -name CVS -exec rm -fr {} \;")
 
-def export_data(sites, temporary_directory):
+def export_data(webroot, temporary_directory):
     sites = DrupalInstallation(webroot).get_sites()
     with cd(temporary_directory):
         exported = list()
