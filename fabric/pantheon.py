@@ -362,7 +362,7 @@ class PantheonServer:
 
     def create_solr_index(self, name):
         """ Create Solr index and tell Tomcat where it is located. 
-        name: Index directory. Standard format is: site_project_environment
+        name: Index directory. Standard format is: project_environment_site
 
         """
         # Setup indexes
@@ -395,7 +395,7 @@ class SiteImport:
             self.location = location
             self.project = project
             self.environment = environment
-            self.destination = webroot + project + '_' + environment + '/'
+            self.destination = webroot + project + '/' + environment + '/'
             self.drupal = DrupalInstallation(location)
             self.drupal.init_drupal_data()
             self.sql_dumps = self.get_sql_files()

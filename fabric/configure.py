@@ -77,7 +77,7 @@ def _configure_iptables(server):
 
 def _configure_databases():
     #TODO: allow for mysql already having a password
-    local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_dev'")
+    local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_dev;'")
     local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_test;'")
     local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_live;'")
 

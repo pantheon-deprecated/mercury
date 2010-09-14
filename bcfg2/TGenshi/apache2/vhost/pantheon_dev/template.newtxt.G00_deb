@@ -1,13 +1,14 @@
 <VirtualHost *:8083>
 	ServerAdmin webmaster@localhost
-	ServerName pantheon_dev.*
+	ServerName dev.pantheon.*
+	ServerAlias *.dev.pantheon.*
 
-	DocumentRoot /var/www/pantheon_dev
+	DocumentRoot /var/www/pantheon/dev
 	<Directory />
 		Options FollowSymLinks
 		AllowOverride None
 	</Directory>
-	<Directory /var/www/pantheon_dev/>
+	<Directory /var/www/pantheon/dev/>
 		Options Indexes FollowSymLinks MultiViews
 		AllowOverride All
 		Order allow,deny

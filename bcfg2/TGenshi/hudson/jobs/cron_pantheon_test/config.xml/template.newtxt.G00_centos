@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>Running cron for drupal from hudson for better error reporting</description>
+  <description>Running cron for drupal</description>
   <keepDependencies>false</keepDependencies>
   <properties/>
   <scm class="hudson.scm.NullSCM"/>
@@ -16,8 +16,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>/usr/bin/sudo /usr/local/bin/drush -r /var/www/html/pantheon_test
- cron</command>
+      <command>/usr/bin/sudo /usr/local/bin/drush -r /var/www/html/pantheon/test cron</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>

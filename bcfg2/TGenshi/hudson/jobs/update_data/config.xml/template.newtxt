@@ -17,12 +17,12 @@
           <defaultValue>live</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>destination_project</name>
+          <name>target_project</name>
           <description>project to copy data to</description>
           <defaultValue>pantheon</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>destination_environment</name>
+          <name>target_environment</name>
           <description>environment to copy data to</description>
           <defaultValue>test</defaultValue>
         </hudson.model.StringParameterDefinition>
@@ -48,7 +48,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>cd /opt/pantheon/fabric; /usr/bin/sudo /usr/bin/fab update_data:$$source_project,$$source_environment,$$destination_project,$$destination_environment</command>
+      <command>cd /opt/pantheon/fabric; /usr/bin/sudo /usr/bin/fab update_data:$$source_project,$$source_environment,$$target_project,$$target_environment</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
