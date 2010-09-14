@@ -49,21 +49,27 @@ def export_data(webroot, temporary_directory):
     sites = DrupalInstallation(webroot).get_sites()
     with cd(temporary_directory):
         exported = list()
-        saved_data = list()
         for site in sites:
             if site.valid:
                 # If multiple sites use same db, only export once.
                 if site.database.name not in exported:
-                    local("mysqldump --single-transaction --user='%s' --password='%s' --host='%s' %s > %s.sql" % \
-                              ( site.database.username, 
-                                site.database.password, 
-                                site.database.hostname, 
-                                site.database.name,
-                                site.database.name,
-                                )    
-                          )
-                    exported.append(site.database.name)
-                    site.database.dump = temporary_directory + "/" + site.database.name + ".sql"
+                    with settings(warn_only=True):
+                        result = local("mysqldump --single-transaction --user='%s' --password='%s' --host='%s' %s > %s.sql" % ( \
+                                    site.database.username,
+                                    site.database.password,
+                                    site.database.hostname,
+                                    site.database.name,
+                                    site.database.name), capture=False)
+                    # It is possible that a settings.php defines a 
+                    # database/user/pass that doesn't exist or doesn't work.
+                    if not result.failed:
+                        print "Exported Database: " + site.database.name
+                        exported.append(site.database.name)
+                        site.database.dump = temporary_directory + "/" + site.database.name + ".sql"
+                    else:
+                        print "Unable to export database '%s' defined for site '%s'. (incorrect database name, username, and/or password)" % (
+                                   site.database.name,
+                                   site.name)
     return(sites)
 
 def import_data(sites):
@@ -92,9 +98,10 @@ def import_data(sites):
                 mysql -u pantheon-admin %s" % \
                   (site.database.dump, site.database.name))
                 
-    # Cleanup
+    # Cleanup (iterate through sites after import in case multiple sites use same db)
+    for site in sites:
+        local("rm -f %s" % site.database.dump)
     local("mysql -u pantheon-admin -e \"DROP USER 'pantheon-admin'@'localhost'\"")
-    local("rm -f %s" % site.database.dump)
 
 def restart_bcfg2():
     local('/etc/init.d/bcfg2-server restart')
@@ -227,7 +234,6 @@ class DrupalSite:
         slug = slug.safe_substitute(settings_dict)
         with open(webroot + "sites/" + self.name + "/settings.php", 'a') as f:
             f.write(slug)
-        f.close
 
     def get_settings_dict(self, project):
        ret = {'username':self.database.username,
@@ -386,7 +392,6 @@ class PantheonServer:
 
         with open(tomcat_dir, 'w') as f:
             f.write(template)
-        f.close()
 
 class SiteImport:
     
@@ -462,5 +467,8 @@ class SiteImport:
             elif not name:
                 name = (local(r"awk '/^-- Host:/' " + sql_file \
                     + r" | sed 's_.*Host:\s*\(.*\)\s*Database:\s*\(.*\)$_\2_'")).rstrip('\n')
+            # If multiple databases defined in dump file, abort.
+            if '\n' in name:
+                abort("Multiple databases found in: " + sql_file)
             return name
 

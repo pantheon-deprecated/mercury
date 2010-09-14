@@ -7,20 +7,13 @@ import tempfile
 
 import pantheon
 
-def import_siteurl(url, project = None, environment = None):
+def import_siteurl(url, project='pantheon', environment='dev'):
     filename = pantheon.getfrom_url(url)
     import_site(filename, project, environment)
 
-def import_site(site_archive, project = None, environment = None):
+def import_site(site_archive, project='pantheon', environment='dev'):
     '''Import site archive into a Pantheon server'''
     archive_directory = tempfile.mkdtemp() + '/'
-
-    if (project == None):
-        print("No project selected. Using 'pantheon'")
-        project = 'pantheon'
-    if (environment == None):
-        print("No environment selected. Using 'dev'")
-        environment = 'dev'
 
     pantheon.unarchive(site_archive, archive_directory)
     server = pantheon.PantheonServer()
@@ -32,6 +25,12 @@ def import_site(site_archive, project = None, environment = None):
     _setup_modules(archive)
     _setup_files_directory(archive)
     _setup_permissions(server, archive)
+    
+    with cd(archive.destination):
+        # Add and commit all files
+        local("git add -A .")
+        local("git commit -m'Imported Site.'")
+
     _run_on_sites(archive.sites, 'cc all')
     _run_on_sites(archive.sites, 'cron')
     server.restart_services()
@@ -55,48 +54,58 @@ def _setup_databases(archive):
                 abort("Database name collision")
         site.database.name = name
         names.append(name)
-        pantheon.import_data(archive.sites)
+    pantheon.import_data(archive.sites)
 
 def _setup_site_files(archive):
     #TODO: add large file size sanity check (no commits over 20mb)
     #TODO: sanity check for versions prior to 6.6 (no pressflow branch).
-    #TODO: look into ignoreing files directory
-    #TODO: check for conflicts (hacked core)
+    #TODO: handle file mode changes (git reports as modifications)
     if os.path.exists(archive.destination):
         local('rm -r ' + archive.destination)
 
-    # Create vanilla drupal/pressflow branch of same version as import site
+    # Clone drupal or pressflow (same core as the imported site uses)
     local("git clone " + archive.drupal.branch + " " + archive.destination)
 
     with cd(archive.destination):
+        # Create branch of core version to match imported site version.
         local("git branch pantheon " + archive.drupal.revision)
         local("git checkout pantheon")
 
-        # Import site and revert any changes to core
-        #local("git import-orig " + working_dir)
+        # Copy imported site files into new repo.
         local("rm -rf " + archive.destination + "*")
         local("rsync -avz " + archive.location + " " + archive.destination)
 
-        # Cleanup potential issues
+        # Only existed in the tarball distributions of pressflow.
+        # Remove so there is no conflict/confusion.
         local("rm -f PRESSFLOW.txt")
+    
+        # Add files directory to .gitignore
+        _ignore_files(archive)
 
-        # Commit the imported site on top of the closest-match core
-        local("git add .")
-        #print(local("git status"))
-        local("git commit -a -m 'Imported site.'")
-        #print(local("git status"))
+        # Add static .gitignore directives
+        with open(os.path.join(archive.destination, ".gitignore"), 'a') as f:
+            f.write("!.gitignore\n")
+
+
+def _ignore_files(archive):
+    file_dirs = ['sites/all/files','sites/default/files']
+    for site in archive.sites:
+        # Get file_directory_path directly from database, as we don't have a working drush yet.
+            file_dirs.append(local("mysql -u %s -p'%s' %s --skip-column-names --batch -e \
+                                  \"SELECT value FROM variable WHERE name='file_directory_path';\" | \
+                                    sed 's/^.*\"\(.*\)\".*$/\\1/'" % (
+                                        site.database.username,
+                                        site.database.password,
+                                        site.database.name)).rstrip('\n'))
+    # Remove duplacates
+    paths = set(file_dirs)
+
+    # Add files directory to gitignore
+    with open(os.path.join(archive.destination, ".gitignore"), 'a') as f:
+        for path in paths:
+            if path:
+                f.write(path + '/*\n')
         
-        # Merge in Latest Pressflow
-        local("git checkout master")
-        local("git pull git://gitorious.org/pressflow/6.git master")
-        #local("git pull git://gitorious.org/pantheon/6.git master")
-        local("git checkout pantheon")
-        local("git pull . master") # Fails on conflict, commits otherwise.
-        
-        # TODO: Check for conflicts
-        
-        # TODO: Is this necessary?
-        #local("rm -r ./.git")
 
 def _run_on_sites(sites, cmd):
     for site in sites:
@@ -169,7 +178,7 @@ def _setup_modules(archive):
         drupal_vars['apachesolr_search_spellcheck'] = True
 
         # admin/settings/performance variables
-        drupal_vars['cache'] = 'CACHE_EXTERNAL'
+        drupal_vars['cache'] = '3' # external
         drupal_vars['page_cache_max_age'] = 900
         drupal_vars['block_cache'] = True
         drupal_vars['page_compression'] = 0
