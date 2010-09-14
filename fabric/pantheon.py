@@ -362,16 +362,13 @@ class PantheonServer:
             local('/etc/init.d/varnish restart')
             local('/etc/init.d/mysqld restart')
 
-    def setup_iptables(self):
-        local('/sbin/iptables-restore < /etc/pantheon/templates/iptables')
-        if self.distro == 'centos':
-            local('/sbin/service iptables save; /etc/init.d/iptables restart')
-        else:
-            local('/sbin/iptables-save')
+    def setup_iptables(self, file):
+        local('/sbin/iptables-restore < ' + file)
+        local('/sbin/iptables-save > /etc/iptables.rules')
 
     def create_solr_index(self, name):
         """ Create Solr index and tell Tomcat where it is located. 
-        name: Index directory. Standard format is: site_project_environment
+        name: Index directory. Standard format is: project_environment_site
 
         """
         # Setup indexes
@@ -403,7 +400,7 @@ class SiteImport:
             self.location = location
             self.project = project
             self.environment = environment
-            self.destination = webroot + project + '_' + environment + '/'
+            self.destination = webroot + project + '/' + environment + '/'
             self.drupal = DrupalInstallation(location)
             self.drupal.init_drupal_data()
             self.sql_dumps = self.get_sql_files()

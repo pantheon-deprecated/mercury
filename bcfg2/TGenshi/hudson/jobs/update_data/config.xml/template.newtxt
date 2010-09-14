@@ -1,20 +1,30 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>Update Pressflow</description>
+  <description>Script to update project data</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
-          <name>project</name>
-          <description>project to update pressflow</description>
+          <name>source_project</name>
+          <description>project to copy data from</description>
           <defaultValue>pantheon</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>environment</name>
-          <description>environment to update pressflow</description>
-          <defaultValue>dev</defaultValue>
+          <name>source_environment</name>
+          <description>environment to copy data from</description>
+          <defaultValue>live</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>target_project</name>
+          <description>project to copy data to</description>
+          <defaultValue>pantheon</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>target_environment</name>
+          <description>environment to copy data to</description>
+          <defaultValue>test</defaultValue>
         </hudson.model.StringParameterDefinition>
 	<hudson.model.StringParameterDefinition>
           <name>uuid</name>
@@ -38,7 +48,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>cd /opt/pantheon/fabric; /usr/bin/sudo /usr/bin/fab update_pressflow:$$project,$$envronment</command>
+      <command>cd /opt/pantheon/fabric; /usr/bin/sudo /usr/bin/fab update_data:$$source_project,$$source_environment,$$target_project,$$target_environment</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>

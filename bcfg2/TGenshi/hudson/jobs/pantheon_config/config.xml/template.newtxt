@@ -1,8 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>Pantheon Initialization Script. &#xd;
-Run once on first boot.</description>
+  <description>Pantheon Initialization Script.  Run once on first boot.</description>
   <keepDependencies>false</keepDependencies>
   <properties/>
   <scm class="hudson.scm.NullSCM"/>
