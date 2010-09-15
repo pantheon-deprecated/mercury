@@ -216,6 +216,7 @@ def _setup_permissions(server, archive):
 def _setup_settings_files(archive):
     for site in archive.sites:
         settings_dict = site.get_settings_dict(archive.project)
-        site.build_settings_file(settings_dict, archive.destination)
+        site_dir = os.path.join(archive.destination, 'sites/%s/' % site.name)
+        pantheon.create_settings_file(site_dir, settings_dict)
 
 

@@ -1,5 +1,4 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
-from fabric.api import *
 import copy
 import os
 import random
@@ -8,6 +7,8 @@ import string
 import tempfile
 import time
 import urlparse
+
+from fabric.api import *
 
 
 def getfrom_url(url):
@@ -18,6 +19,7 @@ def getfrom_url(url):
     curl(url, filename)
     return filename
 
+
 def curl(url, destination):
     """Fetch a file at a url and save to destination.
 
@@ -26,6 +28,40 @@ def curl(url, destination):
 
     """
     local('curl "%s" -o "%s"' % (url, destination))
+
+
+def create_database(database):
+    local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % (database))
+    local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS' %s" % (database))
+
+
+def grant_database(grants, database, username, password, hostname = 'localhost'):
+    local("mysql -u root -e \"GRANT %s ON %s.* TO '%s'@'%s' IDENTIFIED BY '%s';\"" % (
+            grants,
+            database,
+            username,
+            hostname,
+            password))
+
+def create_settings_file(site_dir, settings_dict:
+    """ Replace settings.php template with values from settings_dict
+    site_dir: Full path to site directory. E.g. /var/www/pantheon/dev/sites/default/
+    settings_dict: 'username'
+                   'password'
+                   'database'
+                   'memcache_prefix'
+    webroot: Path to Drupal installation.
+
+    """
+    with open(os.join.path(site_dir, 'settings.php') as f:
+        f.write('\n/* Added by Pantheon */\n')
+        f.write("include 'pantheon.settings.php';\n")
+
+    slug_template = local("cat /opt/pantheon/fabric/templates/pantheon.settings.php")
+    slug = string.Template(slug_template)
+    slug = slug.safe_substitute(settings_dict)
+    with open(os.join.path(site_dir, 'pantheon.settings.php'), 'w') as f:
+        f.write(slug)
 
 def unarchive(archive, destination):
     '''Extract archive to destination directory and remove VCS files'''
@@ -44,6 +80,7 @@ def unarchive(archive, destination):
             local("rm -r ./.git")
             local("find . -depth -name .svn -exec rm -fr {} \;")
             local("find . -depth -name CVS -exec rm -fr {} \;")
+
 
 def export_data(webroot, temporary_directory):
     sites = DrupalInstallation(webroot).get_sites()
@@ -72,6 +109,7 @@ def export_data(webroot, temporary_directory):
                                    site.name)
     return(sites)
 
+
 def import_data(sites):
     # Create temporary superuser to perform import operations
     with settings(warn_only=True):
@@ -79,14 +117,10 @@ def import_data(sites):
     local("mysql -u root -e \"GRANT ALL PRIVILEGES ON *.* TO 'pantheon-admin'@'localhost' WITH GRANT OPTION;\"")
 
     for site in sites:
-        local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % (site.database.name))
-        local("mysql -u root -e 'CREATE DATABASE %s'" % (site.database.name))
-
         #TODO: if db username is root, change it. 
 
-        # Set grants
-        local("mysql -u pantheon-admin -e \"GRANT ALL ON %s.* TO '%s'@'localhost' IDENTIFIED BY '%s';\"" % \
-                  (site.database.name, site.database.username, site.database.password))
+        create_database(site.database.name)
+        create_database_grant('ALL', site.database.name, site.database.username, site.database.password)
         
         # Strip cache tables, convert MyISAM to InnoDB, and import.
         local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | \
@@ -102,6 +136,7 @@ def import_data(sites):
     for site in sites:
         local("rm -f %s" % site.database.dump)
     local("mysql -u pantheon-admin -e \"DROP USER 'pantheon-admin'@'localhost'\"")
+
 
 def restart_bcfg2():
     local('/etc/init.d/bcfg2-server restart')
@@ -219,26 +254,11 @@ class DrupalSite:
             local("find . -type d -exec find '{}' -type f \; | while read FILE; do chmod 660 \"$FILE\"; done")
             local("find . -type d -exec find '{}' -type d \; | while read DIR; do chmod 770 \"$DIR\"; done")
 
-    def build_settings_file(self, settings_dict, webroot = None):
-        """ Replace settings.php template with values from settings_dict
-        settings_dict: 'username'
-                       'password'
-                       'name'
-                       'memcache_prefix'
-
-        """
-        if not webroot:
-            webroot = self.webroot
-        slug_template = local("cat /opt/pantheon/fabric/templates/import.settings.php")
-        slug = string.Template(slug_template)
-        slug = slug.safe_substitute(settings_dict)
-        with open(webroot + "sites/" + self.name + "/settings.php", 'a') as f:
-            f.write(slug)
 
     def get_settings_dict(self, project):
        ret = {'username':self.database.username,
                'password':self.database.password,
-               'name':self.database.name,
+               'database':self.database.name,
                'memcache_prefix':self._get_memcache_prefix(project)}
        return ret
 
@@ -324,6 +344,7 @@ class PantheonServer:
             self.tomcat_version = '6'
             self.webroot = '/var/www/'
             self.ftproot = '/srv/ftp/pantheon/'
+            self.vhost_dir = '/etc/apache2/sites-available/'
         # Centos
         elif os.path.exists('/etc/redhat-release'):
             self.distro = 'centos'
@@ -334,6 +355,7 @@ class PantheonServer:
             self.tomcat_version = '5'
             self.webroot = '/var/www/html/'
             self.ftproot = '/var/ftp/pantheon/'
+            self.vhost_dir = '/etc/httpd/conf/vhosts/'
         self.ip = (local('hostname --ip-address')).rstrip('\n')
         if os.path.exists("/usr/local/bin/ec2-metadata"):
             self.hostname = local('/usr/local/bin/ec2-metadata -p | sed "s/public-hostname: //"').rstrip('\n')
@@ -365,6 +387,20 @@ class PantheonServer:
     def setup_iptables(self, file):
         local('/sbin/iptables-restore < ' + file)
         local('/sbin/iptables-save > /etc/iptables.rules')
+
+    def create_vhost(self, vhost_dict):
+        vhost_template = local("cat /etc/pantheon/templates/vhost.%s.template" % self.distro)
+        template = string.Template(vhost_template)
+        template = template.safe_substitute(vhost_dict)
+
+        vhost = '%s_%s_%s' % (
+                vhost_dict.get('project'),
+                vhost_dict.get('environment'),
+                vhost_dict.get('site'))
+
+        with open(os.path.join(self.vhost_dir, vhost), 'w') as f:
+            f.write(template)
+  
 
     def create_solr_index(self, name):
         """ Create Solr index and tell Tomcat where it is located. 
