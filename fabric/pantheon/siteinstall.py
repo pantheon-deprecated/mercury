@@ -8,10 +8,10 @@ from fabric.api import *
 
 import pantheon
 
-ENVIRONMENTS = ['dev','test','live']
+ENVIRONMENTS = set(['dev','test','live'])
 
 
-def get_environments():
+def _get_environments():
     """ Return list of development environments.
    
     """
@@ -108,7 +108,7 @@ class InstallTools:
         pantheon.create_pantheon_settings_file(site_dir, settings)
 
 
-    def build_database(self, environments=get_environments()):
+    def build_database(self, environments=_get_environments()):
         """ Create a new database and set user grants (all).
 
         """
@@ -125,14 +125,17 @@ class InstallTools:
                                                                 password))
 
 
-    def build_solr_index():
-        pass
+    def build_solr_index(self, environment=_get_environments()):
+        """ Create vhost files for each development environment.
+        environments: Optional. List.
 
+        """
+        for env in environments:
+            self.server.create_solr_index(self.project, env)
 
-    def build_vhost(self, environments=get_environments()):
-        """ Create vhost files (for each developement environment).
+    def build_vhost(self, environments=_get_environments()):
+        """ Create vhost files for each developement environment.
         environments: Optional. List. 
-                      Defaults to environments defined pantheon/pantheon.py 
 
         """
         for env in environments:
@@ -144,6 +147,7 @@ class InstallTools:
             self.server.create_vhost(filename, vhost_dict)
 
 
-    def build_drupal_cron():
-        pass
+    def build_drupal_cron(self, environment=get_environments()):
+        for env in environments:
+            self.server.create_drupal_cron(self.project, env)
 

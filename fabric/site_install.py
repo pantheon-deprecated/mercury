@@ -27,16 +27,19 @@ def get_handler(profile, **kw):
     """
     profiles = {'pantheon':PantheonProfile,
                 'openatrium':OpenAtriumProfile,
-                'openpublish':OpenPublishProfile,}
+                'openpublish':OpenPublishProfile}
 
+    # If handler doesn't exist, return PantheonProfile
     return profiles.has_key(profile) and \
            profiles[profile](**kw) or \
            profiles['PantheonProfile'](**kw)
 
 
-"""Additional profile handlers can be defined by:
+"""
+To define additional profile handlers:
      1. Create a new profile class (example below)
-     2. Add the profile name & class name to the profiles dict in get_handler()
+     2. Add the profile name & class name to the profiles dict in get_handler().
+     Example profile handler:
 
 class MIRProfile(siteinstall.InstallTools):
     def __init__(self, project, **kw):
@@ -46,11 +49,10 @@ class MIRProfile(siteinstall.InstallTools):
         # Step 1: create a working installation
         # Step 2: ??? 
         # Step 3: Make it rain.
-
 """
 
 class PantheonProfile(siteinstall.InstallTools):
-    """ Default Pantheon Installation Profile
+    """ Default Pantheon Installation Profile.
     
     """
 
@@ -64,15 +66,17 @@ class PantheonProfile(siteinstall.InstallTools):
         self.build_makefile(makefile)
         self.build_file_dirs()
         self.build_gitignore()
-        self.build_settings_file()
+        self.build_default_settings_file()
         self.build_database()
-        self.server.create_solr_index(self.project)
-        self.server.create_vhost(self.project)
-        self.server.create_drupal_cron(self.project)
-
+        self.build_solr_index()
+        self.build_vhost()
+        self.build_drupal_cron()
+        self.build_from_repo()
+        self.build_pantheon_settings_file()
+        self.commit('')
 
 class OpenAtriumProfile(siteinstall.InstallTools):
-    """ Open Atrium Installation Profile
+    """ Open Atrium Installation Profile.
 
     """
     def __init__(project, **kw):
@@ -84,7 +88,7 @@ class OpenAtriumProfile(siteinstall.InstallTools):
 
 
 class OpenPublishProfile(siteinstall.InstallTools):
-    """ Open Publish Installation Profile
+    """ Open Publish Installation Profile.
 
     """
     def __init__(project, **kw):

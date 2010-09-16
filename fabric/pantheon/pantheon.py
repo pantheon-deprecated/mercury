@@ -10,11 +10,6 @@ import urlparse
 
 from fabric.api import *
 
-ENVIRONMENTS = set(['dev','test','live'])
-
-def get_environments():
-    return ENVIRONMENTS
-
 def getfrom_url(url):
     download_dir = tempfile.mkdtemp()
     filebase = os.path.basename(url)
@@ -439,19 +434,28 @@ class PantheonServer:
             f.write(content)
 
 
-    def create_drupal_cron(self, project, environments=get_environments()):
+    def create_drupal_cron(self, project, environment):
+        """ Create Hudson drupal cron job.
+        project: project name
+        environment: development environment
+
+        """
+        # Create job directory
+        jobdir = '/var/lib/hudson/jobs/cron_%s_%s/' % (project, environment)
+        if not os.path.exists(jobdir):
+            local('mkdir -p ' + jobdir)
+ 
+        # Create job from template
         cron_template = local("cat /opt/pantheon/fabric/templates/hudson.drupal.cron")
+        site_path = os.join.path(self.webroot, '%s/%s' % (project, environment))
         template = string.Template(cron_template)
-        for env in environments:
-            site_path = os.join.path(self.webroot, '%s/%s' % (project, env))
-            content = template.safe_substitute({'site_path':site_path})
-            jobdir = '/var/lib/hudson/jobs/cron_%s_%s/' % (project, env)
-            if not os.path.exists(jobdir):
-                local('mkdir -p ' + jobdir)
-            with open(jobdir + 'config.xml', 'w') as f:
-                f.write(content)
-            local('chown -R %s:%s %s' % ('hudson', self.hudson_group, jobdir))
-     
+        template = template.safe_substitute({'site_path':site_path})
+        with open(jobdir + 'config.xml', 'w') as f:
+            f.write(content)
+
+        # Set Perms
+        local('chown -R %s:%s %s' % ('hudson', self.hudson_group, jobdir))     
+
 
 class SiteImport:
     
