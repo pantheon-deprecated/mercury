@@ -1,0 +1,17 @@
+<VirtualHost *:8080>
+	ServerAdmin webmaster@localhost
+	ServerName ${environment}.*.gotpantheon.com
+
+	DocumentRoot /var/www/html/${project}/${environment}
+	<Directory />
+		Options FollowSymLinks
+		AllowOverride None
+	</Directory>
+	<Directory /var/www/html/${project}/${environment}>
+		Options Indexes FollowSymLinks MultiViews
+		AllowOverride All
+		Order allow,deny
+		allow from all
+	</Directory>
+</VirtualHost>
+

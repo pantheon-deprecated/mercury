@@ -1,65 +1,66 @@
+import os
 import random
 import string
 import sys
 import tempfile
-import os
 
 import pantheon
 
 from fabric.api import *
 
-"""Additional profile handlers can be defined by created a new class, with the at
-least the following:
+import pdb
 
-    class FooProfile(NewSiteTools):
-        def __init__(self, project, environment):
-            NewSiteTools.__init__(self, project, environment)
+def install_site(profile='Pantheon', project='pantheon'):
+    """ Create a new Drupal installation.
+    profile: installation type (e.g. pantheon/openatrium/aegir)
+    
+    """
+    pdb.set_trace()
+    # init_dict and build_dict can have addtional values added for new handlers.
+    init_dict = {'project':project}
+    build_dict = {}
 
-        def build(self):
-            # Steps to create a working installation for this profile
-"""
+    handler = _get_handler(profile)(**init_dict)
+    handler.build(**build_dict)
 
 
-def get_handler(profile, module=sys.modules[newsite.__module__]):
+def _get_handler(profile, module=sys.modules['__main__']):
     """ Return the handler for a particular profile. Defaults to PantheonProfile.
-    profile: Supported installation types e.g: pantheon/openatrium/aegir
+    profile: Supported installation types e.g: pantheon/openatrium/openpublish
 
     """
-    subclass = profile.capitalize() + 'Profile'
+    subclass = profile + 'Profile'
     return hasattr(module, subclass) and \
-           getattr(module, sublcass)(**build_dict) or \
-           PantheonProfile(**build_dict)
+           getattr(module, sublcass) or \
+           PantheonProfile
 
 
-class PantheonProfile(NewSiteTools):
+"""
 
-    def __init__(project, environment, **kw):
-        NewSiteTools.__init__(self, project, environment)
+Additional profile handlers can be defined by creating a new class. e.g.:
 
+class MIRProfile(NewSiteTools):
+    def __init__(self, project, **kw):
+        NewSiteTools.__init__(self, project, **kw)
 
-    def build(self):
-        makefile = os.path.join(pantheon.TEMPLATE_DIR, 'makefiles/pantheon.make')
-        name = self.project + "_" + self.environment + "_default"
+    def build(self, **kw):
+        # Step 1: create a working installation
+        # Step 2: ??? 
+        # Step 3: Make it rain.
 
-        self.build_makefile(makefile)
-        self.build_file_dirs()
-        self.build_gitignore()
-        self.build_settings_file()
-        self.build_database(self.project, name)
-        self.server.build_solr_index(name)
-        self.server.build_vhost()
+"""
 
-
-class NewSiteTools():
+class NewSiteTools:
     """ Generic Drupal installation helper functions.
     
     """
 
-    def __init__(self, project, environment):
+    def __init__(self, project, environment = 'dev', **kw):
         self.server = pantheon.PantheonServer()
 
         self.project = project
         self.environment = environment
+        self.db_password = self._random_string(10)
         self.destination = os.path.join(
                 self.server.webroot,
                 project,
@@ -73,7 +74,7 @@ class NewSiteTools():
                Defaults to ['--working-copy']
 
         """
-        opts = ''.join(['%s'] % flag for flag in flags)
+        opts = ' '.join(['%s'] % flag for flag in flags)
         local("rm -rf %s" % self.destination)
         local("drush make %s %s %s" % (opts, makefile, self.destination))
 
@@ -90,7 +91,7 @@ class NewSiteTools():
 
 
     def build_gitignore(self, items=['sites/default/files/*','!.gitignore']):
-        """ Creates .gitignore entires.
+        """ Creates .gitignore entries.
         items: List. Optional: list of entries for .gitignore
               Defaults to ['sites/default/files/*', '!.gitignore'].
               All paths are relative to Drupal installation.
@@ -102,27 +103,62 @@ class NewSiteTools():
 
 
     def build_settings_file(self, site='default'):
+        """ Setup the site settings.php
+        site: Optional. The drupal site name. Defaults to 'default'.
+
+        """
         site_dir = os.path.join(self.destination, 'sites/%s/' % site)
         local("cp %s %s" % (site_dir + 'default.settings.php', site_dir + 'settings.php'))
-        
-        settings = {'username' = project,
-                    'password' = self._random_string(10),
-                    'database' = '%s_%s_%s' % (project, environment, site),
-                    'memcache_prefix' = site + _random_string(8)}
-
-        pantheon.create_settings_file(, settings, self.destination)
+        settings = {'username': self.project,
+                    'password': self.db_password,
+                    'database': '%s_%s_%s' % (project, environment, site),
+                    'memcache_prefix': site + self._random_string(8)}
+        pantheon.create_settings_file(site_dir, settings)
 
 
-    def build_vhost(self):
-        pass
+    def build_database(self, environments = ['dev','test','live']):
+        """ Create a new database and set user grants (all).
+
+        """
+        username = self.project
+        password = self.db_password
+
+        for env in environments:      
+            database = '%s_%s' % (self.project, env)
+            local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % (database))
+            local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS' %s" % (database))
+            local("mysql -u root -e \"GRANT ALL ON %s.* TO '%s'@'localhost' \
+                                      IDENTIFIED BY '%s';\"" % (database,
+                                                                username, 
+                                                                password))
 
 
-    def build_database(self, username, database):
-        password = ''.join(['%s' % random.choice(
-                string.ascii_letters + string.digits) for i in range(10)])
-        pantheon.create_database(database, username, password)
+    def _random_string(length):
+        """ Create random string of ascii letters & digits.
+        length: Int. Character length of string to return.
 
-    def _random_string(length=10):
+        """
         return ''.join(['%s' % random.choice (string.ascii_letters + \
                                               string.digits) \
                                               for i in range(length)])
+
+class PantheonProfile(NewSiteTools):
+
+    def __init__(project, **kw):
+        NewSiteTools.__init__(self, project, **kw)
+  
+
+    def build(self, **kw):
+        makefile = '/opt/pantheon/fabric/templates/pantheon.make'
+
+        self.build_makefile(makefile)
+        self.build_file_dirs()
+        self.build_gitignore()
+        self.build_settings_file()
+        self.build_database()
+        self.server.create_solr_index(self.project)
+        self.server.create_vhost(self.project)
+        self.server.create_drupal_cron(self.project)
+
+
+

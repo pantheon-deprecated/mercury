@@ -30,30 +30,17 @@ def curl(url, destination):
     local('curl "%s" -o "%s"' % (url, destination))
 
 
-def create_database(database):
-    local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % (database))
-    local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS' %s" % (database))
-
-
-def grant_database(grants, database, username, password, hostname = 'localhost'):
-    local("mysql -u root -e \"GRANT %s ON %s.* TO '%s'@'%s' IDENTIFIED BY '%s';\"" % (
-            grants,
-            database,
-            username,
-            hostname,
-            password))
-
-def create_settings_file(site_dir, settings_dict:
+def create_settings_file(site_dir, settings_dict):
     """ Replace settings.php template with values from settings_dict
     site_dir: Full path to site directory. E.g. /var/www/pantheon/dev/sites/default/
     settings_dict: 'username'
                    'password'
                    'database'
                    'memcache_prefix'
-    webroot: Path to Drupal installation.
+                   'solr_path'
 
     """
-    with open(os.join.path(site_dir, 'settings.php') as f:
+    with open(os.join.path(site_dir, 'settings.php'), 'a') as f:
         f.write('\n/* Added by Pantheon */\n')
         f.write("include 'pantheon.settings.php';\n")
 
@@ -62,6 +49,7 @@ def create_settings_file(site_dir, settings_dict:
     slug = slug.safe_substitute(settings_dict)
     with open(os.join.path(site_dir, 'pantheon.settings.php'), 'w') as f:
         f.write(slug)
+
 
 def unarchive(archive, destination):
     '''Extract archive to destination directory and remove VCS files'''
@@ -117,11 +105,15 @@ def import_data(sites):
     local("mysql -u root -e \"GRANT ALL PRIVILEGES ON *.* TO 'pantheon-admin'@'localhost' WITH GRANT OPTION;\"")
 
     for site in sites:
+        local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % (site.database.name))
+        local("mysql -u root -e 'CREATE DATABASE %s'" % (site.database.name))
+
         #TODO: if db username is root, change it. 
 
-        create_database(site.database.name)
-        create_database_grant('ALL', site.database.name, site.database.username, site.database.password)
-        
+        # Set grants
+        local("mysql -u pantheon-admin -e \"GRANT ALL ON %s.* TO '%s'@'localhost' IDENTIFIED BY '%s';\"" % \
+                  (site.database.name, site.database.username, site.database.password))
+
         # Strip cache tables, convert MyISAM to InnoDB, and import.
         local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | \
                 grep -v '^INSERT INTO `ctools_object_cache`' | \
@@ -131,7 +123,7 @@ def import_data(sites):
                 sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | \
                 mysql -u pantheon-admin %s" % \
                   (site.database.dump, site.database.name))
-                
+
     # Cleanup (iterate through sites after import in case multiple sites use same db)
     for site in sites:
         local("rm -f %s" % site.database.dump)
@@ -255,19 +247,13 @@ class DrupalSite:
             local("find . -type d -exec find '{}' -type d \; | while read DIR; do chmod 770 \"$DIR\"; done")
 
 
-    def get_settings_dict(self, project):
-       ret = {'username':self.database.username,
-               'password':self.database.password,
-               'database':self.database.name,
-               'memcache_prefix':self._get_memcache_prefix(project)}
-       return ret
+    def get_settings_dict(self, project, environment):
+        return {'username':self.database.username,
+                'password':self.database.password,
+                'database':self.database.name,
+                'memcache_prefix': '%s_%s' % (project, environment),
+                'solr_path': '/%s_%s' % (project, environment)}
 
-    def _get_memcache_prefix(self, name):
-        """Return name + 8 character random string (ascii + digits)
-        name: identifier for memcahe prefix. Generally 'project' name is used.
-
-        """
-        return name + ''.join(["%s" % random.choice(string.ascii_letters + string.digits) for i in range(8)])
 
     def set_variables(self, variables = dict()):
         with cd(self.webroot):
@@ -340,6 +326,7 @@ class PantheonServer:
             self.group = 'www-data'
             self.mysql = 'mysql'
             self.owner = 'root'
+            self.hudson_group = 'nogroup'
             self.tomcat_owner = 'tomcat6'
             self.tomcat_version = '6'
             self.webroot = '/var/www/'
@@ -351,6 +338,7 @@ class PantheonServer:
             self.group = 'apache'
             self.mysql = 'mysqld'
             self.owner = 'root'
+            self.hudson_group = 'hudson'
             self.tomcat_owner = 'tomcat'
             self.tomcat_version = '5'
             self.webroot = '/var/www/html/'
@@ -362,6 +350,7 @@ class PantheonServer:
         else:
             self.hostname = local('hostname').rstrip('\n')
 
+
     def update_packages(self):
         if (self.distro == "centos"):
             local('yum clean all')
@@ -369,6 +358,7 @@ class PantheonServer:
         else:
             local('apt-get -y update')
             local('apt-get -y dist-upgrade')
+
 
     def restart_services(self):
         if self.distro == 'ubuntu':
@@ -384,50 +374,69 @@ class PantheonServer:
             local('/etc/init.d/varnish restart')
             local('/etc/init.d/mysqld restart')
 
+
     def setup_iptables(self, file):
         local('/sbin/iptables-restore < ' + file)
         local('/sbin/iptables-save > /etc/iptables.rules')
 
-    def create_vhost(self, vhost_dict):
-        vhost_template = local("cat /etc/pantheon/templates/vhost.%s.template" % self.distro)
+
+    def create_vhost(self, project, environments=['dev','test','live']):
+        vhost_template = local("cat /etc/pantheon/templates/%s.vhost.template" % self.distro)
         template = string.Template(vhost_template)
-        template = template.safe_substitute(vhost_dict)
-
-        vhost = '%s_%s_%s' % (
-                vhost_dict.get('project'),
-                vhost_dict.get('environment'),
-                vhost_dict.get('site'))
-
-        with open(os.path.join(self.vhost_dir, vhost), 'w') as f:
-            f.write(template)
+        for env in environments:
+            content = template.safe_substitute({'project':project,'environment':env})
+            vhost = '%s_%s' % (project, env)
+            # We want the live site to be the Apache vhost 'default'.
+            if env == 'live':
+                vhost = '000_' + vhost
+            with open(os.path.join(self.vhost_dir, vhost), 'w') as f:
+                f.write(content)
   
 
-    def create_solr_index(self, name):
-        """ Create Solr index and tell Tomcat where it is located. 
-        name: Index directory. Standard format is: project_environment_site
-
-        """
-        # Setup indexes
-        solr_dir = '/var/solr/' + name
-        if os.path.exists(solr_dir):
-            local("rm -rf %s" % solr_dir)
-        solr_template = '/opt/pantheon/fabric/templates/solr/'
-        local("cp -R %s %s" % (solr_template, solr_dir))
-        local('chown -R %s:%s %s' % (
-                self.tomcat_owner,
-                self.tomcat_owner,
-                solr_dir))
-
-        # Tell Tomcat where the indexes are located
+    def create_solr_index(self, project, environments=['dev','test','live']):
+        data_dir_template = '/opt/pantheon/fabric/templates/solr/'
         tomcat_template = local("cat /opt/pantheon/fabric/templates/tomcat_solr_home.xml")
         template = string.Template(tomcat_template)
-        template = template.safe_substitute({'solr_path':name})
-        tomcat_dir = "/etc/tomcat%s/Catalina/localhost/%s.xml" % (
-                self.tomcat_version,
-                name)
 
-        with open(tomcat_dir, 'w') as f:
-            f.write(template)
+        solr_project_dir = '/var/solr/%s/' % project
+        if not os.path.exists(solr_project_dir):
+            local('mkdir %s' % solr_project_dir)
+
+        for env in environments:
+            # Setup index / data directories.
+            solr_data_dir = solr_project_dir + env
+            if os.path.exists(solr_data_dir):
+                local('rm -rf ' + solr_data_dir)
+            local('cp -R %s %s' % (data_dir_template, solr_data_dir))
+
+            # Let Tomcat know where indexes are located
+            solr_path = '/%s/%s' % (project, env)
+            content = template.safe_substitute({'solr_path':solr_path})
+            tomcat_file = "/etc/tomcat%s/Catalina/localhost/%s.xml" % (
+                                                      self.tomcat_version,
+                                                      name)
+            with open(tomcat_file, 'w') as f:
+                f.write(content)
+            
+        local('chown -R %s:%s %s' % (self.tomcat_owner, 
+                                     self.tomcat_owner, 
+                                     solr_project_dir))
+        
+
+
+    def create_drupal_cron(self, project, environments=['dev','test','live']):
+        cron_template = local("cat /opt/pantheon/fabric/templates/hudson.drupal.cron")
+        template = string.Template(cron_template)
+        for env in environments:
+            site_path = os.join.path(self.webroot, '%s/%s' % (project, env))
+            content = template.safe_substitute({'site_path':site_path})
+            jobdir = '/var/lib/hudson/jobs/cron_%s_%s/' % (project, env)
+            if not os.path.exists(jobdir):
+                local('mkdir -p ' + jobdir)
+            with open(jobdir + 'config.xml', 'w') as f:
+                f.write(content)
+            local('chown -R %s:%s %s' % ('hudson', self.hudson_group, jobdir))
+     
 
 class SiteImport:
     
@@ -442,6 +451,7 @@ class SiteImport:
             self.sql_dumps = self.get_sql_files()
             self.sites = self.get_matched_sites()
     
+
     def get_sql_files(self):
         databases = list()
         with cd(self.drupal.location):
@@ -458,6 +468,7 @@ class SiteImport:
             for dump in sql_dumps:
                 databases.append(self.SQLDump(self.drupal.location + dump))
         return databases
+
 
     def get_matched_sites(self):
         matches = list()
@@ -484,14 +495,17 @@ class SiteImport:
 
         return matches
 
+
     def database_count(self):
         return len(self.sql_dumps)
+
 
     class SQLDump:
 
         def __init__(self, sql_file):
             self.sql_file = sql_file
             self.database_name = self.get_database_name(sql_file)
+
 
         def get_database_name(self, sql_file):
             # Check for 'USE' statement
