@@ -1,47 +1,46 @@
-import os
-import random
-import string
-import sys
-import tempfile
-
-from pantheon import pantheon
-
-from fabric.api import *
-
+from pantheon import siteinstall
 import pdb
 
-def install_site(profile='Pantheon', project='pantheon'):
+def install_site(project='pantheon', profile='pantheon'):
     """ Create a new Drupal installation.
-    profile: installation type (e.g. pantheon/openatrium/aegir)
-    
+    project: Installation namespace.
+    profile: The installation type (e.g. pantheon/openatrium)
+
     """
     pdb.set_trace()
-    # init_dict and build_dict can have addtional values added for new handlers.
-    init_dict = {'project':project}
+    #If additional values are needed in the installation profile classes,
+    #they can be placed in init_dict or build_dict and will be passed to
+    #the profile object (and ignored by existing profile classes).
+    init_dict = {'profile':profile,
+                 'project':project}
+
     build_dict = {}
 
-    handler = _get_handler(profile)(**init_dict)
+    handler = get_handler(**init_dict)
     handler.build(**build_dict)
 
 
-def _get_handler(profile, module=sys.modules['__main__']):
-    """ Return the handler for a particular profile. Defaults to PantheonProfile.
-    profile: Supported installation types e.g: pantheon/openatrium/openpublish
+def get_handler(profile, **kw):
+    """ Return instantiated profile object.
+        profile: name of the installation profile.
 
     """
-    subclass = profile + 'Profile'
-    return hasattr(module, subclass) and \
-           getattr(module, sublcass) or \
-           PantheonProfile
+    profiles = {'pantheon':PantheonProfile,
+                'openatrium':OpenAtriumProfile,
+                'openpublish':OpenPublishProfile,}
+
+    return profiles.has_key(profile) and \
+           profiles[profile](**kw) or \
+           profiles['PantheonProfile'](**kw)
 
 
-"""
+"""Additional profile handlers can be defined by:
+     1. Create a new profile class (example below)
+     2. Add the profile name & class name to the profiles dict in get_handler()
 
-Additional profile handlers can be defined by creating a new class. e.g.:
-
-class MIRProfile(NewSiteTools):
+class MIRProfile(siteinstall.InstallTools):
     def __init__(self, project, **kw):
-        NewSiteTools.__init__(self, project, **kw)
+        siteinstall.InstallTools.__init__(self, project, **kw)
 
     def build(self, **kw):
         # Step 1: create a working installation
@@ -50,102 +49,13 @@ class MIRProfile(NewSiteTools):
 
 """
 
-class NewSiteTools:
-    """ Generic Drupal installation helper functions.
+class PantheonProfile(siteinstall.InstallTools):
+    """ Default Pantheon Installation Profile
     
     """
 
-    def __init__(self, project, environment = 'dev', **kw):
-        self.server = pantheon.PantheonServer()
-
-        self.project = project
-        self.environment = environment
-        self.db_password = self._random_string(10)
-        self.destination = os.path.join(
-                self.server.webroot,
-                project,
-                environment)
-
-
-    def build_makefile(self, makefile, flags=['--working-copy']):
-        """ Setup Drupal site using drush make
-        makefile: full path to drush makefile
-        flags: List. Optional: options to use with drush make.
-               Defaults to ['--working-copy']
-
-        """
-        opts = ' '.join(['%s'] % flag for flag in flags)
-        local("rm -rf %s" % self.destination)
-        local("drush make %s %s %s" % (opts, makefile, self.destination))
-
-
-    def build_file_dirs(self, dirs=['sites/default/files']):
-        """ Creates files directory within the Drupal installation.
-        dirs: List. Optional: list of file directories to create.
-              Defaults to ['sites/default/files'].
-              All paths are relative to Drupal installation.
-
-        """
-        for file_dir in dirs:
-            local("mkdir -p %s " % (os.path.join(self.destination, file_dir)))
-
-
-    def build_gitignore(self, items=['sites/default/files/*','!.gitignore']):
-        """ Creates .gitignore entries.
-        items: List. Optional: list of entries for .gitignore
-              Defaults to ['sites/default/files/*', '!.gitignore'].
-              All paths are relative to Drupal installation.
-
-        """
-        with open(os.path.join(self.destination, '.gitignore'), 'w') as f:
-            for item in items:
-                f.write(item + '\n')
-
-
-    def build_settings_file(self, site='default'):
-        """ Setup the site settings.php
-        site: Optional. The drupal site name. Defaults to 'default'.
-
-        """
-        site_dir = os.path.join(self.destination, 'sites/%s/' % site)
-        local("cp %s %s" % (site_dir + 'default.settings.php', site_dir + 'settings.php'))
-        settings = {'username': self.project,
-                    'password': self.db_password,
-                    'database': '%s_%s_%s' % (project, environment, site),
-                    'memcache_prefix': site + self._random_string(8)}
-        pantheon.create_settings_file(site_dir, settings)
-
-
-    def build_database(self, environments = ['dev','test','live']):
-        """ Create a new database and set user grants (all).
-
-        """
-        username = self.project
-        password = self.db_password
-
-        for env in environments:      
-            database = '%s_%s' % (self.project, env)
-            local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % (database))
-            local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS' %s" % (database))
-            local("mysql -u root -e \"GRANT ALL ON %s.* TO '%s'@'localhost' \
-                                      IDENTIFIED BY '%s';\"" % (database,
-                                                                username, 
-                                                                password))
-
-
-    def _random_string(length):
-        """ Create random string of ascii letters & digits.
-        length: Int. Character length of string to return.
-
-        """
-        return ''.join(['%s' % random.choice (string.ascii_letters + \
-                                              string.digits) \
-                                              for i in range(length)])
-
-class PantheonProfile(NewSiteTools):
-
-    def __init__(project, **kw):
-        NewSiteTools.__init__(self, project, **kw)
+    def __init__(self, project, **kw):
+        siteinstall.InstallTools.__init__(self, project, **kw)
   
 
     def build(self, **kw):
@@ -161,4 +71,25 @@ class PantheonProfile(NewSiteTools):
         self.server.create_drupal_cron(self.project)
 
 
+class OpenAtriumProfile(siteinstall.InstallTools):
+    """ Open Atrium Installation Profile
 
+    """
+    def __init__(project, **kw):
+        siteinstall.InstallTools.__init__(self, project, **kw)
+  
+
+    def build(self, **kw):
+        pass
+
+
+class OpenPublishProfile(siteinstall.InstallTools):
+    """ Open Publish Installation Profile
+
+    """
+    def __init__(project, **kw):
+        siteinstall.InstallTools.__init__(self, project, **kw)
+  
+
+    def build(self, **kw):
+        pass

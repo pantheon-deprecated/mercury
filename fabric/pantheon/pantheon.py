@@ -10,6 +10,10 @@ import urlparse
 
 from fabric.api import *
 
+ENVIRONMENTS = set(['dev','test','live'])
+
+def get_environments():
+    return ENVIRONMENTS
 
 def getfrom_url(url):
     download_dir = tempfile.mkdtemp()
@@ -30,8 +34,18 @@ def curl(url, destination):
     local('curl "%s" -o "%s"' % (url, destination))
 
 
-def create_settings_file(site_dir, settings_dict):
-    """ Replace settings.php template with values from settings_dict
+def add_default_settings_include(site_dir):
+    """ Add an include to the end of settings.php 
+       for the pantheon.settings.php file.
+
+    """
+    with open(os.join.path(site_dir, 'settings.php'), 'a') as f:
+        f.write('\n/* Added by Pantheon */\n')
+        f.write("include 'pantheon.settings.php';\n")
+
+
+def create_pantheon_settings_file(site_dir, settings_dict):
+    """ Replace pantheon.settings.php template with values from settings_dict
     site_dir: Full path to site directory. E.g. /var/www/pantheon/dev/sites/default/
     settings_dict: 'username'
                    'password'
@@ -40,10 +54,6 @@ def create_settings_file(site_dir, settings_dict):
                    'solr_path'
 
     """
-    with open(os.join.path(site_dir, 'settings.php'), 'a') as f:
-        f.write('\n/* Added by Pantheon */\n')
-        f.write("include 'pantheon.settings.php';\n")
-
     slug_template = local("cat /opt/pantheon/fabric/templates/pantheon.settings.php")
     slug = string.Template(slug_template)
     slug = slug.safe_substitute(settings_dict)
@@ -380,51 +390,56 @@ class PantheonServer:
         local('/sbin/iptables-save > /etc/iptables.rules')
 
 
-    def create_vhost(self, project, environments=['dev','test','live']):
-        vhost_template = local("cat /etc/pantheon/templates/%s.vhost.template" % self.distro)
+    def create_vhost(self, filename, vhost_dict):
+        """ 
+        filename:  vhost filename
+        vhost_dict: project:
+                    environment:
+        """
+        vhost_template = local("cat /etc/pantheon/templates/vhost.template.%s" % self.distro)
         template = string.Template(vhost_template)
-        for env in environments:
-            content = template.safe_substitute({'project':project,'environment':env})
-            vhost = '%s_%s' % (project, env)
-            # We want the live site to be the Apache vhost 'default'.
-            if env == 'live':
-                vhost = '000_' + vhost
-            with open(os.path.join(self.vhost_dir, vhost), 'w') as f:
-                f.write(content)
-  
-
-    def create_solr_index(self, project, environments=['dev','test','live']):
-        data_dir_template = '/opt/pantheon/fabric/templates/solr/'
-        tomcat_template = local("cat /opt/pantheon/fabric/templates/tomcat_solr_home.xml")
-        template = string.Template(tomcat_template)
-
-        solr_project_dir = '/var/solr/%s/' % project
-        if not os.path.exists(solr_project_dir):
-            local('mkdir %s' % solr_project_dir)
-
-        for env in environments:
-            # Setup index / data directories.
-            solr_data_dir = solr_project_dir + env
-            if os.path.exists(solr_data_dir):
-                local('rm -rf ' + solr_data_dir)
-            local('cp -R %s %s' % (data_dir_template, solr_data_dir))
-
-            # Let Tomcat know where indexes are located
-            solr_path = '/%s/%s' % (project, env)
-            content = template.safe_substitute({'solr_path':solr_path})
-            tomcat_file = "/etc/tomcat%s/Catalina/localhost/%s.xml" % (
-                                                      self.tomcat_version,
-                                                      name)
-            with open(tomcat_file, 'w') as f:
-                f.write(content)
-            
-        local('chown -R %s:%s %s' % (self.tomcat_owner, 
-                                     self.tomcat_owner, 
-                                     solr_project_dir))
+        template = template.safe_substitute(vhost_dict)
+        with open(os.path.join(self.vhost_dir, filename), 'w') as f:
+            f.write(template)
         
 
+    def create_solr_index(self, project, environment):
+        """ Create solr index in: /var/solr/project/environment.
+        project: project name
+        environment: development environment
 
-    def create_drupal_cron(self, project, environments=['dev','test','live']):
+        """
+        data_dir_template = '/opt/pantheon/fabric/templates/solr/'
+        tomcat_template = local("cat /opt/pantheon/fabric/templates/tomcat_solr_home.xml")
+
+        # Create project directory
+        project_dir = '/var/solr/%s/' % project
+        if not os.path.exists(project_dir):
+            local('mkdir %s' % project_dir)
+        
+        # Create data directory from sample solr data.
+        data_dir = project_dir + environment
+        if os.path.exists(data_dir):
+            local('rm -rf ' + data_dir)
+        local('cp -R %s %s' % (data_dir_template, data_dir))
+
+        local('chown -R %s:%s %s' % (self.tomcat_owner,
+                                     self.tomcat_owner,
+                                     project_dir))
+
+        # Tell Tomcat where indexes are located.
+        template = string.Template(tomcat_template)
+        solr_path = '/%s/%s' % (project, environment)
+        template = template.safe_substitute({'solr_path':solr_path})
+        tomcat_file = "/etc/tomcat%s/Catalina/localhost/%s_%s.xml" % (
+                                                      self.tomcat_version,
+                                                      project,
+                                                      environment)
+        with open(tomcat_file, 'w') as f:
+            f.write(content)
+
+
+    def create_drupal_cron(self, project, environments=get_environments()):
         cron_template = local("cat /opt/pantheon/fabric/templates/hudson.drupal.cron")
         template = string.Template(cron_template)
         for env in environments:
