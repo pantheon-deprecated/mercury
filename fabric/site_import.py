@@ -5,7 +5,7 @@ import string
 import random
 import tempfile
 
-import pantheon
+from pantheon import pantheon
 
 def import_siteurl(url, project='pantheon', environment='dev'):
     filename = pantheon.getfrom_url(url)

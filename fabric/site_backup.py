@@ -2,7 +2,7 @@
 from fabric.api import *
 import tempfile
 
-import pantheon
+from pantheon import pantheon
 
 def backup_site(export_name, project='pantheon', environment='dev', export_to=None):
     temporary_directory = tempfile.mkdtemp()

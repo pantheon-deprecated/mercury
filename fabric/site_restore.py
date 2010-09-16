@@ -1,7 +1,7 @@
 import os
 import tempfile
 
-import pantheon
+from pantheon import pantheon
 
 from fabric.api import *
 

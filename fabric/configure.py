@@ -2,7 +2,7 @@
 from fabric.api import *
 import os
 
-import pantheon
+from pantheon import pantheon
 import update
 
 def configure(vps="none"):

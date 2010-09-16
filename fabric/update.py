@@ -3,7 +3,7 @@ from fabric.api import *
 import tempfile
 import os
 
-import pantheon
+from pantheon import pantheon
 
 
 def update_pantheon():
