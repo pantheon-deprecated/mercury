@@ -42,14 +42,14 @@ def _initialize_support_account(server):
     with cd('~pantheon'):
         local('mkdir -p .ssh')
         local('chmod 700 .ssh')
-        local('cp /opt/pantheon/fabric/authorized_keys .ssh/')
+        local('cp /opt/pantheon/fabric/templates/authorized_keys .ssh/')
         local('cat ~/.ssh/id_rsa.pub > .ssh/authorized_keys')
         local('chmod 600 .ssh/authorized_keys')
         local('chown -R pantheon: .ssh')
 
 def _initialize_package_manager(server):
     if server.distro == 'ubuntu':
-        with cd('/opt/pantheon/fabric'):
+        with cd('/opt/pantheon/fabric/templates'):
             local('cp pantheon.list /etc/apt/sources.list.d/')
             local('cp lucid /etc/apt/preferences.d/')
             local('apt-key add gpgkeys.txt')
@@ -78,7 +78,7 @@ def _initialize_bcfg2(vps, server):
         local('apt-get install -y bcfg2-server gamin python-gamin python-genshi')
     elif server.distro == 'centos':
         local('yum -y install bcfg2 bcfg2-server gamin gamin-python python-genshi python-ssl python-lxml libxslt')
-    with cd('/opt/pantheon/fabric'):
+    with cd('/opt/pantheon/fabric/templates'):
         local('cp bcfg2.conf /etc/')
     local('rm -f /etc/bcfg2.key bcfg2.crt')
     local('openssl req -batch -x509 -nodes -subj "/C=US/ST=California/L=San Francisco/CN=localhost" -days 1000 -newkey rsa:2048 -keyout /tmp/bcfg2.key -noout')
@@ -88,7 +88,7 @@ def _initialize_bcfg2(vps, server):
     local('chmod 0600 /etc/bcfg2.key')
     local('[ -h /var/lib/bcfg2 ] || rmdir /var/lib/bcfg2')
     local('ln -sf /opt/pantheon/bcfg2 /var/lib/')
-    local('cp /opt/pantheon/fabric/clients.xml /var/lib/bcfg2/Metadata/')
+    local('cp /opt/pantheon/fabric/templates/clients.xml /var/lib/bcfg2/Metadata/')
     local('sed -i "s/^plugins = .*$/plugins = Bundler,Cfg,Metadata,Packages,Probes,Rules,TGenshi\\nfilemonitor = gamin/" /etc/bcfg2.conf')
     
     if server.distro == 'centos':

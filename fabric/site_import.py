@@ -151,8 +151,7 @@ def _setup_modules(archive):
     for site in archive.sites:
 
         # Create new solr index
-        solr_path = archive.project + '_' + archive.environment + '_' + site.get_safe_name()
-        server.create_solr_index(solr_path)
+        server.create_solr_index(archive.project, archive. environment)
 
         with cd(archive.destination + "sites/" + site.name):
            # If required modules exist in specific site directory, make sure they are on latest version.
@@ -172,8 +171,6 @@ def _setup_modules(archive):
 
         # Solr variables
         drupal_vars = {}
-        drupal_vars['apachesolr_path'] = '/' + solr_path
-        drupal_vars['apachesolr_port'] = 8983
         drupal_vars['apachesolr_search_make_default'] = 1
         drupal_vars['apachesolr_search_spellcheck'] = True
 
@@ -215,7 +212,7 @@ def _setup_permissions(server, archive):
 
 def _setup_settings_files(archive):
     for site in archive.sites:
-        settings_dict = site.get_settings_dict(archive.project)
+        settings_dict = site.get_settings_dict(archive.project, archive.environment)
         site_dir = os.path.join(archive.destination, 'sites/%s/' % site.name)
         pantheon.create_settings_file(site_dir, settings_dict)
 
