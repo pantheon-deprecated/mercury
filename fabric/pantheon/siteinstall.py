@@ -8,6 +8,7 @@ from fabric.api import *
 
 import pantheon
 
+
 ENVIRONMENTS = set(['dev','test','live'])
 
 
@@ -88,7 +89,7 @@ class InstallTools:
         Site: Optional. The drupal site name. Defaults to 'default'.
 
         """
-        site_dir = os.path.join(self.destination, 'sites/%s/' % site)
+        site_dir = os.path.join(self.destination, 'sites/%s/' % (site))
         local("cp %s %s" % (site_dir + 'default.settings.php', site_dir + 'settings.php'))
         pantheon.add_default_settings_include(site_dir) 
 
@@ -102,8 +103,8 @@ class InstallTools:
         settings = {'username': self.project,
                     'password': self.db_password,
                     'database': '%s_%s' % (self.project, self.environment),
-                    'memcache_prefix': '%s_%s' % (self.project, self.environment)
-                    'solr_path': '%s/%s' % (self.project, self.environment)}
+                    'memcache_prefix': '%s_%s' % (self.project, self.environment),
+                    'solr_path': '/%s/%s' % (self.project, self.environment)}
         
         pantheon.create_pantheon_settings_file(site_dir, settings)
 
@@ -118,14 +119,14 @@ class InstallTools:
         for env in environments:      
             database = '%s_%s' % (self.project, env)
             local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % (database))
-            local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS' %s" % (database))
+            local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS %s'" % (database))
             local("mysql -u root -e \"GRANT ALL ON %s.* TO '%s'@'localhost' \
                                       IDENTIFIED BY '%s';\"" % (database,
                                                                 username, 
                                                                 password))
 
 
-    def build_solr_index(self, environment=_get_environments()):
+    def build_solr_index(self, environments=_get_environments()):
         """ Create vhost files for each development environment.
         environments: Optional. List.
 
@@ -133,21 +134,34 @@ class InstallTools:
         for env in environments:
             self.server.create_solr_index(self.project, env)
 
+
     def build_vhost(self, environments=_get_environments()):
         """ Create vhost files for each developement environment.
         environments: Optional. List. 
 
         """
         for env in environments:
-            vhost_dict = {'project':self.project
+            vhost_dict = {'project':self.project,
                           'environment':env}
             filename = '%s_%s' % (self.project, env)
             if env == 'live': 
                 filename = '000_' + filename
             self.server.create_vhost(filename, vhost_dict)
+            if self.server.distro == 'ubuntu':
+               local('a2ensite %s' % filename)
 
 
-    def build_drupal_cron(self, environment=get_environments()):
+    def build_drupal_cron(self, environments=_get_environments()):
+        """ Create drupal cron jobs in hudson for each development environment.
+        environments: Optional. List.
+
+        """
         for env in environments:
             self.server.create_drupal_cron(self.project, env)
+
+
+    def commit(self, msg):
+        with cd(self.destination):
+            local('git add -A .')
+            local("git commit -m '%s'" % msg)
 

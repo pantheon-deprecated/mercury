@@ -7,7 +7,6 @@ def install_site(project='pantheon', profile='pantheon'):
     profile: The installation type (e.g. pantheon/openatrium)
 
     """
-    pdb.set_trace()
     #If additional values are needed in the installation profile classes,
     #they can be placed in init_dict or build_dict and will be passed to
     #the profile object (and ignored by existing profile classes).
@@ -25,14 +24,14 @@ def get_handler(profile, **kw):
         profile: name of the installation profile.
 
     """
-    profiles = {'pantheon':PantheonProfile,
-                'openatrium':OpenAtriumProfile,
-                'openpublish':OpenPublishProfile}
+    profiles = {'pantheon':_PantheonProfile,
+                'openatrium':_OpenAtriumProfile,
+                'openpublish':_OpenPublishProfile}
 
-    # If handler doesn't exist, return PantheonProfile
+    # If handler doesn't exist, use pantheon
     return profiles.has_key(profile) and \
            profiles[profile](**kw) or \
-           profiles['PantheonProfile'](**kw)
+           profiles['pantheon'](**kw)
 
 
 """
@@ -51,7 +50,7 @@ class MIRProfile(siteinstall.InstallTools):
         # Step 3: Make it rain.
 """
 
-class PantheonProfile(siteinstall.InstallTools):
+class _PantheonProfile(siteinstall.InstallTools):
     """ Default Pantheon Installation Profile.
     
     """
@@ -66,16 +65,18 @@ class PantheonProfile(siteinstall.InstallTools):
         self.build_makefile(makefile)
         self.build_file_dirs()
         self.build_gitignore()
+        pdb.set_trace()
         self.build_default_settings_file()
         self.build_database()
         self.build_solr_index()
         self.build_vhost()
         self.build_drupal_cron()
-        self.build_from_repo()
         self.build_pantheon_settings_file()
+        self.build_permissions()
+        self.build_from_repo()
         self.commit('')
 
-class OpenAtriumProfile(siteinstall.InstallTools):
+class _OpenAtriumProfile(siteinstall.InstallTools):
     """ Open Atrium Installation Profile.
 
     """
@@ -87,7 +88,7 @@ class OpenAtriumProfile(siteinstall.InstallTools):
         pass
 
 
-class OpenPublishProfile(siteinstall.InstallTools):
+class _OpenPublishProfile(siteinstall.InstallTools):
     """ Open Publish Installation Profile.
 
     """

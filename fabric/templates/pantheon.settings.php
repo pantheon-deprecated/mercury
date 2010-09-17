@@ -2,6 +2,8 @@
 
 $db_url = 'mysqli://${username}:${password}@localhost/${database}';
 
+$conf['pressflow_smart_start'] = TRUE;
+
 /* Varnish */
 $conf['reverse_proxy'] = TRUE;
 $conf['reverse_proxy_addresses'] = array('127.0.0.1');

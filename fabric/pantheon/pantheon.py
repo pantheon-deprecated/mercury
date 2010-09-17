@@ -34,7 +34,7 @@ def add_default_settings_include(site_dir):
        for the pantheon.settings.php file.
 
     """
-    with open(os.join.path(site_dir, 'settings.php'), 'a') as f:
+    with open(os.path.join(site_dir, 'settings.php'), 'a') as f:
         f.write('\n/* Added by Pantheon */\n')
         f.write("include 'pantheon.settings.php';\n")
 
@@ -52,7 +52,7 @@ def create_pantheon_settings_file(site_dir, settings_dict):
     slug_template = local("cat /opt/pantheon/fabric/templates/pantheon.settings.php")
     slug = string.Template(slug_template)
     slug = slug.safe_substitute(settings_dict)
-    with open(os.join.path(site_dir, 'pantheon.settings.php'), 'w') as f:
+    with open(os.path.join(site_dir, 'pantheon.settings.php'), 'w') as f:
         f.write(slug)
 
 
@@ -391,7 +391,7 @@ class PantheonServer:
         vhost_dict: project:
                     environment:
         """
-        vhost_template = local("cat /etc/pantheon/templates/vhost.template.%s" % self.distro)
+        vhost_template = local("cat /opt/pantheon/fabric/templates/vhost.template.%s" % self.distro)
         template = string.Template(vhost_template)
         template = template.safe_substitute(vhost_dict)
         with open(os.path.join(self.vhost_dir, filename), 'w') as f:
@@ -424,14 +424,17 @@ class PantheonServer:
 
         # Tell Tomcat where indexes are located.
         template = string.Template(tomcat_template)
-        solr_path = '/%s/%s' % (project, environment)
+        solr_path = '%s/%s' % (project, environment)
         template = template.safe_substitute({'solr_path':solr_path})
         tomcat_file = "/etc/tomcat%s/Catalina/localhost/%s_%s.xml" % (
                                                       self.tomcat_version,
                                                       project,
                                                       environment)
         with open(tomcat_file, 'w') as f:
-            f.write(content)
+            f.write(template)
+        local('chown %s:%s %s' % (self.tomcat_owner,
+                                  self.tomcat_owner,
+                                  tomcat_file))
 
 
     def create_drupal_cron(self, project, environment):
@@ -447,11 +450,11 @@ class PantheonServer:
  
         # Create job from template
         cron_template = local("cat /opt/pantheon/fabric/templates/hudson.drupal.cron")
-        site_path = os.join.path(self.webroot, '%s/%s' % (project, environment))
+        site_path = os.path.join(self.webroot, '%s/%s' % (project, environment))
         template = string.Template(cron_template)
         template = template.safe_substitute({'site_path':site_path})
         with open(jobdir + 'config.xml', 'w') as f:
-            f.write(content)
+            f.write(template)
 
         # Set Perms
         local('chown -R %s:%s %s' % ('hudson', self.hudson_group, jobdir))     
