@@ -34,28 +34,42 @@ class InstallTools:
     
     """
 
-    def __init__(self, project, environment = 'dev', **kw):
+    def __init__(self, project):
+        """ Initialize generic installation object & helper functions.
+        project: the name of the project to be built.
+
+        """
         self.server = pantheon.PantheonServer()
 
         self.project = project
-        self.environment = environment
         self.db_password = _random_string(10)
+        self.working_dir = tempdir.mkdtemp()
         self.destination = os.path.join(
                 self.server.webroot,
-                project,
-                environment)
+                project)
 
 
-    def build_makefile(self, makefile, flags=['--working-copy']):
+    def build_pantheon_core(self):
+        """ Bring master up to date and create a new project branch.
+
+        """
+        with cd('/var/git/project'):
+            local('git checkout master')
+            local('git pull')
+            local('git branch %s' % self.project)
+        local('git clone -l /var/git/projects -b %s %s' % (self.project, self.working_dir)
+        
+
+    def build_makefile(self, makefile, flags=list()):
         """ Setup Drupal site using drush make
         makefile: full path to drush makefile
         flags: List. Optional: options to use with drush make.
-               Defaults to ['--working-copy']
 
         """
-        opts = ' '.join(['%s' % flag for flag in flags])
-        local("rm -rf %s" % self.destination)
-        local("drush make %s %s %s" % (opts, makefile, self.destination))
+        opts = ''
+        if flags:
+            opts = ' '.join(['%s' % flag for flag in flags])
+        local("drush make %s %s %s" % (opts, makefile, self.working_dir))
 
 
     def build_file_dirs(self, dirs=['sites/default/files']):
@@ -66,11 +80,10 @@ class InstallTools:
 
         """
         for file_dir in dirs:
-            local("mkdir -p %s " % (os.path.join(self.destination, file_dir)))
+            local("mkdir -p %s " % (os.path.join(self.working_dir, file_dir)))
 
 
     def build_gitignore(self, items=['sites/default/files/*',
-                                     'sites/default/pantheon.settings.php',
                                      '!.gitignore']):
         """ Creates .gitignore entries.
         items: List. Optional: entries for .gitignore
@@ -78,35 +91,19 @@ class InstallTools:
               All paths are relative to Drupal installation.
 
         """
-        with open(os.path.join(self.destination, '.gitignore'), 'w') as f:
+        with open(os.path.join(self.working_dir, '.gitignore'), 'w') as f:
             for item in items:
                 f.write(item + '\n')
 
 
-    def build_default_settings_file(self, site='default'):
-        """ Copy default.settings.php to settings.php, and add an include
-            to the pantheon.settings.php file
+    def build_settings_files(self, site='default'):
+        """ Create settings.php and pantheon.settings.php
         Site: Optional. The drupal site name. Defaults to 'default'.
 
         """
-        site_dir = os.path.join(self.destination, 'sites/%s/' % (site))
+        site_dir = os.path.join(self.working_dir, 'sites/%s/' % (site))
         local("cp %s %s" % (site_dir + 'default.settings.php', site_dir + 'settings.php'))
-        pantheon.add_default_settings_include(site_dir) 
-
-
-    def build_pantheon_settings_file(self, site='default'):
-        """ Setup the site settings.php
-        site: Optional. The drupal site name. Defaults to 'default'.
-
-        """
-        site_dir = os.path.join(self.destination, 'sites/%s/' % site)
-        settings = {'username': self.project,
-                    'password': self.db_password,
-                    'database': '%s_%s' % (self.project, self.environment),
-                    'memcache_prefix': '%s_%s' % (self.project, self.environment),
-                    'solr_path': '/%s/%s' % (self.project, self.environment)}
-        
-        pantheon.create_pantheon_settings_file(site_dir, settings)
+        pantheon.create_pantheon_settings_file(site_dir)
 
 
     def build_database(self, environments=_get_environments()):
@@ -141,11 +138,19 @@ class InstallTools:
 
         """
         for env in environments:
-            vhost_dict = {'project':self.project,
-                          'environment':env}
+
+            vhost_dict = {'project': self.project,
+                          'environment': env,
+                          'db_name': '%s_%s' % (self.project, env),
+                          'db_username':self.project,
+                          'db_password':self.db_password,
+                          'solr_path': '/%s/%s' % (self.project, env)}
+                          'memcache_prefix': '%s_%s' % (self.project, env)}
+
             filename = '%s_%s' % (self.project, env)
             if env == 'live': 
                 filename = '000_' + filename
+
             self.server.create_vhost(filename, vhost_dict)
             if self.server.distro == 'ubuntu':
                local('a2ensite %s' % filename)
@@ -160,8 +165,58 @@ class InstallTools:
             self.server.create_drupal_cron(self.project, env)
 
 
-    def commit(self, msg):
-        with cd(self.destination):
+    def build_environments(self, environments=_get_environments()):
+       """ Clone project from central repo to all environments.
+           environments: Optional. List.
+
+       """ 
+        for env in environments:
+            local('git clone -l /var/git/projects -b %s %s' % (self.project, 
+                                    os.path.join(self.server.webroot, env)))
+
+            with cd(os.path.join(self.server.webroot, env)):
+                if env = 'dev':
+                    local('git checkout master')
+                    local('git checkout pantheon')
+                 else:
+                    local('git fetch')
+                    local('git reset --hard initialization')
+                
+
+    def build_permissions(self, environments=_get_environments()):
+        """ Set permissions on project directory, settings.php, and files dir.
+        environments: Optional. List.
+
+        """
+        with cd(self.server.webroot):
+            local('chown -R root:%s %s' % (self.web_group, self.project))
+
+        for env in environments:
+            site_dir = os.path.join(self.server.webroot, \
+                                    '%s/%s/sites/default' % (self.project, env))
+            with cd(site_dir):
+                local('chown %s:%s settings.php' % (self.server.web_group, 
+                                                    self.server.web_group) 
+                local('chmod 660 settings.php')
+                local('chmod 440 pantheon.settings.php')
+                local('chmod 770 files')
+        
+
+    def push_to_repo(self):
+        """ Commit changes in working directory and push to central repo.
+
+        """
+        with cd(self.working_dir):
+            local('git checkout %s' % self.project)
             local('git add -A .')
-            local("git commit -m '%s'" % msg)
+            local("git commit -m 'Initialize Project: %s'" % self.project)
+            local('git tag initialization')
+            local('git push --tags')
+
+
+    def cleanup(self):
+        """ Remove working directory.
+
+        """
+        local('rm -rf %s' % self.working_dir)
 

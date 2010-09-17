@@ -51,7 +51,7 @@ def _setup_settings_files(archive):
         site.build_settings_file(settings_dict, archive.destination)
 
 def _setup_permissions(archive, server):
-    local("chown -R %s:%s %s" % (server.owner, server.group, archive.destination))
+    local("chown -R %s:%s %s" % (server.owner, server.web_group, archive.destination))
     for site in archive.sites:
         site.set_site_perms(archive.destination)
 

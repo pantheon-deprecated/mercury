@@ -142,8 +142,8 @@ def update_files(source_project=None, source_environment=None, target_project=No
 
 def update_permissions(dir, server):
        with cd(dir):
-              local('chown -R root:' + server.group + ' *')
-              local('chown ' + server.group + ':' + server.group + ' sites/default/settings.php')
+              local('chown -R root:' + server.web_group + ' *')
+              local('chown ' + server.group + ':' + server.web_group + ' sites/default/settings.php')
               local('chmod 660 sites/default/settings.php')
               local('find . -type d -exec chmod 755 {} \;')
               local('find sites/*/files -type d -exec chmod 775 {} \;')

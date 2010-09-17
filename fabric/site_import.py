@@ -203,7 +203,7 @@ def _setup_files_directory(archive):
                 local("mkdir -p " + archive.destination + site.file_location)
 
 def _setup_permissions(server, archive):
-    local("chown -R %s:%s %s" % (server.owner, server.group, archive.destination))
+    local("chown -R %s:%s %s" % (server.owner, server.web_group, archive.destination))
     for site in archive.sites:
         site.set_site_perms(archive.destination)
         # Solr Index permissions

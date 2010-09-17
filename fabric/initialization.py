@@ -1,8 +1,10 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
+import tempfile
+
 from fabric.api import *
 
-from pantheon import pantheon
 import update
+from pantheon import pantheon
 
 def initialize(vps="none"):
     '''Initialize the Pantheon system.'''
@@ -15,7 +17,6 @@ def initialize(vps="none"):
     _initialize_pantheon(server)
     _initialize_solr(server)
     _initialize_hudson(server)
-    _initialize_pressflow(server)
 
 def init():
     '''Alias of "initialize"'''
@@ -35,7 +36,7 @@ def _initialize_support_account(server):
     if 'pantheon' not in local('cat /etc/passwd'):
         if server.distro == 'ubuntu':
             local('useradd pantheon --base-dir=/var --comment="Pantheon Support"'
-                  ' --create-home --groups=' + server.group + ',sudo --shell=/bin/bash')
+                  ' --create-home --groups=' + server.web_group + ',sudo --shell=/bin/bash')
         elif server.distro == 'centos':
             local('useradd pantheon --base-dir=/var --comment="Pantheon Support"'
                   ' --create-home  --shell=/bin/bash')
@@ -122,25 +123,20 @@ def _initialize_drush():
     local('ln -sf /opt/drush/drush /usr/local/bin/drush')
     local('drush dl drush_make')
 
-def _initialize_pantheon(server):
-    local('rm -rf ' + server.webroot)
-    local('drush make /etc/pantheon/pantheon.make ' + server.webroot + 'pantheon/dev/')
 
 def _initialize_solr(server):
-    local('[ ! -d apache-solr-1.4.1 ] || rm -rf apache-solr-1.4.1')
-    local('wget http://apache.osuosl.org/lucene/solr/1.4.1/apache-solr-1.4.1.tgz')
-    local('tar xvzf apache-solr-1.4.1.tgz')
-    local('mkdir -p /var/solr')
-    local('mv apache-solr-1.4.1/dist/apache-solr-1.4.1.war /var/solr/solr.war')
-    local('cp -R apache-solr-1.4.1/example/solr /opt/pantheon/fabric/templates/')
-    local('cp ' + server.webroot + 'pantheon/dev/sites/all/modules/apachesolr/schema.xml /opt/pantheon/fabric/templates/solr/conf/')
-    local('cp ' + server.webroot + 'pantheon/dev/sites/all/modules/apachesolr/solrconfig.xml /opt/pantheon/fabric/templates/solr/conf/')
-    local('rm -rf apache-solr-1.4.1')
-    local('rm apache-solr-1.4.1.tgz')
-    local('cp -R /opt/pantheon/fabric/templates/solr /var/solr/pantheon_dev')
-    local('cp -a /var/solr/pantheon_dev /var/solr/pantheon_test')
-    local('cp -a /var/solr/pantheon_dev /var/solr/pantheon_live')
-    local('chown -R ' + server.tomcat_owner + ':root /var/solr/')
+    temp_dir = tempfile.mkdtemp()
+    with cd(temp_dir):
+        local('wget http://apache.osuosl.org/lucene/solr/1.4.1/apache-solr-1.4.1.tgz')
+        local('tar xvzf apache-solr-1.4.1.tgz')
+        local('mkdir -p /var/solr')
+        local('mv apache-solr-1.4.1/dist/apache-solr-1.4.1.war /var/solr/solr.war')
+        local('cp -R apache-solr-1.4.1/example/solr /opt/pantheon/fabric/templates/')
+        local('drush dl apachesolr') 
+        local('cp apachesolr/schema.xml /opt/pantheon/fabric/templates/solr/conf/')
+        local('cp apachesolr/solrconfig.xml /opt/pantheon/fabric/templates/solr/conf/')
+        local('chown -R ' + server.tomcat_owner + ':root /var/solr/')
+    local('rm -rf ' + temp_dir)
 
 def _initialize_hudson(server):
     sudoers = local('cat /etc/sudoers')

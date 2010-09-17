@@ -29,31 +29,11 @@ def curl(url, destination):
     local('curl "%s" -o "%s"' % (url, destination))
 
 
-def add_default_settings_include(site_dir):
-    """ Add an include to the end of settings.php 
-       for the pantheon.settings.php file.
-
-    """
+def create_pantheon_settings_file(site_dir):
     with open(os.path.join(site_dir, 'settings.php'), 'a') as f:
         f.write('\n/* Added by Pantheon */\n')
         f.write("include 'pantheon.settings.php';\n")
-
-
-def create_pantheon_settings_file(site_dir, settings_dict):
-    """ Replace pantheon.settings.php template with values from settings_dict
-    site_dir: Full path to site directory. E.g. /var/www/pantheon/dev/sites/default/
-    settings_dict: 'username'
-                   'password'
-                   'database'
-                   'memcache_prefix'
-                   'solr_path'
-
-    """
-    slug_template = local("cat /opt/pantheon/fabric/templates/pantheon.settings.php")
-    slug = string.Template(slug_template)
-    slug = slug.safe_substitute(settings_dict)
-    with open(os.path.join(site_dir, 'pantheon.settings.php'), 'w') as f:
-        f.write(slug)
+    local('cp /opt/pantheon/fabric/templates/pantheon.settings.php ' + site_dir)
 
 
 def unarchive(archive, destination):
@@ -328,9 +308,9 @@ class PantheonServer:
         # Ubuntu / Debian
         if os.path.exists('/etc/debian_version'):
             self.distro = 'ubuntu'
-            self.group = 'www-data'
             self.mysql = 'mysql'
             self.owner = 'root'
+            self.web_group = 'www-data'
             self.hudson_group = 'nogroup'
             self.tomcat_owner = 'tomcat6'
             self.tomcat_version = '6'
@@ -340,9 +320,9 @@ class PantheonServer:
         # Centos
         elif os.path.exists('/etc/redhat-release'):
             self.distro = 'centos'
-            self.group = 'apache'
             self.mysql = 'mysqld'
             self.owner = 'root'
+            self.web_group = 'apache'
             self.hudson_group = 'hudson'
             self.tomcat_owner = 'tomcat'
             self.tomcat_version = '5'

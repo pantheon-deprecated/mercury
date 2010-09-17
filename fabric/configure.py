@@ -12,11 +12,10 @@ def configure(vps="none"):
     _configure_server(server)
     if (vps == "aws"):
         _config_ec2_(server)
-    _configure_apache(server)
     _configure_postfix(server)
     _restart_services(server)
     _configure_iptables(server)
-    _configure_databases()
+    _configure_git_repo()
     _mark_incep(server)
     _report()
 
@@ -46,15 +45,6 @@ def  _configure_ec2(server):
     local('ln -s /mnt/varnish/lib /var/lib/varnish')
     local('chown varnish:varnish /mnt/varnish/lib/pressflow/')
 
-def _configure_apache(server):
-    if(server.distro == 'centos'):
-        local('cp /etc/pantheon/templates/vhost/* /etc/httpd/conf/vhosts/')
-    else:
-        local('cp /etc/pantheon/templates/vhost/* /etc/apache2/sites-available/')
-        local('ln -sf /etc/apache2/sites-available/pantheon_live /etc/apache2/sites-available/default')
-        local('a2ensite pantheon_dev')
-        local('a2ensite pantheon_test')
-
 def _configure_postfix(server):
     f = open('/etc/mailname', 'w')
     f.write(server.hostname)
@@ -69,17 +59,18 @@ def _restart_services(server):
 
 def _configure_iptables(server):
     if server.distro == 'centos':
-         local('sed -i "s/#-A/-A/g" /etc/sysconfig/iptables')
-         local('/sbin/iptables-restore < /etc/sysconfig/iptables')
+        local('sed -i "s/#-A/-A/g" /etc/sysconfig/iptables')
+        local('/sbin/iptables-restore < /etc/sysconfig/iptables')
     else:
         local('sed -i "s/#-A/-A/g" /etc/iptables.rules')
         local('/sbin/iptables-restore </etc/iptables.rules')
 
-def _configure_databases():
-    #TODO: allow for mysql already having a password
-    local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_dev;'")
-    local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_test;'")
-    local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_live;'")
+def _configure_git_repo():
+    if os.path.exists('/var/git/projects'):
+        local('rm -rf /var/git/projects')
+    result = local('git clone git://gitorious.org/pressflow/6.git /var/git/projects', Capture=False)
+    if result.failed
+        pass # Can add other repos (local/github) here. In case gitorious is down.
 
 def _mark_incep(server):
     '''Mark incep date. This prevents us from ever running again.'''

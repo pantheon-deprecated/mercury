@@ -62,6 +62,7 @@ class _PantheonProfile(siteinstall.InstallTools):
     def build(self, **kw):
         makefile = '/opt/pantheon/fabric/templates/pantheon.make'
 
+        self.build_pantheon_core()
         self.build_makefile(makefile)
         self.build_file_dirs()
         self.build_gitignore()
