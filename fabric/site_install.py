@@ -42,7 +42,7 @@ To define additional profile handlers:
 
 class MIRProfile(siteinstall.InstallTools):
     def __init__(self, project, **kw):
-        siteinstall.InstallTools.__init__(self, project, **kw)
+        siteinstall.InstallTools.__init__(self, project)
 
     def build(self, **kw):
         # Step 1: create a working installation
@@ -56,33 +56,36 @@ class _PantheonProfile(siteinstall.InstallTools):
     """
 
     def __init__(self, project, **kw):
-        siteinstall.InstallTools.__init__(self, project, **kw)
+        siteinstall.InstallTools.__init__(self, project)
   
 
     def build(self, **kw):
         makefile = '/opt/pantheon/fabric/templates/pantheon.make'
+        drush_opts = ['--no-core']
 
         self.build_pantheon_core()
-        self.build_makefile(makefile)
+        self.build_makefile(makefile, drush_opts)
         self.build_file_dirs()
+        self.build_settings_file()
         self.build_gitignore()
-        pdb.set_trace()
-        self.build_default_settings_file()
+
+        self.push_to_repo()
+        self.build_environments()     
+        self.build_permissions()
+
         self.build_database()
         self.build_solr_index()
         self.build_vhost()
         self.build_drupal_cron()
-        self.build_pantheon_settings_file()
-        self.build_permissions()
-        self.build_from_repo()
-        self.commit('')
+
+        self.cleanup()
 
 class _OpenAtriumProfile(siteinstall.InstallTools):
     """ Open Atrium Installation Profile.
 
     """
     def __init__(project, **kw):
-        siteinstall.InstallTools.__init__(self, project, **kw)
+        siteinstall.InstallTools.__init__(self, project)
   
 
     def build(self, **kw):
@@ -94,8 +97,9 @@ class _OpenPublishProfile(siteinstall.InstallTools):
 
     """
     def __init__(project, **kw):
-        siteinstall.InstallTools.__init__(self, project, **kw)
+        siteinstall.InstallTools.__init__(self, project)
   
 
     def build(self, **kw):
         pass
+

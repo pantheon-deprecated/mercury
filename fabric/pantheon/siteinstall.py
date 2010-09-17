@@ -57,7 +57,7 @@ class InstallTools:
             local('git checkout master')
             local('git pull')
             local('git branch %s' % self.project)
-        local('git clone -l /var/git/projects -b %s %s' % (self.project, self.working_dir)
+        local('git clone -l /var/git/projects -b %s %s' % (self.project, self.working_dir))
         
 
     def build_makefile(self, makefile, flags=list()):
@@ -144,7 +144,7 @@ class InstallTools:
                           'db_name': '%s_%s' % (self.project, env),
                           'db_username':self.project,
                           'db_password':self.db_password,
-                          'solr_path': '/%s/%s' % (self.project, env)}
+                          'solr_path': '/%s/%s' % (self.project, env),
                           'memcache_prefix': '%s_%s' % (self.project, env)}
 
             filename = '%s_%s' % (self.project, env)
@@ -170,17 +170,17 @@ class InstallTools:
            environments: Optional. List.
 
        """ 
-        for env in environments:
-            local('git clone -l /var/git/projects -b %s %s' % (self.project, 
+       for env in environments:
+           local('git clone -l /var/git/projects -b %s %s' % (self.project, 
                                     os.path.join(self.server.webroot, env)))
 
-            with cd(os.path.join(self.server.webroot, env)):
-                if env = 'dev':
-                    local('git checkout master')
-                    local('git checkout pantheon')
-                 else:
-                    local('git fetch')
-                    local('git reset --hard initialization')
+           with cd(os.path.join(self.server.webroot, env)):
+               if env == 'dev':
+                   local('git checkout master')
+                   local('git checkout pantheon')
+               else:
+                   local('git fetch')
+                   local('git reset --hard initialization')
                 
 
     def build_permissions(self, environments=_get_environments()):
@@ -196,7 +196,7 @@ class InstallTools:
                                     '%s/%s/sites/default' % (self.project, env))
             with cd(site_dir):
                 local('chown %s:%s settings.php' % (self.server.web_group, 
-                                                    self.server.web_group) 
+                                                    self.server.web_group))
                 local('chmod 660 settings.php')
                 local('chmod 440 pantheon.settings.php')
                 local('chmod 770 files')

@@ -69,7 +69,7 @@ def _configure_git_repo():
     if os.path.exists('/var/git/projects'):
         local('rm -rf /var/git/projects')
     result = local('git clone git://gitorious.org/pressflow/6.git /var/git/projects', Capture=False)
-    if result.failed
+    if result.failed:
         pass # Can add other repos (local/github) here. In case gitorious is down.
 
 def _mark_incep(server):
