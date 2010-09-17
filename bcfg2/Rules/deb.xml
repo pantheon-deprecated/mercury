@@ -150,7 +150,6 @@
     <!-- PATHS -->
     <Path name="/etc/apache2/mods-enabled/expires.load" type="symlink" to='/etc/apache2/mods-available/expires.load'/>
     <Path name="/etc/apache2/mods-enabled/rewrite.load" type="symlink" to='/etc/apache2/mods-available/rewrite.load'/>
-    <Path name="/etc/apache2/sites-enabled/000-default" type="symlink" to='/etc/apache2/sites-available/default'/>
 
   </Group>
 </Rules>
