@@ -15,11 +15,11 @@ def install_site(project='pantheon', profile='pantheon'):
 
     build_dict = {}
 
-    handler = get_handler(**init_dict)
+    handler = _get_handler(**init_dict)
     handler.build(**build_dict)
 
 
-def get_handler(profile, **kw):
+def _get_handler(profile, **kw):
     """ Return instantiated profile object.
         profile: name of the installation profile.
 
@@ -61,9 +61,9 @@ class _PantheonProfile(siteinstall.InstallTools):
 
     def build(self, **kw):
         makefile = '/opt/pantheon/fabric/templates/pantheon.make'
-        drush_opts = ['--no-core']
-
-        self.build_pantheon_core()
+        drush_opts = ['--working-copy']
+        pdb.set_trace()
+        self.build_project_branch()
         self.build_makefile(makefile, drush_opts)
         self.build_file_dirs()
         self.build_settings_file()

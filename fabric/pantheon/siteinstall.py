@@ -43,21 +43,20 @@ class InstallTools:
 
         self.project = project
         self.db_password = _random_string(10)
-        self.working_dir = tempdir.mkdtemp()
+        self.working_dir = tempfile.mkdtemp()
         self.destination = os.path.join(
                 self.server.webroot,
                 project)
 
 
-    def build_pantheon_core(self):
+    def build_project_branch(self):
         """ Bring master up to date and create a new project branch.
 
         """
-        with cd('/var/git/project'):
+        with cd('/var/git/projects'):
             local('git checkout master')
             local('git pull')
             local('git branch %s' % self.project)
-        local('git clone -l /var/git/projects -b %s %s' % (self.project, self.working_dir))
         
 
     def build_makefile(self, makefile, flags=list()):
@@ -69,6 +68,7 @@ class InstallTools:
         opts = ''
         if flags:
             opts = ' '.join(['%s' % flag for flag in flags])
+        local('rm -rf %s' % self.working_dir)
         local("drush make %s %s %s" % (opts, makefile, self.working_dir))
 
 
@@ -96,7 +96,7 @@ class InstallTools:
                 f.write(item + '\n')
 
 
-    def build_settings_files(self, site='default'):
+    def build_settings_file(self, site='default'):
         """ Create settings.php and pantheon.settings.php
         Site: Optional. The drupal site name. Defaults to 'default'.
 
