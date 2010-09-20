@@ -29,6 +29,16 @@ def _random_string(length):
                                           for i in range(length)])
 
 
+def _drush_download(modules):
+    """ Download list of modules using Drush.
+    modules: list of module names.
+
+    """
+    #TODO: temporary until integrated in pantheon repo
+    for module in modules:
+         local('drush -y dl %s' % module)
+
+
 class InstallTools:
     """ Generic Drupal installation helper functions.
     
@@ -56,8 +66,50 @@ class InstallTools:
         with cd('/var/git/projects'):
             local('git checkout master')
             local('git pull')
+            with settings(warn_only=True):
+                local('git tag -d %s.initialization' % self.project)
+            with settings(warn_only=True):
+                local('git branch -D %s' % self.project)
             local('git branch %s' % self.project)
-        
+
+
+    def build_working_dir(self):
+        """ Clone project to a temporary working directory.
+
+        """
+        local('git clone -l /var/git/projects -b %s %s' % (self.project, 
+                                                           self.working_dir))
+
+    def build_project_modules(self, modules=['apachesolr','memcache','varnish']):
+        """ Add required modules to project branch.
+        modules: Optional list of modules. Defaults to:
+                 apachesolr, memcache, varnish
+
+        """
+        #TODO: temporary until integrated in pantheon repo.
+        module_dir = os.path.join(self.working_dir, 'sites/all/modules')
+        local('mkdir %s' % module_dir)
+        with cd(module_dir):
+            _drush_download(modules)
+        with cd(self.working_dir):
+            local('git add -A .')
+            local("git commit -m 'Add required modules'")
+
+
+    def build_project_libraries(self):
+       """ Add code libraries to project.
+
+       """ 
+       #TODO: temporary until integrated in pantheon repo
+       dest = os.path.join(self.working_dir, 'sites/all/modules/apachesolr/')
+       with cd(dest):
+           local('wget http://solr-php-client.googlecode.com/files/SolrPhpClient.r22.2009-11-09.tgz')
+           local('tar xzf SolrPhpClient.r22.2009-11-09.tgz')
+           local('rm -f SolrPhpClient.r22.2009-11-09.tgz')
+       with cd(self.working_dir):
+           local('git add -A .')
+           local("git commit -m 'Add required libraries'")
+
 
     def build_makefile(self, makefile, flags=list()):
         """ Setup Drupal site using drush make
@@ -81,6 +133,7 @@ class InstallTools:
         """
         for file_dir in dirs:
             local("mkdir -p %s " % (os.path.join(self.working_dir, file_dir)))
+            local("touch %s/.gitignore " % (os.path.join(self.working_dir, file_dir)))
 
 
     def build_gitignore(self, items=['sites/default/files/*',
@@ -170,17 +223,19 @@ class InstallTools:
            environments: Optional. List.
 
        """ 
+       local('rm -rf %s' % (os.path.join(self.server.webroot, self.project)))
        for env in environments:
+           destination = os.path.join(self.server.webroot, self.project, env)
            local('git clone -l /var/git/projects -b %s %s' % (self.project, 
-                                    os.path.join(self.server.webroot, env)))
+                                                              destination))
 
-           with cd(os.path.join(self.server.webroot, env)):
+           with cd(os.path.join(destination)):
                if env == 'dev':
                    local('git checkout master')
-                   local('git checkout pantheon')
+                   local('git checkout %s' % self.project)
                else:
                    local('git fetch')
-                   local('git reset --hard initialization')
+                   local('git reset --hard %s.initialization' % self.project)
                 
 
     def build_permissions(self, environments=_get_environments()):
@@ -189,7 +244,7 @@ class InstallTools:
 
         """
         with cd(self.server.webroot):
-            local('chown -R root:%s %s' % (self.web_group, self.project))
+            local('chown -R root:%s %s' % (self.server.web_group, self.project))
 
         for env in environments:
             site_dir = os.path.join(self.server.webroot, \
@@ -210,7 +265,8 @@ class InstallTools:
             local('git checkout %s' % self.project)
             local('git add -A .')
             local("git commit -m 'Initialize Project: %s'" % self.project)
-            local('git tag initialization')
+            local('git tag %s.initialization' % self.project)
+            local('git push')
             local('git push --tags')
 
 

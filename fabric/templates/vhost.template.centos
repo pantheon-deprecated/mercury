@@ -4,7 +4,7 @@
 
         SetEnv db_name ${db_name}
         SetEnv db_username ${db_username}
-        SetEnv db_passord ${db_password}
+        SetEnv db_password ${db_password}
         SetEnv solr_path ${solr_path}
         SetEnv memcache_prefix ${memcache_prefix}
 

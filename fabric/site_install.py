@@ -1,4 +1,4 @@
-from pantheon import siteinstall
+from pantheon import install
 import pdb
 
 def install_site(project='pantheon', profile='pantheon'):
@@ -40,9 +40,9 @@ To define additional profile handlers:
      2. Add the profile name & class name to the profiles dict in get_handler().
      Example profile handler:
 
-class MIRProfile(siteinstall.InstallTools):
+class MIRProfile(install.InstallTools):
     def __init__(self, project, **kw):
-        siteinstall.InstallTools.__init__(self, project)
+        install.InstallTools.__init__(self, project)
 
     def build(self, **kw):
         # Step 1: create a working installation
@@ -50,29 +50,38 @@ class MIRProfile(siteinstall.InstallTools):
         # Step 3: Make it rain.
 """
 
-class _PantheonProfile(siteinstall.InstallTools):
+class _PantheonProfile(install.InstallTools):
     """ Default Pantheon Installation Profile.
     
     """
 
     def __init__(self, project, **kw):
-        siteinstall.InstallTools.__init__(self, project)
+        install.InstallTools.__init__(self, project)
   
 
     def build(self, **kw):
         makefile = '/opt/pantheon/fabric/templates/pantheon.make'
-        drush_opts = ['--working-copy']
-        pdb.set_trace()
+        
+        # Create a new project in /var/git/projects
         self.build_project_branch()
-        self.build_makefile(makefile, drush_opts)
+
+        # Clone project to a working directory
+        self.build_working_dir()
+        self.build_project_modules()  #NOTE: temporary until integrated with repo
+        self.build_project_libraries()#NOTE: temporary until integrated with repo
         self.build_file_dirs()
         self.build_settings_file()
         self.build_gitignore()
 
+        # Push changes from working directory to /var/git/projects
         self.push_to_repo()
-        self.build_environments()     
-        self.build_permissions()
 
+        # Clone project to all environments
+        self.build_environments()     
+
+        # Finish related (non-code) site building tasks.
+        pdb.set_trace()
+        self.build_permissions()
         self.build_database()
         self.build_solr_index()
         self.build_vhost()
@@ -80,24 +89,24 @@ class _PantheonProfile(siteinstall.InstallTools):
 
         self.cleanup()
 
-class _OpenAtriumProfile(siteinstall.InstallTools):
+class _OpenAtriumProfile(install.InstallTools):
     """ Open Atrium Installation Profile.
 
     """
     def __init__(project, **kw):
-        siteinstall.InstallTools.__init__(self, project)
+        install.InstallTools.__init__(self, project)
   
 
     def build(self, **kw):
         pass
 
 
-class _OpenPublishProfile(siteinstall.InstallTools):
+class _OpenPublishProfile(install.InstallTools):
     """ Open Publish Installation Profile.
 
     """
     def __init__(project, **kw):
-        siteinstall.InstallTools.__init__(self, project)
+        install.InstallTools.__init__(self, project)
   
 
     def build(self, **kw):
