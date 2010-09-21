@@ -1,5 +1,4 @@
 from pantheon import install
-import pdb
 
 def install_site(project='pantheon', profile='pantheon'):
     """ Create a new Drupal installation.
@@ -80,7 +79,6 @@ class _PantheonProfile(install.InstallTools):
         self.build_environments()     
 
         # Finish related (non-code) site building tasks.
-        pdb.set_trace()
         self.build_permissions()
         self.build_database()
         self.build_solr_index()
