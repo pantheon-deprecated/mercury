@@ -14,7 +14,6 @@ def initialize(vps="none"):
     _initialize_bcfg2(vps, server)
     _initialize_iptables(server)
     _initialize_drush()
-    _initialize_pantheon(server)
     _initialize_solr(server)
     _initialize_hudson(server)
 

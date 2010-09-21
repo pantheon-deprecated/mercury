@@ -25,8 +25,8 @@ def _test_for_previous_run():
 
 def _configure_server(server):
     server.update_packages()
-    update.update_pressflow()
-    update.update_pantheon()
+    #update.update_pressflow()
+    #update.update_pantheon()
     local('cp /etc/pantheon/templates/tuneables /etc/pantheon/server_tuneables')
     local('chmod 755 /etc/pantheon/server_tuneables')
 
