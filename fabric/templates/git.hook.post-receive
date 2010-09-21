@@ -31,5 +31,5 @@ if __name__ == '__main__':
                 with hide('everything'):
                     local('env -i git pull')
         else:
-            print "\n\nNo development environment for project '%s' found."
+            print "\n\nNo development environment for project '%s' found." % (project)
 
