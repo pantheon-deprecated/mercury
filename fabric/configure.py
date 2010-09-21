@@ -76,6 +76,7 @@ def _configure_git_repo():
                                      /var/git/projects', capture=False)
     if result.failed:
         pass # Can add other repos (local/github) here. In case gitorious is down.
+    local('git config receive.denycurrentbranch ignore')
     local('cp /opt/pantheon/fabric/templates/git.hook.post-receive /var/git/projects/.git/hooks/post-receive')    
     local('chmod +x /var/git/projects/.git/hooks/post-receive')
 

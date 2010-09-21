@@ -71,8 +71,6 @@ class InstallTools:
             with settings(warn_only=True):
                 local('git branch -D %s' % self.project)
             local('git branch %s' % self.project)
-            local('git checkout %s' % self.project)
-            local('git config receive.denycurrentbranch ignore')
 
 
     def build_working_dir(self):
