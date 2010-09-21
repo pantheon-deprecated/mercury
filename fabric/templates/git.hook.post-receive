@@ -1,0 +1,35 @@
+#!/usr/bin/python
+import os
+import sys
+
+from fabric.api import cd
+from fabric.api import hide
+from fabric.api import local
+
+
+def _get_webroot():
+    if os.path.exists('/etc/debian_version'):
+        return '/var/www/'
+    elif os.path.exists('/etc/redhat-release'):
+        return '/var/www/html/'
+
+
+if __name__ == '__main__':
+
+    params = sys.stdin.read()
+    if params:
+        (revision_old, revision_new, refs) = params.split(' ')
+        project = refs.split('/')[2].rstrip('\n')
+        webroot = _get_webroot()
+
+        dest = os.path.join(webroot, project, 'dev')
+        if os.path.exists(dest):
+            print "\n\n \
+            The '%s' project is being updated in the development environment. \
+                   \n\n" % (project)
+            with cd(dest):
+                with hide('everything'):
+                    local('env -i git pull')
+        else:
+            print "\n\nNo development environment for project '%s' found."
+

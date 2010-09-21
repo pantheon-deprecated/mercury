@@ -26,7 +26,7 @@ def _test_for_previous_run():
 def _configure_server(server):
     server.update_packages()
     #update.update_pressflow()
-    #update.update_pantheon()
+    update.update_pantheon()
     local('cp /etc/pantheon/templates/tuneables /etc/pantheon/server_tuneables')
     local('chmod 755 /etc/pantheon/server_tuneables')
 
@@ -45,6 +45,7 @@ def  _configure_ec2(server):
     local('ln -s /mnt/varnish/lib /var/lib/varnish')
     local('chown varnish:varnish /mnt/varnish/lib/pressflow/')
 
+
 def _configure_postfix(server):
     f = open('/etc/mailname', 'w')
     f.write(server.hostname)
@@ -54,8 +55,10 @@ def _configure_postfix(server):
     local('/usr/sbin/postconf -e "mydestination = %s"' % server.hostname)
     local('/etc/init.d/postfix restart')
 
+
 def _restart_services(server):
     server.restart_services()
+
 
 def _configure_iptables(server):
     if server.distro == 'centos':
@@ -65,6 +68,7 @@ def _configure_iptables(server):
         local('sed -i "s/#-A/-A/g" /etc/iptables.rules')
         local('/sbin/iptables-restore </etc/iptables.rules')
 
+
 def _configure_git_repo():
     if os.path.exists('/var/git/projects'):
         local('rm -rf /var/git/projects')
@@ -72,12 +76,14 @@ def _configure_git_repo():
                                      /var/git/projects', capture=False)
     if result.failed:
         pass # Can add other repos (local/github) here. In case gitorious is down.
+    local('cp /opt/pantheon/fabric/template/git.hook.post-receive /var/git/projects/.git/hooks/post-receive')    
 
 def _mark_incep(server):
     '''Mark incep date. This prevents us from ever running again.'''
     f = open('/etc/pantheon/incep', 'w')
     f.write(server.hostname)
     f.close()
+
 
 def _report():
     '''Phone home - helps us to know how many users there are without passing \
