@@ -77,6 +77,7 @@ def _configure_git_repo():
     if result.failed:
         pass # Can add other repos (local/github) here. In case gitorious is down.
     local('cp /opt/pantheon/fabric/template/git.hook.post-receive /var/git/projects/.git/hooks/post-receive')    
+    local('chmod +x /var/git/projects/.git/hooks/post-receive')
 
 def _mark_incep(server):
     '''Mark incep date. This prevents us from ever running again.'''
