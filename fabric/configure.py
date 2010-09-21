@@ -69,7 +69,7 @@ def _configure_git_repo():
     if os.path.exists('/var/git/projects'):
         local('rm -rf /var/git/projects')
     result = local('git clone --bare git://gitorious.org/pressflow/6.git \
-                                     /var/git/projects', Capture=False)
+                                     /var/git/projects', capture=False)
     if result.failed:
         pass # Can add other repos (local/github) here. In case gitorious is down.
 
@@ -91,6 +91,5 @@ def _report():
     print('#   Pantheon Setup Complete! #')
     print('##############################')
 
-    local('echo "DEAR SYSADMIN: PANTHEON IS READY FOR YOU NOW.  \
-           Do not forget the README.txt, CHANGELOG.txt and docs!" | wall')
+    local('echo "DEAR SYSADMIN: PANTHEON IS READY FOR YOU NOW.  Do not forget the README.txt, CHANGELOG.txt and docs!" | wall')
 
