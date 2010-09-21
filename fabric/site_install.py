@@ -88,6 +88,7 @@ class _PantheonProfile(install.InstallTools):
         self.build_drupal_cron()
 
         self.cleanup()
+        self.server.restart_services()
 
 class _OpenAtriumProfile(install.InstallTools):
     """ Open Atrium Installation Profile.

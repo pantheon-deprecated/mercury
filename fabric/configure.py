@@ -55,7 +55,7 @@ def _configure_postfix(server):
     local('/etc/init.d/postfix restart')
 
 def _restart_services(server):
-     server.restart_services()
+    server.restart_services()
 
 def _configure_iptables(server):
     if server.distro == 'centos':
@@ -68,7 +68,8 @@ def _configure_iptables(server):
 def _configure_git_repo():
     if os.path.exists('/var/git/projects'):
         local('rm -rf /var/git/projects')
-    result = local('git clone git://gitorious.org/pressflow/6.git /var/git/projects', Capture=False)
+    result = local('git clone --bare git://gitorious.org/pressflow/6.git \
+                                     /var/git/projects', Capture=False)
     if result.failed:
         pass # Can add other repos (local/github) here. In case gitorious is down.
 
@@ -79,7 +80,10 @@ def _mark_incep(server):
     f.close()
 
 def _report():
-    '''Phone home - helps us to know how many users there are without passing any identifying or personal information to us.'''
+    '''Phone home - helps us to know how many users there are without passing \
+    any identifying or personal information to us.
+
+    '''
     id = local('hostname -f | md5sum | sed "s/[^a-zA-Z0-9]//g"').rstrip('\n')
     local('curl "http://getpantheon.com/pantheon.php?id="' + id + '"&product=pantheon"')
     
@@ -87,4 +91,6 @@ def _report():
     print('#   Pantheon Setup Complete! #')
     print('##############################')
 
-    local('echo "DEAR SYSADMIN: PANTHEON IS READY FOR YOU NOW.  Do not forget the README.txt, CHANGELOG.txt and docs!" | wall')
+    local('echo "DEAR SYSADMIN: PANTHEON IS READY FOR YOU NOW.  \
+           Do not forget the README.txt, CHANGELOG.txt and docs!" | wall')
+

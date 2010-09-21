@@ -18,9 +18,11 @@ def initialize(vps="none"):
     _initialize_solr(server)
     _initialize_hudson(server)
 
+
 def init():
     '''Alias of "initialize"'''
     initialize()
+
 
 def _initialize_support_account(server):
     '''Generate a public/private key pair for root.'''
@@ -48,6 +50,7 @@ def _initialize_support_account(server):
         local('chmod 600 .ssh/authorized_keys')
         local('chown -R pantheon: .ssh')
 
+
 def _initialize_package_manager(server):
     if server.distro == 'ubuntu':
         with cd('/opt/pantheon/fabric/templates'):
@@ -73,6 +76,7 @@ def _initialize_package_manager(server):
         if exclude_arch:
             local('echo "exclude=%s" >> /etc/yum.conf' % exclude_arch)
     server.update_packages()
+
         
 def _initialize_bcfg2(vps, server):
     if server.distro == 'ubuntu':
@@ -104,6 +108,7 @@ def _initialize_bcfg2(vps, server):
     else:
         local('/usr/sbin/bcfg2 -vqed', capture=False)
 
+
 def _initialize_iptables(server):
     local('/sbin/iptables-restore < /etc/pantheon/templates/iptables')
     if server.distro == 'centos':
@@ -112,6 +117,7 @@ def _initialize_iptables(server):
         local('service iptables start')
     else:
         local('cp /etc/pantheon/templates/iptables /etc/iptables.rules')
+
 
 def _initialize_drush():
     local('[ ! -d drush ] || rm -rf drush')
@@ -138,6 +144,7 @@ def _initialize_solr(server):
         local('chown -R ' + server.tomcat_owner + ':root /var/solr/')
     local('rm -rf ' + temp_dir)
 
+
 def _initialize_hudson(server):
     sudoers = local('cat /etc/sudoers')
     hudson_sudoer = ('hudson ALL = NOPASSWD: /usr/local/bin/drush,'
@@ -152,29 +159,3 @@ def _initialize_hudson(server):
         local('usermod -a -G shadow hudson')
     local('/etc/init.d/hudson restart')
 
-def _initialize_pressflow(server):
-    with cd(server.webroot + 'pantheon/dev'):
-        local('mkdir -p sites/default/files')
-        local('mkdir -p sites/all/files')
-        local('echo "*" > sites/all/files/.gitignore')
-        local('echo "!.gitignore" >> sites/all/files/.gitignore')
-        local('cp sites/all/files/.gitignore sites/default/files/' )
-        local('cp sites/default/default.settings.php sites/default/settings.php')
-        local('cat /opt/pantheon/fabric/templates/newsite.settings.php >> sites/default/settings.php')
-        local('git init')
-        local('git add .')
-        local('git commit -m "initial branch commit"')
-        local('git checkout -b pantheon/dev')
-        local('git config receive.denycurrentbranch ignore')
-        local('cp /opt/pantheon/fabric/templates/git_post-receive .git/hooks/post-receive')
-        local('chmod +x .git/hooks/post-receive')
-    local('git clone ' + server.webroot + 'pantheon/dev ' + server.webroot + 'pantheon/test')
-    local('mkdir '  + server.webroot + 'pantheon/live')
-    with cd(server.webroot + 'pantheon/test'):
-        local('git update-index --assume-unchanged profiles/default/default.profile sites/default/settings.php')
-        local('git archive master | sudo tar -x -C ' + server.webroot + 'pantheon/live')
-    local('sed -i "s/pantheon_dev/pantheon_test/g" ' + server.webroot + 'pantheon/test/sites/default/settings.php ' + server.webroot + 'pantheon/test/profiles/default/default.profile')
-    local('sed -i "s/pantheon_dev/pantheon_live/g" ' + server.webroot + 'pantheon/live/sites/default/settings.php ' + server.webroot + 'pantheon/live/profiles/default/default.profile')
-    update.update_permissions(server.webroot + 'pantheon/dev', server)
-    update.update_permissions(server.webroot + 'pantheon/test', server)
-    update.update_permissions(server.webroot + 'pantheon/live', server)
