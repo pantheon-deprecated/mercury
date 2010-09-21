@@ -229,7 +229,7 @@ class InstallTools:
            local('git clone -l /var/git/projects -b %s %s' % (self.project, 
                                                               destination))
 
-           with cd(os.path.join(destination)):
+           with cd(destination):
                if env == 'dev':
                    local('git checkout master')
                    local('git checkout %s' % self.project)
