@@ -66,9 +66,8 @@ class InstallTools:
         with cd('/var/git/projects'):
             local('git checkout master')
             local('git pull')
-            with settings(warn_only=True):
+            with settings(warn_only=True, hide('warnings')):
                 local('git tag -d %s.initialization' % self.project)
-            with settings(warn_only=True):
                 local('git branch -D %s' % self.project)
             local('git branch %s' % self.project)
 
