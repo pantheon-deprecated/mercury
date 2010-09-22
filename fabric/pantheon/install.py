@@ -196,7 +196,7 @@ class InstallTools:
                           'db_name': '%s_%s' % (self.project, env),
                           'db_username':self.project,
                           'db_password':self.db_password,
-                          'solr_path': '/%s/%s' % (self.project, env),
+                          'solr_path': '/%s_%s' % (self.project, env),
                           'memcache_prefix': '%s_%s' % (self.project, env)}
 
             filename = '%s_%s' % (self.project, env)
