@@ -62,6 +62,7 @@ def _initialize_package_manager(server):
         local('rpm -Uvh http://yum.fourkitchens.com/pub/centos/5/noarch/fourkitchens-release-5-6.noarch.rpm')
         local('rpm --import http://hudson-ci.org/redhat/hudson-ci.org.key')
         local('wget http://hudson-ci.org/redhat/hudson.repo -O /etc/yum.repos.d/hudson.repo')
+        local('yum -y install git17 --enablerepo=ius-testing')
         arch = local('uname -m').rstrip('\n')
         if (arch == "x86_64"):
             exclude_arch = "*.i?86"
@@ -70,14 +71,7 @@ def _initialize_package_manager(server):
         if exclude_arch:
             local('echo "exclude=%s" >> /etc/yum.conf' % exclude_arch)
     server.update_packages()
-    
-    '''temp until '''
-    if server.distro == 'centos':
-            local('yum install yum-plugin-replace')
-            local('yum -y replace git --replace-with git17 --enablerepo=ius-testing')
-
-
-        
+            
 def _initialize_bcfg2(vps, server):
     if server.distro == 'ubuntu':
         local('apt-get install -y bcfg2-server gamin python-gamin python-genshi')
