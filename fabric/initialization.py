@@ -16,7 +16,7 @@ def initialize(vps="none"):
     _initialize_drush()
     _initialize_solr(server)
     _initialize_hudson(server)
-
+    _initialize_apache(server)
 
 def init():
     '''Alias of "initialize"'''
@@ -159,3 +159,9 @@ def _initialize_hudson(server):
         local('usermod -a -G shadow hudson')
     local('/etc/init.d/hudson restart')
 
+
+def _initialize_apache(server):
+    if server.distro == 'ubuntu':
+        local('a2dissite default')
+        local('rm -f /etc/apache/sites-available/default*')
+        local('rm -f /var/www/*')
