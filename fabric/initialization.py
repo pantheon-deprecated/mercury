@@ -62,9 +62,9 @@ def _initialize_package_manager(server):
         local('rpm -Uvh http://yum.fourkitchens.com/pub/centos/5/noarch/fourkitchens-release-5-6.noarch.rpm')
 
         '''temp'''
-        local('rpm -Uvh http://repo.webtatic.com/yum/centos/5/`uname -i`/webtatic-release-5-0.noarch.rpm')
-        local('yum install -y --enablerepo=webtatic git')
-        
+        local('yum install yum-plugin-replace')
+        local('yum replace git --replace-with git17 --enablerepo=ius-testing')
+
         local('rpm --import http://hudson-ci.org/redhat/hudson-ci.org.key')
         local('wget http://hudson-ci.org/redhat/hudson.repo -O /etc/yum.repos.d/hudson.repo')
         arch = local('uname -m').rstrip('\n')
