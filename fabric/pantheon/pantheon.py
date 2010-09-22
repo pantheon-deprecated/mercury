@@ -374,8 +374,10 @@ class PantheonServer:
         vhost_template = local("cat /opt/pantheon/fabric/templates/vhost.template.%s" % self.distro)
         template = string.Template(vhost_template)
         template = template.safe_substitute(vhost_dict)
-        with open(os.path.join(self.vhost_dir, filename), 'w') as f:
+        vhost = os.path.join(self.vhost_dir, filename)
+        with open(vhost, 'w') as f:
             f.write(template)
+        local('chmod 640 %s' % vhost)
         
 
     def create_solr_index(self, project, environment):

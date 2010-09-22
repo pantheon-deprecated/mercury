@@ -163,5 +163,5 @@ def _initialize_hudson(server):
 def _initialize_apache(server):
     if server.distro == 'ubuntu':
         local('a2dissite default')
-        local('rm -f /etc/apache/sites-available/default*')
+        local('rm -f /etc/apache2/sites-available/default*')
         local('rm -f /var/www/*')
