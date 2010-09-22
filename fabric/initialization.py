@@ -60,11 +60,6 @@ def _initialize_package_manager(server):
     elif server.distro == 'centos':
         local('rpm -Uvh http://dl.iuscommunity.org/pub/ius/stable/Redhat/5/x86_64/ius-release-1.0-6.ius.el5.noarch.rpm')
         local('rpm -Uvh http://yum.fourkitchens.com/pub/centos/5/noarch/fourkitchens-release-5-6.noarch.rpm')
-
-        '''temp'''
-        local('yum install yum-plugin-replace')
-        local('yum replace git --replace-with git17 --enablerepo=ius-testing')
-
         local('rpm --import http://hudson-ci.org/redhat/hudson-ci.org.key')
         local('wget http://hudson-ci.org/redhat/hudson.repo -O /etc/yum.repos.d/hudson.repo')
         arch = local('uname -m').rstrip('\n')
@@ -75,6 +70,12 @@ def _initialize_package_manager(server):
         if exclude_arch:
             local('echo "exclude=%s" >> /etc/yum.conf' % exclude_arch)
     server.update_packages()
+    
+    '''temp until '''
+    if server.distro == 'centos':
+            local('yum install yum-plugin-replace')
+            local('yum -y replace git --replace-with git17 --enablerepo=ius-testing')
+
 
         
 def _initialize_bcfg2(vps, server):
