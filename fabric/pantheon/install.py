@@ -174,7 +174,7 @@ class InstallTools:
                                                                 username, 
                                                                 password))
 
-    def build_solr_index(self, environments=_get_environments()):
+    def build_drush_alias(self, environments=_get_environments()):
         """ Create drush aliases for each environment in a project.
         environments: Optional. List.
 
@@ -188,10 +188,10 @@ class InstallTools:
             if self.server.distro == 'centos':
                 vhost = '/etc/httpd/conf/vhosts/%s' % filename
             root = os.path.join(self.server.webroot, self.project, env)
-            drush_dict = {'project':self.project,
-                          'environment':self.environment,
-                          'vhost':vhost,
-                          'root':root}
+            drush_dict = {'project': self.project,
+                          'environment': env,
+                          'vhost': vhost,
+                          'root': root}
             self.server.create_drush_alias(drush_dict)
 
 

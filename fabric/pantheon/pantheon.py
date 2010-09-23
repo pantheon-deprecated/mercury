@@ -375,11 +375,11 @@ class PantheonServer:
         """
         alias_template = 'opt/pantheon/fabric/templates/drush.alias.drushrc.php'
         alias_file = '/opt/drush/aliases/%s_%s.alias.drushrc.php' % (drush_dict.get('project'), drush_dict.get('environment'))
-        template = _build_template(alias_template, drush_dict)
+        template = self._build_template(alias_template, drush_dict)
         with open(alias_file, 'w') as f:
             f.write(template)
         
-    def _build_template(template_file, values):
+    def _build_template(self, template_file, values):
         """ Helper method that returns a template object of the template_file 
             with substitued values.
         filename: full path to template file
