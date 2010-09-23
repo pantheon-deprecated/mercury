@@ -41,7 +41,7 @@ def update_pressflow(project=None):
                    if (temp == "master"):
                           local('skipping master branch')
                    else:
-                          local('git checkout temp')
+                          local('git checkout ' + temp)
                           local('git pull master')
 
        print("Pressflow Updated")
