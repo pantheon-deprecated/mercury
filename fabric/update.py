@@ -22,7 +22,7 @@ def update_pressflow(project=None):
               print("No project selected. Using 'projects'")
               project = 'projects'
        
-       local('git clone /var/git' + project + ' ' + temporary_directory)
+       local('git clone /var/git/' + project + ' ' + temporary_directory)
        with('cd temporary_directory'):
               local('got checkout -b testing')
               local('git pull git://gitorious.org/pantheon/6.git')
