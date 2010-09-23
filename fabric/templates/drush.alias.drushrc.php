@@ -1,7 +1,7 @@
 <?php
 
 // Get settings.php variables from vhost file.
-$vhost = explode(PHP_EOL, file_get_contents('${vhost}'));
+$vhost = explode(PHP_EOL, file_get_contents('${vhost_path}'));
 $vars = array();
 foreach ($vhost as $line) {
     $line = trim($line);

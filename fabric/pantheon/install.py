@@ -190,7 +190,7 @@ class InstallTools:
             root = os.path.join(self.server.webroot, self.project, env)
             drush_dict = {'project': self.project,
                           'environment': env,
-                          'vhost': vhost,
+                          'vhost_path': vhost,
                           'root': root}
             self.server.create_drush_alias(drush_dict)
 

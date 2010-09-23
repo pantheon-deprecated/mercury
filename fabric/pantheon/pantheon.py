@@ -369,11 +369,11 @@ class PantheonServer:
         """ Create an alias.drushrc.php file.
         drush_dict: project:
                     environment:
-                    vhost: full path to vhost file
+                    vhost_path: full path to vhost file
                     root: full path to drupal installation
         
         """
-        alias_template = 'opt/pantheon/fabric/templates/drush.alias.drushrc.php'
+        alias_template = '/opt/pantheon/fabric/templates/drush.alias.drushrc.php'
         alias_file = '/opt/drush/aliases/%s_%s.alias.drushrc.php' % (drush_dict.get('project'), drush_dict.get('environment'))
         template = self._build_template(alias_template, drush_dict)
         with open(alias_file, 'w') as f:
@@ -386,7 +386,7 @@ class PantheonServer:
         values: dictionary of values to be substituted in template file
 
         """
-        contents = ('cat %s' % template_file)
+        contents = local('cat %s' % template_file)
         template = string.Template(contents)
         template = template.safe_substitute(values)
         return template
