@@ -24,7 +24,7 @@ def update_pressflow(project=None):
        
        local('git clone /var/git/' + project + ' ' + temporary_directory)
        with cd(temporary_directory):
-              local('got checkout -b testing')
+              local('git checkout -b testing')
               local('git pull git://gitorious.org/pantheon/6.git')
               local('git checkout master')
               local('git merge testing')
