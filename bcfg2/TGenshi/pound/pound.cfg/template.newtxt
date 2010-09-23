@@ -19,10 +19,12 @@ ListenHTTPS
   Address 0.0.0.0
   Port    8081
   Cert "/etc/pantheon/system.pem"
+  CAlist "/etc/ssl/certs/ca-certificates.crt"
+  VerifyList "/etc/ssl/certs/ca-certificates.crt"
+  ClientCert 2 5
   xHTTP   0
-  HeadRemove X-SSL-Subject
-  HeadRemove X-SSL-Issuer
-  HTTPSHeaders 2
+  HeadRemove "X-SSL-Subject.*"
+  HeadRemove "X-SSL-Issuer.*"
   Service
     BackEnd
       Address 127.0.0.1
@@ -37,9 +39,8 @@ ListenHTTP
   Port    8089
   xHTTP   0
   Service
-    # TODO: Properly validate Prometheus.
-    HeadRequire "X-SSL-Issued: .*"
-    HeadRequire "X-SSL-Subject: *."
+    HeadRequire "X-SSL-Issuer:.*CN = pki.getpantheon.com"
+    HeadRequire "X-SSL-Subject:.*CN = [a-z]+.getpantheon.com"
     BackEnd
       Address 127.0.0.1
       Port    8090
