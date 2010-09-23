@@ -14,33 +14,25 @@ def update_pantheon():
        local('/usr/sbin/bcfg2 -vq', capture=False)
        print("Pantheon Updated")
 
-def update_pressflow(project=None):
-       server = pantheon.PantheonServer()
-       temporary_directory = tempfile.mkdtemp()
-       print ("Updating Pressflow")
-       if (project == None):
-              print("No project selected. Using 'projects'")
-              project = 'projects'
-       
-       local('git clone /var/git/' + project + ' ' + temporary_directory)
-       with cd(temporary_directory):
-              local('git checkout -b testing')
-              local('git pull git://gitorious.org/pantheon/6.git')
-              local('git checkout master')
-              local('git merge testing')
-              local('git push /var/git/' + project)
+def update_pressflow(git_dir=None,branch=None):
+       if (git_dir == None):
+              print("No dir selected. Using '/var/git/pantheon'")
+              git_dir = '/var/git/pantheon'
+       if (branch == None):
+              print("No branch selected. Using 'master'")
+              branch = 'master'
 
-       local('rm -rf ' + temporary_directory)
-       with cd('/var/git/' + project):
-            local('git checkout master')
-            local('git pull')
-            #update all branches from the master branch
-            branches = local('git branch | grep -v master').lstrip(' ').split('/n')
-            for branch in branches:
-                   local('git checkout ' + branch)
-                   local('git merge master')
-
-       print("Pressflow Updated")
+       with cd('git_dir'):
+              with settings(warn_only=True):
+                     local('got checkout' + branch)
+                     local('git add -A .')
+                     local('git commit -av -m "committing found changes"')
+                     if (project == 'master'):
+                            local('git pull')
+                     else:
+                            local('git merge master')
+              
+       print(branch + ' branch of ' + git_dir + ' Updated')
 
 def update_data(source_project=None, source_environment=None, target_project=None, target_environment=None):
        server = pantheon.PantheonServer()
