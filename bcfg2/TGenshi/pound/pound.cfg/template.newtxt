@@ -18,7 +18,7 @@ Control "/var/run/pound/poundctl.socket"
 ListenHTTPS
   Address 0.0.0.0
   Port    8081
-  Cert "/etc/pantheon/client.pem"
+  Cert "/etc/pantheon/system.pem"
   xHTTP   0
   HeadRemove X-SSL-Subject
   HeadRemove X-SSL-Issuer
