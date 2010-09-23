@@ -1,0 +1,49 @@
+User            "www-data"
+Group           "www-data"
+#RootJail       "/chroot/pound"
+
+## Logging: (goes to syslog by default)
+##      0       no logging
+##      1       normal
+##      2       extended
+##      3       Apache-style (common log format)
+LogLevel        1
+
+## check backend every X secs:
+Alive           30
+
+Control "/var/run/pound/poundctl.socket"
+
+# Authenticate the client certificate.
+ListenHTTPS
+  Address 0.0.0.0
+  Port    8081
+  Cert "/etc/pantheon/client.pem"
+  xHTTP   0
+  HeadRemove X-SSL-Subject
+  HeadRemove X-SSL-Issuer
+  HTTPSHeaders 2
+  Service
+    BackEnd
+      Address 127.0.0.1
+      Port    8089
+    End
+  End
+End
+
+# Ensure the client certificate is authorized.
+ListenHTTP
+  Address 127.0.0.1
+  Port    8089
+  xHTTP   0
+  Service
+    # TODO: Properly validate Prometheus.
+    HeadRequire "X-SSL-Issued: .*"
+    HeadRequire "X-SSL-Subject: *."
+    BackEnd
+      Address 127.0.0.1
+      Port    8090
+    End
+  End
+End
+

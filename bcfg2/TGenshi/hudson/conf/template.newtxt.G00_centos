@@ -50,7 +50,7 @@ HUDSON_LISTEN_ADDRESS="127.0.0.1"
 #
 # Port Hudson is listening on.
 #
-HUDSON_PORT="8081"
+HUDSON_PORT="8090"
 
 ## Type:        integer(1:9)
 ## Default:     5
