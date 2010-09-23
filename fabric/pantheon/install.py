@@ -176,7 +176,7 @@ class InstallTools:
 
 
     def build_solr_index(self, environments=_get_environments()):
-        """ Create vhost files for each development environment.
+        """ Create solr index for each environment in a project.
         environments: Optional. List.
 
         """
@@ -185,7 +185,7 @@ class InstallTools:
 
 
     def build_vhost(self, environments=_get_environments()):
-        """ Create vhost files for each developement environment.
+        """ Create vhost files for each environment in a project.
         environments: Optional. List. 
 
         """

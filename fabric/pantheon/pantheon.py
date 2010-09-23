@@ -370,6 +370,12 @@ class PantheonServer:
         filename:  vhost filename
         vhost_dict: project:
                     environment:
+                    db_name:
+                    db_username:
+                    db_password:
+                    db_solr_path:
+                    memcache_prefix:
+
         """
         vhost_template = local("cat /opt/pantheon/fabric/templates/vhost.template.%s" % self.distro)
         template = string.Template(vhost_template)
