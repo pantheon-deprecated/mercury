@@ -38,7 +38,7 @@ def update_pressflow(project=None):
             branches = local('git branch')
             for branch in branches:
                    temp = branch.lstrip('* ').rstrip('\n')
-                   break if temp == "master"
+                   break if (temp == "master")
                    local('git checkout temp')
                    local('git pull master')
        print("Pressflow Updated")
