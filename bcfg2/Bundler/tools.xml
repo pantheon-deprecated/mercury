@@ -37,7 +37,7 @@
   
   <!-- CentOS Only -->
   <Group name='centos'>
-    <Package name='git'/>
+    <Package name='git17'/>
     <Path name='/etc/cron.d/vnstat' altsrc='/vnstat/cron'/>
   </Group>
 </Bundle>

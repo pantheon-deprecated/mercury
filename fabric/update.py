@@ -14,21 +14,33 @@ def update_pantheon():
        local('/usr/sbin/bcfg2 -vq', capture=False)
        print("Pantheon Updated")
 
-def update_pressflow(project=None, environment=None):
+def update_pressflow(project=None):
        server = pantheon.PantheonServer()
-
+       temporary_directory = tempfile.mkdtemp()
        print ("Updating Pressflow")
        if (project == None):
-              print("No project selected. Using 'pantheon'")
-              project = 'pantheon'
-       if (environment == None):
-              print("No environment selected. Using 'dev'")
-              environment = 'dev'
-       with cd(server.webroot + project + '/' + environment):
+              print("No project selected. Using 'projects'")
+              project = 'projects'
+       
+       local('git clone /var/git' + project + ' ' + temporary_directory)
+       with('cd temporary_directory'):
+              local('got checkout -b testing')
               local('git pull git://gitorious.org/pantheon/6.git')
-              with settings(warn_only=True):
-                     local('git commit -m "updates from the Pantheon gitorious project"')
-       update_permissions('%s' % (server.webroot + project + '/' + environment + '/'), server)
+              local('git checkout master')
+              local('git merge testing')
+              local('git push /var/git' + project)
+
+       local('rm -rf ' + temporary_directory)
+       with cd('/var/git/' + project):
+            local('git checkout master')
+            local('git pull')
+            #update all branches
+            branches = local('git branch')
+            for branch in branches:
+                   next if branch == "*master*"
+                   temp = branch.rstrip('\n')
+                   local('git checkout temp')
+                   local('git pull master')
        print("Pressflow Updated")
 
 def update_data(source_project=None, source_environment=None, target_project=None, target_environment=None):
@@ -95,13 +107,6 @@ def update_code(source_project=None, source_environment=None, target_project=Non
                      with settings(warn_only=True):
                             local('git add -A .')
                             local('git commit -av -m "committing found changes"')
-                     branch = local('git branch | grep "*"').lstrip('* ').rstrip('\n')
-                     if branch != 'master':
-                            print("current source git branch is " + branch + " - merging into master branch")
-                            with settings(warn_only=True):
-                                   local('git checkout master')
-                                   local('git merge ' + branch)
-                                   local('git checkout ' + branch)
        else:
               abort("Source target not in version control.")
 
@@ -110,11 +115,7 @@ def update_code(source_project=None, source_environment=None, target_project=Non
               with cd(target_location):
                      local('git pull')
        else:
-              with cd(source_location):
-                     temporary_directory = tempfile.mkdtemp()
-                     local('git archive master | sudo tar -x -C ' + temporary_directory)
-                     local('rsync -av --delete --exclude=settings.php --exclude=files ' + temporary_directory + '/ ' + target_location)
-                     local('rm -rf ' + temporary_directory)
+              abort("Source target not in version control.")
 
        update_permissions(source_location, server)
        update_permissions(target_location, server)

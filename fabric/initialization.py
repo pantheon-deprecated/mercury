@@ -22,7 +22,6 @@ def init():
     '''Alias of "initialize"'''
     initialize()
 
-
 def _initialize_support_account(server):
     '''Generate a public/private key pair for root.'''
     local('mkdir -p ~/.ssh')
