@@ -28,7 +28,7 @@ def update_pressflow(project=None):
               local('git pull git://gitorious.org/pantheon/6.git')
               local('git checkout master')
               local('git merge testing')
-              local('git push /var/git' + project)
+              local('git push /var/git/' + project)
 
        local('rm -rf ' + temporary_directory)
        with cd('/var/git/' + project):
