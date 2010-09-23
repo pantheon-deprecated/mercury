@@ -24,7 +24,7 @@ def update_pressflow(git_dir=None,branch=None):
 
        with cd('git_dir'):
               with settings(warn_only=True):
-                     local('got checkout' + branch)
+                     local('git checkout ' + branch)
                      local('git add -A .')
                      local('git commit -av -m "committing found changes"')
                      if (branch == 'master'):
