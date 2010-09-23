@@ -126,6 +126,7 @@ def _initialize_drush():
     local('chmod 555 drush/drush')
     local('chown -R root: drush')
     local('rm -rf /opt/drush && mv drush /opt/')
+    local('mkdir /opt/drush/aliases')
     local('ln -sf /opt/drush/drush /usr/local/bin/drush')
     local('drush dl drush_make')
 

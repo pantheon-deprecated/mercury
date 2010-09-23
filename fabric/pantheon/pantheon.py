@@ -365,6 +365,33 @@ class PantheonServer:
         local('/sbin/iptables-save > /etc/iptables.rules')
 
 
+    def create_drush_alias(self, drush_dict):
+        """ Create an alias.drushrc.php file.
+        drush_dict: project:
+                    environment:
+                    vhost: full path to vhost file
+                    root: full path to drupal installation
+        
+        """
+        alias_template = 'opt/pantheon/fabric/templates/drush.alias.drushrc.php'
+        alias_file = '/opt/drush/aliases/%s_%s.alias.drushrc.php' % (drush_dict.get('project'), drush_dict.get('environment'))
+        template = _build_template(alias_template, drush_dict)
+        with open(alias_file, 'w') as f:
+            f.write(template)
+        
+    def _build_template(template_file, values):
+        """ Helper method that returns a template object of the template_file 
+            with substitued values.
+        filename: full path to template file
+        values: dictionary of values to be substituted in template file
+
+        """
+        contents = ('cat %s' % template_file)
+        template = string.Template(contents)
+        template = template.safe_substitute(values)
+        return template
+
+
     def create_vhost(self, filename, vhost_dict):
         """ 
         filename:  vhost filename
