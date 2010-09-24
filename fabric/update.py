@@ -47,6 +47,7 @@ def update_parent_code(project=None, environment=None):
        does_branch_exist(dir,branch)
        commit_if_needed(dir,branch)
        push_upstream(dir,branch,project)
+       commit_if_needed(dir,branch)
                             
        print(project + ' project updated with code from ' + dir)
 
@@ -69,7 +70,7 @@ def update_code_from_parent(project=None, environment=None):
        commit_if_needed(dir,branch)
        pull_downstream(dir,branch)
        commit_if_needed(dir,branch)
-       update_permissions(location, server)
+       update_permissions(dir, server)
 
        print(dir + ' updated with code from upstream project ' + project)
        
@@ -156,14 +157,16 @@ def commit_if_needed(dir,branch):
                      if status.failed:
                             local('git add -A .')
                             local('git commit -av -m "committing found changes"')
+       local('git status')
 
 def push_upstream(dir,branch,project):
        with cd(dir):
               with settings(warn_only=True):
                      local('git checkout ' + branch)
                      local('git tag %s.update' % project)
-                     local('git push')
-                     local('git push --tags')
+                     local('git checkout master')
+                     local('git merge ' + branch)
+                     local('git checkout ' + branch)
                      
 def pull_downstream(dir,branch):
        with cd(dir):
