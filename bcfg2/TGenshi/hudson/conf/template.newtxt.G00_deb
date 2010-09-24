@@ -54,4 +54,4 @@ AJP_PORT=-1
 # --argumentsRealm.passwd.$$ADMIN_USER=[password]
 # --argumentsRealm.$$ADMIN_USER=admin
 # --webroot=~/.hudson/war
-HUDSON_ARGS="--webroot=/var/run/hudson/war --httpListenAddress=$HTTP_LISTEN_ADDRESS --httpPort=$$HTTP_PORT --ajp13Port=$$AJP_PORT"
+HUDSON_ARGS="--webroot=/var/run/hudson/war --httpListenAddress=$$HTTP_LISTEN_ADDRESS --httpPort=$$HTTP_PORT --ajp13Port=$$AJP_PORT"
