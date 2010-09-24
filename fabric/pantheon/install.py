@@ -280,17 +280,8 @@ class InstallTools:
             local("git commit -m 'Initialize Project: %s'" % self.project)
             local('git tag %s.initialization' % self.project)
             local('git push')
-            local('git push --tags')
+            local('git push --tags')\
 
-
-    def pull_to_repo(self):
-        """ Pullchanges from central repo to working directory.
-
-        """
-        with cd(self.working_dir):
-            local('git checkout %s' % self.project)
-            local('git pull')
-            
 
     def cleanup(self):
         """ Remove working directory.
