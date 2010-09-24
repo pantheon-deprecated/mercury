@@ -23,7 +23,7 @@ def update_pressflow(git_dir=None,branch=None):
               branch = 'master'
 
        with cd(git_dir):
-              if not local('git branch | grep' + branch):
+              if not local('git branch | grep ' + branch):
                      abort('Branch ' + branch + ' does not exist')
               
               orig_branch = local('git branch | grep "*"').lstrip('* ').rstrip('\n')
