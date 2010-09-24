@@ -22,19 +22,10 @@ def update_pressflow(git_dir=None,branch=None):
               print("No branch selected. Using 'master'")
               branch = 'master'
 
-       with cd(git_dir):
-              with settings(warn_only=True):
-                     response = local('git branch | grep ' + branch, capture=False)
-                     if response.failed:
-                            abort('Branch ' + branch + ' does not exist')
-              
+              does_branch_exist(git_dir,branch)
               orig_branch = local('git branch | grep "*"').lstrip('* ').rstrip('\n')
               local('git checkout ' + branch)
-              with settings(warn_only=True):
-                      status = local('git status | grep "nothing to commit"', capture=False)
-                      if status.failed:
-                             local('git add -A .')
-                             local('git commit -av -m "committing found changes"')
+              commit_if_needed(git_dir,branch)
 
               if (branch == 'master'):
                      local('git pull')
@@ -43,8 +34,31 @@ def update_pressflow(git_dir=None,branch=None):
                      local('git merge master')
               
               local('git checkout ' +  orig_branch)
+
        print(branch + ' branch of ' + git_dir + ' Updated')
 
+def does_branch_exist(git_dir,branch):
+       with cd(git_dir):
+              with settings(warn_only=True):
+                     response = local('git branch | grep ' + branch, capture=False)
+                     if response.failed:
+                            abort('Branch ' + branch + ' does not exist')
+
+def commit_if_needed(git_dir,branch):
+       with cd(git_dir):
+              with settings(warn_only=True):
+                     status = local('git status | grep "nothing to commit"', capture=False)
+                     if status.failed:
+                            local('git add -A .')
+                            local('git commit -av -m "committing found changes"')
+
+def push_upstream(git_dir,branch):
+       with cd(git_dir):
+              with settings(warn_only=True):
+                     local('git tag %s.update' % project)
+                            local('git push')
+                            local('git push --tags')
+                     
 def update_project_code(project=None,  environment=None):
        server = pantheon.PantheonServer()
 
@@ -57,19 +71,12 @@ def update_project_code(project=None,  environment=None):
 
        location = server.webroot + project + '/' + environment + "/"
 
-       #push to repo:
-       with cd(location):
-              local('git checkout %s' % project)
-              with settings(warn_only=True):
-                     status = local('git status | grep "nothing to commit"', capture=False)
-                     if status.failed:
-                            local('git add -A .')
-                            local("git commit -m 'Initialize Project: %s'" % project)
-                            local('git tag %s.initialization' % project)
-                            local('git push')
-                            local('git push --tags')
+       does_branch_exist(location,branch)
+       local('git checkout %s' % project)
+       commit_if_needed(location,branch)
+       push_upstream(location,branch):
                             
-       print(project + 'project updated with code from ' + location)
+       print(project + ' project updated with code from ' + location)
 
 def update_env_code(project=None, environment=None):
        server = pantheon.PantheonServer()
@@ -91,7 +98,7 @@ def update_env_code(project=None, environment=None):
        #check permissions:
        update_permissions(location, server)
 
-       print(location + 'updated with code from project' + project)
+       print(location + ' updated with code from project ' + project)
        
 def update_data(source_project=None, source_environment=None, target_project=None, target_environment=None):
        server = pantheon.PantheonServer()
