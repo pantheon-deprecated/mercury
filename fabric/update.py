@@ -23,7 +23,8 @@ def update_pressflow(git_dir=None,branch=None):
               branch = 'master'
 
               does_branch_exist(git_dir,branch)
-              orig_branch = local('git branch | grep "*"').lstrip('* ').rstrip('\n')
+              with cd(git_dir):
+                     orig_branch = local('git branch | grep "*"').lstrip('* ').rstrip('\n')
               local('git checkout ' + branch)
               commit_if_needed(git_dir,branch)
 
@@ -72,7 +73,8 @@ def update_project_code(project=None,  environment=None):
        location = server.webroot + project + '/' + environment + "/"
 
        does_branch_exist(location,branch)
-       local('git checkout %s' % project)
+       with cd(git_dir):
+              local('git checkout %s' % project)
        commit_if_needed(location,branch)
        push_upstream(location,branch)
                             
