@@ -481,6 +481,16 @@ class PantheonServer:
         # Set Perms
         local('chown -R %s:%s %s' % ('hudson', self.hudson_group, jobdir))     
 
+    def parse_vhost(self, path):
+        env_vars = dict()
+        with open(path, 'r') as f:
+           vhost = f.readlines()
+        for line in vhost:
+            line = line.strip()
+            if line.find('SetEnv') != -1:
+                var = line.split()
+                env_vars[var[1]] = var[2]
+        return env_vars
 
     def get_vhost_file(self, project, environment):
         filename = '%s_%s' % (project, environment)
