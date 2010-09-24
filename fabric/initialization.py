@@ -149,11 +149,7 @@ def _initialize_hudson(server):
     if 'hudson ALL = NOPASSWD:' not in sudoers:
         local('echo "%s" >> /etc/sudoers' % hudson_sudoer)
     if server.distro == 'centos':
-        local('usermod -a -G root hudson')
-        local('chmod g+r /etc/shadow')
         local('sed -i "s/Defaults    requiretty/#Defaults    requiretty/" /etc/sudoers')
-    else:
-        local('usermod -a -G shadow hudson')
     local('/etc/init.d/hudson restart')
 
 def _initialize_pressflow(server):
