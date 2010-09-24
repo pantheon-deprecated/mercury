@@ -23,13 +23,14 @@ def update_pressflow(git_dir=None,branch=None):
               branch = 'master'
 
        with cd(git_dir):
-              if not local('git branch | grep ' + branch):
+              response = local('git branch | grep ' + branch)
+              if len(response == 0):
                      abort('Branch ' + branch + ' does not exist')
               
               orig_branch = local('git branch | grep "*"').lstrip('* ').rstrip('\n')
               local('git checkout ' + branch)
-              status = local('git status | grep "nothing to commit"')
-              if not (status == '\w*'):
+              status = local('git status | grep "nothing to commit"', capture=False)
+              if len(status == 0):
                      local('git add -A .')
                      local('git commit -av -m "committing found changes"')
 
