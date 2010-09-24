@@ -16,13 +16,13 @@ def update_pantheon():
 
 def update_pressflow(git_dir=None,branch=None):
        if (git_dir == None):
-              print("No dir selected. Using '/var/git/pantheon'")
-              git_dir = '/var/git/pantheon'
+              print("No dir selected. Using '/var/git/projects'")
+              git_dir = '/var/git/projects'
        if (branch == None):
               print("No branch selected. Using 'master'")
               branch = 'master'
 
-       with cd('git_dir'):
+       with cd(git_dir):
               with settings(warn_only=True):
                      local('git checkout ' + branch)
                      local('git add -A .')
