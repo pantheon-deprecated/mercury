@@ -1,13 +1,11 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <hudson>
-  <version>1.366</version>
+  <version>1.377</version>
   <numExecutors>1</numExecutors>
   <mode>NORMAL</mode>
-  <useSecurity>true</useSecurity>
-  <authorizationStrategy class="hudson.security.FullControlOnceLoggedInAuthorizationStrategy"/>
-  <securityRealm class="hudson.security.PAMSecurityRealm">
-    <serviceName>sshd</serviceName>
-  </securityRealm>
+  <useSecurity>false</useSecurity>
+  <authorizationStrategy class="hudson.security.AuthorizationStrategy$Unsecured"/>
+  <securityRealm class="hudson.security.SecurityRealm$None"/>
   <jdks/>
   <clouds/>
   <slaves/>
