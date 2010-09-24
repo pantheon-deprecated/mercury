@@ -84,6 +84,7 @@ class _PantheonProfile(install.InstallTools):
         self.build_solr_index()
         self.build_vhost()
         self.build_drupal_cron()
+        self.build_drush_alias()
 
         self.cleanup()
         self.server.restart_services()

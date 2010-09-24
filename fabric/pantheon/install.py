@@ -66,9 +66,8 @@ class InstallTools:
         with cd('/var/git/projects'):
             local('git checkout master')
             local('git pull')
-            with settings(warn_only=True):
+            with settings(hide('warnings'), warn_only=True):
                 local('git tag -d %s.initialization' % self.project)
-            with settings(warn_only=True):
                 local('git branch -D %s' % self.project)
             local('git branch %s' % self.project)
 
@@ -175,9 +174,23 @@ class InstallTools:
                                                                 username, 
                                                                 password))
 
+    def build_drush_alias(self, environments=_get_environments()):
+        """ Create drush aliases for each environment in a project.
+        environments: Optional. List.
+
+        """
+        for env in environments:
+            vhost = self.server.get_vhost_file(self.project, env)
+            root = os.path.join(self.server.webroot, self.project, env)
+            drush_dict = {'project': self.project,
+                          'environment': env,
+                          'vhost_path': vhost,
+                          'root': root}
+            self.server.create_drush_alias(drush_dict)
+
 
     def build_solr_index(self, environments=_get_environments()):
-        """ Create vhost files for each development environment.
+        """ Create solr index for each environment in a project.
         environments: Optional. List.
 
         """
@@ -186,7 +199,7 @@ class InstallTools:
 
 
     def build_vhost(self, environments=_get_environments()):
-        """ Create vhost files for each developement environment.
+        """ Create vhost files for each environment in a project.
         environments: Optional. List. 
 
         """
@@ -197,7 +210,7 @@ class InstallTools:
                           'db_name': '%s_%s' % (self.project, env),
                           'db_username':self.project,
                           'db_password':self.db_password,
-                          'solr_path': '/%s/%s' % (self.project, env),
+                          'solr_path': '/%s_%s' % (self.project, env),
                           'memcache_prefix': '%s_%s' % (self.project, env)}
 
             filename = '%s_%s' % (self.project, env)

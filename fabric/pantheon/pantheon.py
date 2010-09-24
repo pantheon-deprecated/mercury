@@ -10,6 +10,13 @@ import urlparse
 
 from fabric.api import *
 
+ENVIRONMENTS = set(['dev','test','live'])
+
+
+def get_environments():
+    return ENVIRONMENTS
+
+
 def getfrom_url(url):
     download_dir = tempfile.mkdtemp()
     filebase = os.path.basename(url)
@@ -365,17 +372,52 @@ class PantheonServer:
         local('/sbin/iptables-save > /etc/iptables.rules')
 
 
+    def create_drush_alias(self, drush_dict):
+        """ Create an alias.drushrc.php file.
+        drush_dict: project:
+                    environment:
+                    vhost_path: full path to vhost file
+                    root: full path to drupal installation
+        
+        """
+        alias_template = '/opt/pantheon/fabric/templates/drush.alias.drushrc.php'
+        alias_file = '/opt/drush/aliases/%s_%s.alias.drushrc.php' % (drush_dict.get('project'), drush_dict.get('environment'))
+        template = self._build_template(alias_template, drush_dict)
+        with open(alias_file, 'w') as f:
+            f.write(template)
+        
+    def _build_template(self, template_file, values):
+        """ Helper method that returns a template object of the template_file 
+            with substitued values.
+        filename: full path to template file
+        values: dictionary of values to be substituted in template file
+
+        """
+        contents = local('cat %s' % template_file)
+        template = string.Template(contents)
+        template = template.safe_substitute(values)
+        return template
+
+
     def create_vhost(self, filename, vhost_dict):
         """ 
         filename:  vhost filename
         vhost_dict: project:
                     environment:
+                    db_name:
+                    db_username:
+                    db_password:
+                    db_solr_path:
+                    memcache_prefix:
+
         """
         vhost_template = local("cat /opt/pantheon/fabric/templates/vhost.template.%s" % self.distro)
         template = string.Template(vhost_template)
         template = template.safe_substitute(vhost_dict)
-        with open(os.path.join(self.vhost_dir, filename), 'w') as f:
+        vhost = os.path.join(self.vhost_dir, filename)
+        with open(vhost, 'w') as f:
             f.write(template)
+        local('chmod 640 %s' % vhost)
         
 
     def create_solr_index(self, project, environment):
@@ -438,6 +480,16 @@ class PantheonServer:
 
         # Set Perms
         local('chown -R %s:%s %s' % ('hudson', self.hudson_group, jobdir))     
+
+
+    def get_vhost_file(self, project, environment):
+        filename = '%s_%s' % (project, environment)
+        if environment == 'live':
+            filename = '000_' + filename
+        if self.distro == 'ubuntu':
+            return '/etc/apache2/sites-available/%s' % filename
+        elif self.distro == 'centos':
+            return '/etc/httpd/conf/vhosts/%s' % filename
 
 
 class SiteImport:
