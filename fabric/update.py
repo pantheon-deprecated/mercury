@@ -45,7 +45,7 @@ def update_upstream_code(project=None, environment=None):
               branch = local('git branch | grep -v master').lstrip('* ').rstrip('\n')
               
        does_branch_exist(dir,branch)
-       commit_if_needed(dir,branch)
+       commit_if_needed(dir,branch,project)
        push_upstream(dir,branch)
                             
        print(project + ' project updated with code from ' + location)
@@ -157,7 +157,7 @@ def commit_if_needed(dir,branch):
                             local('git add -A .')
                             local('git commit -av -m "committing found changes"')
 
-def push_upstream(dir,branch):
+def push_upstream(dir,branch,project):
        with cd(dir):
               with settings(warn_only=True):
                      local('git checkout ' + branch)
