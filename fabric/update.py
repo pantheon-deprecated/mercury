@@ -23,15 +23,18 @@ def update_pressflow(git_dir=None,branch=None):
               branch = 'master'
 
        with cd(git_dir):
+              orig_branch = local('git branch | grep "*"').lstrip('* ').rstrip('\n')
               with settings(warn_only=True):
+
                      local('git checkout ' + branch)
                      local('git add -A .')
                      local('git commit -av -m "committing found changes"')
                      if (branch == 'master'):
                             local('git pull')
                      else:
+                            local('git checkout ' + branch)
                             local('git merge master')
-              
+              local('git checkout ' +  orig_branch)
        print(branch + ' branch of ' + git_dir + ' Updated')
 
 def update_data(source_project=None, source_environment=None, target_project=None, target_environment=None):
