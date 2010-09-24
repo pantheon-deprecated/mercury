@@ -45,6 +45,54 @@ def update_pressflow(git_dir=None,branch=None):
               local('git checkout ' +  orig_branch)
        print(branch + ' branch of ' + git_dir + ' Updated')
 
+def update_project_code(project=None, source=None):
+       server = pantheon.PantheonServer()
+
+       if (project == None):
+              print("No project selected. Using 'pantheon'")
+              project = 'pantheon'
+       if (environment == None):
+              print("No environment selected. Using 'dev'")
+              environment = 'dev'
+
+       location = server.webroot + project + '/' + environment + "/"
+
+       #push to repo:
+       with cd(location):
+              local('git checkout %s' % project)
+              with settings(warn_only=True):
+                     status = local('git status | grep "nothing to commit"', capture=False)
+                     if status.failed:
+                            local('git add -A .')
+                            local("git commit -m 'Initialize Project: %s'" % project)
+                            local('git tag %s.initialization' % project)
+                            local('git push')
+                            local('git push --tags')
+                            
+       print(project + 'project updated with code from ' + location)
+
+def update_env_code(project=None, source=None):
+       server = pantheon.PantheonServer()
+
+       if (project == None):
+              print("No project selected. Using 'pantheon'")
+              project = 'pantheon'
+       if (environment == None):
+              print("No environment selected. Using 'dev'")
+              environment = 'dev'
+
+       location = server.webroot + project + '/' + environment + "/"
+       
+       #pull from repo:
+       with cd(location):
+              local('git checkout %s' % project)
+              local('git pull')
+
+       #check permissions:
+       update_permissions(location, server)
+
+       print(location + 'updated with code from project' + project)
+       
 def update_data(source_project=None, source_environment=None, target_project=None, target_environment=None):
        server = pantheon.PantheonServer()
        source_temporary_directory = tempfile.mkdtemp()
@@ -84,46 +132,6 @@ def update_data(source_project=None, source_environment=None, target_project=Non
        pantheon.import_data(sites)
        print(target_project + '/' + target_environment + ' database updated with database from ' + source_project + '/' + source_environment)
 
-def update_code(source_project=None, source_environment=None, target_project=None, target_environment=None):
-       server = pantheon.PantheonServer()
-
-       if (source_project == None):
-              print("No source_project selected. Using 'pantheon'")
-              source_project = 'pantheon'
-       if (source_environment == None):
-              print("No source_environment selected. Using 'dev'")
-              source_environment = 'dev'
-       if (target_project == None):
-              print("No target_project selected. Using 'pantheon'")
-              target_project = 'pantheon'
-       if (target_environment == None):
-              print("No target_environment selected. Using 'test'")
-              target_environment = 'test'
-
-       source_location = server.webroot + source_project + '/' + source_environment + "/"
-       target_location = server.webroot + target_project + '/' + target_environment + "/"
-       
-       #push to repo:
-       with cd(source_location):
-              local('git checkout %s' % source_project)
-              with settings(warn_only=True):
-                     status = local('git status | grep "nothing to commit"', capture=False)
-                     if status.failed:
-                            local('git add -A .')
-                            local("git commit -m 'Initialize Project: %s'" % source_project)
-                            local('git tag %s.initialization' % source_project)
-                            local('git push')
-                            local('git push --tags')
-
-       #pull from repo:
-       with cd(target_location):
-              local('git checkout %s' % target_project)
-              local('git pull')
-
-       #check permissions:
-       update_permissions(target_location, server)
-       print(target_location + ' code updated from ' + source_location)
-       
 def update_files(source_project=None, source_environment=None, target_project=None, target_environment=None):
        server = pantheon.PantheonServer()
 
