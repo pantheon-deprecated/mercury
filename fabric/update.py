@@ -48,7 +48,7 @@ def update_upstream_code(project=None, environment=None):
        commit_if_needed(dir,branch)
        push_upstream(dir,branch,project)
                             
-       print(project + ' project updated with code from ' + location)
+       print(project + ' project updated with code from ' + dir)
 
 def update_code_from_upstream(project=None, environment=None):
        server = pantheon.PantheonServer()
@@ -71,7 +71,7 @@ def update_code_from_upstream(project=None, environment=None):
        commit_if_needed(dir,branch)
        update_permissions(location, server)
 
-       print(location + ' updated with code from project ' + project)
+       print(dir + ' updated with code from upstream project ' + project)
        
 def update_data(source_project=None, source_environment=None, target_project=None, target_environment=None):
        server = pantheon.PantheonServer()
