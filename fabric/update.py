@@ -30,6 +30,7 @@ def update_pressflow(git_dir=None,branch=None):
               
               orig_branch = local('git branch | grep "*"').lstrip('* ').rstrip('\n')
               local('git checkout ' + branch)
+              #TODO: replace with self.push_to_repo()?
               with settings(warn_only=True):
                       status = local('git status | grep "nothing to commit"', capture=False)
                       if status.failed:
@@ -103,7 +104,7 @@ def update_code(source_project=None, source_environment=None, target_project=Non
        source_location = server.webroot + source_project + '/' + source_environment + "/"
        target_location = server.webroot + target_project + '/' + target_environment + "/"
 
-       #commit any changes in source dir:
+       #commit any changes in source dir(TODO: replace with self.push_to_repo()?):
        if os.path.exists(source_location + '.git'):
               with cd(source_location):
                      with settings(warn_only=True):
