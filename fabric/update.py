@@ -24,7 +24,7 @@ def update_pressflow(git_dir=None,branch=None):
 
        with cd(git_dir):
               response = local('git branch | grep ' + branch)
-              if len(response == 0):
+              if (response == 0):
                      abort('Branch ' + branch + ' does not exist')
               
               orig_branch = local('git branch | grep "*"').lstrip('* ').rstrip('\n')
