@@ -86,7 +86,7 @@ def update_data(source_project=None, source_environment=None, target_project=Non
        print(target_project + '/' + target_environment + ' database updated with database from ' + source_project + '/' + source_environment)
 
 def update_code(source_project=None, source_environment=None, target_project=None, target_environment=None):
-       server = python.InstallTools()
+       server = pantheon.InstallTools()
 
        if (source_project == None):
               print("No source_project selected. Using 'pantheon'")
