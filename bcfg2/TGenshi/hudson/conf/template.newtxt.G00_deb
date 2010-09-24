@@ -47,7 +47,7 @@ AJP_PORT=-1
 
 # arguments to pass to hudson.
 # --javahome=$$JAVA_HOME
-# --httpListenAddress=$HTTP_LISTEN_ADDRESS (default 0.0.0.0)
+# --httpListenAddress=$$HTTP_LISTEN_ADDRESS (default 0.0.0.0)
 # --httpPort=$$HTTP_PORT (default 8080; disable with -1)
 # --httpsPort=$$HTTP_PORT
 # --ajp13Port=$$AJP_PORT
