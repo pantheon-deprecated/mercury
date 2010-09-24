@@ -101,27 +101,9 @@ def update_code(source_project=None, source_environment=None, target_project=Non
               print("No target_environment selected. Using 'test'")
               target_environment = 'test'
 
-       source_location = server.webroot + source_project + '/' + source_environment + "/"
-       target_location = server.webroot + target_project + '/' + target_environment + "/"
-
-       #commit any changes in source dir(TODO: replace with self.push_to_repo()?):
-       if os.path.exists(source_location + '.git'):
-              with cd(source_location):
-                     with settings(warn_only=True):
-                            local('git add -A .')
-                            local('git commit -av -m "committing found changes"')
-       else:
-              abort("Source target not in version control.")
-
-       #update target dir:
-       if os.path.exists(target_location + '.git'):
-              with cd(target_location):
-                     local('git pull')
-       else:
-              abort("Source target not in version control.")
-
-       update_permissions(source_location, server)
-       update_permissions(target_location, server)
+       server.push_to_repo('source_env')
+       server.build_environments('target_env')
+       server.build_permissions()
        print(target_project + '/' + target_environment + ' project updated from ' + source_project + '/' + source_environment)
        
 def update_files(source_project=None, source_environment=None, target_project=None, target_environment=None):

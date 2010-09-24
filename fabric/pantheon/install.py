@@ -283,6 +283,15 @@ class InstallTools:
             local('git push --tags')
 
 
+    def pull_to_repo(self):
+        """ Pullchanges from central repo to working directory.
+
+        """
+        with cd(self.working_dir):
+            local('git checkout %s' % self.project)
+            local('git pull')
+            
+
     def cleanup(self):
         """ Remove working directory.
 
