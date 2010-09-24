@@ -30,7 +30,7 @@ def update_pressflow(git_dir=None,branch=None):
               
               orig_branch = local('git branch | grep "*"').lstrip('* ').rstrip('\n')
               local('git checkout ' + branch)
-               with settings(warn_only=True):
+              with settings(warn_only=True):
                       status = local('git status | grep "nothing to commit"', capture=False)
                       if status.failed:
                              local('git add -A .')
