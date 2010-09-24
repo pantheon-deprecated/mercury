@@ -3,8 +3,8 @@ from fabric.api import *
 import tempfile
 import os
 
-from pantheon import pantheon
-from install import InstallTools
+from pantheon import *
+
 
 def update_pantheon():
        print("Updating Pantheon from Launchpad")
