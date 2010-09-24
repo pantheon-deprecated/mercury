@@ -45,8 +45,8 @@ def update_upstream_code(project=None, environment=None):
               branch = local('git branch | grep -v master').lstrip('* ').rstrip('\n')
               
        does_branch_exist(dir,branch)
-       commit_if_needed(dir,branch,project)
-       push_upstream(dir,branch)
+       commit_if_needed(dir,branch)
+       push_upstream(dir,branch,project)
                             
        print(project + ' project updated with code from ' + location)
 
