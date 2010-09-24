@@ -14,7 +14,7 @@ def update_pantheon():
        local('/usr/sbin/bcfg2 -vq', capture=False)
        print("Pantheon Updated")
 
-def update_pressflow(dir=None,branch=None):
+def update_pressflow(dir=None, branch=None):
        if (dir == None):
               print("No dir selected. Using '/var/git/projects'")
               dir = '/var/git/projects'
@@ -29,7 +29,7 @@ def update_pressflow(dir=None,branch=None):
 
        print(branch + ' branch of ' + dir + ' Updated')
 
-def update_project_code(project=None,  environment=None):
+def update_upstream_code(project=None, environment=None):
        server = pantheon.PantheonServer()
 
        if (project == None):
@@ -39,15 +39,18 @@ def update_project_code(project=None,  environment=None):
               print("No environment selected. Using 'dev'")
               environment = 'dev'
 
-       location = server.webroot + project + '/' + environment + "/"
-
-       does_branch_exist(location,branch)
-       commit_if_needed(location,branch)
-       push_upstream(location,branch)
+       dir = server.webroot + project + '/' + environment + "/"
+       
+       with cd(dir):
+              branch = local('git branch | grep -v master').lstrip('* ').rstrip('\n')
+              
+       does_branch_exist(dir,branch)
+       commit_if_needed(dir,branch)
+       push_upstream(dir,branch)
                             
        print(project + ' project updated with code from ' + location)
 
-def update_env_code(project=None, environment=None):
+def update_code_from_upstream(project=None, environment=None):
        server = pantheon.PantheonServer()
 
        if (project == None):
@@ -57,7 +60,10 @@ def update_env_code(project=None, environment=None):
               print("No environment selected. Using 'dev'")
               environment = 'dev'
 
-       location = server.webroot + project + '/' + environment + "/"
+       dir = server.webroot + project + '/' + environment + "/"
+
+       with cd(dir):
+              branch = local('git branch | grep -v master').lstrip('* ').rstrip('\n')
        
        does_branch_exist(dir,branch)
        commit_if_needed(dir,branch)
