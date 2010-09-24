@@ -14,53 +14,21 @@ def update_pantheon():
        local('/usr/sbin/bcfg2 -vq', capture=False)
        print("Pantheon Updated")
 
-def update_pressflow(git_dir=None,branch=None):
-       if (git_dir == None):
+def update_pressflow(dir=None,branch=None):
+       if (dir == None):
               print("No dir selected. Using '/var/git/projects'")
-              git_dir = '/var/git/projects'
+              dir = '/var/git/projects'
        if (branch == None):
               print("No branch selected. Using 'master'")
               branch = 'master'
 
-              does_branch_exist(git_dir,branch)
-              with cd(git_dir):
-                     orig_branch = local('git branch | grep "*"').lstrip('* ').rstrip('\n')
-              commit_if_needed(git_dir,branch)
+       does_branch_exist(dir,branch)
+       commit_if_needed(dir,branch)
+       pull_downstream(dir,branch)
+       commit_if_needed(dir,branch)
 
-              if (branch == 'master'):
-                     local('git pull')
-              else:
-                     local('git checkout ' + branch)
-                     local('git merge master')
-              
-              local('git checkout ' +  orig_branch)
+       print(branch + ' branch of ' + dir + ' Updated')
 
-       print(branch + ' branch of ' + git_dir + ' Updated')
-
-def does_branch_exist(git_dir,branch):
-       with cd(git_dir):
-              with settings(warn_only=True):
-                     response = local('git branch | grep ' + branch, capture=False)
-                     if response.failed:
-                            abort('Branch ' + branch + ' does not exist')
-
-def commit_if_needed(git_dir,branch):
-       with cd(git_dir):
-              with settings(warn_only=True):
-                     local('git checkout ' + branch)
-                     status = local('git status | grep "nothing to commit"', capture=False)
-                     if status.failed:
-                            local('git add -A .')
-                            local('git commit -av -m "committing found changes"')
-
-def push_upstream(git_dir,branch):
-       with cd(git_dir):
-              with settings(warn_only=True):
-                     local('git checkout ' + branch)
-                     local('git tag %s.update' % project)
-                     local('git push')
-                     local('git push --tags')
-                     
 def update_project_code(project=None,  environment=None):
        server = pantheon.PantheonServer()
 
@@ -91,12 +59,8 @@ def update_env_code(project=None, environment=None):
 
        location = server.webroot + project + '/' + environment + "/"
        
-       #pull from repo:
-       with cd(location):
-              local('git checkout %s' % project)
-              local('git pull')
-
-       #check permissions:
+       pull_downstream(dir,branch)
+       commit_if_needed(dir,branch)
        update_permissions(location, server)
 
        print(location + ' updated with code from project ' + project)
@@ -169,3 +133,34 @@ def update_permissions(dir, server):
               local('find sites/*/files -type d -exec chmod 775 {} \;')
               local('find sites/*/files -type f -exec chmod 660 {} \;')
 
+def does_branch_exist(dir,branch):
+       with cd(dir):
+              with settings(warn_only=True):
+                     response = local('git branch | grep ' + branch, capture=False)
+                     if response.failed:
+                            abort('Branch ' + branch + ' does not exist')
+
+def commit_if_needed(dir,branch):
+       with cd(dir):
+              with settings(warn_only=True):
+                     local('git checkout ' + branch)
+                     status = local('git status | grep "nothing to commit"', capture=False)
+                     if status.failed:
+                            local('git add -A .')
+                            local('git commit -av -m "committing found changes"')
+
+def push_upstream(dir,branch):
+       with cd(dir):
+              with settings(warn_only=True):
+                     local('git checkout ' + branch)
+                     local('git tag %s.update' % project)
+                     local('git push')
+                     local('git push --tags')
+                     
+def pull_downstream(dir,branch):
+       with cd(dir):
+              if (branch == 'master'):
+                     local('git pull')
+              else:
+                     local('git checkout ' + branch)
+                     local('git merge master')
