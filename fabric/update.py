@@ -170,7 +170,8 @@ def pull_downstream(dir,branch):
               if (branch == 'master'):
                      local('git pull')
               else:
-                     response = local('git branch | grep mater', capture=False)
+                     with settings(warn_only=True):
+                            response = local('git branch | grep master', capture=False)
                      if response.failed:
                             local('git pull')
                      else:
