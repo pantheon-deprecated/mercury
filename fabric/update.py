@@ -59,6 +59,8 @@ def update_env_code(project=None, environment=None):
 
        location = server.webroot + project + '/' + environment + "/"
        
+       does_branch_exist(dir,branch)
+       commit_if_needed(dir,branch)
        pull_downstream(dir,branch)
        commit_if_needed(dir,branch)
        update_permissions(location, server)
