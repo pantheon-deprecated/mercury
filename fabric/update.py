@@ -56,8 +56,8 @@ def push_upstream(git_dir,branch):
        with cd(git_dir):
               with settings(warn_only=True):
                      local('git tag %s.update' % project)
-                            local('git push')
-                            local('git push --tags')
+                     local('git push')
+                     local('git push --tags')
                      
 def update_project_code(project=None,  environment=None):
        server = pantheon.PantheonServer()
