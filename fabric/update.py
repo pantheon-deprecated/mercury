@@ -25,7 +25,6 @@ def update_pressflow(git_dir=None,branch=None):
               does_branch_exist(git_dir,branch)
               with cd(git_dir):
                      orig_branch = local('git branch | grep "*"').lstrip('* ').rstrip('\n')
-              local('git checkout ' + branch)
               commit_if_needed(git_dir,branch)
 
               if (branch == 'master'):
@@ -48,6 +47,7 @@ def does_branch_exist(git_dir,branch):
 def commit_if_needed(git_dir,branch):
        with cd(git_dir):
               with settings(warn_only=True):
+                     local('git checkout ' + branch)
                      status = local('git status | grep "nothing to commit"', capture=False)
                      if status.failed:
                             local('git add -A .')
@@ -56,6 +56,7 @@ def commit_if_needed(git_dir,branch):
 def push_upstream(git_dir,branch):
        with cd(git_dir):
               with settings(warn_only=True):
+                     local('git checkout ' + branch)
                      local('git tag %s.update' % project)
                      local('git push')
                      local('git push --tags')
@@ -73,8 +74,6 @@ def update_project_code(project=None,  environment=None):
        location = server.webroot + project + '/' + environment + "/"
 
        does_branch_exist(location,branch)
-       with cd(git_dir):
-              local('git checkout %s' % project)
        commit_if_needed(location,branch)
        push_upstream(location,branch)
                             
