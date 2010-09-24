@@ -180,13 +180,7 @@ class InstallTools:
 
         """
         for env in environments:
-            filename = '%s_%s' % (self.project, env)
-            if env == 'live':
-                filename = '000_' + filename
-            if self.server.distro == 'ubuntu':
-                vhost = '/etc/apache2/sites-available/%s' % filename
-            if self.server.distro == 'centos':
-                vhost = '/etc/httpd/conf/vhosts/%s' % filename
+            vhost = self.server.get_vhost_file(self.project, env)
             root = os.path.join(self.server.webroot, self.project, env)
             drush_dict = {'project': self.project,
                           'environment': env,

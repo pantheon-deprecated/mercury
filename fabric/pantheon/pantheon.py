@@ -10,6 +10,13 @@ import urlparse
 
 from fabric.api import *
 
+ENVIRONMENTS = set(['dev','test','live'])
+
+
+def get_environments():
+    return ENVIRONMENTS
+
+
 def getfrom_url(url):
     download_dir = tempfile.mkdtemp()
     filebase = os.path.basename(url)
@@ -473,6 +480,16 @@ class PantheonServer:
 
         # Set Perms
         local('chown -R %s:%s %s' % ('hudson', self.hudson_group, jobdir))     
+
+
+    def get_vhost_file(self, project, environment):
+        filename = '%s_%s' % (project, environment)
+        if environment == 'live':
+            filename = '000_' + filename
+        if self.distro == 'ubuntu':
+            return '/etc/apache2/sites-available/%s' % filename
+        elif self.distro == 'centos':
+            return '/etc/httpd/conf/vhosts/%s' % filename
 
 
 class SiteImport:
