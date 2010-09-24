@@ -157,7 +157,7 @@ def commit_if_needed(dir,branch):
                      if status.failed:
                             local('git add -A .')
                             local('git commit -av -m "committing found changes"')
-       local('git status')
+       print('git status')
 
 def push_upstream(dir,branch,project):
        with cd(dir):
