@@ -74,7 +74,7 @@ def update_project_code(project=None,  environment=None):
        does_branch_exist(location,branch)
        local('git checkout %s' % project)
        commit_if_needed(location,branch)
-       push_upstream(location,branch):
+       push_upstream(location,branch)
                             
        print(project + ' project updated with code from ' + location)
 
