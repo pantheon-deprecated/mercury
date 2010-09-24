@@ -4,7 +4,7 @@ import tempfile
 import os
 
 from pantheon import pantheon
-from install import install
+from install import InstallTools
 
 def update_pantheon():
        print("Updating Pantheon from Launchpad")
