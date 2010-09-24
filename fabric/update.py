@@ -45,7 +45,7 @@ def update_pressflow(git_dir=None,branch=None):
               local('git checkout ' +  orig_branch)
        print(branch + ' branch of ' + git_dir + ' Updated')
 
-def update_project_code(project=None, source=None):
+def update_project_code(project=None,  environment=None):
        server = pantheon.PantheonServer()
 
        if (project == None):
@@ -71,7 +71,7 @@ def update_project_code(project=None, source=None):
                             
        print(project + 'project updated with code from ' + location)
 
-def update_env_code(project=None, source=None):
+def update_env_code(project=None, environment=None):
        server = pantheon.PantheonServer()
 
        if (project == None):
