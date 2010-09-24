@@ -7,7 +7,7 @@
     <Package name='Pound' />
   </Group>
 
-  <Path name='/etc/' altsrc='/pound/pound.cfg'/>
+  <Path name='/etc/pound/pound.cfg' altsrc='/pound/pound.cfg'/>
   <Service name='pound'/>
 
   <!-- Ubuntu/Deb Only -->
@@ -20,4 +20,3 @@
     <Path name='/etc/sysconfig/pound' altsrc='/pound/daemon'/>
   </Group>
 </Bundle>
-
