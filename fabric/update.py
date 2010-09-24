@@ -29,7 +29,7 @@ def update_pressflow(dir=None, branch=None):
 
        print(branch + ' branch of ' + dir + ' Updated')
 
-def update_upstream_code(project=None, environment=None):
+def update_parent_code(project=None, environment=None):
        server = pantheon.PantheonServer()
 
        if (project == None):
@@ -50,7 +50,7 @@ def update_upstream_code(project=None, environment=None):
                             
        print(project + ' project updated with code from ' + dir)
 
-def update_code_from_upstream(project=None, environment=None):
+def update_code_from_parent(project=None, environment=None):
        server = pantheon.PantheonServer()
 
        if (project == None):
@@ -170,5 +170,9 @@ def pull_downstream(dir,branch):
               if (branch == 'master'):
                      local('git pull')
               else:
-                     local('git checkout ' + branch)
-                     local('git merge master')
+                     response = local('git branch | grep mater', capture=False)
+                     if response.failed:
+                            local('git pull')
+                     else:
+                            local('git checkout ' + branch)
+                            local('git merge master')
