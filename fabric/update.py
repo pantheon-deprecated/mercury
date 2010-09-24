@@ -106,11 +106,14 @@ def update_code(source_project=None, source_environment=None, target_project=Non
        #push to repo:
        with cd(source_location):
               local('git checkout %s' % source_project)
-              local('git add -A .')
-              local("git commit -m 'Initialize Project: %s'" % source_project)
-              local('git tag %s.initialization' % source_project)
-              local('git push')
-              local('git push --tags')
+              with settings(warn_only=True):
+                     status = local('git status | grep "nothing to commit"', capture=False)
+                     if status.failed:
+                            local('git add -A .')
+                            local("git commit -m 'Initialize Project: %s'" % source_project)
+                            local('git tag %s.initialization' % source_project)
+                            local('git push')
+                            local('git push --tags')
 
        #pull from repo:
        with cd(target_location):
