@@ -72,14 +72,16 @@ def _configure_iptables(server):
 def _configure_git_repo():
     if os.path.exists('/var/git/projects'):
         local('rm -rf /var/git/projects')
-    result = local('git clone git://gitorious.org/pantheon/6.git \
-                                     /var/git/projects', capture=False)
-    if result.failed:
-        pass # Can add other repos (local/github) here. In case gitorious is down.
+    # Pantheon Core
+    local('git clone git://gitorious.org/pantheon/6.git /var/git/projects')
+    # Drupal Core
     with cd('/var/git/projects'):
+        local('git fetch git://gitorious.org/drupal/6.git master:drupal_core')
+   
         local('git config receive.denycurrentbranch ignore')
     local('cp /opt/pantheon/fabric/templates/git.hook.post-receive /var/git/projects/.git/hooks/post-receive')    
     local('chmod +x /var/git/projects/.git/hooks/post-receive')
+
 
 def _mark_incep(server):
     '''Mark incep date. This prevents us from ever running again.'''

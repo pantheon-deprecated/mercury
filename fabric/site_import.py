@@ -6,6 +6,41 @@ import random
 import tempfile
 
 from pantheon import pantheon
+from pantheon import onramp
+
+def import_site(url, project='pantheon'):
+    tarball = onramp.download()
+    archive = onramp.PantheonImport(project)
+
+
+    archive.extract(tarball)
+    archive.parse_archive()
+
+    archive.import_database()
+    archive.import_files()
+    archive.build_drush_alias()
+    archive.import_pantheon_modules()
+    archive.import_drupal_settings()
+
+    # Push changes from working directory to /var/git/projects
+    self.push_to_repo()
+
+    # Clone project to all environments
+    self.build_environments()
+
+    # Finish related (non-code) site building tasks.
+    self.build_permissions()
+    self.build_database()
+    self.build_solr_index()
+    self.build_vhost()
+    self.build_drupal_cron()
+    self.build_drush_alias()
+
+    self.cleanup()
+    self.server.restart_services()
+
+    
+
 
 def import_siteurl(url, project='pantheon', environment='dev'):
     filename = pantheon.getfrom_url(url)
