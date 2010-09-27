@@ -147,7 +147,7 @@ def does_branch_exist(dir,branch):
               with settings(warn_only=True):
                      response = local('git branch | grep ' + branch, capture=False)
                      if response.failed:
-                            abort('Branch ' + branch + ' does not exist')
+                            abort('Branch ' + branch + ' does not exist in ' + dir)
 
 def commit_if_needed(dir,branch):
        with cd(dir):
