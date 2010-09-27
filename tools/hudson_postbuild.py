@@ -33,4 +33,3 @@ if __name__ == '__main__':
             headers = {'Content-Type': 'application/json'}, \
             data = json.dumps(responsedict))
     urllib2.urlopen(req)
-
