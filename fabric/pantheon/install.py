@@ -255,7 +255,7 @@ class InstallTools:
         
         """
         if server_host == "auth.example.com":
-        server_host = "auth." + base_domain
+            server_host = "auth." + base_domain
 
         # If necessary, restrict by group
         if require_group is not None:
