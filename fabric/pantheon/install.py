@@ -9,26 +9,6 @@ from fabric.api import *
 import pantheon
 
 
-ENVIRONMENTS = set(['dev','test','live'])
-
-
-def _get_environments():
-    """ Return list of development environments.
-   
-    """
-    return ENVIRONMENTS
-
-
-def _random_string(length):
-    """ Create random string of ascii letters & digits.
-    length: Int. Character length of string to return.
-
-    """
-    return ''.join(['%s' % random.choice (string.ascii_letters + \
-                                          string.digits) \
-                                          for i in range(length)])
-
-
 def _drush_download(modules):
     """ Download list of modules using Drush.
     modules: list of module names.
@@ -52,11 +32,9 @@ class InstallTools:
         self.server = pantheon.PantheonServer()
 
         self.project = project
-        self.db_password = _random_string(10)
+        self.db_password = pantheon.random_string(10)
         self.working_dir = tempfile.mkdtemp()
-        self.destination = os.path.join(
-                self.server.webroot,
-                project)
+        self.destination = os.path.join(self.server.webroot, project)
 
 
     def build_project_branch(self):
@@ -78,6 +56,7 @@ class InstallTools:
         """
         local('git clone -l /var/git/projects -b %s %s' % (self.project, 
                                                            self.working_dir))
+
 
     def build_project_modules(self, modules=['apachesolr','memcache','varnish']):
         """ Add required modules to project branch.
@@ -158,7 +137,7 @@ class InstallTools:
         pantheon.create_pantheon_settings_file(site_dir)
 
 
-    def build_database(self, environments=_get_environments()):
+    def build_database(self, environments=pantheon.get_environments()):
         """ Create a new database and set user grants (all).
 
         """
@@ -174,7 +153,8 @@ class InstallTools:
                                                                 username, 
                                                                 password))
 
-    def build_drush_alias(self, environments=_get_environments()):
+
+    def build_drush_alias(self, environments=pantheon.get_environments()):
         """ Create drush aliases for each environment in a project.
         environments: Optional. List.
 
@@ -189,7 +169,7 @@ class InstallTools:
             self.server.create_drush_alias(drush_dict)
 
 
-    def build_solr_index(self, environments=_get_environments()):
+    def build_solr_index(self, environments=pantheon.get_environments()):
         """ Create solr index for each environment in a project.
         environments: Optional. List.
 
@@ -198,7 +178,7 @@ class InstallTools:
             self.server.create_solr_index(self.project, env)
 
 
-    def build_vhost(self, environments=_get_environments()):
+    def build_vhost(self, environments=pantheon.get_environments()):
         """ Create vhost files for each environment in a project.
         environments: Optional. List. 
 
@@ -222,7 +202,7 @@ class InstallTools:
                local('a2ensite %s' % filename)
 
 
-    def build_drupal_cron(self, environments=_get_environments()):
+    def build_drupal_cron(self, environments=pantheon.get_environments()):
         """ Create drupal cron jobs in hudson for each development environment.
         environments: Optional. List.
 
@@ -231,7 +211,7 @@ class InstallTools:
             self.server.create_drupal_cron(self.project, env)
 
 
-    def build_environments(self, environments=_get_environments()):
+    def build_environments(self, environments=pantheon.get_environments()):
        """ Clone project from central repo to all environments.
            environments: Optional. List.
 
@@ -251,7 +231,7 @@ class InstallTools:
                    local('git reset --hard %s.initialization' % self.project)
                 
 
-    def build_permissions(self, environments=_get_environments()):
+    def build_permissions(self, environments=pantheon.get_environments()):
         """ Set permissions on project directory, settings.php, and files dir.
         environments: Optional. List.
 
@@ -260,6 +240,8 @@ class InstallTools:
             local('chown -R root:%s %s' % (self.server.web_group, self.project))
 
         for env in environments:
+            import pdb
+            pdb.set_trace()
             site_dir = os.path.join(self.server.webroot, \
                                     '%s/%s/sites/default' % (self.project, env))
             with cd(site_dir):
@@ -270,7 +252,7 @@ class InstallTools:
                 local('chmod 770 files')
         
 
-    def push_to_repo(self):
+    def push_to_repo(self, tag='initialization'):
         """ Commit changes in working directory and push to central repo.
 
         """
@@ -278,7 +260,7 @@ class InstallTools:
             local('git checkout %s' % self.project)
             local('git add -A .')
             local("git commit -m 'Initialize Project: %s'" % self.project)
-            local('git tag %s.initialization' % self.project)
+            local('git tag %s.%s' % (self.project, tag))
             local('git push')
             local('git push --tags')\
 

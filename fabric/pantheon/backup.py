@@ -24,8 +24,8 @@ class PantheonBackup():
 
     def backup_data(self, environments=pantheon.get_environments()):
         for env in environments:
-            drupal_vars = self._parse_vhost(self.server.get_vhost_file(
-                                                    self.project, env))
+            drupal_vars = self.server.parse_vhost(self.server.get_vhost_file(
+                                                  self.project, env))
             dest = os.path.join(self.working_dir, self.project, env, 'database.sql')
             self._dump_data(dest, drupal_vars)
 
@@ -48,6 +48,10 @@ class PantheonBackup():
             local('mv %s %s' % (self.name, self.server.ftproot))
 
 
+    def cleanup(self):
+        local('rm -rf %s' % self.working_dir)
+
+
     def _dump_data(self, destination, db_dict):        
         result = local("mysqldump --single-transaction \
                                   --user='%s' --password='%s' %s > %s" % (
@@ -58,15 +62,4 @@ class PantheonBackup():
         if result.failed:
             abort("Export of database '%s' failed." % db_dict.get('db_name'))
                                          
-
-    def _parse_vhost(self, path):
-        env_vars = dict()
-        with open(path, 'r') as f:
-           vhost = f.readlines()
-        for line in vhost:
-            line = line.strip()
-            if line.find('SetEnv') != -1:
-                var = line.split()
-                env_vars[var[1]] = var[2]
-        return env_vars
 

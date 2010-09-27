@@ -14,4 +14,5 @@ def backup_site(archive_name, project='pantheon'):
     archive.backup_repo()
     archive.make_archive()
     archive.move_archive()
+    archive.cleanup()
 

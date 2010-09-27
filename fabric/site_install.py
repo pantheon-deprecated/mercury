@@ -1,6 +1,7 @@
 from pantheon import install
+from pantheon import onramp
 
-def install_site(project='pantheon', profile='pantheon'):
+def install_site(project='pantheon', profile='pantheon', url=None):
     """ Create a new Drupal installation.
     project: Installation namespace.
     profile: The installation type (e.g. pantheon/openatrium)
@@ -12,7 +13,7 @@ def install_site(project='pantheon', profile='pantheon'):
     init_dict = {'profile':profile,
                  'project':project}
 
-    build_dict = {}
+    build_dict = {'url':url}
 
     handler = _get_handler(**init_dict)
     handler.build(**build_dict)
@@ -24,6 +25,7 @@ def _get_handler(profile, **kw):
 
     """
     profiles = {'pantheon':_PantheonProfile,
+                'import':_ImportProfile,
                 'openatrium':_OpenAtriumProfile,
                 'openpublish':_OpenPublishProfile}
 
@@ -59,7 +61,6 @@ class _PantheonProfile(install.InstallTools):
   
 
     def build(self, **kw):
-        makefile = '/opt/pantheon/fabric/templates/pantheon.make'
         
         # Create a new project in /var/git/projects
         self.build_project_branch()
@@ -88,6 +89,41 @@ class _PantheonProfile(install.InstallTools):
 
         self.cleanup()
         self.server.restart_services()
+
+class _ImportProfile(onramp.ImportTools):
+
+    def __init__(self, project, **kw):
+        onramp.ImportTools.__init__(self, project)
+
+    def build(self, url, **kw):
+        tarball = onramp.download(url)
+
+        self.extract(tarball)
+        self.parse_archive()
+
+        self.import_database()
+        self.import_files()
+        self.build_drush_alias()
+        self.import_pantheon_modules()
+
+        # Push changes from working directory to /var/git/projects
+        self.push_to_repo('import')
+
+        # Clone project to all environments
+        self.build_environments()
+
+        # Finish related (non-code) site building tasks.
+        self.build_permissions()
+        self.build_solr_index()
+        self.build_vhost()
+        self.build_drupal_cron()
+        self.build_drush_alias()
+
+        archive.import_drupal_settings()
+
+        self.cleanup()
+        self.server.restart_services()
+
 
 class _OpenAtriumProfile(install.InstallTools):
     """ Open Atrium Installation Profile.
