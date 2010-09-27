@@ -72,6 +72,9 @@
     <!-- vsftpd -->
     <Service type='chkconfig' status='on' name='vsftpd'/>
 
+    <!-- pound -->
+    <Service type='chkconfig' status='on' name='pound'/>
+
     <!-- CentOS -->
     <Service type='chkconfig' status='on' name='crond'/>
     <Service type='chkconfig' status='off' name='iptables'/>

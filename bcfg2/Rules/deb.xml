@@ -71,6 +71,9 @@
     <!-- tools -->
     <Service type='deb' status='off' name='rsync'/>
 
+    <!-- pound -->
+    <Service type='deb' status='on' name='pound'/>
+
     <!-- varnish -->
     <Service type='deb' status='on' name='varnish'/>
     <Service type='deb' status='on' name='varnishlog'/>
