@@ -1,5 +1,6 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 from fabric.api import *
+from genshi.template import TemplateLoader, TextTemplate
 import os
 
 from pantheon import pantheon
@@ -108,6 +109,11 @@ def build_ldap_client(base_domain = "example.com", require_group = None, server_
     environments: Optional. List.
     
     """
+    loader = TemplateLoader(
+        os.path.join(os.path.dirname(__file__), 'templates'),
+        auto_reload=True
+        )
+    
     if server_host == "auth.example.com":
         server_host = "auth." + base_domain
         
