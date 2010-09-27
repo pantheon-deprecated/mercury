@@ -4,7 +4,6 @@ import tempfile
 
 from fabric.api import *
 
-import drupal
 import install
 import pantheon
 
@@ -195,7 +194,7 @@ class ImportTools(install.InstallTools):
                                                     self.server.web_group))
                 local('chmod 440 settings.php')
                 local('chmod 440 pantheon.settings.php')
-            file_dir = self._get_files_dir(env)
+            file_dir = self._get_files_dir()
             file_path = os.path.join(self.server.webroot, '%s/%s/%s' % (self.project, env, file_dir))
             with cd(file_path): 
                 local("chmod 770 .")
