@@ -211,7 +211,7 @@ class InstallTools:
             self.server.create_drupal_cron(self.project, env)
 
 
-    def build_environments(self, environments=pantheon.get_environments()):
+    def build_environments(self, tag='initialization', environments=pantheon.get_environments()):
        """ Clone project from central repo to all environments.
            environments: Optional. List.
 
@@ -228,7 +228,7 @@ class InstallTools:
                    local('git checkout %s' % self.project)
                else:
                    local('git fetch')
-                   local('git reset --hard %s.initialization' % self.project)
+                   local('git reset --hard %s.%s' % (self.project, tag))
                 
 
     def build_permissions(self, environments=pantheon.get_environments()):
@@ -240,8 +240,6 @@ class InstallTools:
             local('chown -R root:%s %s' % (self.server.web_group, self.project))
 
         for env in environments:
-            import pdb
-            pdb.set_trace()
             site_dir = os.path.join(self.server.webroot, \
                                     '%s/%s/sites/default' % (self.project, env))
             with cd(site_dir):

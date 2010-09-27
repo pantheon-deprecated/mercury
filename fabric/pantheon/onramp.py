@@ -88,7 +88,11 @@ class ImportTools(install.InstallTools):
                        grep -v '^INSERT INTO `accesslog`' | \
                        grep -v '^USE `' | \
                        sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | \
-                       mysql -u root %s" %  (self.db_dump, database))
+                       mysql -u root %s" %  (os.path.join(self.processing_dir,
+                                             self.db_dump), 
+                                             database))
+                local('rm -f %s' % (os.path.join(self.processing_dir, 
+                                                 self.db_dump)))
    
  
     def import_files(self):
@@ -117,8 +121,6 @@ class ImportTools(install.InstallTools):
 
 
     def import_pantheon_modules(self):
-
-
         module_dir = os.path.join(self.working_dir, 'sites/all/modules')
         if not os.path.exists(module_dir):
             local('mkdir -p %s' % module_dir)
@@ -175,19 +177,57 @@ class ImportTools(install.InstallTools):
                 drush_set_variables(alias, drupal_vars)
 
 
+    def setup_permissions(self, environments=pantheon.get_environments()):
+        """ Set permissions on project directory, settings.php, and files dir.
+        environments: Optional. List.
+
+        """
+        with cd(self.server.webroot):
+            local('chown -R root:%s %s' % (self.server.web_group, self.project))
+
+        for env in environments:
+            import pdb
+            pdb.set_trace()
+            site_dir = os.path.join(self.server.webroot, \
+                                    '%s/%s/sites/default' % (self.project, env))
+            with cd(site_dir):
+                local('chown %s:%s settings.php' % ('root',
+                                                    self.server.web_group))
+                local('chmod 440 settings.php')
+                local('chmod 440 pantheon.settings.php')
+            file_dir = self._get_files_dir(env)
+            file_path = os.path.join(self.server.webroot, '%s/%s/%s' % (self.project, env, file_dir))
+            with cd(file_path): 
+                local("chmod 770 .")
+                local("find . -type d -exec find '{}' -type f \; | \
+                       while read FILE; do chmod 660 \"$FILE\"; done")
+                local("find . -type d -exec find '{}' -type d \; | \
+                      while read DIR; do chmod 770 \"$DIR\"; done")
+
+
     def _setup_default_site(self):
-        file_dir = self._get_files_dir()
         #TODO: Handle file paths that are not sites/sitename/files
         #TODO: Handle gitignore 
+        file_dir = self._get_files_dir()
+        if not file_dir:
+            #TODO: Handle no file_dir set.
+            pass
         destination = os.path.join(self.working_dir, 'sites/default')
         if self.site == 'default':
-            pantheon.create_pantheon_settings_file(destination)
+            pass
         else:
             source = os.path.join(self.working_dir, 'sites/%s' % self.site)
             if os.path.exists(destination):
                 local('rm -rf %s' % destination)
             local('mv %s %s' % (source, destination))
-            local('ln -s %s %s' % (source, destination))
+            with cd(os.path.join(self.working_dir,'sites')):
+                local('ln -s %s %s' % ('default', self.site))
+        file_path = os.path.join(self.working_dir, file_dir)
+        if not os.path.exists(file_path):
+            local('mkdir -p %s' % file_path)
+            # Create empty .gitignore file so git will track the files directory.
+            local('touch %s' % (os.path.join(file_path, '.gitignore')))
+        pantheon.create_pantheon_settings_file(destination)
 
                    
     def _get_site_name(self):
@@ -249,8 +289,8 @@ class ImportTools(install.InstallTools):
         return match['commit']
 
 
-    def _get_files_dir(self):
-        database = '%s_%s' % (self.project, 'dev')
+    def _get_files_dir(self, env='dev'):
+        database = '%s_%s' % (self.project, env)
         # Get file_directory_path directly from database, as we don't have a working drush yet.
         return local("mysql -u %s -p'%s' %s --skip-column-names --batch -e \
                       \"SELECT value FROM variable WHERE name='file_directory_path';\" | \
