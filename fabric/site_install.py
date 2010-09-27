@@ -1,22 +1,18 @@
 from pantheon import install
 from pantheon import onramp
 
-def install_site(project='pantheon', profile='pantheon', url=None):
+def install_site(project='pantheon', profile='pantheon', **kw):
     """ Create a new Drupal installation.
     project: Installation namespace.
     profile: The installation type (e.g. pantheon/openatrium)
+    **kw: Optional dictionary of values to process on installation.
 
     """
-    #If additional values are needed in the installation profile classes,
-    #they can be placed in init_dict or build_dict and will be passed to
-    #the profile object (and ignored by existing profile classes).
-    init_dict = {'profile':profile,
-                 'project':project}
+    data = {'profile':profile,'project':project}
+    data.update(kw)
 
-    build_dict = {'url':url}
-
-    handler = _get_handler(**init_dict)
-    handler.build(**build_dict)
+    handler = _get_handler(**data)
+    handler.build(**data)
 
 
 def _get_handler(profile, **kw):
@@ -107,13 +103,13 @@ class _ImportProfile(onramp.ImportTools):
         self.import_pantheon_modules()
 
         # Push changes from working directory to /var/git/projects
-        self.push_to_repo('import')
+        self.push_to_repo(tag='import')
 
         # Clone project to all environments
-        self.build_environments()
+        self.build_environments(tag='import')
 
         # Finish related (non-code) site building tasks.
-        self.build_permissions()
+        self.setup_permissions()
         self.build_solr_index()
         self.build_vhost()
         self.build_drupal_cron()

@@ -301,5 +301,3 @@ class PantheonServer:
         elif self.distro == 'centos':
             return '/etc/httpd/conf/vhosts/%s' % filename
 
-    def set_drupal_perms(self, project, environment):
-        location = os.path.join(self.webroot, project, environment)
