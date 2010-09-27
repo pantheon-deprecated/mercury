@@ -6,7 +6,7 @@ import uuid
 
 def get_build_status(job, id):
     try:
-        req = urllib2.Request('http://localhost:8081/job/%s/%s/api/python?tree=result' % (job, id))
+        req = urllib2.Request('http://localhost:8090/job/%s/%s/api/python?tree=result' % (job, id))
         return eval(urllib2.urlopen(req).read()).get('result').lower()
     except urllib2.URLError:
         return "unknown"
