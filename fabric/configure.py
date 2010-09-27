@@ -141,3 +141,11 @@ def build_ldap_client(base_domain = "example.com", require_group = None, server_
         local("sudo cp " + temp_file.name + " /etc/ldap.conf")
 
     local("sudo auth-client-config -t nss -p lac_ldap")
+
+def _fabuntu_ldap_domain_to_ldap(domain):
+    parts = domain.split(".")
+    ldap_domain_parts = []
+    for part in parts:
+        ldap_domain_parts.append("dc=" + part.lower())
+    ldap_domain = ",".join(ldap_domain_parts)
+    return ldap_domain
