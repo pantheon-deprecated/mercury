@@ -43,7 +43,7 @@ def _configure_certificates():
     # Download and install the root CA.
     local('curl %s | sudo tee /usr/share/ca-certificates/pantheon.crt' % pki_server)
     local('echo "pantheon.crt" | sudo tee -a /etc/ca-certificates.conf')
-    local('cat /etc/ca-certificates.conf | sort | uniq | sudo tee /etc/ca-certificates.conf') # Remove duplicates.
+    #local('cat /etc/ca-certificates.conf | sort | uniq | sudo tee /etc/ca-certificates.conf') # Remove duplicates.
     local('sudo update-ca-certificates')
 
     # TODO: Replace the following with actual knowledge of the server's common name (hostname).
