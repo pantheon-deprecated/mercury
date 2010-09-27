@@ -1,6 +1,7 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 from fabric.api import *
 from genshi.template import TemplateLoader, TextTemplate
+from tempfile import NamedTemporaryFile
 import os
 
 from pantheon import pantheon
