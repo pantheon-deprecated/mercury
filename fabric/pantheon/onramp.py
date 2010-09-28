@@ -17,7 +17,8 @@ def download(url):
 
 
 def drush(alias, cmd, option):
-    local('drush -y @%s %s %s' % (alias, cmd, option))
+    with settings(warn_only=True):
+        local('drush -y @%s %s %s' % (alias, cmd, option))
    
 
 def drush_set_variables(alias, variables = dict()):
@@ -30,7 +31,7 @@ def drush_set_variables(alias, variables = dict()):
                 value = 'TRUE'
             elif value == False:
                 value = 'FALSE'
-        local("drush %s php-eval \"variable_set('%s',%s);\"" % (alias, 
+        local("drush @%s php-eval \"variable_set('%s',%s);\"" % (alias, 
                                                                 key, 
                                                                 value))
 
@@ -70,6 +71,8 @@ class ImportTools(install.InstallTools):
         """
         username = self.project
         password = self.db_password
+        #TODO: This is temporary
+        environments = ['dev']
 
         for env in environments:
             database = '%s_%s' % (self.project, env)
@@ -79,19 +82,17 @@ class ImportTools(install.InstallTools):
                                       IDENTIFIED BY '%s';\"" % (database,
                                                                 username,
                                                                 password))        
-            if env == 'dev':
-                # Strip cache tables, convert MyISAM to InnoDB, and import.
-                local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | \
-                       grep -v '^INSERT INTO `ctools_object_cache`' | \
-                       grep -v '^INSERT INTO `watchdog`' | \
-                       grep -v '^INSERT INTO `accesslog`' | \
-                       grep -v '^USE `' | \
-                       sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | \
-                       mysql -u root %s" %  (os.path.join(self.processing_dir,
-                                             self.db_dump), 
-                                             database))
-                local('rm -f %s' % (os.path.join(self.processing_dir, 
-                                                 self.db_dump)))
+            # Strip cache tables, convert MyISAM to InnoDB, and import.
+            local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | \
+                   grep -v '^INSERT INTO `ctools_object_cache`' | \
+                   grep -v '^INSERT INTO `watchdog`' | \
+                   grep -v '^INSERT INTO `accesslog`' | \
+                   grep -v '^USE `' | \
+                   sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | \
+                   mysql -u root %s" %  (os.path.join(self.processing_dir,
+                                         self.db_dump), 
+                                         database))
+        local('rm -f %s' % (os.path.join(self.processing_dir, self.db_dump)))
    
  
     def import_files(self):
@@ -117,6 +118,7 @@ class ImportTools(install.InstallTools):
             local('rsync -avz %s/* %s' % (self.processing_dir, repo))
             local('rm -f PRESSFLOW.txt')
         self._setup_default_site()
+        local('rm -rf %s' % self.processing_dir)
 
 
     def import_pantheon_modules(self):
@@ -168,10 +170,13 @@ class ImportTools(install.InstallTools):
         drupal_vars['preprocess_js'] = True
         drupal_vars['preprocess_css'] = True
 
+        #TODO: This is temporary
+        environments = ['dev']
+
         for env in environments:
             alias = '%s_%s' % (self.project, env)
             for module in required_modules:
-                drush(alias, 'enable', module)
+                drush(alias, 'en', module)
             with settings(warn_only=True):
                 drush_set_variables(alias, drupal_vars)
 
@@ -184,9 +189,8 @@ class ImportTools(install.InstallTools):
         with cd(self.server.webroot):
             local('chown -R root:%s %s' % (self.server.web_group, self.project))
 
+        file_dir = self._get_files_dir()
         for env in environments:
-            import pdb
-            pdb.set_trace()
             site_dir = os.path.join(self.server.webroot, \
                                     '%s/%s/sites/default' % (self.project, env))
             with cd(site_dir):
@@ -194,7 +198,6 @@ class ImportTools(install.InstallTools):
                                                     self.server.web_group))
                 local('chmod 440 settings.php')
                 local('chmod 440 pantheon.settings.php')
-            file_dir = self._get_files_dir()
             file_path = os.path.join(self.server.webroot, '%s/%s/%s' % (self.project, env, file_dir))
             with cd(file_path): 
                 local("chmod 770 .")
@@ -202,6 +205,15 @@ class ImportTools(install.InstallTools):
                        while read FILE; do chmod 660 \"$FILE\"; done")
                 local("find . -type d -exec find '{}' -type d \; | \
                       while read DIR; do chmod 770 \"$DIR\"; done")
+
+
+    def update_environment_databases(self, environments=pantheon.get_environments()):
+        tempdir = tempfile.mkdtemp()
+        dump_file = pantheon.export_data(self.project, 'dev', tempdir)
+        for env in environments:
+            if env != 'dev':
+                pantheon.import_data(self.project, env, dump_file)
+        local('rm -rf %s' % tempdir)
 
 
     def _setup_default_site(self):
@@ -277,14 +289,18 @@ class ImportTools(install.InstallTools):
         with cd(temporary_directory):
             match = {'difference': None, 'commit': None}
             commits = local("git log | grep '^commit' | sed 's/^commit //'").split('\n')
+            print "\nPlease Wait. Determining closest Pantheon revision.\n" + \
+                  "This could take a few minutes.\n"
             for commit in commits:
                 if len(commit) > 1:
-                    local("git reset --hard " + commit)
-                    difference = int(local("diff -rup " + self.processing_dir + " ./ | wc -l"))
-                    print("Commit " + commit + " shows difference of " + str(difference))
-                    if match['commit'] == None or difference < match['difference']:
-                        match['difference'] = difference
-                        match['commit'] = commit
+                    with hide('running'):
+                        local("git reset --hard " + commit)
+                        difference = int(local("diff -rup " + self.processing_dir + " ./ | wc -l"))
+                        # print("Commit " + commit + " shows difference of " + str(difference))
+                        if match['commit'] == None or difference < match['difference']:
+                            match['difference'] = difference
+                            match['commit'] = commit
+        local('rm -rf %s' % temporary_directory)
         return match['commit']
 
 
@@ -297,91 +313,3 @@ class ImportTools(install.InstallTools):
                                                           self.db_password,
                                                           database)).rstrip('\n')
         
-
-
-
-class SiteImport:
-
-    def __init__(self, location, webroot, project, environment):
-        if os.path.exists(location):
-            self.location = location
-            self.project = project
-            self.environment = environment
-            self.destination = webroot + project + '/' + environment + '/'
-            self.drupal = DrupalInstallation(location)
-            self.drupal.init_drupal_data()
-            self.sql_dumps = self.get_sql_files()
-            self.sites = self.get_matched_sites()
-
-
-    def get_sql_files(self):
-        databases = list()
-        with cd(self.drupal.location):
-            with settings(warn_only=True):
-                sql_dumps = (local("find . -maxdepth 1 -type f | grep '\.sql'")).replace('./','').rstrip('\n')
-                if not sql_dumps:
-                    abort("No .sql files found")
-        # One database file
-        if '\n' not in sql_dumps:
-            databases.append(self.SQLDump(self.drupal.location + sql_dumps))
-        # Multiple database file
-        else:
-            sql_dumps = sql_dumps.split('\n')
-            for dump in sql_dumps:
-                databases.append(self.SQLDump(self.drupal.location + dump))
-        return databases
-
-
-    def get_matched_sites(self):
-        matches = list()
-        # If one site and one database, don't test anything just assume they match.
-        if self.drupal.valid_site_count() == 1 and self.database_count() == 1:
-            for site in self.drupal.sites:
-                if site.valid:
-                    match = copy.deepcopy(site)
-                    match.database.dump = self.sql_dumps[0].sql_file
-                    matches.append(match)
-        # More than one site and/or database
-        else:
-            for site in self.drupal.sites:
-                if site.valid:
-                    for dump in self.sql_dumps:
-                        if site.database.name == dump.database_name:
-                            match = copy.deepcopy(site)
-                            match.database.dump = dump.sql_file
-                            matches.append(match)
-
-        # Set site webroot to new destination (webroot + project + environment)
-        for match in matches:
-            match.webroot = self.destination
-
-        return matches
-
-    def database_count(self):
-        return len(self.sql_dumps)
-
-
-    class SQLDump:
-
-        def __init__(self, sql_file):
-            self.sql_file = sql_file
-            self.database_name = self.get_database_name(sql_file)
-
-
-        def get_database_name(self, sql_file):
-            # Check for 'USE' statement
-            name = (local("grep '^USE `' " + sql_file + r" | sed 's/^.*`\(.*\)`;/\1/'")).rstrip('\n')
-            # If multiple databases defined in dump file, abort.
-            if '\n' in name:
-                abort("Multiple databases found in: " + sql_file)
-            # Check dump file comments for database name
-            elif not name:
-                name = (local(r"awk '/^-- Host:/' " + sql_file \
-                    + r" | sed 's_.*Host:\s*\(.*\)\s*Database:\s*\(.*\)$_\2_'")).rstrip('\n')
-            # If multiple databases defined in dump file, abort.
-            if '\n' in name:
-                abort("Multiple databases found in: " + sql_file)
-            return name
-
-
-

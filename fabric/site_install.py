@@ -47,6 +47,7 @@ class MIRProfile(install.InstallTools):
         # Step 3: Make it rain.
 """
 
+
 class _PantheonProfile(install.InstallTools):
     """ Default Pantheon Installation Profile.
     
@@ -58,10 +59,10 @@ class _PantheonProfile(install.InstallTools):
 
     def build(self, **kw):
         
-        # Create a new project in /var/git/projects
+        # Create a new project
         self.build_project_branch()
 
-        # Clone project to a working directory
+        # Build project in a temporary directory
         self.build_working_dir()
         self.build_project_modules()  #NOTE: temporary until integrated with repo
         self.build_project_libraries()#NOTE: temporary until integrated with repo
@@ -69,13 +70,13 @@ class _PantheonProfile(install.InstallTools):
         self.build_settings_file()
         self.build_gitignore()
 
-        # Push changes from working directory to /var/git/projects
+        # Push changes from working directory to central repo
         self.push_to_repo()
 
         # Clone project to all environments
-        self.build_environments()     
+        self.build_environments()
 
-        # Finish related (non-code) site building tasks.
+        # Build non-code site features.
         self.build_permissions()
         self.build_database()
         self.build_solr_index()
@@ -86,36 +87,40 @@ class _PantheonProfile(install.InstallTools):
         self.cleanup()
         self.server.restart_services()
 
+
 class _ImportProfile(onramp.ImportTools):
 
     def __init__(self, project, **kw):
         onramp.ImportTools.__init__(self, project)
 
     def build(self, url, **kw):
-        tarball = onramp.download(url)
 
+        # Download, extract, and parse the tarball.
+        tarball = onramp.download(url)
         self.extract(tarball)
         self.parse_archive()
 
+        # Import site and download pantheon modules.
         self.import_database()
         self.import_files()
-        self.build_drush_alias()
         self.import_pantheon_modules()
 
-        # Push changes from working directory to /var/git/projects
+        # Push imported project from working directory to central repo
         self.push_to_repo(tag='import')
 
         # Clone project to all environments
         self.build_environments(tag='import')
 
-        # Finish related (non-code) site building tasks.
+        # Build non-code site features
         self.setup_permissions()
         self.build_solr_index()
         self.build_vhost()
         self.build_drupal_cron()
         self.build_drush_alias()
 
-        archive.import_drupal_settings()
+        # Enable modules & set variables. Then push changes to test/live.
+        self.import_drupal_settings()
+        self.update_environment_databases()
 
         self.cleanup()
         self.server.restart_services()
