@@ -92,25 +92,13 @@ def update_data(source_project=None, source_environment=None, target_project=Non
               print("No target_environment selected. Using 'test'")
               target_environment = 'test'
 
-       source_location = server.webroot + source_project + '/' + source_environment + "/"
-       target_location = server.webroot + target_project + '/' + target_environment + "/"
-
        print('Exporting ' + source_project + '/' + source_environment + ' database to temporary directory %s' % source_temporary_directory)
-       sites = pantheon.export_data(source_location, source_temporary_directory)
+       dump_file = pantheon.export_data(source_project, source_environment, source_temporary_directory)
        print('Exporting ' + target_project + '/' + target_environment + ' database to temporary directory %s' % target_temporary_directory)
-       pantheon.export_data(target_location, target_temporary_directory)
+       pantheon.export_data(target_project, target_environment, target_temporary_directory)
 
-       # NOTE: Name changes should be done outside the import function (no logic, just import).
-       #       Added the below as a temporary stop-gap until the TODO is fixed.
-       for site in sites:
-           site.database.name = target_project + "_" + target_environment
-
-       # TODO: update process needs to be multi-site friendly. Can't use project_environment (e.g. pantheon_dev) for database name.
-       #       instead we should use project_environment_sitename (e.g. pantheon_dev_getpantheon_com for sites/getpantheon.com)
-       #       this namespacing will allow multi-codebase & multi-site installs. Once supported, can use:
-       #       project + "_" + environment + "_" + site.get_safe_name()
-
-       pantheon.import_data(sites)
+       pantheon.import_data(target_project, target_environment, dump_file)
+       local('rm -rf ' + temp_dir)
        print(target_project + '/' + target_environment + ' database updated with database from ' + source_project + '/' + source_environment)
 
 def update_files(source_project=None, source_environment=None, target_project=None, target_environment=None):
