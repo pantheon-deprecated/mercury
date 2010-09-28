@@ -122,7 +122,7 @@ class PantheonServer:
             self.vhost_dir = '/etc/httpd/conf/vhosts/'
 
 
-    def get_hostname():
+    def get_hostname(self):
         if os.path.exists("/usr/local/bin/ec2-metadata"):
             return local('/usr/local/bin/ec2-metadata -p | sed "s/public-hostname: //"').rstrip('\n')
         else:
