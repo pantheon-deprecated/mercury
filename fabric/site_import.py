@@ -8,69 +8,13 @@ import tempfile
 from pantheon import pantheon
 from pantheon import onramp
 
-def import_site(url, project='pantheon'):
-    tarball = onramp.download()
-    archive = onramp.PantheonImport(project)
-
-
-    archive.extract(tarball)
-    archive.parse_archive()
-
-    archive.import_database()
-    archive.import_files()
-    archive.build_drush_alias()
-    archive.import_pantheon_modules()
-    archive.import_drupal_settings()
-
-    # Push changes from working directory to /var/git/projects
-    self.push_to_repo()
-
-    # Clone project to all environments
-    self.build_environments()
-
-    # Finish related (non-code) site building tasks.
-    self.build_permissions()
-    self.build_database()
-    self.build_solr_index()
-    self.build_vhost()
-    self.build_drupal_cron()
-    self.build_drush_alias()
-
-    self.cleanup()
-    self.server.restart_services()
-
-    
-
 
 def import_siteurl(url, project='pantheon', environment='dev'):
-    filename = pantheon.getfrom_url(url)
-    import_site(filename, project, environment)
+    pass
+
 
 def import_site(site_archive, project='pantheon', environment='dev'):
-    '''Import site archive into a Pantheon server'''
-    archive_directory = tempfile.mkdtemp() + '/'
-
-    pantheon.unarchive(site_archive, archive_directory)
-    server = pantheon.PantheonServer()
-    archive = pantheon.SiteImport(archive_directory, server.webroot, project, environment)
-
-    _setup_databases(archive)
-    _setup_site_files(archive)
-    _setup_settings_files(archive)
-    _setup_modules(archive)
-    _setup_files_directory(archive)
-    _setup_permissions(server, archive)
-    
-    with cd(archive.destination):
-        # Add and commit all files
-        local("git add -A .")
-        local("git commit -m'Imported Site.'")
-
-    _run_on_sites(archive.sites, 'cc all')
-    _run_on_sites(archive.sites, 'cron')
-    server.restart_services()
-
-    local("rm -rf " + archive_directory)
+    pass
 
 def _setup_databases(archive):
     # Sites are matched to databases. Replace database name with: "project_environment_sitename"
