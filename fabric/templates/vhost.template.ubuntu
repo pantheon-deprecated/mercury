@@ -1,6 +1,7 @@
 <VirtualHost *:8080>
         ServerAdmin webmaster@localhost
-        ServerName ${environment}.*.gotpantheon.com
+        ServerName ${environment}
+        ServerAlias ${environment}.*.gotpantheon.com
         
         SetEnv db_name ${db_name}
         SetEnv db_username ${db_username}

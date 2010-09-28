@@ -48,12 +48,12 @@ def  _configure_ec2(server):
 
 
 def _configure_postfix(server):
-    f = open('/etc/mailname', 'w')
-    f.write(server.hostname)
-    f.close()
-    local('/usr/sbin/postconf -e "myhostname = %s"' % server.hostname)
-    local('/usr/sbin/postconf -e "mydomain = %s"' % server.hostname)
-    local('/usr/sbin/postconf -e "mydestination = %s"' % server.hostname)
+    hostname = server.get_hostname()
+    with open('/etc/mailname', 'w') as f:
+        f.write(hostname)
+    local('/usr/sbin/postconf -e "myhostname = %s"' % hostname)
+    local('/usr/sbin/postconf -e "mydomain = %s"' % hostname)
+    local('/usr/sbin/postconf -e "mydestination = %s"' % hostname)
     local('/etc/init.d/postfix restart')
 
 
@@ -86,9 +86,9 @@ def _configure_git_repo():
 
 def _mark_incep(server):
     '''Mark incep date. This prevents us from ever running again.'''
-    f = open('/etc/pantheon/incep', 'w')
-    f.write(server.hostname)
-    f.close()
+    hostname = server.get_hostname()
+    with open('/etc/pantheon/incep', 'w') as f:
+        f.write(hostname)
 
 
 def _report():

@@ -37,64 +37,42 @@ def create_pantheon_settings_file(site_dir):
     local('cp /opt/pantheon/fabric/templates/pantheon.settings.php ' + site_dir)
 
 
-def export_data(webroot, temporary_directory):
-    sites = DrupalInstallation(webroot).get_sites()
-    with cd(temporary_directory):
-        exported = list()
-        for site in sites:
-            if site.valid:
-                # If multiple sites use same db, only export once.
-                if site.database.name not in exported:
-                    with settings(warn_only=True):
-                        result = local("mysqldump --single-transaction --user='%s' --password='%s' --host='%s' %s > %s.sql" % ( \
-                                    site.database.username,
-                                    site.database.password,
-                                    site.database.hostname,
-                                    site.database.name,
-                                    site.database.name), capture=False)
-                    # It is possible that a settings.php defines a 
-                    # database/user/pass that doesn't exist or doesn't work.
-                    if not result.failed:
-                        print "Exported Database: " + site.database.name
-                        exported.append(site.database.name)
-                        site.database.dump = temporary_directory + "/" + site.database.name + ".sql"
-                    else:
-                        print "Unable to export database '%s' defined for site '%s'. (incorrect database name, username, and/or password)" % (
-                                   site.database.name,
-                                   site.name)
-    return(sites)
+def export_data(project, environment, destination):
+    filename = os.path.join(destination, '%s_%s.sql' % (project, environment))
+    username, password, db_name = _get_database_vars(project, environment)
+    local("mysqldump --single-transaction --user='%s' \
+                                          --password='%s' \
+                                            %s > %s" % (username,
+                                                       password,
+                                                       db_name,
+                                                       filename))
+    return filename
+
+    
+def import_data(project, environment, source):
+    username, password, db_name = _get_database_vars(project, environment)
+
+    local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % db_name)
+    local("mysql -u root -e 'CREATE DATABASE %s'" % db_name)
+    # Strip cache tables, convert MyISAM to InnoDB, and import.
+    local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | \
+           grep -v '^INSERT INTO `ctools_object_cache`' | \
+           grep -v '^INSERT INTO `watchdog`' | \
+           grep -v '^INSERT INTO `accesslog`' | \
+           grep -v '^USE `' | \
+           mysql -u root %s" % (source, db_name))
 
 
-def import_data(sites):
-    # Create temporary superuser to perform import operations
-    with settings(warn_only=True):
-        local("mysql -u root -e \"CREATE USER 'pantheon-admin'@'localhost' IDENTIFIED BY '';\"")
-    local("mysql -u root -e \"GRANT ALL PRIVILEGES ON *.* TO 'pantheon-admin'@'localhost' WITH GRANT OPTION;\"")
-
-    for site in sites:
-        local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % (site.database.name))
-        local("mysql -u root -e 'CREATE DATABASE %s'" % (site.database.name))
-
-        #TODO: if db username is root, change it. 
-
-        # Set grants
-        local("mysql -u pantheon-admin -e \"GRANT ALL ON %s.* TO '%s'@'localhost' IDENTIFIED BY '%s';\"" % \
-                  (site.database.name, site.database.username, site.database.password))
-
-        # Strip cache tables, convert MyISAM to InnoDB, and import.
-        local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | \
-                grep -v '^INSERT INTO `ctools_object_cache`' | \
-                grep -v '^INSERT INTO `watchdog`' | \
-                grep -v '^INSERT INTO `accesslog`' | \
-                grep -v '^USE `' | \
-                sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | \
-                mysql -u pantheon-admin %s" % \
-                  (site.database.dump, site.database.name))
-
-    # Cleanup (iterate through sites after import in case multiple sites use same db)
-    for site in sites:
-        local("rm -f %s" % site.database.dump)
-    local("mysql -u pantheon-admin -e \"DROP USER 'pantheon-admin'@'localhost'\"")
+def parse_vhost(path):
+    env_vars = dict()
+    with open(path, 'r') as f:
+       vhost = f.readlines()
+    for line in vhost:
+        line = line.strip()
+        if line.find('SetEnv') != -1:
+            var = line.split()
+            env_vars[var[1]] = var[2]
+    return env_vars
 
 
 def restart_bcfg2():
@@ -105,6 +83,14 @@ def restart_bcfg2():
         with settings(hide('warnings'), warn_only=True):
             server_running = (local('netstat -atn | grep :6789')).rstrip('\n')
         time.sleep(5)
+
+
+def _get_database_vars(project, environment):
+    vhost = PantheonServer().get_vhost_file(project, environment)
+    env_vars = parse_vhost(vhost)
+    return (env_vars.get('db_username'), 
+            env_vars.get('db_password'), 
+            env_vars.get('db_name'))
 
 
 class PantheonServer:
@@ -134,11 +120,13 @@ class PantheonServer:
             self.webroot = '/var/www/html/'
             self.ftproot = '/var/ftp/pantheon/'
             self.vhost_dir = '/etc/httpd/conf/vhosts/'
-        self.ip = (local('hostname --ip-address')).rstrip('\n')
+
+
+    def get_hostname():
         if os.path.exists("/usr/local/bin/ec2-metadata"):
-            self.hostname = local('/usr/local/bin/ec2-metadata -p | sed "s/public-hostname: //"').rstrip('\n')
+            return local('/usr/local/bin/ec2-metadata -p | sed "s/public-hostname: //"').rstrip('\n')
         else:
-            self.hostname = local('hostname').rstrip('\n')
+            return local('hostname').rstrip('\n')
 
 
     def update_packages(self):
@@ -179,23 +167,13 @@ class PantheonServer:
         
         """
         alias_template = '/opt/pantheon/fabric/templates/drush.alias.drushrc.php'
-        alias_file = '/opt/drush/aliases/%s_%s.alias.drushrc.php' % (drush_dict.get('project'), drush_dict.get('environment'))
+        alias_file = '/opt/drush/aliases/%s_%s.alias.drushrc.php' % (
+                                            drush_dict.get('project'), 
+                                            drush_dict.get('environment'))
         template = self._build_template(alias_template, drush_dict)
         with open(alias_file, 'w') as f:
             f.write(template)
         
-    def _build_template(self, template_file, values):
-        """ Helper method that returns a template object of the template_file 
-            with substitued values.
-        filename: full path to template file
-        values: dictionary of values to be substituted in template file
-
-        """
-        contents = local('cat %s' % template_file)
-        template = string.Template(contents)
-        template = template.safe_substitute(values)
-        return template
-
 
     def create_vhost(self, filename, vhost_dict):
         """ 
@@ -280,18 +258,6 @@ class PantheonServer:
         local('chown -R %s:%s %s' % ('hudson', self.hudson_group, jobdir))     
 
 
-    def parse_vhost(self, path):
-        env_vars = dict()
-        with open(path, 'r') as f:
-           vhost = f.readlines()
-        for line in vhost:
-            line = line.strip()
-            if line.find('SetEnv') != -1:
-                var = line.split()
-                env_vars[var[1]] = var[2]
-        return env_vars
-
-
     def get_vhost_file(self, project, environment):
         filename = '%s_%s' % (project, environment)
         if environment == 'live':
@@ -300,4 +266,17 @@ class PantheonServer:
             return '/etc/apache2/sites-available/%s' % filename
         elif self.distro == 'centos':
             return '/etc/httpd/conf/vhosts/%s' % filename
+
+
+    def _build_template(self, template_file, values):
+        """ Helper method that returns a template object of the template_file 
+            with substitued values.
+        filename: full path to template file
+        values: dictionary of values to be substituted in template file
+
+        """
+        contents = local('cat %s' % template_file)
+        template = string.Template(contents)
+        template = template.safe_substitute(values)
+        return template
 
