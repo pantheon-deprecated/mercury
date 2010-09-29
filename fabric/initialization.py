@@ -61,7 +61,7 @@ def _initialize_package_manager(server):
         '''temp'''
         local('rpm -Uvh http://repo.webtatic.com/yum/centos/5/`uname -i`/webtatic-release-5-0.noarch.rpm')
         local('yum install -y --enablerepo=webtatic git')
-        
+
         local('rpm --import http://hudson-ci.org/redhat/hudson-ci.org.key')
         local('wget http://hudson-ci.org/redhat/hudson.repo -O /etc/yum.repos.d/hudson.repo')
         arch = local('uname -m').rstrip('\n')
@@ -72,7 +72,7 @@ def _initialize_package_manager(server):
         if exclude_arch:
             local('echo "exclude=%s" >> /etc/yum.conf' % exclude_arch)
     server.update_packages()
-        
+
 def _initialize_bcfg2(vps, server):
     if server.distro == 'ubuntu':
         local('apt-get install -y bcfg2-server gamin python-gamin python-genshi')
@@ -90,11 +90,11 @@ def _initialize_bcfg2(vps, server):
     local('ln -sf /opt/pantheon/bcfg2 /var/lib/')
     local('cp /opt/pantheon/fabric/clients.xml /var/lib/bcfg2/Metadata/')
     local('sed -i "s/^plugins = .*$/plugins = Bundler,Cfg,Metadata,Packages,Probes,Rules,TGenshi\\nfilemonitor = gamin/" /etc/bcfg2.conf')
-    
+
     if server.distro == 'centos':
         '''temp bug fix for upstream tab issue in TGenshi'''
         local('sed -i "s/\t/    /" /usr/lib/python2.4/site-packages/Bcfg2/Server/Plugins/TGenshi.py')
-    
+
     pantheon.restart_bcfg2()
     if (vps == "aws"):
         local('/usr/sbin/bcfg2 -vqed -p pantheon-aws', capture=False)
