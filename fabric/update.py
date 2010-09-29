@@ -115,7 +115,7 @@ def get_branch(dir):
                      if branches.count == 1:
                             return branches
                      else:
-                            return local('git branch | gre[ "*"').lstrip('* ').rstrip('\n')
+                            return local('git branch | grep "*"').lstrip('* ').rstrip('\n')
 
 def does_branch_exist(dir,branch):
        with cd(dir):
