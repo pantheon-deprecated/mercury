@@ -102,23 +102,24 @@ class ImportTools(install.InstallTools):
         self.db_dump = self._get_database_dump()
 
 
-    def import_database(self):
+    def import_database(self, environments=pantheon.get_environments()):
         """ Create a new database and set user grants (all), then import
         using 'project_dev' as the name.
 
         """
         username = self.project
         password = self.db_password
-        env = 'dev'
 
-        database = '%s_%s' % (self.project, env)
-        local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % (database))
-        local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS %s'" % (database))
-        local("mysql -u root -e \"GRANT ALL ON %s.* TO '%s'@'localhost' \
-                                  IDENTIFIED BY '%s';\"" % (database,
-                                                            username,
-                                                            password))        
-        # Strip cache tables, convert MyISAM to InnoDB, and import.
+        for env in environments:
+            database = '%s_%s' % (self.project, env)
+            local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % (database))
+            local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS %s'" % (database))
+            local("mysql -u root -e \"GRANT ALL ON %s.* TO '%s'@'localhost' \
+                                      IDENTIFIED BY '%s';\"" % (database,
+                                                                username,
+                                                                password))        
+
+        # Strip cache tables, convert MyISAM to InnoDB, and import into dev.
         local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | \
                grep -v '^INSERT INTO `ctools_object_cache`' | \
                grep -v '^INSERT INTO `watchdog`' | \
