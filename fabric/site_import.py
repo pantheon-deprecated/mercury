@@ -83,6 +83,7 @@ class _ImportProfile(onramp.ImportTools):
         # Enable modules & set variables. Then push changes to test/live.
         self.import_drupal_settings()
         self.update_environment_databases()
+        self.update_environment_files()
 
         self.cleanup()
         self.server.restart_services()

@@ -199,6 +199,7 @@ class InstallTools:
         """
         for env in environments:
             self.server.create_drupal_cron(self.project, env)
+        pantheon.reload_hudson()
 
 
     def build_environments(self, tag='initialization', environments=pantheon.get_environments()):

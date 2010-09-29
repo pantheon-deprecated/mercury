@@ -106,6 +106,10 @@ def restart_bcfg2():
         time.sleep(5)
 
 
+def reload_hudson():
+    local('curl http://localhost:8081/reload')
+
+
 def _get_database_vars(project, environment):
     """Helper method that returns database variables for a project/environment.
     project: project name

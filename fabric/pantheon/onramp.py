@@ -241,7 +241,8 @@ class ImportTools(install.InstallTools):
                                                     self.server.web_group))
                 local('chmod 440 settings.php')
                 local('chmod 440 pantheon.settings.php')
-            file_path = os.path.join(self.server.webroot, '%s/%s/%s' % (self.project, env, file_dir))
+            file_path = os.path.join(self.server.webroot, '%s/%s/%s' % (
+                                           self.project, env, file_dir))
             with cd(file_path): 
                 local("chmod 770 .")
                 local("find . -type d -exec find '{}' -type f \; | \
@@ -257,6 +258,14 @@ class ImportTools(install.InstallTools):
             if env != 'dev':
                 pantheon.import_data(self.project, env, dump_file)
         local('rm -rf %s' % tempdir)
+
+
+    def update_environment_files(self, environments=pantheon.get_environments()):
+        source = os.path.join(self.working_dir, 'sites/default/files')
+        for env in environments:
+            destination = os.path.join(self.server.webroot, 
+                          '%s/%s/sites/default/' % (self.project, env))
+            local('rsync -av %s %s' % (source, destination))
 
 
     def _setup_default_site(self):
@@ -285,18 +294,22 @@ class ImportTools(install.InstallTools):
         if not os.path.exists(file_dest):
             local('mkdir -p %s' % file_dest)
 
+        # Move files to sites/default/files and symlink from former location.
         local('cp -R %s/* %s' % (file_path, file_dest))
         local('rm -rf %s' % file_path)
         path = os.path.split(file_path)
         if not os.path.islink(path[0]):
             rel_path = os.path.relpath(file_dest, os.path.split(file_path)[0])
             local('ln -s %s %s' % (rel_path, file_path))
+
+        # Change paths in the files table
         database = '%s_%s' % (self.project, 'dev')
         local('mysql -u root %s -e "UPDATE files SET filepath = \
                REPLACE(filepath,\'%s\',\'%s\');"' % (database,
                                                      file_location, 
                                                      'sites/default/files'))
 
+        # Change file_directory_path drupal variable
         file_directory_path = 's:19:\\"sites/default/files\\";'
         local('mysql -u root %s -e "UPDATE variable \
                                     SET value = \'%s\' \
@@ -304,6 +317,7 @@ class ImportTools(install.InstallTools):
                                     database, 
                                     file_directory_path))
 
+        # Ignore files directory
         with open(os.path.join(file_dest,'.gitignore'), 'a') as f:
             f.write('*\n')
             f.write('!.gitignore\n')
