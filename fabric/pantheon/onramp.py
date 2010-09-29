@@ -305,8 +305,8 @@ class ImportTools(install.InstallTools):
                                     file_directory_path))
 
         with open(os.path.join(file_dest,'.gitignore'), 'a') as f:
-            f.write('*')
-            f.write('!.gitignore')
+            f.write('*\n')
+            f.write('!.gitignore\n')
         
 
     def _get_site_name(self):

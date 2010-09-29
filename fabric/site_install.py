@@ -66,7 +66,6 @@ class _PantheonProfile(install.InstallTools):
         self.build_project_libraries()#NOTE: temporary until integrated with repo
         self.build_file_dirs()
         self.build_settings_file()
-        self.build_gitignore()
 
         # Push changes from working directory to central repo
         self.push_to_repo()
