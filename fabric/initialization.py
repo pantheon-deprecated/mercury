@@ -23,10 +23,10 @@ def init():
 
 def _initialize_support_account(server):
     '''Generate a public/private key pair for root.'''
-    local('mkdir -p ~/.ssh')
-    with cd('~/.ssh'):
-        with settings(warn_only=True):
-            local('[ -f id_rsa ] || ssh-keygen -trsa -b1024 -f id_rsa -N ""')
+    #local('mkdir -p ~/.ssh')
+    #with cd('~/.ssh'):
+    #    with settings(warn_only=True):
+    #        local('[ -f id_rsa ] || ssh-keygen -trsa -b1024 -f id_rsa -N ""')
 
     '''Set up the Pantheon support account with sudo and the proper keys.'''
     sudoers = local('cat /etc/sudoers')
@@ -43,7 +43,7 @@ def _initialize_support_account(server):
         local('mkdir -p .ssh')
         local('chmod 700 .ssh')
         local('cp /opt/pantheon/fabric/authorized_keys .ssh/')
-        local('cat ~/.ssh/id_rsa.pub > .ssh/authorized_keys')
+        #local('cat ~/.ssh/id_rsa.pub > .ssh/authorized_keys')
         local('chmod 600 .ssh/authorized_keys')
         local('chown -R pantheon: .ssh')
 
