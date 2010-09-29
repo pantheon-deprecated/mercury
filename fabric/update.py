@@ -29,29 +29,7 @@ def update_pressflow(dir=None, branch=None):
 
        print(branch + ' branch of ' + dir + ' Updated')
 
-def update_parent_code(project=None, environment=None):
-       server = pantheon.PantheonServer()
-
-       if (project == None):
-              print("No project selected. Using 'pantheon'")
-              project = 'pantheon'
-       if (environment == None):
-              print("No environment selected. Using 'dev'")
-              environment = 'dev'
-
-       dir = server.webroot + project + '/' + environment + "/"
-       
-       with cd(dir):
-              branch = local('git branch | grep -v master').lstrip('* ').rstrip('\n')
-              
-       does_branch_exist(dir,branch)
-       commit_if_needed(dir,branch)
-       push_upstream(dir,branch,project)
-       commit_if_needed(dir,branch)
-                            
-       print(project + ' project updated with code from ' + dir)
-
-def update_code_from_parent(project=None, environment=None):
+def update_code(project=None, environment=None):
        server = pantheon.PantheonServer()
 
        if (project == None):
@@ -63,10 +41,7 @@ def update_code_from_parent(project=None, environment=None):
 
        dir = server.webroot + project + '/' + environment + "/"
 
-       with cd(dir):
-              branch = local('git branch | grep -v master').lstrip('* ').rstrip('\n')
-       
-       does_branch_exist(dir,branch)
+       branch = get_branch(dir)
        commit_if_needed(dir,branch)
        pull_downstream(dir,branch)
        commit_if_needed(dir,branch)
@@ -130,6 +105,18 @@ def update_permissions(dir, server):
               local('find sites/*/files -type d -exec chmod 775 {} \;')
               local('find sites/*/files -type f -exec chmod 660 {} \;')
 
+def get_branch(dir):
+       with cd(dir):
+              branches = local('git branch').lstrip('* ').split()
+              if branches.count == 1:
+                     return branches
+              else:
+                     branches.remove('master')
+                     if branches.count == 1:
+                            return branches
+                     else:
+                            return local('git branch | gre[ "*"').lstrip('* ').rstrip('\n')
+
 def does_branch_exist(dir,branch):
        with cd(dir):
               with settings(warn_only=True):
@@ -146,6 +133,28 @@ def commit_if_needed(dir,branch):
                             local('git add -A .')
                             local('git commit -av -m "committing found changes"')
        print('git status')
+
+def push_code_up(project=None, environment=None):
+       server = pantheon.PantheonServer()
+
+       if (project == None):
+              print("No project selected. Using 'pantheon'")
+              project = 'pantheon'
+       if (environment == None):
+              print("No environment selected. Using 'dev'")
+              environment = 'dev'
+
+       dir = server.webroot + project + '/' + environment + "/"
+       
+       with cd(dir):
+              branch = local('git branch | grep -v master').lstrip('* ').rstrip('\n')
+              
+       does_branch_exist(dir,branch)
+       commit_if_needed(dir,branch)
+       push_upstream(dir,branch,project)
+       commit_if_needed(dir,branch)
+                            
+       print(project + ' project updated with code from ' + dir)
 
 def push_upstream(dir,branch,project):
        with cd(dir):
@@ -164,7 +173,8 @@ def pull_downstream(dir,branch):
                      with settings(warn_only=True):
                             response = local('git branch | grep master', capture=False)
                      if response.failed:
-                            local('git pull')
+                            local('git fetch')
+                            local('git reset --hard')
                      else:
                             local('git checkout ' + branch)
                             local('git merge master')
