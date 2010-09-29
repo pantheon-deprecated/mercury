@@ -62,8 +62,7 @@ def ldap_client_scripts(base_domain, server_host, password):
 
     ldap_domain = _ldap_domain_to_ldap(base_domain)
     ldapscripts_conf_template = loader.load('ldapscripts.conf', cls=TextTemplate)
-    ldapscripts_conf = ldapscripts_conf_template.generate(ldap_domain=ldap_domain, server_host=server_
-host).render()
+    ldapscripts_conf = ldapscripts_conf_template.generate(ldap_domain=ldap_domain, server_host=server_host).render()
     with NamedTemporaryFile() as temp_file:
         temp_file.write(ldapscripts_conf)
         temp_file.seek(0)
