@@ -36,13 +36,21 @@ HUDSON_USER="hudson"
 #
 HUDSON_JAVA_OPTIONS="-Djava.awt.headless=true"
 
+## Type:        string
+## Default:     0.0.0.0
+## ServiceRestart: hudson
+#
+# Address/interface Hudson is listening on.
+#
+HUDSON_LISTEN_ADDRESS="127.0.0.1"
+
 ## Type:        integer(0:65535)
 ## Default:     8080
 ## ServiceRestart: hudson
 #
 # Port Hudson is listening on.
 #
-HUDSON_PORT="8081"
+HUDSON_PORT="8090"
 
 ## Type:        integer(1:9)
 ## Default:     5

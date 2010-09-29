@@ -1,0 +1,22 @@
+<Bundle name='pound'>
+
+  <Group name='deb'>
+    <Package name='pound' />
+  </Group>
+  <Group name='centos'>
+    <Package name='Pound' />
+  </Group>
+
+  <Path name='/etc/pound/pound.cfg' altsrc='/pound/pound.cfg'/>
+  <Service name='pound'/>
+
+  <!-- Ubuntu/Deb Only -->
+  <Group name='deb'>
+    <Path name='/etc/default/pound' altsrc='/pound/daemon'/>
+  </Group>
+
+  <!-- CentOS Only -->
+  <Group name='centos'>
+    <Path name='/etc/sysconfig/pound' altsrc='/pound/daemon'/>
+  </Group>
+</Bundle>
