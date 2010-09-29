@@ -8,3 +8,4 @@
     <Path name='/etc/pam.d/sshd'/>
   </Group>
 
+</Bundle>
