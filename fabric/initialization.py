@@ -24,10 +24,10 @@ def init():
 
 def _initialize_support_account(server):
     '''Generate a public/private key pair for root.'''
-    local('mkdir -p ~/.ssh')
-    with cd('~/.ssh'):
-        with settings(warn_only=True):
-            local('[ -f id_rsa ] || ssh-keygen -trsa -b1024 -f id_rsa -N ""')
+    #local('mkdir -p ~/.ssh')
+    #with cd('~/.ssh'):
+    #    with settings(warn_only=True):
+    #        local('[ -f id_rsa ] || ssh-keygen -trsa -b1024 -f id_rsa -N ""')
 
     '''Set up the Pantheon support account with sudo and the proper keys.'''
     sudoers = local('cat /etc/sudoers')
@@ -44,7 +44,7 @@ def _initialize_support_account(server):
         local('mkdir -p .ssh')
         local('chmod 700 .ssh')
         local('cp /opt/pantheon/fabric/templates/authorized_keys .ssh/')
-        local('cat ~/.ssh/id_rsa.pub > .ssh/authorized_keys')
+        #local('cat ~/.ssh/id_rsa.pub > .ssh/authorized_keys')
         local('chmod 600 .ssh/authorized_keys')
         local('chown -R pantheon: .ssh')
 
@@ -70,7 +70,8 @@ def _initialize_package_manager(server):
         if exclude_arch:
             local('echo "exclude=%s" >> /etc/yum.conf' % exclude_arch)
     server.update_packages()
-            
+
+
 def _initialize_bcfg2(vps, server):
     if server.distro == 'ubuntu':
         local('apt-get install -y bcfg2-server gamin python-gamin python-genshi')
@@ -88,11 +89,11 @@ def _initialize_bcfg2(vps, server):
     local('ln -sf /opt/pantheon/bcfg2 /var/lib/')
     local('cp /opt/pantheon/fabric/templates/clients.xml /var/lib/bcfg2/Metadata/')
     local('sed -i "s/^plugins = .*$/plugins = Bundler,Cfg,Metadata,Packages,Probes,Rules,TGenshi\\nfilemonitor = gamin/" /etc/bcfg2.conf')
-    
+
     if server.distro == 'centos':
         '''temp bug fix for upstream tab issue in TGenshi'''
         local('sed -i "s/\t/    /" /usr/lib/python2.4/site-packages/Bcfg2/Server/Plugins/TGenshi.py')
-    
+
     pantheon.restart_bcfg2()
     if (vps == "aws"):
         local('/usr/sbin/bcfg2 -vqed -p pantheon-aws', capture=False)
@@ -147,11 +148,7 @@ def _initialize_hudson(server):
     if 'hudson ALL = NOPASSWD:' not in sudoers:
         local('echo "%s" >> /etc/sudoers' % hudson_sudoer)
     if server.distro == 'centos':
-        local('usermod -a -G root hudson')
-        local('chmod g+r /etc/shadow')
         local('sed -i "s/Defaults    requiretty/#Defaults    requiretty/" /etc/sudoers')
-    else:
-        local('usermod -a -G shadow hudson')
     local('/etc/init.d/hudson restart')
 
 

@@ -16,12 +16,12 @@
 
 if [ ! -f /etc/pantheon/incep ]; then
   # Wait for Hudson to spin Up
-  while [ "`curl -sL --connect-timeout 1 -w "%{http_code}\\n" "127.0.0.1:8081" -o /dev/null`" != "200" ]; do
+  while [ "`curl -sL --connect-timeout 1 -w "%{http_code}\\n" "127.0.0.1:8090" -o /dev/null`" != "200" ]; do
     sleep 5
   done
   
   # Run the pantheon_config Hudson job
-  curl http://127.0.0.1:8081/job/pantheon_config/build?token='INIT'
+  curl http://127.0.0.1:8090/job/pantheon_config/build
 fi
 
 exit 0

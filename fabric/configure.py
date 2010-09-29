@@ -4,12 +4,14 @@ import os
 
 from pantheon import pantheon
 import update
+import time
 
 def configure(vps="none"):
     '''configure the Pantheon system.'''
     server = pantheon.PantheonServer()
     _test_for_previous_run()
     _configure_server(server)
+    _configure_certificates()
     if (vps == "aws"):
         _config_ec2_(server)
     _configure_postfix(server)
@@ -29,7 +31,42 @@ def _configure_server(server):
     local('cp /etc/pantheon/templates/tuneables /etc/pantheon/server_tuneables')
     local('chmod 755 /etc/pantheon/server_tuneables')
 
-def  _configure_ec2(server):
+def _configure_certificates():
+    # Just in case we're testing, we need to ensure this path exists.
+    local('mkdir -p /etc/pantheon')
+
+    # Set the Helios CA server to use.
+    pki_server = 'http://pki.getpantheon.com:8080/'
+
+    # Download and install the root CA.
+    local('curl %s | sudo tee /usr/share/ca-certificates/pantheon.crt' % pki_server)
+    local('echo "pantheon.crt" | sudo tee -a /etc/ca-certificates.conf')
+    #local('cat /etc/ca-certificates.conf | sort | uniq | sudo tee /etc/ca-certificates.conf') # Remove duplicates.
+    local('sudo update-ca-certificates')
+
+    # TODO: Replace the following with actual knowledge of the server's common name (hostname).
+    ip_address = local('hostname -i')
+    cn = local('dig +short -x %s' % ip_address).rstrip('\n.')
+    subject = '/C=US/ST=California/L=San Francisco/O=Pantheon Systems, Inc./OU=Olympians/CN=%s/emailAddress=hostmaster@%s/' % (cn, cn)
+
+    # Generate a local key and certificate-signing request.
+    local('openssl genrsa 4096 > /etc/pantheon/system.key')
+    local('chmod 600 /etc/pantheon/system.key')
+    local('openssl req -new -nodes -subj "%s" -key /etc/pantheon/system.key > /etc/pantheon/system.csr' % subject)
+
+    # Have the PKI server sign the request.
+    local('curl --silent -X POST -d"`cat /etc/pantheon/system.csr`" %s > /etc/pantheon/system.crt' % pki_server)
+
+    # Combine the private key and signed certificate into a PEM file (for Apache and Pound).
+    local('cat /etc/pantheon/system.crt /etc/pantheon/system.key > /etc/pantheon/system.pem')
+    local('chmod 600 /etc/pantheon/system.pem')
+
+    # Wait 20 seconds so 
+    print 'Waiting briefly so slight clock skew does not affect certificate verification.'
+    time.sleep(20)
+    print local('openssl verify -verbose /etc/pantheon/system.crt')
+
+def _configure_ec2(server):
     local('chmod 1777 /tmp')
     if(server.distro == 'centos'):
         local('mv /var/log/mysqld.log /mnt/mysql/')

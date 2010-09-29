@@ -49,6 +49,7 @@
     <Bundle name='tools'/>
     <Bundle name='varnish'/>
     <Bundle name='vsftpd'/>
+    <Bundle name='pound'/>
     <Group name='hudson'/>
   </Group>
   

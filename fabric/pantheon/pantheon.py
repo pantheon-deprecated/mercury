@@ -1,12 +1,9 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
-import copy
 import os
 import random
-import re
 import string
 import tempfile
 import time
-import urlparse
 
 from fabric.api import *
 
@@ -31,6 +28,11 @@ def random_string(length):
 
 
 def create_pantheon_settings_file(site_dir):
+    """Add an include to pantheon.settings.php to the site_dir/settings.php. 
+    Copies the pantheon.settings.php file from templates to the site_dir.
+    site_dir: path to the site directory. E.g. /var/www/sites/default
+
+    """
     with open(os.path.join(site_dir, 'settings.php'), 'a') as f:
         f.write('\n/* Added by Pantheon */\n')
         f.write("include 'pantheon.settings.php';\n")
@@ -38,6 +40,13 @@ def create_pantheon_settings_file(site_dir):
 
 
 def export_data(project, environment, destination):
+    """Export the database for a particular project/environment to destination.
+    exported database will have a name in the form of: project_environment.sql
+    project: project name
+    environment: environment name
+    destination: path where database file should be exported
+
+    """
     filename = os.path.join(destination, '%s_%s.sql' % (project, environment))
     username, password, db_name = _get_database_vars(project, environment)
     local("mysqldump --single-transaction --user='%s' \
@@ -50,6 +59,13 @@ def export_data(project, environment, destination):
 
     
 def import_data(project, environment, source):
+    """Import a database into a particular project/environment. Expects user,
+    pass, grants to already be in place.
+    project: project name
+    environment: environment name
+    source: full path to database dump file to import.
+    
+    """
     username, password, db_name = _get_database_vars(project, environment)
 
     local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % db_name)
@@ -64,6 +80,11 @@ def import_data(project, environment, source):
 
 
 def parse_vhost(path):
+    """Helper method that returns environment variables from a vhost file.
+    path: full path to vhost file.
+    returns: dict of all vhost SetEnv variables.
+
+    """
     env_vars = dict()
     with open(path, 'r') as f:
        vhost = f.readlines()
@@ -85,7 +106,17 @@ def restart_bcfg2():
         time.sleep(5)
 
 
+def reload_hudson():
+    local('curl http://localhost:8081/reload')
+
+
 def _get_database_vars(project, environment):
+    """Helper method that returns database variables for a project/environment.
+    project: project name
+    environment: environment name.
+    returns: Tuple: (username, password, db_name)
+
+    """
     vhost = PantheonServer().get_vhost_file(project, environment)
     env_vars = parse_vhost(vhost)
     return (env_vars.get('db_username'), 
@@ -187,9 +218,8 @@ class PantheonServer:
                     memcache_prefix:
 
         """
-        vhost_template = local("cat /opt/pantheon/fabric/templates/vhost.template.%s" % self.distro)
-        template = string.Template(vhost_template)
-        template = template.safe_substitute(vhost_dict)
+        vhost_template = '/opt/pantheon/fabric/templates/vhost.template.%s' % self.distro
+        template = self._build_template(vhost_template, vhost_dict)
         vhost = os.path.join(self.vhost_dir, filename)
         with open(vhost, 'w') as f:
             f.write(template)
@@ -202,8 +232,6 @@ class PantheonServer:
         environment: development environment
 
         """
-        data_dir_template = '/opt/pantheon/fabric/templates/solr/'
-        tomcat_template = local("cat /opt/pantheon/fabric/templates/tomcat_solr_home.xml")
 
         # Create project directory
         project_dir = '/var/solr/%s/' % project
@@ -211,19 +239,19 @@ class PantheonServer:
             local('mkdir %s' % project_dir)
         
         # Create data directory from sample solr data.
-        data_dir = project_dir + environment
+        data_dir = os.path.join(project_dir, environment)
         if os.path.exists(data_dir):
             local('rm -rf ' + data_dir)
+        data_dir_template = '/opt/pantheon/fabric/templates/solr/'
         local('cp -R %s %s' % (data_dir_template, data_dir))
-
         local('chown -R %s:%s %s' % (self.tomcat_owner,
                                      self.tomcat_owner,
                                      project_dir))
 
         # Tell Tomcat where indexes are located.
-        template = string.Template(tomcat_template)
-        solr_path = '%s/%s' % (project, environment)
-        template = template.safe_substitute({'solr_path':solr_path})
+        tomcat_template = '/opt/pantheon/fabric/templates/tomcat_solr_home.xml'
+        values = {'solr_path': '%s/%s' % (project, environment)}
+        template = self._build_template(tomcat_template, values)
         tomcat_file = "/etc/tomcat%s/Catalina/localhost/%s_%s.xml" % (
                                                       self.tomcat_version,
                                                       project,
@@ -247,10 +275,9 @@ class PantheonServer:
             local('mkdir -p ' + jobdir)
  
         # Create job from template
-        cron_template = local("cat /opt/pantheon/fabric/templates/hudson.drupal.cron")
-        site_path = os.path.join(self.webroot, '%s/%s' % (project, environment))
-        template = string.Template(cron_template)
-        template = template.safe_substitute({'site_path':site_path})
+        values = {'drush_alias':'@%s_%s' % (project, environment)}
+        cron_template = '/opt/pantheon/fabric/templates/hudson.drupal.cron'
+        template = self._build_template(cron_template, values)
         with open(jobdir + 'config.xml', 'w') as f:
             f.write(template)
 
@@ -259,6 +286,12 @@ class PantheonServer:
 
 
     def get_vhost_file(self, project, environment):
+        """Helper method that returns the full path to the vhost file for a
+        particular project/environment.
+        project: project name
+        environment: environment name.
+
+        """
         filename = '%s_%s' % (project, environment)
         if environment == 'live':
             filename = '000_' + filename
@@ -269,9 +302,9 @@ class PantheonServer:
 
 
     def _build_template(self, template_file, values):
-        """ Helper method that returns a template object of the template_file 
-            with substitued values.
-        filename: full path to template file
+        """Helper method that returns a template object of the template_file 
+        with substitued values.
+        template_file: full path to template file
         values: dictionary of values to be substituted in template file
 
         """

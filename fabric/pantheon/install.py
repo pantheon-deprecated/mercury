@@ -110,21 +110,11 @@ class InstallTools:
 
         """
         for file_dir in dirs:
-            local("mkdir -p %s " % (os.path.join(self.working_dir, file_dir)))
-            local("touch %s/.gitignore " % (os.path.join(self.working_dir, file_dir)))
-
-
-    def build_gitignore(self, items=['sites/default/files/*',
-                                     '!.gitignore']):
-        """ Creates .gitignore entries.
-        items: List. Optional: entries for .gitignore
-              See function for default items.
-              All paths are relative to Drupal installation.
-
-        """
-        with open(os.path.join(self.working_dir, '.gitignore'), 'w') as f:
-            for item in items:
-                f.write(item + '\n')
+            path = os.path.join(self.working_dir, file_dir)
+            local("mkdir -p %s " % path)
+            with open('%s/.gitignore' % path, 'a') as f:
+                f.write('*\n')
+                f.write('!.gitignore\n')
 
 
     def build_settings_file(self, site='default'):
@@ -209,6 +199,7 @@ class InstallTools:
         """
         for env in environments:
             self.server.create_drupal_cron(self.project, env)
+        pantheon.reload_hudson()
 
 
     def build_environments(self, tag='initialization', environments=pantheon.get_environments()):

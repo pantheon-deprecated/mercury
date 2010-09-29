@@ -1,20 +1,15 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>Backup a Drupal installation</description>
+  <description>Backup a project</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
           <name>project</name>
-          <description>Project name of Drupal Installation</description>
-          <defaultValue>pantheon</defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>environment</name>
-          <description>Environment to backup</description>
-          <defaultValue>dev</defaultValue>
+          <description>Project name</description>
+          <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>uuid</name>
@@ -23,7 +18,7 @@
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>callback_url</name>
-          <description>Where to send response</description>
+          <description>Response url</description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
@@ -33,12 +28,11 @@
   <canRoam>true</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-  <authToken>BACKUPTOKEN</authToken>
   <triggers class="vector"/>
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>cd /opt/pantheon/fabric; sudo fab backup_site:$$uuid,$$project,$$environment</command>
+      <command>cd /opt/pantheon/fabric; sudo fab backup_site:archive_name=$$uuid,project=$$project</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
@@ -58,3 +52,4 @@
   </publishers>
   <buildWrappers/>
 </project>
+

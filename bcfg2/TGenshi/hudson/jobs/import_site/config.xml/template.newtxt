@@ -7,19 +7,19 @@
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
-          <name>tarball_url</name>
-          <description>url of tarball to import</description>
+          <name>project</name>
+          <description>project name</description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>project</name>
-          <description>Project to import Drupal installation into</description>
-          <defaultValue>pantheon</defaultValue>
+          <name>profile</name>
+          <description>Installation profile</description>
+          <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>environment</name>
-          <description>import into dev/test/live environments</description>
-          <defaultValue>dev</defaultValue>
+          <name>url</name>
+          <description>url of archive to import</description>
+          <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>uuid</name>
@@ -38,12 +38,11 @@
   <canRoam>true</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-  <authToken>IMPORTTOKEN</authToken>
   <triggers class="vector"/>
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-	    <command>cd /opt/pantheon/fabric; sudo fab import_siteurl:&quot;$$tarball_url&quot;,$$project,$$environment</command>
+      <command>cd /opt/pantheon/fabric; sudo fab import_site:project=$$project,profile=$$profile,url=$$url</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
@@ -56,10 +55,11 @@
               <operator>AND</operator>
             </hudson.plugins.postbuildtask.LogProperties>
           </logTexts>
-	  <script>python /opt/pantheon/tools/hudson_postbuild.py</script>
+          <script>python /opt/pantheon/tools/hudson_postbuild.py</script>
         </hudson.plugins.postbuildtask.TaskProperties>
       </tasks>
     </hudson.plugins.postbuildtask.PostbuildTask>
   </publishers>
   <buildWrappers/>
 </project>
+
