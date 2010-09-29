@@ -49,6 +49,26 @@ def update_code(project=None, environment=None):
 
        print(dir + ' updated with code from upstream project ' + project)
        
+def update_upstream_code(project=None, environment=None):
+       server = pantheon.PantheonServer()
+
+       if (project == None):
+              print("No project selected. Using 'pantheon'")
+              project = 'pantheon'
+       if (environment == None):
+              print("No environment selected. Using 'dev'")
+              environment = 'dev'
+
+       dir = server.webroot + project + '/' + environment + "/"
+       
+       branch = get_branch(dir)
+       does_branch_exist(dir,branch)
+       commit_if_needed(dir,branch)
+       push_upstream(dir,branch,project)
+       commit_if_needed(dir,branch)
+                            
+       print(project + ' project updated with code from ' + dir)
+
 def update_data(source_project=None, source_environment=None, target_project=None, target_environment=None):
        server = pantheon.PantheonServer()
        source_temporary_directory = tempfile.mkdtemp()
@@ -133,28 +153,6 @@ def commit_if_needed(dir,branch):
                             local('git add -A .')
                             local('git commit -av -m "committing found changes"')
        print('git status')
-
-def push_code_up(project=None, environment=None):
-       server = pantheon.PantheonServer()
-
-       if (project == None):
-              print("No project selected. Using 'pantheon'")
-              project = 'pantheon'
-       if (environment == None):
-              print("No environment selected. Using 'dev'")
-              environment = 'dev'
-
-       dir = server.webroot + project + '/' + environment + "/"
-       
-       with cd(dir):
-              branch = local('git branch | grep -v master').lstrip('* ').rstrip('\n')
-              
-       does_branch_exist(dir,branch)
-       commit_if_needed(dir,branch)
-       push_upstream(dir,branch,project)
-       commit_if_needed(dir,branch)
-                            
-       print(project + ' project updated with code from ' + dir)
 
 def push_upstream(dir,branch,project):
        with cd(dir):
