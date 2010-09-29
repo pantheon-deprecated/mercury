@@ -6,10 +6,8 @@
     <BoundPath type='directory' name='/var/lib/hudson/jobs/bcfg2-client' owner='hudson' group='nogroup' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/bcfg2-status' owner='hudson' group='nogroup' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/pantheon_config' owner='hudson' group='nogroup' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/cron_pantheon_dev' owner='hudson' group='nogroup' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/cron_pantheon_test' owner='hudson' group='nogroup' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/cron_pantheon_live' owner='hudson' group='nogroup' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/import_site' owner='hudson' group='nogroup' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/install_site' owner='hudson' group='nogroup' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/backup_site' owner='hudson' group='nogroup' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/restore_site' owner='hudson' group='nogroup' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/update_code' owner='hudson' group='nogroup' perms='0755'/>
@@ -25,10 +23,8 @@
     <BoundPath type='directory' name='/var/lib/hudson/jobs/bcfg2-client' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/bcfg2-status' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/pantheon_config' owner='hudson' group='hudson' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/cron_pantheon_dev' owner='hudson' group='hudson' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/cron_pantheon_test' owner='hudson' group='hudson' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/cron_pantheon_live' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/import_site' owner='hudson' group='hudson' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/install_site' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/backup_site' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/restore_site' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/update_code' owner='hudson' group='hudson' perms='0755'/>
@@ -40,14 +36,12 @@
   
   <!-- Jobs -->
   <Path name='/var/lib/hudson/jobs/import_site/config.xml' altsrc='/hudson/jobs/import_site/config.xml'/>
+  <Path name='/var/lib/hudson/jobs/install_site/config.xml' altsrc='/hudson/jobs/install_site/config.xml'/>
   <Path name='/var/lib/hudson/jobs/backup_site/config.xml' altsrc='/hudson/jobs/backup_site/config.xml'/>
   <Path name='/var/lib/hudson/jobs/restore_site/config.xml' altsrc='/hudson/jobs/restore_site/config.xml'/>
   <Path name='/var/lib/hudson/jobs/bcfg2-client/config.xml' altsrc='/hudson/jobs/bcfg2-client/config.xml'/>
   <Path name='/var/lib/hudson/jobs/bcfg2-status/config.xml' altsrc='/hudson/jobs/bcfg2-status/config.xml'/>
   <Path name='/var/lib/hudson/jobs/pantheon_config/config.xml' altsrc='/hudson/jobs/pantheon_config/config.xml'/>
-  <Path name='/var/lib/hudson/jobs/cron_pantheon_dev/config.xml' altsrc='/hudson/jobs/cron_pantheon_dev/config.xml'/>
-  <Path name='/var/lib/hudson/jobs/cron_pantheon_test/config.xml' altsrc='/hudson/jobs/cron_pantheon_test/config.xml'/>
-  <Path name='/var/lib/hudson/jobs/cron_pantheon_live/config.xml' altsrc='/hudson/jobs/cron_pantheon_live/config.xml'/>
   <Path name='/var/lib/hudson/jobs/update_code/config.xml' altsrc='/hudson/jobs/update_code/config.xml'/>
   <Path name='/var/lib/hudson/jobs/update_data/config.xml' altsrc='/hudson/jobs/update_data/config.xml'/>
   <Path name='/var/lib/hudson/jobs/update_files/config.xml' altsrc='/hudson/jobs/update_files/config.xml'/>

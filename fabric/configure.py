@@ -2,7 +2,7 @@
 from fabric.api import *
 import os
 
-import pantheon
+from pantheon import pantheon
 import update
 import time
 
@@ -14,11 +14,10 @@ def configure(vps="none"):
     _configure_certificates()
     if (vps == "aws"):
         _config_ec2_(server)
-    _configure_apache(server)
     _configure_postfix(server)
     _restart_services(server)
     _configure_iptables(server)
-    _configure_databases()
+    _configure_git_repo()
     _mark_incep(server)
     _report()
 
@@ -28,7 +27,7 @@ def _test_for_previous_run():
 
 def _configure_server(server):
     server.update_packages()
-    update.update_pressflow()
+    #update.update_pressflow()
     update.update_pantheon()
     local('cp /etc/pantheon/templates/tuneables /etc/pantheon/server_tuneables')
     local('chmod 755 /etc/pantheon/server_tuneables')
@@ -83,49 +82,56 @@ def _configure_ec2(server):
     local('ln -s /mnt/varnish/lib /var/lib/varnish')
     local('chown varnish:varnish /mnt/varnish/lib/pressflow/')
 
-def _configure_apache(server):
-    if(server.distro == 'centos'):
-        local('cp /etc/pantheon/templates/vhost/* /etc/httpd/conf/vhosts/')
-    else:
-        local('cp /etc/pantheon/templates/vhost/* /etc/apache2/sites-available/')
-        local('ln -sf /etc/apache2/sites-available/pantheon_live /etc/apache2/sites-available/default')
-        local('a2ensite pantheon_dev')
-        local('a2ensite pantheon_test')
 
 def _configure_postfix(server):
-    f = open('/etc/mailname', 'w')
-    f.write(server.hostname)
-    f.close()
-    local('/usr/sbin/postconf -e "myhostname = %s"' % server.hostname)
-    local('/usr/sbin/postconf -e "mydomain = %s"' % server.hostname)
-    local('/usr/sbin/postconf -e "mydestination = %s"' % server.hostname)
+    hostname = server.get_hostname()
+    with open('/etc/mailname', 'w') as f:
+        f.write(hostname)
+    local('/usr/sbin/postconf -e "myhostname = %s"' % hostname)
+    local('/usr/sbin/postconf -e "mydomain = %s"' % hostname)
+    local('/usr/sbin/postconf -e "mydestination = %s"' % hostname)
     local('/etc/init.d/postfix restart')
 
+
 def _restart_services(server):
-     server.restart_services()
+    server.restart_services()
+
 
 def _configure_iptables(server):
     if server.distro == 'centos':
-         local('sed -i "s/#-A/-A/g" /etc/sysconfig/iptables')
-         local('/sbin/iptables-restore < /etc/sysconfig/iptables')
+        local('sed -i "s/#-A/-A/g" /etc/sysconfig/iptables')
+        local('/sbin/iptables-restore < /etc/sysconfig/iptables')
     else:
         local('sed -i "s/#-A/-A/g" /etc/iptables.rules')
         local('/sbin/iptables-restore </etc/iptables.rules')
 
-def _configure_databases():
-    #TODO: allow for mysql already having a password
-    local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_dev;'")
-    local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_test;'")
-    local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS pantheon_live;'")
+
+def _configure_git_repo():
+    if os.path.exists('/var/git/projects'):
+        local('rm -rf /var/git/projects')
+    # Pantheon Core
+    local('git clone git://gitorious.org/pantheon/6.git /var/git/projects')
+    # Drupal Core
+    with cd('/var/git/projects'):
+        local('git fetch git://gitorious.org/drupal/6.git master:drupal_core')
+   
+        local('git config receive.denycurrentbranch ignore')
+    local('cp /opt/pantheon/fabric/templates/git.hook.post-receive /var/git/projects/.git/hooks/post-receive')    
+    local('chmod +x /var/git/projects/.git/hooks/post-receive')
+
 
 def _mark_incep(server):
     '''Mark incep date. This prevents us from ever running again.'''
-    f = open('/etc/pantheon/incep', 'w')
-    f.write(server.hostname)
-    f.close()
+    hostname = server.get_hostname()
+    with open('/etc/pantheon/incep', 'w') as f:
+        f.write(hostname)
+
 
 def _report():
-    '''Phone home - helps us to know how many users there are without passing any identifying or personal information to us.'''
+    '''Phone home - helps us to know how many users there are without passing \
+    any identifying or personal information to us.
+
+    '''
     id = local('hostname -f | md5sum | sed "s/[^a-zA-Z0-9]//g"').rstrip('\n')
     local('curl "http://getpantheon.com/pantheon.php?id="' + id + '"&product=pantheon"')
     
@@ -134,3 +140,4 @@ def _report():
     print('##############################')
 
     local('echo "DEAR SYSADMIN: PANTHEON IS READY FOR YOU NOW.  Do not forget the README.txt, CHANGELOG.txt and docs!" | wall')
+

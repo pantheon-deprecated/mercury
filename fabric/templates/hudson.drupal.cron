@@ -2,6 +2,12 @@
 <project>
   <actions/>
   <description>Running cron for drupal</description>
+  <logRotator>
+    <daysToKeep>30</daysToKeep>
+    <numToKeep>-1</numToKeep>
+    <artifactDaysToKeep>-1</artifactDaysToKeep>
+    <artifactNumToKeep>-1</artifactNumToKeep>
+  </logRotator>
   <keepDependencies>false</keepDependencies>
   <properties/>
   <scm class="hudson.scm.NullSCM"/>
@@ -10,15 +16,16 @@
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers class="vector">
     <hudson.triggers.TimerTrigger>
-      <spec>10 * * * * </spec>
+      <spec>0 * * * * </spec>
     </hudson.triggers.TimerTrigger>
   </triggers>
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>/usr/bin/sudo /usr/local/bin/drush -r /var/www/html/pantheon/test cron</command>
+      <command>/usr/bin/sudo /usr/local/bin/drush ${drush_alias} cron</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
   <buildWrappers/>
 </project>
+

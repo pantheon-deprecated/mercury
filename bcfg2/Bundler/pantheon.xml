@@ -1,6 +1,5 @@
 <Bundle name='pantheon'>
   
-   <Path name='/etc/pantheon/pantheon.make'/>
    <Path name='/etc/pantheon/templates/cron' altsrc='/pantheon/cron'/>
    <Path name='/etc/pantheon/templates/iptables' altsrc='/pantheon/iptables'/>
    <Path name='/etc/pantheon/templates/tuneables' altsrc='/pantheon/tuneables'/>

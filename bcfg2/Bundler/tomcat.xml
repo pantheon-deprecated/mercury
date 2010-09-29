@@ -10,9 +10,6 @@
     <Package name='tomcat6'/>
     <Package name='tomcat6-common'/>
     <Path name='/etc/default/tomcat6' altsrc='/tomcat/conf'/>
-    <Path name='/etc/tomcat6/Catalina/localhost/pantheon_dev.xml' altsrc='/tomcat/solr/pantheon_dev'/>
-    <Path name='/etc/tomcat6/Catalina/localhost/pantheon_test.xml' altsrc='/tomcat/solr/pantheon_test'/>
-    <Path name='/etc/tomcat6/Catalina/localhost/pantheon_live.xml' altsrc='/tomcat/solr/pantheon_live'/>
     <Path name='/etc/tomcat6/server.xml' altsrc='/tomcat/server'/>
     <Service name='tomcat6'/>
   </Group>
@@ -39,9 +36,6 @@
     <Package name='ttf-dejavu-core'/>
     <Package name='ttf-dejavu-extra'/>
     <Path name='/etc/default/tomcat6' altsrc='/tomcat/conf'/>
-    <Path name='/etc/tomcat5.5/Catalina/localhost/pantheon_dev.xml' altsrc='/tomcat/solr/pantheon_dev'/>
-    <Path name='/etc/tomcat5.5/Catalina/localhost/pantheon_test.xml' altsrc='/tomcat/solr/pantheon_test'/>
-    <Path name='/etc/tomcat5.5/Catalina/localhost/pantheon_live.xml' altsrc='/tomcat/solr/pantheon_live'/>
     <Path name='/etc/tomcat5.5/server.xml' altsrc='/tomcat/server'/>
     <Service name='tomcat5.5'/>
   </Group>
@@ -57,9 +51,6 @@
       <Ignore name='/var/log/tomcat5/catalina.out'/>
     </Package>
     <Path name='/etc/sysconfig/tomcat5' altsrc='/tomcat/conf'/>
-    <Path name='/etc/tomcat5/Catalina/localhost/pantheon_dev.xml' altsrc='/tomcat/solr/pantheon_dev'/>
-    <Path name='/etc/tomcat5/Catalina/localhost/pantheon_test.xml' altsrc='/tomcat/solr/pantheon_test'/>
-    <Path name='/etc/tomcat5/Catalina/localhost/pantheon_live.xml' altsrc='/tomcat/solr/pantheon_live'/>
     <Path name='/etc/tomcat5/server.xml' altsrc='/tomcat/server'/>
     <Path name='/var/lib/tomcat5/common/endorsed/xalan-j2.jar'/>
     <Service name='tomcat5'/>

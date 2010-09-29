@@ -20,12 +20,8 @@
     <Path name='/etc/apache2/apache2.conf' altsrc='/apache2/conf'/>
     <Path name='/etc/apache2/mods-enabled/expires.load'/>
     <Path name='/etc/apache2/mods-enabled/rewrite.load'/>
-    <Path name='/etc/apache2/sites-enabled/000-default'/>
     <Path name='/etc/apache2/ports.conf' altsrc='/apache2/ports'/>
     <Path name='/etc/apache2/conf.d/pantheon' altsrc='/apache2/pantheon'/>
-    <Path name='/etc/pantheon/templates/vhost/pantheon_dev' altsrc='/apache2/vhost/pantheon_dev'/>
-    <Path name='/etc/pantheon/templates/vhost/pantheon_test' altsrc='/apache2/vhost/pantheon_test'/>
-    <Path name='/etc/pantheon/templates/vhost/pantheon_live' altsrc='/apache2/vhost/pantheon_live'/>
 
 <Service name='apache2'/>
   </Group>
@@ -35,10 +31,6 @@
     <Package name='httpd'/>
     <Path name='/etc/httpd/conf/httpd.conf' altsrc='/apache2/conf'/>
     <Path name='/etc/httpd/conf.d/pantheon.conf' altsrc='/apache2/pantheon'/>
-    <Path name='/etc/pantheon/templates/vhost/pantheon_dev.conf' altsrc='/apache2/vhost/pantheon_dev'/>
-    <Path name='/etc/pantheon/templates/vhost/pantheon_test.conf' altsrc='/apache2/vhost/pantheon_test'/>
-    <Path name='/etc/pantheon/templates/vhost/pantheon_live.conf' altsrc='/apache2/vhost/pantheon_live'/>
-
     <BoundPath name='/etc/httpd/conf/vhosts' type='directory' owner='root' group='root' perms='0755'/>
     <Service name='httpd'/>
   </Group>
