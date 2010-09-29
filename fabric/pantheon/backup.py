@@ -24,8 +24,8 @@ class PantheonBackup():
 
     def backup_data(self, environments=pantheon.get_environments()):
         for env in environments:
-            drupal_vars = self.server.parse_vhost(self.server.get_vhost_file(
-                                                  self.project, env))
+            drupal_vars = pantheon.parse_vhost(self.server.get_vhost_file(
+                                               self.project, env))
             dest = os.path.join(self.working_dir, self.project, env, 'database.sql')
             self._dump_data(dest, drupal_vars)
 

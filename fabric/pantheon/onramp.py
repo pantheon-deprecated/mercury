@@ -102,33 +102,32 @@ class ImportTools(install.InstallTools):
         self.db_dump = self._get_database_dump()
 
 
-    def import_database(self, environments=pantheon.get_environments()):
-        """ Create a new database and set user grants (all).
+    def import_database(self):
+        """ Create a new database and set user grants (all), then import
+        using 'project_dev' as the name.
 
         """
         username = self.project
         password = self.db_password
-        #TODO: This is temporary
-        environments = ['dev']
+        env = 'dev'
 
-        for env in environments:
-            database = '%s_%s' % (self.project, env)
-            local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % (database))
-            local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS %s'" % (database))
-            local("mysql -u root -e \"GRANT ALL ON %s.* TO '%s'@'localhost' \
-                                      IDENTIFIED BY '%s';\"" % (database,
-                                                                username,
-                                                                password))        
-            # Strip cache tables, convert MyISAM to InnoDB, and import.
-            local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | \
-                   grep -v '^INSERT INTO `ctools_object_cache`' | \
-                   grep -v '^INSERT INTO `watchdog`' | \
-                   grep -v '^INSERT INTO `accesslog`' | \
-                   grep -v '^USE `' | \
-                   sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | \
-                   mysql -u root %s" %  (os.path.join(self.processing_dir,
-                                         self.db_dump), 
-                                         database))
+        database = '%s_%s' % (self.project, env)
+        local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % (database))
+        local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS %s'" % (database))
+        local("mysql -u root -e \"GRANT ALL ON %s.* TO '%s'@'localhost' \
+                                  IDENTIFIED BY '%s';\"" % (database,
+                                                            username,
+                                                            password))        
+        # Strip cache tables, convert MyISAM to InnoDB, and import.
+        local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | \
+               grep -v '^INSERT INTO `ctools_object_cache`' | \
+               grep -v '^INSERT INTO `watchdog`' | \
+               grep -v '^INSERT INTO `accesslog`' | \
+               grep -v '^USE `' | \
+               sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | \
+               mysql -u root %s" %  (os.path.join(self.processing_dir,
+                                     self.db_dump), 
+                                     database))
         local('rm -f %s' % (os.path.join(self.processing_dir, self.db_dump)))
    
  
@@ -196,7 +195,7 @@ class ImportTools(install.InstallTools):
                     local("drush dl -y varnish")
 
  
-    def import_drupal_settings(self, environments=pantheon.get_environments()):
+    def import_drupal_settings(self):
         """Enable required modules, and set Pantheon variable defaults.
 
         """
@@ -219,15 +218,11 @@ class ImportTools(install.InstallTools):
         drupal_vars['preprocess_js'] = True
         drupal_vars['preprocess_css'] = True
 
-        #TODO: This is temporary
-        environments = ['dev']
-
-        for env in environments:
-            alias = '%s_%s' % (self.project, env)
-            for module in required_modules:
-                drush(alias, 'en', module)
-            with settings(warn_only=True):
-                drush_set_variables(alias, drupal_vars)
+        alias = '%s_%s' % (self.project, 'dev')
+        for module in required_modules:
+            drush(alias, 'en', module)
+        with settings(warn_only=True):
+            drush_set_variables(alias, drupal_vars)
 
 
     def setup_permissions(self, environments=pantheon.get_environments()):
@@ -237,8 +232,6 @@ class ImportTools(install.InstallTools):
         """
         with cd(self.server.webroot):
             local('chown -R root:%s %s' % (self.server.web_group, self.project))
-        import pdb
-        pdb.set_trace()
         file_dir = self._get_files_dir()
         for env in environments:
             site_dir = os.path.join(self.server.webroot, \
