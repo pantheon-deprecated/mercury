@@ -4,6 +4,7 @@
     <Package name='debconf-utils'/>
     <Package name='ldap-auth-config'/>
     <Package name='libnss-ldap'/>
+    <Service name='libnss-ldap'/>
     <Path name='/etc/pam.d/sshd'/>
   </Group>
 
