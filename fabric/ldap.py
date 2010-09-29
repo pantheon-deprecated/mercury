@@ -57,18 +57,3 @@ def _ldap_domain_to_ldap(domain):
     ldap_domain = ",".join(ldap_domain_parts)
     return ldap_domain
 
-def ldap_client_scripts(base_domain, server_host, password):
-    local("sudo apt-get install -y ldapscripts")
-
-    ldap_domain = _ldap_domain_to_ldap(base_domain)
-    ldapscripts_conf_template = loader.load('ldapscripts.conf', cls=TextTemplate)
-    ldapscripts_conf = ldapscripts_conf_template.generate(ldap_domain=ldap_domain, server_host=server_host).render()
-    with NamedTemporaryFile() as temp_file:
-        temp_file.write(ldapscripts_conf)
-        temp_file.seek(0)
-        local("sudo cp " + temp_file.name + " /etc/ldapscripts/ldapscripts.conf")
-
-    with NamedTemporaryFile() as temp_file:
-        temp_file.write(password)
-        temp_file.seek(0)
-        local("sudo cp " + temp_file.name + " /etc/ldapscripts/ldapscripts.passwd")
