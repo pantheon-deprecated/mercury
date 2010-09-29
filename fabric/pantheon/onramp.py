@@ -8,6 +8,11 @@ import install
 import pantheon
 
 def download(url):
+    """Download url to temporary directory and return path to file.
+    url: fully qualified url of file to download.
+    returns: full path to downloaded file.
+
+    """
     download_dir = tempfile.mkdtemp()
     filebase = os.path.basename(url)
     filename = os.path.join(download_dir, filebase)
@@ -17,15 +22,27 @@ def download(url):
 
 
 def drush(alias, cmd, option):
+    """Use drush to run a command on an aliased site.
+    alias: alias name of site (just name, no '@')
+    cmd: drush command to run
+    option: options / parameters for the command.
+
+    """
     with settings(warn_only=True):
         local('drush -y @%s %s %s' % (alias, cmd, option))
    
 
 def drush_set_variables(alias, variables = dict()):
+    """Set drupal variables using drush. php-eval is used because drush vset 
+    always sets vars as strings.
+    alias: alias name of site (just name, no '@')
+    variables: dict of var_name/values.
+
+    """
     for key, value in variables.iteritems():
         # normalize strings and bools
         if isinstance(value, str):
-            value = "'" + value + "'"
+            value = "'%s'" % value
         if isinstance(value, bool):
             if value == True:
                 value = 'TRUE'
@@ -35,7 +52,13 @@ def drush_set_variables(alias, variables = dict()):
                                                                 key, 
                                                                 value))
 
+
 def _curl(url, destination):
+    """Use curl to save url to destination.
+    url: url to download
+    destination: full path/ filename to save curl output.
+
+    """
     local('curl "%s" -o "%s"' % (url, destination)) 
 
 
@@ -43,11 +66,22 @@ class ImportTools(install.InstallTools):
 
 
     def __init__(self, project):
+        """Inherit install.InstallTools and initialize. Create addtional
+        processing directory for import process.
+
+        """
         install.InstallTools.__init__(self, project)
         self.processing_dir = tempfile.mkdtemp()
 
 
     def extract(self, tarball):
+        """Use bzr import to extract archive. bzr import is used for this
+        because it can handle zero or one top level directories, and supports
+        .tar.gz/.tar/.gz/.zip archives. After extraction remove all VCS files
+        (including bzr/git/cvs/svn)
+        tarball: full path to archive to extract.
+
+        """
         local('bzr init %s' % self.processing_dir)
         with cd(self.processing_dir):
             local("bzr import %s" % tarball)
@@ -61,6 +95,9 @@ class ImportTools(install.InstallTools):
 
 
     def parse_archive(self):
+        """Get the site name and database dump file from archive to be imported.
+
+        """
         self.site = self._get_site_name()
         self.db_dump = self._get_database_dump()
 
@@ -96,32 +133,41 @@ class ImportTools(install.InstallTools):
    
  
     def import_files(self):
+        """Create git branch of project at same revision and platform of 
+        imported site. Import files into this branch and setup default site.
+        
+        """
         #TODO: add large file size sanity check (no commits over 20mb)
-        repo = self.working_dir
         platform, version, revision = self._get_drupal_version_info()
 
         with cd('/var/git/projects'):
             if platform == 'PRESSFLOW':
                 local('git checkout master')
                 local('git pull')
-            else:
+            elif platform == 'DRUPAL':
                 local('git checkout drupal_core')
                 local('git pull git://gitorious.org/drupal/6.git')
             with settings(hide('warnings'), warn_only=True):
                 local('git tag -d %s.import' % self.project)
                 local('git branch -D %s' % self.project)
             local('git branch %s %s' % (self.project, revision))
-        local('git clone -l /var/git/projects -b %s %s' % (self.project, repo))
-        with cd(repo):
+        local('git clone -l /var/git/projects -b %s %s' % (self.project, self.working_dir))
+        with cd(self.working_dir):
             local('git checkout pantheon')
-            local('rm -rf %s/*' % repo)
-            local('rsync -avz %s/* %s' % (self.processing_dir, repo))
+            local('rm -rf %s/*' % self.working_dir)
+            local('rsync -avz %s/* %s' % (self.processing_dir, self.working_dir))
             local('rm -f PRESSFLOW.txt')
-        self._setup_default_site()
         local('rm -rf %s' % self.processing_dir)
+
+        #Standardize on sites/default.
+        self._setup_default_site()
+        self._setup_default_files()
 
 
     def import_pantheon_modules(self):
+        """Setup required Pantheon modules and libraries.
+
+        """
         module_dir = os.path.join(self.working_dir, 'sites/all/modules')
         if not os.path.exists(module_dir):
             local('mkdir -p %s' % module_dir)
@@ -151,6 +197,9 @@ class ImportTools(install.InstallTools):
 
  
     def import_drupal_settings(self, environments=pantheon.get_environments()):
+        """Enable required modules, and set Pantheon variable defaults.
+
+        """
         required_modules = ['apachesolr', 
                             'apachesolr_search', 
                             'cookie_cache_bypass', 
@@ -188,7 +237,8 @@ class ImportTools(install.InstallTools):
         """
         with cd(self.server.webroot):
             local('chown -R root:%s %s' % (self.server.web_group, self.project))
-
+        import pdb
+        pdb.set_trace()
         file_dir = self._get_files_dir()
         for env in environments:
             site_dir = os.path.join(self.server.webroot, \
@@ -217,30 +267,55 @@ class ImportTools(install.InstallTools):
 
 
     def _setup_default_site(self):
-        #TODO: Handle file paths that are not sites/sitename/files
-        #TODO: Handle gitignore 
-        file_dir = self._get_files_dir()
-        if not file_dir:
-            #TODO: Handle no file_dir set.
-            pass
+        source = os.path.join(self.working_dir, 'sites/%s' % self.site)
         destination = os.path.join(self.working_dir, 'sites/default')
-        if self.site == 'default':
-            pass
-        else:
-            source = os.path.join(self.working_dir, 'sites/%s' % self.site)
+
+        # Move sites/site_dir to sites/default
+        if self.site != 'default':
             if os.path.exists(destination):
                 local('rm -rf %s' % destination)
             local('mv %s %s' % (source, destination))
+            # Symlink site_dir to default
             with cd(os.path.join(self.working_dir,'sites')):
                 local('ln -s %s %s' % ('default', self.site))
-        file_path = os.path.join(self.working_dir, file_dir)
-        if not os.path.exists(file_path):
-            local('mkdir -p %s' % file_path)
-            # Create empty .gitignore file so git will track the files directory.
-            local('touch %s' % (os.path.join(file_path, '.gitignore')))
+
+
+        # Setup settings.php and pantheon.settings.php
         pantheon.create_pantheon_settings_file(destination)
 
                    
+    def _setup_default_files(self):
+        file_location = self._get_files_dir()
+        file_path = os.path.join(self.working_dir, file_location)
+        file_dest = os.path.join(self.working_dir, 'sites/default/files')
+
+        if not os.path.exists(file_dest):
+            local('mkdir -p %s' % file_dest)
+
+        local('cp -R %s/* %s' % (file_path, file_dest))
+        local('rm -rf %s' % file_path)
+        path = os.path.split(file_path)
+        if not os.path.islink(path[0]):
+            rel_path = os.path.relpath(file_dest, os.path.split(file_path)[0])
+            local('ln -s %s %s' % (rel_path, file_path))
+        database = '%s_%s' % (self.project, 'dev')
+        local('mysql -u root %s -e "UPDATE files SET filepath = \
+               REPLACE(filepath,\'%s\',\'%s\');"' % (database,
+                                                     file_location, 
+                                                     'sites/default/files'))
+
+        file_directory_path = 's:19:\\"sites/default/files\\";'
+        local('mysql -u root %s -e "UPDATE variable \
+                                    SET value = \'%s\' \
+                                    WHERE name = \'file_directory_path\';"' % (
+                                    database, 
+                                    file_directory_path))
+
+        with open(os.path.join(file_dest,'.gitignore'), 'a') as f:
+            f.write('*')
+            f.write('!.gitignore')
+        
+
     def _get_site_name(self):
         with cd(self.processing_dir):
             settings_files = (local('find sites/ -name settings.php -type f')).rstrip('\n')

@@ -1,5 +1,4 @@
 from pantheon import install
-from pantheon import onramp
 
 def install_site(project='pantheon', profile='pantheon', **kw):
     """ Create a new Drupal installation.
@@ -11,21 +10,20 @@ def install_site(project='pantheon', profile='pantheon', **kw):
     data = {'profile':profile,'project':project}
     data.update(kw)
 
-    handler = _get_handler(**data)
+    handler = _get_profile_handler(**data)
     handler.build(**data)
 
 
-def _get_handler(profile, **kw):
+def _get_profile_handler(profile, **kw):
     """ Return instantiated profile object.
         profile: name of the installation profile.
 
     """
-    profiles = {'pantheon':_PantheonProfile,
-                'import':_ImportProfile,
-                'openatrium':_OpenAtriumProfile,
-                'openpublish':_OpenPublishProfile}
+    profiles = {'pantheon': _PantheonProfile,
+                'openatrium': _OpenAtriumProfile,
+                'openpublish': _OpenPublishProfile}
 
-    # If handler doesn't exist, use pantheon
+    # If profile: doesn't exist, use 'pantheon'
     return profiles.has_key(profile) and \
            profiles[profile](**kw) or \
            profiles['pantheon'](**kw)
@@ -83,44 +81,6 @@ class _PantheonProfile(install.InstallTools):
         self.build_vhost()
         self.build_drupal_cron()
         self.build_drush_alias()
-
-        self.cleanup()
-        self.server.restart_services()
-
-
-class _ImportProfile(onramp.ImportTools):
-
-    def __init__(self, project, **kw):
-        onramp.ImportTools.__init__(self, project)
-
-    def build(self, url, **kw):
-
-        # Download, extract, and parse the tarball.
-        tarball = onramp.download(url)
-        self.extract(tarball)
-        self.parse_archive()
-
-        # Import site and download pantheon modules.
-        self.import_database()
-        self.import_files()
-        self.import_pantheon_modules()
-
-        # Push imported project from working directory to central repo
-        self.push_to_repo(tag='import')
-
-        # Clone project to all environments
-        self.build_environments(tag='import')
-
-        # Build non-code site features
-        self.setup_permissions()
-        self.build_solr_index()
-        self.build_vhost()
-        self.build_drupal_cron()
-        self.build_drush_alias()
-
-        # Enable modules & set variables. Then push changes to test/live.
-        self.import_drupal_settings()
-        self.update_environment_databases()
 
         self.cleanup()
         self.server.restart_services()
