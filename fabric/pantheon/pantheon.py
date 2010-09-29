@@ -214,9 +214,8 @@ class PantheonServer:
                     memcache_prefix:
 
         """
-        vhost_template = local("cat /opt/pantheon/fabric/templates/vhost.template.%s" % self.distro)
-        template = string.Template(vhost_template)
-        template = template.safe_substitute(vhost_dict)
+        vhost_template = '/opt/pantheon/fabric/templates/vhost.template.%s' % self.distro
+        template = self._build_template(vhost_template, vhost_dict)
         vhost = os.path.join(self.vhost_dir, filename)
         with open(vhost, 'w') as f:
             f.write(template)
@@ -246,7 +245,7 @@ class PantheonServer:
                                      project_dir))
 
         # Tell Tomcat where indexes are located.
-        tomcat_template = 'cat /opt/pantheon/fabric/templates/tomcat_solr_home.xml'
+        tomcat_template = '/opt/pantheon/fabric/templates/tomcat_solr_home.xml'
         values = {'solr_path': '%s/%s' % (project, environment)}
         template = self._build_template(tomcat_template, values)
         tomcat_file = "/etc/tomcat%s/Catalina/localhost/%s_%s.xml" % (
