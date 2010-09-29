@@ -29,16 +29,12 @@ def build_ldap_client(base_domain = "example.com", require_group = None, server_
             
     ldap_domain = _ldap_domain_to_ldap(base_domain)
             
-    local("sudo apt-get install -y debconf-utils")
-            
     ldap_auth_conf_template = loader.load('ldap-auth-config.preseed.cfg', cls=TextTemplate)
     ldap_auth_conf = ldap_auth_conf_template.generate(ldap_domain=ldap_domain, server_host=server_host).render()
     with NamedTemporaryFile() as temp_file:
         temp_file.write(ldap_auth_conf)
         temp_file.seek(0)
         local("sudo debconf-set-selections " + temp_file.name)
-        
-    local("sudo apt-get install -y libnss-ldap ldap-auth-config")
         
     ldap_conf_template = loader.load('ldap.conf', cls=TextTemplate)
     ldap_conf = ldap_conf_template.generate(ldap_domain=ldap_domain, server_host=server_host).render()

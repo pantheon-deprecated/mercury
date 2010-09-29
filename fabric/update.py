@@ -153,16 +153,14 @@ def commit_if_needed(dir,branch):
                             local('git add -A .')
                             local('git commit -av -m "committing found changes"')
               print(local('git status'))
-       #print run('git status')
  
 def push_upstream(dir,branch,project):
        with cd(dir):
               with settings(warn_only=True):
                      local('git checkout ' + branch)
-                     local('git tag %s.update' % project)
-                     local('git checkout master')
-                     local('git merge ' + branch)
-                     local('git checkout ' + branch)
+                     #datestamp = 
+                     local('git tag %s' % project.datestamp)
+                     local('git push --tags')
                      
 def pull_downstream(dir,branch):
        with cd(dir):

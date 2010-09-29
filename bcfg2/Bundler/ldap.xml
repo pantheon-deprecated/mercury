@@ -1,0 +1,9 @@
+<Bundle name='ldap'>
+
+  <Group name='deb'>
+    <Package name='debconf-utils'/>
+    <Package name='ldap-auth-config'/>
+    <Package name='libnss-ldap'/>
+    <Path name='/etc/pam.d/sshd'/>
+  </Group>
+
