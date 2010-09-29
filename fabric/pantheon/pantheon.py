@@ -229,8 +229,6 @@ class PantheonServer:
         environment: development environment
 
         """
-        data_dir_template = '/opt/pantheon/fabric/templates/solr/'
-        tomcat_template = local("cat /opt/pantheon/fabric/templates/tomcat_solr_home.xml")
 
         # Create project directory
         project_dir = '/var/solr/%s/' % project
@@ -238,19 +236,19 @@ class PantheonServer:
             local('mkdir %s' % project_dir)
         
         # Create data directory from sample solr data.
-        data_dir = project_dir + environment
+        data_dir = os.path.join(project_dir, environment)
         if os.path.exists(data_dir):
             local('rm -rf ' + data_dir)
+        data_dir_template = '/opt/pantheon/fabric/templates/solr/'
         local('cp -R %s %s' % (data_dir_template, data_dir))
-
         local('chown -R %s:%s %s' % (self.tomcat_owner,
                                      self.tomcat_owner,
                                      project_dir))
 
         # Tell Tomcat where indexes are located.
-        template = string.Template(tomcat_template)
-        solr_path = '%s/%s' % (project, environment)
-        template = template.safe_substitute({'solr_path':solr_path})
+        tomcat_template = 'cat /opt/pantheon/fabric/templates/tomcat_solr_home.xml'
+        values = {'solr_path': '%s/%s' % (project, environment)}
+        template = self._build_template(tomcat_template, values)
         tomcat_file = "/etc/tomcat%s/Catalina/localhost/%s_%s.xml" % (
                                                       self.tomcat_version,
                                                       project,
@@ -274,10 +272,9 @@ class PantheonServer:
             local('mkdir -p ' + jobdir)
  
         # Create job from template
-        cron_template = local("cat /opt/pantheon/fabric/templates/hudson.drupal.cron")
-        site_path = os.path.join(self.webroot, '%s/%s' % (project, environment))
-        template = string.Template(cron_template)
-        template = template.safe_substitute({'site_path':site_path})
+        values = {'drush_alias':'@%s_%s' % (project, environment)}
+        cron_template = '/opt/pantheon/fabric/templates/hudson.drupal.cron'
+        template = self._build_template(cron_template, values)
         with open(jobdir + 'config.xml', 'w') as f:
             f.write(template)
 
