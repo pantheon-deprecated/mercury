@@ -37,7 +37,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>cd /opt/pantheon/fabric; sudo fab install_site:$$project,$$profile</command>
+      <command>cd /opt/pantheon/fabric; sudo fab install_site:project=$$project,profile=$$profile</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
