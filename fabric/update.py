@@ -44,8 +44,8 @@ def update_code(project=None, environment=None):
        branch = get_branch(dir)
        commit_if_needed(dir,branch)
        pull_downstream(dir,branch)
-       commit_if_needed(dir,branch)
        update_permissions(dir, server)
+       commit_if_needed(dir,branch)
 
        print(dir + ' updated with code from upstream project ' + project)
        
@@ -152,7 +152,7 @@ def commit_if_needed(dir,branch):
                      if status.failed:
                             local('git add -A .')
                             local('git commit -av -m "committing found changes"')
-       print('git status')
+       print('git status', capture=False))
 
 def push_upstream(dir,branch,project):
        with cd(dir):
