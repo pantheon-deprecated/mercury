@@ -60,7 +60,8 @@ def _configure_certificates():
 
     # Combine the private key and signed certificate into a PEM file (for Apache and Pound).
     local('cat /etc/pantheon/system.crt /etc/pantheon/system.key > /etc/pantheon/system.pem')
-    local('chmod 600 /etc/pantheon/system.pem')
+    local('chmod 640 /etc/pantheon/system.pem')
+    local('chgrp ssl-cert /etc/pantheon/system.pem')
 
     # Wait 20 seconds so 
     print 'Waiting briefly so slight clock skew does not affect certificate verification.'

@@ -38,7 +38,6 @@ if __name__ == '__main__':
 	key_file = certificate,
 	cert_file = certificate
     )
-    connection.putrequest('POST', '/%s/' % tube)
-    connection.endheaders()
-    connection.send(json.dumps(responsedict))
+    connection.request('POST', '/%s/' % tube, json.dumps(responsedict))
     response = connection.getresponse()
+
