@@ -47,7 +47,10 @@
   
     <!-- cacti -->
     <Service type='deb' status='on' name='snmpd'/>
-  
+
+    <!-- ldap -->
+    <Service type='deb' status='on' name='libnss-ldap'/>
+
     <!-- memcached -->
     <Service type='deb' status='on' name='memcached'/>
   

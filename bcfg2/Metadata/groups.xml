@@ -37,15 +37,16 @@
 
   <!-- pantheon server types -->
   <Group name='pantheon'>
-    <Bundle name='bcfg2'/>
     <Bundle name='apache2'/>
-    <Bundle name='php'/>
+    <Bundle name='bcfg2'/>
+    <Bundle name='ldap'/>
     <Bundle name='memcached'/>
-    <Bundle name='tools'/>
-    <Bundle name='pantheon'/>
     <Bundle name='mysql'/>
+    <Bundle name='pantheon'/>
+    <Bundle name='php'/>
     <Bundle name='postfix'/>
     <Bundle name='tomcat'/>
+    <Bundle name='tools'/>
     <Bundle name='varnish'/>
     <Bundle name='vsftpd'/>
     <Bundle name='pound'/>

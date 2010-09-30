@@ -23,7 +23,6 @@
     <Package name='apt-transport-https'/>
     <Package name='at'/>
     <Package name='bash-completion'/>
-    <Package name='bind9-host'/>
     <Package name='busybox-static'/>
     <Package name='byobu'/>
     <Package name='cloud-init'/>
@@ -33,7 +32,6 @@
     <Package name='consolekit'/>
     <Package name='cpu-checker'/>
     <Package name='dbus'/>
-    <Package name='dnsutils'/>
     <Package name='dosfstools'/>
     <Package name='dpkg-dev'/>
     <Package name='debhelper'/>
