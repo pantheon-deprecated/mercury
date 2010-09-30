@@ -22,7 +22,7 @@ if __name__ == '__main__':
     results = dict([(k.lower(), v) for k, v in os.environ.iteritems()])
     results['build_status'] = get_build_status(results.get('job_name'), results.get('build_number'))
 
-    response_keys = ['build_status', 'job_name', 'build_number','project', 'environment']
+    response_keys = ['build_status', 'job_name', 'build_number', 'project']
     responsebody = dict([(k, v) for k, v in results.iteritems() if k in response_keys])
 
     responsedict = {'uuid': uuid.uuid4().hex,
