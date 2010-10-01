@@ -7,8 +7,8 @@
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
-          <name>Group Client Name</name>
-          <description>group_client_name</description>
+          <name>group_client_name</name>
+          <description>Group Client Name</description>
           <defaultValue>None</defaultValue>
         </hudson.model.StringParameterDefinition>
 	<hudson.model.StringParameterDefinition>
