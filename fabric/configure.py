@@ -62,6 +62,9 @@ def _configure_certificates():
     local('cat /etc/pantheon/system.crt /etc/pantheon/system.key > /etc/pantheon/system.pem')
     local('chmod 640 /etc/pantheon/system.pem')
     local('chgrp ssl-cert /etc/pantheon/system.pem')
+    
+    # Start pound, which has been waiting for system.pem
+    local('/etc/init.d/pound start');
 
     # Wait 20 seconds so 
     print 'Waiting briefly so slight clock skew does not affect certificate verification.'
