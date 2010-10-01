@@ -15,8 +15,9 @@
   
   <!-- Debian/Ubuntu Only -->
   <Group name='deb'>
-    <Package name='git-core'/>
+    <Package name='bind9-host'/>
     <Package name='dnsutils'/>
+    <Package name='git-core'/>
     <Service name='rsync'/>
   </Group>
 
