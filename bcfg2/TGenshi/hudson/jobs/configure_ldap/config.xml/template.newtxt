@@ -1,11 +1,16 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>Run the bcfg2-client</description>
+  <description>Configure LDAP</description>
   <keepDependencies>false</keepDependencies>
-    <properties>
+  <properties>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>group_client_name</name>
+          <description>Group Client Name</description>
+          <defaultValue>None</defaultValue>
+        </hudson.model.StringParameterDefinition>
 	<hudson.model.StringParameterDefinition>
           <name>uuid</name>
           <description>Job Id</description>
@@ -27,7 +32,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>sudo /usr/sbin/bcfg2 -vq</command>
+      <command>cd /opt/pantheon/fabric; /usr/bin/sudo /usr/bin/fab build_ldap_client:getpantheon.com,$$group_client_name</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
