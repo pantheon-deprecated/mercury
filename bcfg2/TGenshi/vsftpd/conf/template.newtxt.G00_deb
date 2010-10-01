@@ -21,8 +21,7 @@ hide_ids=YES
 write_enable=NO
 max_clients=5
 anon_max_rate=3145728
-cmds_allowed=QUIT,RETR,GET,SYST,PORT
-
+cmds_denied=CWD,DELE,LIST,MKD,NLST,RMD,RNFR,RNTO,STOR,APPE,CDUP,HELP,STOU
 
 # Run standalone?  vsftpd can run either from an inetd or as a standalone
 # Added by Pantheon
