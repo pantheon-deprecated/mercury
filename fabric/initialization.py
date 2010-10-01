@@ -149,6 +149,7 @@ def _initialize_hudson(server):
         local('echo "%s" >> /etc/sudoers' % hudson_sudoer)
     if server.distro == 'centos':
         local('sed -i "s/Defaults    requiretty/#Defaults    requiretty/" /etc/sudoers')
+    local('usermod -aG ssl-cert hudson')
     local('/etc/init.d/hudson restart')
 
 
