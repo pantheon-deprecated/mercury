@@ -37,7 +37,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>cd /opt/pantheon/fabric; sudo fab install_site:project=$$project,profile=$$profile</command>
+      <command>cd /opt/pantheon/fabric; sudo fab install_site:project=$project,profile=$profile</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
@@ -51,6 +51,15 @@
             </hudson.plugins.postbuildtask.LogProperties>
           </logTexts>
           <script>python /opt/pantheon/tools/hudson_postbuild.py</script>
+        </hudson.plugins.postbuildtask.TaskProperties>
+        <hudson.plugins.postbuildtask.TaskProperties>
+          <logTexts>
+            <hudson.plugins.postbuildtask.LogProperties>
+              <logText></logText>
+              <operator>AND</operator>
+            </hudson.plugins.postbuildtask.LogProperties>
+          </logTexts>
+          <script>curl --silent http://localhost:8090/reload</script>
         </hudson.plugins.postbuildtask.TaskProperties>
       </tasks>
     </hudson.plugins.postbuildtask.PostbuildTask>
