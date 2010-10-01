@@ -42,7 +42,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>cd /opt/pantheon/fabric; sudo fab import_site:project=$project,profile=$profile,url=$url</command>
+      <command>cd /opt/pantheon/fabric; sudo fab import_site:project=$$project,profile=$$profile,url=$$url</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
