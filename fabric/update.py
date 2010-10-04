@@ -33,12 +33,15 @@ def update_test_code(tag=None):
               local('git tag ' + tag + ' -m "tagging current state of /var/www/pantheon/dev"')
               local('git push --tags')
        with cd('/var/www/pantheon/test'):
+              local('git pull')
+              local('git reset --hard ' + tag)
+
+def update_live_code():
+       #get current tag from test branch
+       with cd('/var/www/pantheon/live'):
               local('git fetch')
               local('git reset --hard ' + tag)
- 
-#def update_live_code():
-       #get current tag from test branch
-       
+
 def update_data(source_project=None, source_environment=None, target_project=None, target_environment=None):
        server = pantheon.PantheonServer()
        source_temporary_directory = tempfile.mkdtemp()
