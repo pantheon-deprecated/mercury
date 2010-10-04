@@ -30,16 +30,15 @@ def update_test_code(tag=None):
               print("No tag name provided. Using 'date stamp'")
               tag = local('date +%Y%m%d%H%M%S`')
        with cd('/var/www/pantheon/dev'):
-              local('git tag -m ' + tag)
+              local('git tag ' + tag + ' -m automatically checking in found changes in code in /var/www/pantheon/dev')
               local('git push --tags')
        with cd('/var/www/pantheon/test'):
               local('git fetch')
               local('git reset --hard ' + tag)
-              local('')
-
-def upodate_live_code():
-       #get current tag from test branch
  
+#def update_live_code():
+       #get current tag from test branch
+       
 def update_data(source_project=None, source_environment=None, target_project=None, target_environment=None):
        server = pantheon.PantheonServer()
        source_temporary_directory = tempfile.mkdtemp()
