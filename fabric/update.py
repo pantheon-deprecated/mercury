@@ -30,11 +30,11 @@ def update_test_code(tag=None):
               print("No tag name provided. Using 'date stamp'")
               tag = local('date +%Y%m%d%H%M%S`')
        with cd('/var/www/pantheon/dev'):
-              local('git tag -m ' + $tag)
+              local('git tag -m ' + tag)
               local('git push --tags')
        with cd('/var/www/pantheon/test'):
               local('git fetch')
-              local('git reset --hard ' + $tag)
+              local('git reset --hard ' + tag)
               local('')
 
 def upodate_live_code():
