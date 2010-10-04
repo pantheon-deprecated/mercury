@@ -28,7 +28,7 @@ def update_pressflow():
 def update_test_code(tag=None):
        if (tag == None):
               print("No tag name provided. Using 'date stamp'")
-              tag = local('date +%Y%m%d%H%M%S`')
+              tag = local('date +%Y%m%d%H%M%S')
        with cd('/var/www/pantheon/dev'):
               local('git tag ' + tag + ' -m automatically checking in found changes in code in /var/www/pantheon/dev')
               local('git push --tags')
