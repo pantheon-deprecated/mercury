@@ -15,19 +15,13 @@ def update_pantheon():
        print("Pantheon Updated")
 
 def update_pressflow(dir=None, branch=None):
-       if (dir == None):
-              print("No dir selected. Using '/var/git/projects'")
-              dir = '/var/git/projects'
-       if (branch == None):
-              print("No branch selected. Using 'master'")
-              branch = 'master'
-
-       does_branch_exist(dir,branch)
-       commit_if_needed(dir,branch)
-       pull_downstream(dir,branch)
-       commit_if_needed(dir,branch)
-
-       print(branch + ' branch of ' + dir + ' Updated')
+       with cd('/var/git/projects'):
+              local('git checkout master')
+              local('git fetch')
+       with cd('/var/www/pantheon/dev'):
+              local('git checkout pantheon')
+              local('git merge master')
+              local('git push')
 
 def update_code(project=None, environment=None):
        server = pantheon.PantheonServer()
