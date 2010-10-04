@@ -39,6 +39,8 @@ def update_test_code(tag=None):
 
 def update_live_code():
        #get current tag from test branch
+       with cd('/var/www/pantheon/test'):
+              tag = local('git describe').rstrip('\n')
        with cd('/var/www/pantheon/live'):
               local('git fetch -t')
               local('git reset --hard ' + tag)
