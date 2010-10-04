@@ -25,7 +25,7 @@ def update_pressflow():
               local('git merge master')
               local('git push')
 
-def push_to_test(tag=None):
+def update_test_code(tag=None):
        if (tag == None):
               print("No tag name provided. Using 'date stamp'")
               tag = local('date +%Y%m%d%H%M%S`')
@@ -37,7 +37,7 @@ def push_to_test(tag=None):
               local('git reset --hard ' + $tag)
               local('')
 
-def push_to_live():
+def upodate_live_code():
        #get current tag from test branch
  
 def update_data(source_project=None, source_environment=None, target_project=None, target_environment=None):
