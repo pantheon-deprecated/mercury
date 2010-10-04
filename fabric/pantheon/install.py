@@ -89,17 +89,20 @@ class InstallTools:
            local("git commit -m 'Add required libraries'")
 
 
-    def build_makefile(self, makefile, flags=list()):
+    def build_makefile(self, makefile):
         """ Setup Drupal site using drush make
         makefile: full path to drush makefile
-        flags: List. Optional: options to use with drush make.
 
         """
-        opts = ''
-        if flags:
-            opts = ' '.join(['%s' % flag for flag in flags])
-        local('rm -rf %s' % self.working_dir)
-        local("drush make %s %s %s" % (opts, makefile, self.working_dir))
+        tempdir = tempfile.mkdtemp()
+        local('rm -rf %s' % tempdir)
+        local("drush make %s %s" % (makefile, tempdir))
+        local('rm -rf %s/*' % self.working_dir)
+        local('rsync -av %s/* %s' % (tempdir, self.working_dir))
+        with cd(self.working_dir):
+            local('git add -A .')
+            local("git commit -m 'Site from makefile'")
+        local('rm -rf %s' % tempdir)
 
 
     def build_file_dirs(self, dirs=['sites/default/files']):

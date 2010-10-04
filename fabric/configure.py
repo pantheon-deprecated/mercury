@@ -45,8 +45,7 @@ def _configure_certificates():
     local('sudo update-ca-certificates')
 
     # TODO: Replace the following with actual knowledge of the server's common name (hostname).
-    ip_address = local('hostname -i')
-    cn = local('dig +short -x %s' % ip_address).rstrip('\n.')
+    cn = local('curl http://dev.getpantheon.com:8080/atlas/vminfo').rstrip('\n') + '.gotpantheon.com'
     subject = '/C=US/ST=California/L=San Francisco/O=Pantheon Systems, Inc./OU=Olympians/CN=%s/emailAddress=hostmaster@%s/' % (cn, cn)
 
     # Generate a local key and certificate-signing request.

@@ -1,15 +1,10 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
-from fabric.api import *
-from genshi.template import TemplateLoader, TextTemplate
-
-from tempfile import NamedTemporaryFile
 import os
+import string
+import tempfile
 
-loader = TemplateLoader(
-    os.path.join(os.path.dirname(__file__), 'templates'),
-    auto_reload=True
-    )
-    
+from fabric.api import *
+
 def build_ldap_client(base_domain = "example.com", require_group = None, server_host = "auth.example.com"):
     """ Set permissions on project directory, settings.php, and files dir.
     environments: Optional. List.
@@ -17,7 +12,7 @@ def build_ldap_client(base_domain = "example.com", require_group = None, server_
     """
     if server_host == "auth.example.com":
         server_host = "auth." + base_domain
-        
+
     # If necessary, restrict by group
     if require_group is not None:
         #local("sudo echo '-:ALL EXCEPT root sudo (" + require_group + "):ALL' | tee -a /etc/security/access.conf")
@@ -29,16 +24,19 @@ def build_ldap_client(base_domain = "example.com", require_group = None, server_
             
     ldap_domain = _ldap_domain_to_ldap(base_domain)
             
-    ldap_auth_conf_template = loader.load('ldap-auth-config.preseed.cfg', cls=TextTemplate)
-    ldap_auth_conf = ldap_auth_conf_template.generate(ldap_domain=ldap_domain, server_host=server_host).render()
-    with NamedTemporaryFile() as temp_file:
+    template = local('cat /opt/pantheon/fabric/templates/ldap-auth-config.preseed.cfg')
+    template = string.Template(template)
+    values = {'ldap_domain':ldap_domain,'server_host':server_host}
+    ldap_auth_conf = template.safe_substitute(values)
+    with tempfile.NamedTemporaryFile() as temp_file:
         temp_file.write(ldap_auth_conf)
         temp_file.seek(0)
         local("sudo debconf-set-selections " + temp_file.name)
         
-    ldap_conf_template = loader.load('ldap.conf', cls=TextTemplate)
-    ldap_conf = ldap_conf_template.generate(ldap_domain=ldap_domain, server_host=server_host).render()
-    with NamedTemporaryFile() as temp_file:
+    template = local('cat /opt/pantheon/fabric/templates/ldap.conf')
+    template = string.Template(template)
+    ldap_conf = template.safe_substitute(values)
+    with tempfile.NamedTemporaryFile() as temp_file:
         temp_file.write(ldap_conf)
         temp_file.seek(0)
         local("sudo cp " + temp_file.name + " /etc/ldap.conf")
