@@ -14,55 +14,32 @@ def update_pantheon():
        local('/usr/sbin/bcfg2 -vq', capture=False)
        print("Pantheon Updated")
 
-def update_pressflow(dir=None, branch=None):
+def update_pressflow():
        with cd('/var/git/projects'):
               local('git checkout master')
-              local('git fetch')
+              local('git pull')
        with cd('/var/www/pantheon/dev'):
+              local('git checkout master')
+              local('git pull')
               local('git checkout pantheon')
               local('git merge master')
               local('git push')
 
-def update_code(project=None, environment=None):
-       server = pantheon.PantheonServer()
+def push_to_test(tag=None):
+       if (tag == None):
+              print("No tag name provided. Using 'date stamp'")
+              tag = local('date +%Y%m%d%H%M%S`')
+       with cd('/var/www/pantheon/dev'):
+              local('git tag -m ' + $tag)
+              local('git push --tags')
+       with cd('/var/www/pantheon/test'):
+              local('git fetch')
+              local('git reset --hard ' + $tag)
+              local('')
 
-       if (project == None):
-              print("No project selected. Using 'pantheon'")
-              project = 'pantheon'
-       if (environment == None):
-              print("No environment selected. Using 'dev'")
-              environment = 'dev'
-
-       dir = server.webroot + project + '/' + environment + "/"
-
-       branch = get_branch(dir)
-       commit_if_needed(dir,branch)
-       pull_downstream(dir,branch)
-       update_permissions(dir, server)
-       commit_if_needed(dir,branch)
-
-       print(dir + ' updated with code from upstream project ' + project)
-       
-def update_upstream_code(project=None, environment=None):
-       server = pantheon.PantheonServer()
-
-       if (project == None):
-              print("No project selected. Using 'pantheon'")
-              project = 'pantheon'
-       if (environment == None):
-              print("No environment selected. Using 'dev'")
-              environment = 'dev'
-
-       dir = server.webroot + project + '/' + environment + "/"
-       
-       branch = get_branch(dir)
-       does_branch_exist(dir,branch)
-       commit_if_needed(dir,branch)
-       push_upstream(dir,branch,project)
-       commit_if_needed(dir,branch)
-                            
-       print(project + ' project updated with code from ' + dir)
-
+def push_to_live():
+       #get current tag from test branch
+ 
 def update_data(source_project=None, source_environment=None, target_project=None, target_environment=None):
        server = pantheon.PantheonServer()
        source_temporary_directory = tempfile.mkdtemp()
