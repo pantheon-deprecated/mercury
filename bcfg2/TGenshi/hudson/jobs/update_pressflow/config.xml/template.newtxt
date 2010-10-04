@@ -6,16 +6,6 @@
   <properties>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
-        <hudson.model.StringParameterDefinition>
-          <name>project</name>
-          <description>project to update pressflow</description>
-          <defaultValue>pantheon</defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>environment</name>
-          <description>environment to update pressflow</description>
-          <defaultValue>dev</defaultValue>
-        </hudson.model.StringParameterDefinition>
 	<hudson.model.StringParameterDefinition>
           <name>uuid</name>
           <description>Job Id</description>
@@ -37,7 +27,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>cd /opt/pantheon/fabric; /usr/bin/sudo /usr/bin/fab update_pressflow:$$project,$$envronment</command>
+      <command>cd /opt/pantheon/fabric; /usr/bin/sudo /usr/bin/fab update_pressflow</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
