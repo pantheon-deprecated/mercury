@@ -20,7 +20,7 @@ def update_pressflow():
               local('git pull')
        with cd('/var/www/pantheon/dev'):
               with settings(warn_only=True):
-                     pull = local('git pull origin master')
+                     pull = local('git pull origin master', capture=False)
                      if pull.failed:
                             print(pull)
                             abort('Please review the above error message and fix')
