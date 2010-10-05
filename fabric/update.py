@@ -38,7 +38,6 @@ def update_test_code(tag=None, message=None):
               local('git push --tags')
        with cd('/var/www/pantheon/test'):
               local('git fetch -t')
-              local('git reset --hard ')
               local("git reset --hard '%s'" % (tag))
 
 def update_live_code():
