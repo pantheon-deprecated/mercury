@@ -1,0 +1,9 @@
+<FileInfo>
+  <Group name="deb">
+    <Info owner='hudson' group='root' perms='0644'/>
+  </Group>
+  <Group name="centos">
+    <Info owner='hudson' group='hudson' perms='0644'/>
+  </Group>
+</FileInfo>
+

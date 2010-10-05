@@ -5,10 +5,6 @@
     <Package name='ldap-auth-config'/>
     <Package name='libnss-ldap'/>
     <Service name='libnss-ldap'/>
-<!--    <Path name='/etc/pam.d/common-account'/>
-    <Path name='/etc/pam.d/common-auth'/>
-    <Path name='/etc/pam.d/common-password'/>
-    <Path name='/etc/pam.d/common-session'/> -->
     <Path name='/etc/pam.d/sshd'/>
   </Group>
 

@@ -253,7 +253,7 @@ class InstallTools:
             local("git commit -m 'Initialize Project: %s'" % self.project)
             local('git tag %s.%s' % (self.project, tag))
             local('git push')
-            local('git push --tags')
+            local('git push --tags')\
 
 
     def cleanup(self):

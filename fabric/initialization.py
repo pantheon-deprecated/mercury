@@ -22,7 +22,6 @@ def init():
     '''Alias of "initialize"'''
     initialize()
 
-
 def _initialize_support_account(server):
     '''Generate a public/private key pair for root.'''
     #local('mkdir -p ~/.ssh')
@@ -60,13 +59,9 @@ def _initialize_package_manager(server):
     elif server.distro == 'centos':
         local('rpm -Uvh http://dl.iuscommunity.org/pub/ius/stable/Redhat/5/x86_64/ius-release-1.0-6.ius.el5.noarch.rpm')
         local('rpm -Uvh http://yum.fourkitchens.com/pub/centos/5/noarch/fourkitchens-release-5-6.noarch.rpm')
-
-        '''temp'''
-        local('rpm -Uvh http://repo.webtatic.com/yum/centos/5/`uname -i`/webtatic-release-5-0.noarch.rpm')
-        local('yum install -y --enablerepo=webtatic git')
-
         local('rpm --import http://hudson-ci.org/redhat/hudson-ci.org.key')
         local('wget http://hudson-ci.org/redhat/hudson.repo -O /etc/yum.repos.d/hudson.repo')
+        local('yum -y install git17 --enablerepo=ius-testing')
         arch = local('uname -m').rstrip('\n')
         if (arch == "x86_64"):
             exclude_arch = "*.i?86"

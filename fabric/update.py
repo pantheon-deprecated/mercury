@@ -14,22 +14,40 @@ def update_pantheon():
        local('/usr/sbin/bcfg2 -vq', capture=False)
        print("Pantheon Updated")
 
-def update_pressflow(project=None, environment=None):
-       server = pantheon.PantheonServer()
+def update_pressflow():
+       with cd('/var/git/projects'):
+              local('git checkout master')
+              local('git pull')
+       with cd('/var/www/pantheon/dev'):
+              local('git checkout master')
+              local('git pull')
+              local('git checkout pantheon')
+              local('git merge master')
+              local('git push')
 
-       print ("Updating Pressflow")
-       if (project == None):
-              print("No project selected. Using 'pantheon'")
-              project = 'pantheon'
-       if (environment == None):
-              print("No environment selected. Using 'dev'")
-              environment = 'dev'
-       with cd(server.webroot + project + '/' + environment):
-              local('git pull git://gitorious.org/pantheon/6.git')
-              with settings(warn_only=True):
-                     local('git commit -m "updates from the Pantheon gitorious project"')
-       update_permissions('%s' % (server.webroot + project + '/' + environment + '/'), server)
-       print("Pressflow Updated")
+def update_test_code(tag=None, message=None):
+       if not tag:
+              print("No tag name provided. Using 'date stamp'")
+              tag = local('date +%Y%m%d%H%M%S').rstrip('\n')
+       if not message:
+              print("No message provided. Using default")
+              message  = 'tagging current state of /var/www/pantheon/dev'
+       with cd('/var/www/pantheon/dev'):
+              local("git tag '%s' -m '%s'" % (tag, message))
+              local('git push')
+              local('git push --tags')
+       with cd('/var/www/pantheon/test'):
+              local('git fetch -t')
+              local('git reset --hard ')
+              local("git reset --hard '%s'" % (tag))
+
+def update_live_code():
+       #get current tag from test branch:
+       with cd('/var/www/pantheon/test'):
+              tag = local('git describe').rstrip('\n')
+       with cd('/var/www/pantheon/live'):
+              local('git fetch -t')
+              local("git reset --hard '%s'" % (tag))
 
 def update_data(source_project=None, source_environment=None, target_project=None, target_environment=None):
        server = pantheon.PantheonServer()
@@ -49,77 +67,15 @@ def update_data(source_project=None, source_environment=None, target_project=Non
               print("No target_environment selected. Using 'test'")
               target_environment = 'test'
 
-       source_location = server.webroot + source_project + '/' + source_environment + "/"
-       target_location = server.webroot + target_project + '/' + target_environment + "/"
-
        print('Exporting ' + source_project + '/' + source_environment + ' database to temporary directory %s' % source_temporary_directory)
-       sites = pantheon.export_data(source_location, source_temporary_directory)
+       dump_file = pantheon.export_data(source_project, source_environment, source_temporary_directory)
        print('Exporting ' + target_project + '/' + target_environment + ' database to temporary directory %s' % target_temporary_directory)
-       pantheon.export_data(target_location, target_temporary_directory)
+       pantheon.export_data(target_project, target_environment, target_temporary_directory)
 
-       # NOTE: Name changes should be done outside the import function (no logic, just import).
-       #       Added the below as a temporary stop-gap until the TODO is fixed.
-       for site in sites:
-           site.database.name = target_project + "_" + target_environment
-
-       # TODO: update process needs to be multi-site friendly. Can't use project_environment (e.g. pantheon_dev) for database name.
-       #       instead we should use project_environment_sitename (e.g. pantheon_dev_getpantheon_com for sites/getpantheon.com)
-       #       this namespacing will allow multi-codebase & multi-site installs. Once supported, can use:
-       #       project + "_" + environment + "_" + site.get_safe_name()
-
-       pantheon.import_data(sites)
+       pantheon.import_data(target_project, target_environment, dump_file)
+       local('rm -rf ' + temp_dir)
        print(target_project + '/' + target_environment + ' database updated with database from ' + source_project + '/' + source_environment)
 
-def update_code(source_project=None, source_environment=None, target_project=None, target_environment=None):
-       server = pantheon.PantheonServer()
-
-       if (source_project == None):
-              print("No source_project selected. Using 'pantheon'")
-              source_project = 'pantheon'
-       if (source_environment == None):
-              print("No source_environment selected. Using 'dev'")
-              source_environment = 'dev'
-       if (target_project == None):
-              print("No target_project selected. Using 'pantheon'")
-              target_project = 'pantheon'
-       if (target_environment == None):
-              print("No target_environment selected. Using 'test'")
-              target_environment = 'test'
-
-       source_location = server.webroot + source_project + '/' + source_environment + "/"
-       target_location = server.webroot + target_project + '/' + target_environment + "/"
-
-       #commit any changes in source dir:
-       if os.path.exists(source_location + '.git'):
-              with cd(source_location):
-                     with settings(warn_only=True):
-                            local('git add -A .')
-                            local('git commit -av -m "committing found changes"')
-                     branch = local('git branch | grep "*"').lstrip('* ').rstrip('\n')
-                     if branch != 'master':
-                            print("current source git branch is " + branch + " - merging into master branch")
-                            with settings(warn_only=True):
-                                   local('git checkout master')
-                                   local('git merge ' + branch)
-                                   local('git checkout ' + branch)
-       else:
-              abort("Source target not in version control.")
-
-       #update target dir:
-       if os.path.exists(target_location + '.git'):
-              with cd(target_location):
-                     local('git pull')
-       else:
-              with cd(source_location):
-                     temporary_directory = tempfile.mkdtemp()
-                     local('git archive master | sudo tar -x -C ' + temporary_directory)
-                     local('rsync -av --delete --exclude=settings.php --exclude=files ' + temporary_directory + '/ ' + target_location)
-                     local('rm -rf ' + temporary_directory)
-
-       update_permissions(source_location, server)
-       update_permissions(target_location, server)
-       print(target_project + '/' + target_environment + ' project updated from ' + source_project + '/' + source_environment)
-       
 def update_files(source_project=None, source_environment=None, target_project=None, target_environment=None):
        server = pantheon.PantheonServer()
 
@@ -143,9 +99,59 @@ def update_files(source_project=None, source_environment=None, target_project=No
 def update_permissions(dir, server):
        with cd(dir):
               local('chown -R root:' + server.web_group + ' *')
-              local('chown ' + server.group + ':' + server.web_group + ' sites/default/settings.php')
+              local('chown ' + server.web_group + ':' + server.web_group + ' sites/default/settings.php')
               local('chmod 660 sites/default/settings.php')
               local('find . -type d -exec chmod 755 {} \;')
               local('find sites/*/files -type d -exec chmod 775 {} \;')
               local('find sites/*/files -type f -exec chmod 660 {} \;')
 
+def get_branch(dir):
+       with cd(dir):
+              branches = local('git branch').lstrip('* ').split()
+              if branches.count == 1:
+                     return branches
+              else:
+                     branches.remove('master')
+                     if branches.count == 1:
+                            return branches
+                     else:
+                            return local('git branch | grep "*"').lstrip('* ').rstrip('\n')
+
+def does_branch_exist(dir,branch):
+       with cd(dir):
+              with settings(warn_only=True):
+                     response = local('git branch | grep ' + branch, capture=False)
+                     if response.failed:
+                            abort('Branch ' + branch + ' does not exist in ' + dir)
+
+def commit_if_needed(dir,branch):
+       with cd(dir):
+              with settings(warn_only=True):
+                     local('git checkout ' + branch)
+                     status = local('git status | grep "nothing to commit"', capture=False)
+                     if status.failed:
+                            local('git add -A .')
+                            local('git commit -av -m "committing found changes"')
+              print(local('git status'))
+ 
+def push_upstream(dir,branch,project):
+       with cd(dir):
+              with settings(warn_only=True):
+                     local('git checkout ' + branch)
+                     #datestamp = 
+                     local('git tag %s' % project.datestamp)
+                     local('git push --tags')
+                     
+def pull_downstream(dir,branch):
+       with cd(dir):
+              if (branch == 'master'):
+                     local('git pull')
+              else:
+                     with settings(warn_only=True):
+                            response = local('git branch | grep master', capture=False)
+                     if response.failed:
+                            local('git fetch')
+                            local('git reset --hard')
+                     else:
+                            local('git checkout ' + branch)
+                            local('git merge master')
