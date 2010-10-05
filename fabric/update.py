@@ -25,12 +25,15 @@ def update_pressflow():
               local('git merge master')
               local('git push')
 
-def update_test_code(tag=None):
+def update_test_code(tag=None, message=None):
        if (tag == None):
               print("No tag name provided. Using 'date stamp'")
               tag = local('date +%Y%m%d%H%M%S').rstrip('\n')
+       if (message == None):
+              print("No message provided. Using default")
+              message  = 'tagging current state of /var/www/pantheon/dev'
        with cd('/var/www/pantheon/dev'):
-              local('git tag ' + tag + ' -m "tagging current state of /var/www/pantheon/dev"')
+              local('git tag ' + tag + ' -m ' + message)
               local('git push')
               local('git push --tags')
        with cd('/var/www/pantheon/test'):
