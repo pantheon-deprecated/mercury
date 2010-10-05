@@ -106,6 +106,19 @@ def restart_bcfg2():
         time.sleep(5)
 
 
+def build_template(template_file, values):
+    """Helper method that returns a template object of the template_file 
+    with substitued values.
+    template_file: full path to template file
+    values: dictionary of values to be substituted in template file
+
+    """
+    contents = local('cat %s' % template_file)
+    template = string.Template(contents)
+    template = template.safe_substitute(values)
+    return template
+
+
 def _get_database_vars(project, environment):
     """Helper method that returns database variables for a project/environment.
     project: project name
@@ -197,7 +210,7 @@ class PantheonServer:
         alias_file = '/opt/drush/aliases/%s_%s.alias.drushrc.php' % (
                                             drush_dict.get('project'), 
                                             drush_dict.get('environment'))
-        template = self._build_template(alias_template, drush_dict)
+        template = build_template(alias_template, drush_dict)
         with open(alias_file, 'w') as f:
             f.write(template)
         
@@ -215,7 +228,7 @@ class PantheonServer:
 
         """
         vhost_template = '/opt/pantheon/fabric/templates/vhost.template.%s' % self.distro
-        template = self._build_template(vhost_template, vhost_dict)
+        template = build_template(vhost_template, vhost_dict)
         vhost = os.path.join(self.vhost_dir, filename)
         with open(vhost, 'w') as f:
             f.write(template)
@@ -247,7 +260,7 @@ class PantheonServer:
         # Tell Tomcat where indexes are located.
         tomcat_template = '/opt/pantheon/fabric/templates/tomcat_solr_home.xml'
         values = {'solr_path': '%s/%s' % (project, environment)}
-        template = self._build_template(tomcat_template, values)
+        template = build_template(tomcat_template, values)
         tomcat_file = "/etc/tomcat%s/Catalina/localhost/%s_%s.xml" % (
                                                       self.tomcat_version,
                                                       project,
@@ -273,7 +286,7 @@ class PantheonServer:
         # Create job from template
         values = {'drush_alias':'@%s_%s' % (project, environment)}
         cron_template = '/opt/pantheon/fabric/templates/hudson.drupal.cron'
-        template = self._build_template(cron_template, values)
+        template = build_template(cron_template, values)
         with open(jobdir + 'config.xml', 'w') as f:
             f.write(template)
 
@@ -296,16 +309,4 @@ class PantheonServer:
         elif self.distro == 'centos':
             return '/etc/httpd/conf/vhosts/%s' % filename
 
-
-    def _build_template(self, template_file, values):
-        """Helper method that returns a template object of the template_file 
-        with substitued values.
-        template_file: full path to template file
-        values: dictionary of values to be substituted in template file
-
-        """
-        contents = local('cat %s' % template_file)
-        template = string.Template(contents)
-        template = template.safe_substitute(values)
-        return template
 
