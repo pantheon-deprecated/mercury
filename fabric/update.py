@@ -19,18 +19,12 @@ def update_pressflow():
               local('git checkout master')
               local('git pull')
        with cd('/var/www/pantheon/dev'):
-              local('git checkout master')
               with settings(warn_only=True):
-                     pull = local('git pull', capture=False)
+                     pull = local('git pull origin master')
                      if pull.failed:
                             print(pull)
                             abort('Please review the above error message and fix')
-                     local('git checkout pantheon')
-                     merge = local('git merge master')
-                     if merge.failed:
-                            print(merge)
-                            abort('Please review the above error message and fix')
-                     local('git push')
+              local('git push')
 
 def update_test_code(tag=None, message=None):
        if not tag:
