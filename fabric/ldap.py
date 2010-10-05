@@ -4,6 +4,7 @@ import string
 import tempfile
 
 from fabric.api import *
+from pantheon import pantheon
 
 def build_ldap_client(base_domain = "example.com", require_group = None, server_host = "auth.example.com"):
     """ Set permissions on project directory, settings.php, and files dir.
@@ -23,19 +24,17 @@ def build_ldap_client(base_domain = "example.com", require_group = None, server_
     local("sudo /etc/init.d/ssh restart")
             
     ldap_domain = _ldap_domain_to_ldap(base_domain)
-            
-    template = local('cat /opt/pantheon/fabric/templates/ldap-auth-config.preseed.cfg')
-    template = string.Template(template)
     values = {'ldap_domain':ldap_domain,'server_host':server_host}
-    ldap_auth_conf = template.safe_substitute(values)
+            
+    template = '/opt/pantheon/fabric/templates/ldap-auth-config.preseed.cfg'
+    ldap_auth_conf = pantheon.build_template(template, values)
     with tempfile.NamedTemporaryFile() as temp_file:
         temp_file.write(ldap_auth_conf)
         temp_file.seek(0)
         local("sudo debconf-set-selections " + temp_file.name)
         
-    template = local('cat /opt/pantheon/fabric/templates/ldap.conf')
-    template = string.Template(template)
-    ldap_conf = template.safe_substitute(values)
+    template = '/opt/pantheon/fabric/templates/ldap.conf'
+    ldap_conf = pantheon.build_template(template, values)
     with tempfile.NamedTemporaryFile() as temp_file:
         temp_file.write(ldap_conf)
         temp_file.seek(0)
