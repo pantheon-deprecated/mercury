@@ -33,20 +33,21 @@ def update_test_code(tag=None, message=None):
               print("No message provided. Using default")
               message  = 'tagging current state of /var/www/pantheon/dev'
        with cd('/var/www/pantheon/dev'):
-              local('git tag ' + tag + ' -m ' + message)
+              local("git tag '%s' -m '%s'" % (tag, message))
               local('git push')
               local('git push --tags')
        with cd('/var/www/pantheon/test'):
               local('git fetch -t')
-              local('git reset --hard ' + tag)
+              local('git reset --hard ')
+              local("git reset --hard '%s'" % (tag))
 
 def update_live_code():
-       #get current tag from test branch
+       #get current tag from test branch:
        with cd('/var/www/pantheon/test'):
               tag = local('git describe').rstrip('\n')
        with cd('/var/www/pantheon/live'):
               local('git fetch -t')
-              local('git reset --hard ' + tag)
+              local("git reset --hard '%s'" % (tag))
 
 def update_data(source_project=None, source_environment=None, target_project=None, target_environment=None):
        server = pantheon.PantheonServer()
