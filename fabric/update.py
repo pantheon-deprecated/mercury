@@ -26,10 +26,10 @@ def update_pressflow():
               local('git push')
 
 def update_test_code(tag=None, message=None):
-       if (tag == None):
+       if not tag:
               print("No tag name provided. Using 'date stamp'")
               tag = local('date +%Y%m%d%H%M%S').rstrip('\n')
-       if (message == None):
+       if not message:
               print("No message provided. Using default")
               message  = 'tagging current state of /var/www/pantheon/dev'
        with cd('/var/www/pantheon/dev'):
