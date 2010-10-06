@@ -56,13 +56,11 @@ class Updater():
 
     def dig_git(self, branch1, branch2):
         with cd(self.server.webroot):
-            answer = local('git diff branch1 branch2')
-            return answer
+            print(local('git diff branch1 branch2'))
 
     def status_git(self):
         with cd(self.server.webroot):
-            answer = local('git status')
-            return answer
+            print(local('git status'))
 
     def _tag_code(self, tag, message):
         with cd(os.path.join(self.project_dir, 'dev')):
