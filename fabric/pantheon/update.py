@@ -57,8 +57,8 @@ class Updater():
             local('chmod 440 pantheon.settings.php')
 
     def run_command(self, command):
+        pdb.set_trace()
         with cd(self.server.webroot):
-            pdb.set_trace()
             print local(command, capture=False)
 
     def _tag_code(self, tag, message):
