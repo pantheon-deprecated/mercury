@@ -2,6 +2,9 @@
 import os
 import sys
 
+sys.path.append('/opt/pantheon/tools/ptools')
+import postback
+
 from fabric.api import cd
 from fabric.api import hide
 from fabric.api import local
@@ -30,6 +33,8 @@ if __name__ == '__main__':
             with cd(dest):
                 with hide('everything'):
                     local('env -i git pull')
+                    status = local('git status')
+                    postback.postback({'status':status})
         else:
             print "\n\nNo development environment for project '%s' found." % (project)
 
