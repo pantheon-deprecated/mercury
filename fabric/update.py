@@ -67,12 +67,12 @@ def git_diff(project, environment, branch1, branch2):
 
     """ 
     updater = update.Updater(project, environment)
-    updater.dif_git(branch1, branch2)
+    updater.run_command('git diff ' + branch1 + '' + branch2)
 
 def git_status(project, environment):
     """Return git status
 
     """ 
     updater = update.Updater(project, environment)
-    updater.status_git
+    updater.run_command('git status')
 
