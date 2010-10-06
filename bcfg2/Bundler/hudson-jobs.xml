@@ -45,7 +45,7 @@
   <Path name='/var/lib/hudson/jobs/install_site/config.xml' altsrc='/hudson/jobs/install_site/config.xml'/>
   <Path name='/var/lib/hudson/jobs/pantheon_config/config.xml' altsrc='/hudson/jobs/pantheon_config/config.xml'/>
   <Path name='/var/lib/hudson/jobs/restore_site/config.xml' altsrc='/hudson/jobs/restore_site/config.xml'/>
-  <Path name='/var/lib/hudson/jobs/update_code/config.xml' altsrc='/hudson/jobs/update_live_code/config.xml'/>
+  <Path name='/var/lib/hudson/jobs/update_code/config.xml' altsrc='/hudson/jobs/update_code/config.xml'/>
   <Path name='/var/lib/hudson/jobs/update_data/config.xml' altsrc='/hudson/jobs/update_data/config.xml'/>
   <Path name='/var/lib/hudson/jobs/update_files/config.xml' altsrc='/hudson/jobs/update_files/config.xml'/>
   <Path name='/var/lib/hudson/jobs/update_pantheon/config.xml' altsrc='/hudson/jobs/update_pantheon/config.xml'/>
