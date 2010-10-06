@@ -1,10 +1,7 @@
 import os
 import urllib2
-import sys
 
-sys.path.append('/opt/pantheon/tools/ptools')
-
-import postback
+from ptools import postback
 
 def get_build_status(job, id):
     try:
