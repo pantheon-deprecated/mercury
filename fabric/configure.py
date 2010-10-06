@@ -112,14 +112,14 @@ def _configure_git_repo():
     if os.path.exists('/var/git/projects'):
         local('rm -rf /var/git/projects')
     # Pantheon Core
-    local('git clone git://gitorious.org/pantheon/6.git /var/git/projects')
+    local('git clone git://gitorious.org/pantheon/6.git /var/git/projects/pantheon')
     # Drupal Core
-    with cd('/var/git/projects'):
+    with cd('/var/git/projects/pantheon'):
         local('git fetch git://gitorious.org/drupal/6.git master:drupal_core')
    
         local('git config receive.denycurrentbranch ignore')
-    local('cp /opt/pantheon/fabric/templates/git.hook.post-receive /var/git/projects/.git/hooks/post-receive')    
-    local('chmod +x /var/git/projects/.git/hooks/post-receive')
+    local('cp /opt/pantheon/fabric/templates/git.hook.post-receive /var/git/projects/pantheon/.git/hooks/post-receive')    
+    local('chmod +x /var/git/projects/pantheon/.git/hooks/post-receive')
 
 
 def _mark_incep(server):

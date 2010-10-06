@@ -15,7 +15,7 @@ def update_pantheon():
        print("Pantheon Updated")
 
 def update_pressflow():
-       with cd('/var/git/projects'):
+       with cd('/var/git/projects/pantheon'):
               local('git checkout master')
               local('git pull')
        with cd('/var/www/pantheon/dev'):
