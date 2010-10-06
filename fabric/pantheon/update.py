@@ -54,6 +54,8 @@ class Updater():
             local('chmod 440 settings.php')
             local('chmod 440 pantheon.settings.php')
 
+    def 
+
     def _tag_code(self, tag, message):
         with cd(os.path.join(self.project_dir, 'dev')):
             local('git checkout %s' % self.project)

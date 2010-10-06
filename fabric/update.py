@@ -61,3 +61,19 @@ def update_files(project, environment, source_env):
     """
     updater = update.Updater(project, environment)
     updater.files_update(source_env)
+
+def git_diff((project, environment, environment):
+    """Return git diff
+
+    """ 
+    updater = update.Updater(project, environment)
+    diff = updater.dif_git
+    print(dif)
+
+def git_status(project, environment):
+    """Return git status
+
+    """ 
+    updater = update.Updater(project, environment)
+    status = updater.status_git
+    print(status)
