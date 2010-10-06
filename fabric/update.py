@@ -62,12 +62,12 @@ def update_files(project, environment, source_env):
     updater = update.Updater(project, environment)
     updater.files_update(source_env)
 
-def git_diff((project, environment, environment):
+def git_diff(project, environment, branch1, branch2):
     """Return git diff
 
     """ 
     updater = update.Updater(project, environment)
-    diff = updater.dif_git
+    diff = updater.dif_git(branch1, branch2)
     print(dif)
 
 def git_status(project, environment):

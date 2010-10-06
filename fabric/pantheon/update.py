@@ -54,7 +54,15 @@ class Updater():
             local('chmod 440 settings.php')
             local('chmod 440 pantheon.settings.php')
 
-    def 
+    def dig_git(self, branch1, branch2):
+        with cd(self.server.webroot):
+            answer = local('git diff branch1 branch2')
+            return answer
+
+    def status_git(self):
+        with cd(self.server.webroot):
+            answer = local('git status')
+            return answer
 
     def _tag_code(self, tag, message):
         with cd(os.path.join(self.project_dir, 'dev')):
