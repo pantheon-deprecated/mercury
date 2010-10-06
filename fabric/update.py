@@ -1,10 +1,10 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
-from fabric.api import *
+import datetime
 import tempfile
 import os
 
 from pantheon import pantheon
-
+from pantheon import update
 
 def update_pantheon():
        print("Updating Pantheon from Launchpad")
@@ -49,49 +49,24 @@ def update_live_code():
               local('git fetch -t')
               local("git reset --hard '%s'" % (tag))
 
-def update_data(source_project=None, source_environment=None, target_project=None, target_environment=None):
-       server = pantheon.PantheonServer()
-       source_temporary_directory = tempfile.mkdtemp()
-       target_temporary_directory = tempfile.mkdtemp()
+def rebuild_environment(project, environment):
+    """Rebuild the project/environment with files and data from 'live'.
 
-       if (source_project == None):
-              print("No source_project selected. Using 'pantheon'")
-              source_project = 'pantheon'
-       if (source_environment == None):
-              print("No source_environment selected. Using 'live'")
-              source_environment = 'live'
-       if (target_project == None):
-              print("No target_project selected. Using 'pantheon'")
-              target_project = 'pantheon'
-       if (target_environment == None):
-              print("No target_environment selected. Using 'test'")
-              target_environment = 'test'
+    """
+    updater = update.Updater(project, environment)
+    updater.files_update('live')
+    updater.data_update('live')
 
-       print('Exporting ' + source_project + '/' + source_environment + ' database to temporary directory %s' % source_temporary_directory)
-       dump_file = pantheon.export_data(source_project, source_environment, source_temporary_directory)
-       print('Exporting ' + target_project + '/' + target_environment + ' database to temporary directory %s' % target_temporary_directory)
-       pantheon.export_data(target_project, target_environment, target_temporary_directory)
+def update_data(project, environment, source_env):
+    """Update the data in project/environment using data from source_env.
 
-       pantheon.import_data(target_project, target_environment, dump_file)
-       local('rm -rf ' + temp_dir)
-       print(target_project + '/' + target_environment + ' database updated with database from ' + source_project + '/' + source_environment)
+    """
+    updater = update.Updater(project, environment)
+    updater.data_update(source_env)
 
-def update_files(source_project=None, source_environment=None, target_project=None, target_environment=None):
-       server = pantheon.PantheonServer()
+def update_files(project, environment, source_env):
+    """Update the files in project/environment using files from source_env.
 
-       if (source_project == None):
-              print("No source_project selected. Using 'pantheon'")
-              source_project = 'pantheon'
-       if (source_environment == None):
-              print("No source_environment selected. Using 'live'")
-              source_environment = 'live'
-       if (target_project == None):
-              print("No target_project selected. Using 'pantheon'")
-              target_project = 'pantheon'
-       if (target_environment == None):
-              print("No target_environment selected. Using 'test'")
-              target_environment = 'test'
-
-       local('rsync -av --delete '+ server.webroot + source_project + '/' + source_environment + '/sites/all/files ' + server.webroot + target_project + '/' + target_environment + '/sites/all/')
-       local('rsync -av --delete '+ server.webroot + source_project + '/' + source_environment + '/sites/default/files ' + server.webroot + target_project + '/' + target_environment + '/sites/default/')
-       print(target_project + '/' + target_environment + ' files updated from ' + source_project + '/' + source_environment)
+    """
+    updater = update.Updater(project, environment)
+    updater.files_update(source_env)
