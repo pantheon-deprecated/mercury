@@ -33,7 +33,7 @@ if __name__ == '__main__':
             with cd(dest):
                 with hide('everything'):
                     local('env -i git pull')
-                    status = local('git status')
+                    status = local('env -i git status')
                     postback.postback({'status':status})
         else:
             print "\n\nNo development environment for project '%s' found." % (project)
