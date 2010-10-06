@@ -15,11 +15,11 @@ def update_pantheon():
        local('/usr/sbin/bcfg2 -vq', capture=False)
        print("Pantheon Updated")
 
-def update_pressflow():
+def update_pressflow(project='project'):
        with cd('/var/git/projects'):
               local('git checkout master')
               local('git pull')
-       with cd('/var/www/pantheon/dev'):
+       with cd('/var/www/%s/dev' % project):
               with settings(warn_only=True):
                      pull = local('git pull origin master', capture=False)
                      if pull.failed:
@@ -27,28 +27,18 @@ def update_pressflow():
                             abort('Please review the above error message and fix')
               local('git push')
 
-def update_test_code(tag=None, message=None):
-       if not tag:
-              print("No tag name provided. Using 'date stamp'")
-              tag = local('date +%Y%m%d%H%M%S').rstrip('\n')
-       if not message:
-              print("No message provided. Using default")
-              message  = 'tagging current state of /var/www/pantheon/dev'
-       with cd('/var/www/pantheon/dev'):
-              local("git tag '%s' -m '%s'" % (tag, message))
-              local('git push')
-              local('git push --tags')
-       with cd('/var/www/pantheon/test'):
-              local('git fetch -t')
-              local("git reset --hard '%s'" % (tag))
+def update_code(project, environment, tag=None, message=None):
+    """ Update the working-tree for project/environment.
 
-def update_live_code():
-       #get current tag from test branch:
-       with cd('/var/www/pantheon/test'):
-              tag = local('git describe').rstrip('\n')
-       with cd('/var/www/pantheon/live'):
-              local('git fetch -t')
-              local("git reset --hard '%s'" % (tag))
+    """
+    if not tag:
+        tag = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+    if not message:
+        message = 'Tagging as %s for release.' % tag
+
+    updater = update.Updater(project, environment)
+    updater.code_update(tag, message)
+    updater.permissions_update()
 
 def rebuild_environment(project, environment):
     """Rebuild the project/environment with files and data from 'live'.

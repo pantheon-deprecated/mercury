@@ -28,12 +28,12 @@ class Updater():
             self._fetch_and_reset(tag)
     
     def code_commit(self, message):
-        if self.environment == 'dev':
-            with cd(os.path.join(self.project_dir, environment)):
-                local('git checkout %s' % self.project)
-                local('git add -A .')
+        with cd(os.path.join(self.project_dir, 'dev')):
+            local('git checkout %s' % self.project)
+            local('git add -A .')
+            with settings(warn_only=True):
                 local('git commit -m "%s"' % message)
-                local('git push')
+            local('git push')
 
     def data_update(self, source_env):
         tempdir = tempfile.mkdtemp()
@@ -55,11 +55,10 @@ class Updater():
             local('chmod 440 pantheon.settings.php')
 
     def _tag_code(self, tag, message):
-        if self.environment == 'dev':
-            with cd(os.path.join(self.project_dir, environment)):
-                local('git checkout %s' % self.project)
-                local('git tag "%s" -m "%s"' % (tag, message))
-                local('git push --tags')
+        with cd(os.path.join(self.project_dir, 'dev')):
+            local('git checkout %s' % self.project)
+            local('git tag "%s" -m "%s"' % (tag, message))
+            local('git push --tags')
 
     def _fetch_and_reset(self, tag):
         with cd(os.path.join(self.project_dir, self.environment)):
