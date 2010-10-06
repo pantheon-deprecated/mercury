@@ -5,6 +5,8 @@ import pantheon
 
 from fabric.api import *
 
+import pdb
+
 class Updater():
 
     def __init__(self, project, environment):
@@ -56,6 +58,7 @@ class Updater():
 
     def run_command(self, command):
         with cd(self.server.webroot):
+            pdb.set_trace()
             print local(command, capture=False)
 
     def _tag_code(self, tag, message):
