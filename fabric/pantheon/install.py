@@ -217,7 +217,6 @@ class InstallTools:
 
            with cd(destination):
                if env == 'dev':
-                   local('git checkout master')
                    local('git checkout %s' % self.project)
                else:
                    local('git fetch')
