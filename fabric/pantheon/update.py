@@ -14,6 +14,7 @@ class Updater():
         self.environment = environment
         self.server = pantheon.PantheonServer()
         self.project_dir = os.path.join(self.server.webroot, self.project)
+        self.envpathname = os.path.join(self.project_dir, environment)
 
     def code_update(self, tag, message):
 
@@ -58,7 +59,7 @@ class Updater():
 
     def run_command(self, command):
         pdb.set_trace()
-        with cd(self.server.webroot):
+        with cd(self.envpathname):
             print local(command, capture=False)
 
     def _tag_code(self, tag, message):
