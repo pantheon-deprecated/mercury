@@ -5,8 +5,6 @@ import pantheon
 
 from fabric.api import *
 
-import pdb
-
 class Updater():
 
     def __init__(self, project, environment):
@@ -58,7 +56,6 @@ class Updater():
             local('chmod 440 pantheon.settings.php')
 
     def run_command(self, command):
-        pdb.set_trace()
         with cd(self.envpathname):
             print local(command, capture=False)
 
