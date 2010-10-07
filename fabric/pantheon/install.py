@@ -41,7 +41,7 @@ class InstallTools:
         """ Bring master up to date and create a new project branch.
 
         """
-        with cd('/var/git/projects'):
+        with cd('/var/git/projects/%s' % self.project):
             local('git checkout master')
             local('git pull')
             with settings(hide('warnings'), warn_only=True):
@@ -54,8 +54,9 @@ class InstallTools:
         """ Clone project to a temporary working directory.
 
         """
-        local('git clone -l /var/git/projects -b %s %s' % (self.project, 
-                                                           self.working_dir))
+        local('git clone -l /var/git/projects/%s -b %s %s' % (self.project,
+                                                              self.project, 
+                                                              self.working_dir))
 
 
     def build_project_modules(self, modules=['apachesolr','memcache','varnish']):
@@ -212,12 +213,12 @@ class InstallTools:
        local('rm -rf %s' % (os.path.join(self.server.webroot, self.project)))
        for env in environments:
            destination = os.path.join(self.server.webroot, self.project, env)
-           local('git clone -l /var/git/projects -b %s %s' % (self.project, 
-                                                              destination))
+           local('git clone -l /var/git/projects/%s -b %s %s' % (self.project,
+                                                                 self.project,
+                                                                 destination))
 
            with cd(destination):
                if env == 'dev':
-                   local('git checkout master')
                    local('git checkout %s' % self.project)
                else:
                    local('git fetch')

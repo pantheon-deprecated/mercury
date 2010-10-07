@@ -15,8 +15,8 @@ def update_pantheon():
        local('/usr/sbin/bcfg2 -vq', capture=False)
        print("Pantheon Updated")
 
-def update_pressflow(project='project'):
-       with cd('/var/git/projects'):
+def update_pressflow():
+       with cd('/var/git/projects/pantheon'):
               local('git checkout master')
               local('git pull')
        with cd('/var/www/%s/dev' % project):

@@ -33,7 +33,9 @@ class PantheonBackup():
     def backup_repo(self):
         dest = os.path.join(self.working_dir, '%s.git' % (self.project))
         local('mkdir -p %s' % dest)
-        local('git clone --mirror /var/git/projects -b %s %s/' % (self.project, dest))
+        local('git clone --mirror /var/git/projects/%s -b %s %s/' % (self.project, 
+                                                                     self.project, 
+                                                                     dest))
         #TODO: warning: Remote branch master not found in upstream origin, using HEAD instead
 
 

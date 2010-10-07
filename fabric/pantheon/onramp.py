@@ -140,7 +140,7 @@ class ImportTools(install.InstallTools):
         #TODO: add large file size sanity check (no commits over 20mb)
         platform, version, revision = self._get_drupal_version_info()
 
-        with cd('/var/git/projects'):
+        with cd('/var/git/projects/%s' % self.project):
             if platform == 'PRESSFLOW':
                 local('git checkout master')
                 local('git pull')
@@ -151,7 +151,9 @@ class ImportTools(install.InstallTools):
                 local('git tag -d %s.import' % self.project)
                 local('git branch -D %s' % self.project)
             local('git branch %s %s' % (self.project, revision))
-        local('git clone -l /var/git/projects -b %s %s' % (self.project, self.working_dir))
+        local('git clone -l /var/git/projects/%s -b %s %s' % (self.project, 
+                                                              self.project, 
+                                                              self.working_dir))
         with cd(self.working_dir):
             local('git checkout pantheon')
             local('rm -rf %s/*' % self.working_dir)
