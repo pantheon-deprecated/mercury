@@ -11,8 +11,8 @@ class Updater():
         self.project = project
         self.environment = environment
         self.server = pantheon.PantheonServer()
-        self.project_dir = os.path.join(self.server.webroot, self.project)
-        self.envpathname = os.path.join(self.project_dir, environment)
+        self.project_path = os.path.join(self.server.webroot, self.project)
+        self.env_path = os.path.join(self.project_path, environment)
 
     def code_update(self, tag, message):
 
@@ -24,12 +24,12 @@ class Updater():
 
         # Update code in 'live' (get latest tag from 'test', fetch in 'live')
         elif self.environment == 'live':
-            with cd(os.path.join(self.project_dir, 'test')):
+            with cd(os.path.join(self.project_path, 'test')):
                 tag = local('git describe').rstrip('\n')
             self._fetch_and_reset(tag)
     
     def code_commit(self, message):
-        with cd(os.path.join(self.project_dir, 'dev')):
+        with cd(os.path.join(self.project_path, 'dev')):
             local('git checkout %s' % self.project)
             local('git add -A .')
             with settings(warn_only=True):
@@ -43,30 +43,30 @@ class Updater():
         local('rm -rf %s' % tempdir)
 
     def files_update(self, source_env):
-        source = os.path.join(self.project_dir, '%s/sites/default/files' % source_env)
-        dest = os.path.join(self.project_dir,'%s/sites/default/' % self.environment)
+        source = os.path.join(self.project_path, '%s/sites/default/files' % source_env)
+        dest = os.path.join(self.project_path,'%s/sites/default/' % self.environment)
         local('rsync -av --delete %s %s' % (source, dest))
 
     def permissions_update(self):
         with cd(self.server.webroot):
             local('chown -R root:%s %s' % (self.server.web_group, self.project))
-        site_dir = os.path.join(self.project_dir, '%s/sites/default' % self.environment)
-        with cd(site_dir):
+        site_path = os.path.join(self.project_path, '%s/sites/default' % self.environment)
+        with cd(site_path):
             local('chmod 440 settings.php')
             local('chmod 440 pantheon.settings.php')
 
     def run_command(self, command):
-        with cd(self.envpathname):
-            print local(command, capture=False)
+        with cd(self.env_path):
+            local(command, capture=False)
 
     def _tag_code(self, tag, message):
-        with cd(os.path.join(self.project_dir, 'dev')):
+        with cd(os.path.join(self.project_path, 'dev')):
             local('git checkout %s' % self.project)
             local('git tag "%s" -m "%s"' % (tag, message))
             local('git push --tags')
 
     def _fetch_and_reset(self, tag):
-        with cd(os.path.join(self.project_dir, self.environment)):
+        with cd(os.path.join(self.project_path, self.environment)):
             local('git checkout %s' % self.project)
             local('git fetch -t')
             local('git reset --hard "%s"' % tag)

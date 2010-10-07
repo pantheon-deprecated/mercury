@@ -67,7 +67,7 @@ def git_diff(project, environment, revision_1, revision_2=''):
 
     """ 
     updater = update.Updater(project, environment)
-    if not rev_2:
+    if not revision_2:
            updater.run_command('git diff $s %s' % (revision_1, revision_2))
     else:
             updater.run_command('git diff $s %s' % revision_1)
