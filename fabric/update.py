@@ -62,12 +62,15 @@ def update_files(project, environment, source_env):
     updater = update.Updater(project, environment)
     updater.files_update(source_env)
 
-def git_diff(project, environment, rev_1, rev_2=''):
+def git_diff(project, environment, revision_1, revision_2=''):
     """Return git diff
 
     """ 
     updater = update.Updater(project, environment)
-    updater.run_command('git diff $s %s' % (rev_1, rev_2))
+    if not rev_2:
+           updater.run_command('git diff $s %s' % (revision_1, revision_2))
+    else:
+            updater.run_command('git diff $s %s' % revision_1)
 
 def git_status(project, environment):
     """Return git status
