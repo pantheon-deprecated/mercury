@@ -47,6 +47,8 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
+      <!-- note: a bug in fabric (http://code.fabfile.org/issues/show/242) forces us to either support mutli-word tags and messages or blank tags and messaged - not both -->
+      <!-- this version supports mutli-word tags and messages -->
       <command>cd /opt/pantheon/fabric; /usr/bin/sudo /usr/bin/fab update_code:project=$$project,environment=$$environment,tag="$$tag",message="$$message"</command>
     </hudson.tasks.Shell>
   </builders>
