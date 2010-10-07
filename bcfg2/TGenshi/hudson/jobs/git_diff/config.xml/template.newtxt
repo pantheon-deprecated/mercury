@@ -1,19 +1,29 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>Script to update code in /var/www/pantheon/test</description>
+  <description>Script to run git diff</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
-          <name>tag</name>
-          <description>tag name to use</description>
+          <name>project</name>
+          <description>project to update</description>
+          <defaultValue>pantheon</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>environment</name>
+          <description>environment to update</description>
+          <defaultValue>test</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>revision_1</name>
+          <description>revision/tag to diff</description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>message</name>
-          <description>message to use</description>
+          <name>revision_2</name>
+          <description>second revision/tag to diff (leave blank to diff against the filesystem)</description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
 	<hudson.model.StringParameterDefinition>
@@ -37,7 +47,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>cd /opt/pantheon/fabric; /usr/bin/sudo /usr/bin/fab update_test_code:tag="$$tag",message="$$message"</command>
+      <command>cd /opt/pantheon/fabric; /usr/bin/sudo /usr/bin/fab git_diff:$$project,$$environment,$$revision_1,$$revision_2</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>

@@ -19,6 +19,7 @@
     <Package name='dnsutils'/>
     <Package name='git-core'/>
     <Service name='rsync'/>
+    <Service name='screen-cleanup'/>
   </Group>
 
   <!-- Debian Only -->

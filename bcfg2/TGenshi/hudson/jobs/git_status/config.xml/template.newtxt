@@ -1,11 +1,21 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>Script to update code in /var/www/pantheon/live</description>
+  <description>Script to get git status</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>project</name>
+          <description>project to update</description>
+          <defaultValue>pantheon</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>environment</name>
+          <description>environment to update</description>
+          <defaultValue>test</defaultValue>
+        </hudson.model.StringParameterDefinition>
 	<hudson.model.StringParameterDefinition>
           <name>uuid</name>
           <description>Job Id</description>
@@ -27,7 +37,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>cd /opt/pantheon/fabric; /usr/bin/sudo /usr/bin/fab update_live_code</command>
+      <command>cd /opt/pantheon/fabric; /usr/bin/sudo /usr/bin/fab git_status:project=$$project,environment=$$environment</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>

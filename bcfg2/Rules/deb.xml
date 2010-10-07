@@ -73,6 +73,7 @@
 
     <!-- tools -->
     <Service type='deb' status='off' name='rsync'/>
+    <Service type='deb' status='off' name='screen-cleanup'/>
 
     <!-- pound -->
     <Service type='deb' status='on' name='pound'/>

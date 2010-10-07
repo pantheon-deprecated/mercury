@@ -1,10 +1,11 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 from fabric.api import *
+import datetime
 import tempfile
 import os
 
 from pantheon import pantheon
-
+from pantheon import update
 
 def update_pantheon():
        print("Updating Pantheon from Launchpad")
@@ -18,7 +19,7 @@ def update_pressflow():
        with cd('/var/git/projects/pantheon'):
               local('git checkout master')
               local('git pull')
-       with cd('/var/www/pantheon/dev'):
+       with cd('/var/www/%s/dev' % project):
               with settings(warn_only=True):
                      pull = local('git pull origin master', capture=False)
                      if pull.failed:
@@ -26,72 +27,55 @@ def update_pressflow():
                             abort('Please review the above error message and fix')
               local('git push')
 
-def update_test_code(tag=None, message=None):
-       if not tag:
-              print("No tag name provided. Using 'date stamp'")
-              tag = local('date +%Y%m%d%H%M%S').rstrip('\n')
-       if not message:
-              print("No message provided. Using default")
-              message  = 'tagging current state of /var/www/pantheon/dev'
-       with cd('/var/www/pantheon/dev'):
-              local("git tag '%s' -m '%s'" % (tag, message))
-              local('git push')
-              local('git push --tags')
-       with cd('/var/www/pantheon/test'):
-              local('git fetch -t')
-              local("git reset --hard '%s'" % (tag))
+def update_code(project, environment, tag=None, message=None):
+    """ Update the working-tree for project/environment.
 
-def update_live_code():
-       #get current tag from test branch:
-       with cd('/var/www/pantheon/test'):
-              tag = local('git describe').rstrip('\n')
-       with cd('/var/www/pantheon/live'):
-              local('git fetch -t')
-              local("git reset --hard '%s'" % (tag))
+    """
+    if not tag:
+        tag = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+    if not message:
+        message = 'Tagging as %s for release.' % tag
 
-def update_data(source_project=None, source_environment=None, target_project=None, target_environment=None):
-       server = pantheon.PantheonServer()
-       source_temporary_directory = tempfile.mkdtemp()
-       target_temporary_directory = tempfile.mkdtemp()
+    updater = update.Updater(project, environment)
+    updater.code_update(tag, message)
+    updater.permissions_update()
 
-       if (source_project == None):
-              print("No source_project selected. Using 'pantheon'")
-              source_project = 'pantheon'
-       if (source_environment == None):
-              print("No source_environment selected. Using 'live'")
-              source_environment = 'live'
-       if (target_project == None):
-              print("No target_project selected. Using 'pantheon'")
-              target_project = 'pantheon'
-       if (target_environment == None):
-              print("No target_environment selected. Using 'test'")
-              target_environment = 'test'
+def rebuild_environment(project, environment):
+    """Rebuild the project/environment with files and data from 'live'.
 
-       print('Exporting ' + source_project + '/' + source_environment + ' database to temporary directory %s' % source_temporary_directory)
-       dump_file = pantheon.export_data(source_project, source_environment, source_temporary_directory)
-       print('Exporting ' + target_project + '/' + target_environment + ' database to temporary directory %s' % target_temporary_directory)
-       pantheon.export_data(target_project, target_environment, target_temporary_directory)
+    """
+    updater = update.Updater(project, environment)
+    updater.files_update('live')
+    updater.data_update('live')
 
-       pantheon.import_data(target_project, target_environment, dump_file)
-       local('rm -rf ' + temp_dir)
-       print(target_project + '/' + target_environment + ' database updated with database from ' + source_project + '/' + source_environment)
+def update_data(project, environment, source_env):
+    """Update the data in project/environment using data from source_env.
 
-def update_files(source_project=None, source_environment=None, target_project=None, target_environment=None):
-       server = pantheon.PantheonServer()
+    """
+    updater = update.Updater(project, environment)
+    updater.data_update(source_env)
 
-       if (source_project == None):
-              print("No source_project selected. Using 'pantheon'")
-              source_project = 'pantheon'
-       if (source_environment == None):
-              print("No source_environment selected. Using 'live'")
-              source_environment = 'live'
-       if (target_project == None):
-              print("No target_project selected. Using 'pantheon'")
-              target_project = 'pantheon'
-       if (target_environment == None):
-              print("No target_environment selected. Using 'test'")
-              target_environment = 'test'
+def update_files(project, environment, source_env):
+    """Update the files in project/environment using files from source_env.
 
-       local('rsync -av --delete '+ server.webroot + source_project + '/' + source_environment + '/sites/all/files ' + server.webroot + target_project + '/' + target_environment + '/sites/all/')
-       local('rsync -av --delete '+ server.webroot + source_project + '/' + source_environment + '/sites/default/files ' + server.webroot + target_project + '/' + target_environment + '/sites/default/')
-       print(target_project + '/' + target_environment + ' files updated from ' + source_project + '/' + source_environment)
+    """
+    updater = update.Updater(project, environment)
+    updater.files_update(source_env)
+
+def git_diff(project, environment, revision_1, revision_2=None):
+    """Return git diff
+
+    """ 
+    updater = update.Updater(project, environment)
+    if not revision_2:
+           updater.run_command('git diff %s' % revision_1)
+    else:
+           updater.run_command('git diff %s %s' % (revision_1, revision_2))
+
+def git_status(project, environment):
+    """Return git status
+
+    """ 
+    updater = update.Updater(project, environment)
+    updater.run_command('git status')
+
