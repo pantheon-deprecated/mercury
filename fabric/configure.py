@@ -36,13 +36,16 @@ def _configure_certificates():
     local('mkdir -p /etc/pantheon')
 
     # Set the Helios CA server to use.
-    pki_server = 'http://pki.getpantheon.com:8080/'
+    pki_server = 'http://pki.getpantheon.com/'
 
     # Download and install the root CA.
     local('curl %s | sudo tee /usr/share/ca-certificates/pantheon.crt' % pki_server)
     local('echo "pantheon.crt" | sudo tee -a /etc/ca-certificates.conf')
     #local('cat /etc/ca-certificates.conf | sort | uniq | sudo tee /etc/ca-certificates.conf') # Remove duplicates.
     local('sudo update-ca-certificates')
+    
+    # Now Helios cert is OTS
+    pki_server = 'https://pki.getpantheon.com/'
 
     # TODO: Replace the following with actual knowledge of the server's common name (hostname).
     cn = local('curl https://dev.getpantheon.com/atlas/vminfo').rstrip('\n') + '.gotpantheon.com'

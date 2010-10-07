@@ -26,11 +26,12 @@ def _send_response(responsedict):
     host = 'jobs.getpantheon.com'
     certificate = '/etc/pantheon/system.pem'
     tube = 'atlas-in'
+    headers = {'Content-Type': 'application/json'}
 
     connection = httplib.HTTPSConnection(host,
                                          key_file = certificate,
                                          cert_file = certificate)
-    connection.request('POST', '/%s/' % tube, json.dumps(responsedict))
+    connection.request('POST', '/%s/' % tube, json.dumps(responsedict), headers)
     response = connection.getresponse()
     return response
 
