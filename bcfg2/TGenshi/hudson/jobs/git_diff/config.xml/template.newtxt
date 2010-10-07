@@ -47,7 +47,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>cd /opt/pantheon/fabric; /usr/bin/sudo /usr/bin/fab git_diff:project=$$project,environment=$$environment,revision_1="$$revision_1",revision_2="$$revision_2"</command>
+      <command>cd /opt/pantheon/fabric; /usr/bin/sudo /usr/bin/fab git_diff:$$project,$$environment,$$revision_1,$$revision_2</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
