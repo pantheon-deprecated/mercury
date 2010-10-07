@@ -62,7 +62,7 @@ class Updater():
     def _tag_code(self, tag, message):
         with cd(os.path.join(self.project_path, 'dev')):
             local('git checkout %s' % self.project)
-            local('git tag "%s" -m "%s"' % (tag, message))
+            local('git tag "%s" -m "%s"' % (tag, message),  capture=False)
             local('git push --tags')
 
     def _fetch_and_reset(self, tag):

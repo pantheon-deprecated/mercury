@@ -17,13 +17,13 @@
           <defaultValue>test</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>branch1</name>
-          <description>branch/repo/tag to diff</description>
+          <name>revision_1</name>
+          <description>revision/tag to diff</description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>branch2</name>
-          <description>second branch/repo/tag to diff (leave blank to diff against the filesystem)</description>
+          <name>revision_2</name>
+          <description>second revision/tag to diff (leave blank to diff against the filesystem)</description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
 	<hudson.model.StringParameterDefinition>
@@ -47,7 +47,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>cd /opt/pantheon/fabric; /usr/bin/sudo /usr/bin/fab git_diff:project=$$project,environment=$$environment,branch1="$$branch1",branch2="$$branch2"</command>
+      <command>cd /opt/pantheon/fabric; /usr/bin/sudo /usr/bin/fab git_diff:project=$$project,environment=$$environment,revision_1="$$revision_1",revision_2="$$revision_2"</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
