@@ -25,7 +25,7 @@ class Updater():
         # Update code in 'live' (get latest tag from 'test', fetch in 'live')
         elif self.environment == 'live':
             with cd(os.path.join(self.project_path, 'test')):
-                tag = local('git describe').rstrip('\n')
+                tag = local('git describe --tags').rstrip('\n')
             self._fetch_and_reset(tag)
     
     def code_commit(self, message):
