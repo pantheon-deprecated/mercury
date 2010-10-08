@@ -34,15 +34,16 @@ if __name__ == '__main__':
                 with hide('running'):
                     local('env -i git pull')
                     author_name, author_email = local(
-                                   'env -i git log --pretty=format:%an%n%ae ' \
+                                   'env -i git log --pretty=format:%an%n%ae ' +
                                    '%s..%s' % (revision_old, revision_new)
                                    ).rstrip('\n').split('\n')
-                    if ((author_name != 'Hudson User') and 
-                        (author_email != 'hudson@getpantheon')):
+            if ((author_name != 'Hudson User') and
+                (author_email != 'hudson@getpantheon')):
 
-                        repo = gittools.GitRepo(project)
-                        status = repo.get_update_status(revision_new)
-                        postback.postback({'status':status})
+                with hide('running'):
+                    repo = gittools.GitRepo(project)
+                    status = repo.get_update_status(revision_new)
+                    postback.postback({'status':status})
 
         else:
             print "\n\nNo development environment for project '%s' found." % (project)

@@ -51,7 +51,7 @@ class GitRepo():
                              '%s' %  self.project)
         else:
             with cd(os.path.join(self.project_path, env)):
-                ref = local('git describe --tags %s' % self.project).rstrip('\n')
+                ref = local('env -i git describe --tags %s' % self.project).rstrip('\n')
         return ref
 
     def _get_diff(self, base, other):
@@ -61,8 +61,8 @@ class GitRepo():
 
         """
         with cd(self.repo):
-            local('git checkout %s' % self.project)
-            diff = local('git diff --stat %s %s' % (base, other))
+            local('env -i git checkout %s' % self.project)
+            diff = local('env -i git diff --stat %s %s' % (base, other))
         return diff
 
     def _get_log(self, num_entries):
@@ -71,6 +71,6 @@ class GitRepo():
 
         """
         with cd(self.repo):
-            log = local('git log -n%s %s' % (num_entries, self.project))
+            log = local('env -i git log -n%s %s' % (num_entries, self.project))
         return log
 
