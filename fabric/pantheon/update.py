@@ -10,6 +10,7 @@ class Updater():
     def __init__(self, project, environment):
         self.project = project
         self.environment = environment
+        self.author = 'Hudson User <hudson@pantheon>'
         self.server = pantheon.PantheonServer()
         self.project_path = os.path.join(self.server.webroot, self.project)
         self.env_path = os.path.join(self.project_path, environment)
@@ -33,7 +34,7 @@ class Updater():
             local('git checkout %s' % self.project)
             local('git add -A .')
             with settings(warn_only=True):
-                local('git commit -m "%s"' % message)
+                local('git commit --author="%s" -m "%s"' % (self.author, message))
             local('git push')
 
     def data_update(self, source_env):
