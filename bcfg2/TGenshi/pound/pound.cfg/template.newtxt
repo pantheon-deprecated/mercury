@@ -40,7 +40,7 @@ ListenHTTP
   xHTTP   0
   Service
     HeadRequire "X-SSL-Issuer:.*CN = pki.getpantheon.com"
-    HeadRequire "X-SSL-Subject:.*CN = [a-z]+.getpantheon.com"
+    HeadRequire "X-SSL-Subject:.*CN = [a-z\.]+.getpantheon.com"
     BackEnd
       Address 127.0.0.1
       Port    8090
