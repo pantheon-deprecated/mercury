@@ -25,7 +25,7 @@ class Updater():
         # Update code in 'live' (get latest tag from 'test', fetch in 'live')
         elif self.environment == 'live':
             with cd(os.path.join(self.project_path, 'test')):
-                tag = local('git describe').rstrip('\n')
+                tag = local('git describe --tags').rstrip('\n')
             self._fetch_and_reset(tag)
     
     def code_commit(self, message):
@@ -33,7 +33,7 @@ class Updater():
             local('git checkout %s' % self.project)
             local('git add -A .')
             with settings(warn_only=True):
-                local('git commit -m "%s"' % message)
+                local('git commit -m "%s"' % message, capture=False)
             local('git push')
 
     def data_update(self, source_env):
@@ -62,7 +62,7 @@ class Updater():
     def _tag_code(self, tag, message):
         with cd(os.path.join(self.project_path, 'dev')):
             local('git checkout %s' % self.project)
-            local('git tag "%s" -m "%s"' % (tag, message),  capture=False)
+            local('git tag "%s" -m "%s"' % (tag, message), capture=False)
             local('git push --tags')
 
     def _fetch_and_reset(self, tag):
