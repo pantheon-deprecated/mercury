@@ -61,8 +61,9 @@ class Updater():
 
     def test_tag(self, tag):
         #test of existing tag
-        if local(' git tag | grep ' + tag):
-            abort('waring - tag ' + tag + 'already exists!')
+        with cd(self.env_path):
+            if local(' git tag | grep ' + tag):
+                abort('waring - tag ' + tag + 'already exists!')
 
     def _tag_code(self, tag, message):
         with cd(os.path.join(self.project_path, 'dev')):
