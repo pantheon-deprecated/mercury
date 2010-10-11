@@ -37,7 +37,7 @@ def update_code(project, environment, tag=None, message=None):
         message = 'Tagging as %s for release.' % tag
 
     updater = update.Updater(project, environment)
-    update.test_tag(tag)
+    updater.test_tag(tag)
     updater.code_update(tag, message)
     updater.permissions_update()
 
