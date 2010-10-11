@@ -5,11 +5,13 @@ import os
 from pantheon import pantheon
 import update
 import time
+import urllib2
 
 def configure(vps="none"):
     '''configure the Pantheon system.'''
     server = pantheon.PantheonServer()
     _test_for_previous_run()
+    _check_connectivity()
     _configure_server(server)
     _configure_certificates()
     if (vps == "aws"):
@@ -24,6 +26,22 @@ def configure(vps="none"):
 def _test_for_previous_run():
     if os.path.exists("/etc/pantheon/incep"):
         abort("Pantheon config has already run. Exiting.")
+
+# The Rackspace Cloud occasionally has connectivity issues unless a server gets
+# rebooted after initial provisioning.
+def _check_connectivity():
+    try:
+        urllib2.urlopen('http://pki.getpantheon.com/', timeout=10)
+        print 'Connectivity to the PKI server seems to work.'
+    except urllib2.URLError, e:
+        print "Connectivity error: ", e
+        # Bail if a connectivity reboot has already been attempted.
+        if os.path.exists("/etc/pantheon/connectivity_reboot"):
+            abort("A Pantheon connectivity reboot has already been attempted. Exiting.")
+        # Record the running of a connectivity reboot.
+        with open('/etc/pantheon/connectivity_reboot', 'w') as f:
+            f.write('Dear Rackspace: Fix this issue.')
+        local('sudo reboot')
 
 def _configure_server(server):
     server.update_packages()
@@ -43,7 +61,7 @@ def _configure_certificates():
     local('echo "pantheon.crt" | sudo tee -a /etc/ca-certificates.conf')
     #local('cat /etc/ca-certificates.conf | sort | uniq | sudo tee /etc/ca-certificates.conf') # Remove duplicates.
     local('sudo update-ca-certificates')
-    
+
     # Now Helios cert is OTS
     pki_server = 'https://pki.getpantheon.com/'
 
@@ -63,11 +81,11 @@ def _configure_certificates():
     local('cat /etc/pantheon/system.crt /etc/pantheon/system.key > /etc/pantheon/system.pem')
     local('chmod 640 /etc/pantheon/system.pem')
     local('chgrp ssl-cert /etc/pantheon/system.pem')
-    
+
     # Start pound, which has been waiting for system.pem
     local('/etc/init.d/pound start');
 
-    # Wait 20 seconds so 
+    # Wait 20 seconds so
     print 'Waiting briefly so slight clock skew does not affect certificate verification.'
     time.sleep(20)
     print local('openssl verify -verbose /etc/pantheon/system.crt')
@@ -119,9 +137,9 @@ def _configure_git_repo():
     # Drupal Core
     with cd('/var/git/projects/pantheon'):
         local('git fetch git://gitorious.org/drupal/6.git master:drupal_core')
-   
+
         local('git config receive.denycurrentbranch ignore')
-    local('cp /opt/pantheon/fabric/templates/git.hook.post-receive /var/git/projects/pantheon/.git/hooks/post-receive')    
+    local('cp /opt/pantheon/fabric/templates/git.hook.post-receive /var/git/projects/pantheon/.git/hooks/post-receive')
     local('chmod +x /var/git/projects/pantheon/.git/hooks/post-receive')
 
 
@@ -139,7 +157,7 @@ def _report():
     '''
     id = local('hostname -f | md5sum | sed "s/[^a-zA-Z0-9]//g"').rstrip('\n')
     local('curl "http://getpantheon.com/pantheon.php?id="' + id + '"&product=pantheon"')
-    
+
     print('##############################')
     print('#   Pantheon Setup Complete! #')
     print('##############################')
