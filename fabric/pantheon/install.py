@@ -35,6 +35,7 @@ class InstallTools:
         self.db_password = pantheon.random_string(10)
         self.working_dir = tempfile.mkdtemp()
         self.destination = os.path.join(self.server.webroot, project)
+        self.author = 'Hudson User <hudson@pantheon>'
 
 
     def build_project_branch(self):
@@ -72,7 +73,7 @@ class InstallTools:
             _drush_download(modules)
         with cd(self.working_dir):
             local('git add -A .')
-            local("git commit -m 'Add required modules'")
+            local("git commit --author=\"%s\" -m 'Add required modules'" % self.author)
 
 
     def build_project_libraries(self):
@@ -87,7 +88,7 @@ class InstallTools:
            local('rm -f SolrPhpClient.r22.2009-11-09.tgz')
        with cd(self.working_dir):
            local('git add -A .')
-           local("git commit -m 'Add required libraries'")
+           local("git commit --author=\"%s\" -m 'Add required libraries'" % self.author)
 
 
     def build_makefile(self, makefile):
@@ -102,7 +103,7 @@ class InstallTools:
         local('rsync -av %s/* %s' % (tempdir, self.working_dir))
         with cd(self.working_dir):
             local('git add -A .')
-            local("git commit -m 'Site from makefile'")
+            local("git commit --author=\"%s\" -m 'Site from makefile'" % self.author)
         local('rm -rf %s' % tempdir)
 
 
@@ -251,7 +252,7 @@ class InstallTools:
         with cd(self.working_dir):
             local('git checkout %s' % self.project)
             local('git add -A .')
-            local("git commit -m 'Initialize Project: %s'" % self.project)
+            local("git commit --author=\"%s\" -m 'Initialize Project: %s'" % (self.author, self.project))
             local('git tag %s.%s' % (self.project, tag))
             local('git push')
             local('git push --tags')

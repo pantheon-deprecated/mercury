@@ -4,11 +4,11 @@ import sys
 
 sys.path.append('/opt/pantheon/tools/ptools')
 import postback
+import gittools
 
 from fabric.api import cd
 from fabric.api import hide
 from fabric.api import local
-
 
 def _get_webroot():
     if os.path.exists('/etc/debian_version'):
@@ -31,10 +31,20 @@ if __name__ == '__main__':
             The '%s' project is being updated in the development environment. \
                    \n\n" % (project)
             with cd(dest):
-                with hide('everything'):
+                with hide('running'):
                     local('env -i git pull')
-                    status = local('env -i git status')
+                    author_name, author_email = local(
+                                   'env -i git log --pretty=format:%an%n%ae ' +
+                                   '%s..%s' % (revision_old, revision_new)
+                                   ).rstrip('\n').split('\n')
+            if ((author_name != 'Hudson User') and
+                (author_email != 'hudson@getpantheon')):
+
+                with hide('running'):
+                    repo = gittools.GitRepo(project)
+                    status = repo.get_update_status(revision_new)
                     postback.postback({'status':status})
+
         else:
             print "\n\nNo development environment for project '%s' found." % (project)
 

@@ -143,8 +143,8 @@ def _initialize_solr(server):
 
 def _initialize_hudson(server):
     sudoers = local('cat /etc/sudoers')
-    hudson_sudoer = ('hudson ALL = NOPASSWD: /usr/local/bin/drush,'
-                     ' /etc/pantheon/init.sh, /usr/bin/fab, /usr/sbin/bcfg2')
+    hudson_sudoer = ('hudson ALL = NOPASSWD: /usr/local/bin/drush, '
+                     '/usr/bin/fab, /usr/sbin/bcfg2, /usr/bin/python')
     if 'hudson ALL = NOPASSWD:' not in sudoers:
         local('echo "%s" >> /etc/sudoers' % hudson_sudoer)
     if server.distro == 'centos':
