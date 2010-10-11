@@ -71,3 +71,5 @@ class Updater():
             local('git fetch -t')
             local('git reset --hard "%s"' % tag)
 
+#    def test_for_existing_tag(self, tag):
+#        tags = local('git -l')
