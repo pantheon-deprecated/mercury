@@ -26,7 +26,7 @@
           <description>message to use</description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
-	<hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
           <name>uuid</name>
           <description>Job Id</description>
           <defaultValue></defaultValue>
@@ -42,11 +42,32 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <!-- note: a bug in fabric (http://code.fabfile.org/issues/show/242) forces us to either support mutli-word tags and messages or blank tags and messaged - not both -->
-      <!-- this version supports mutli-word tags and messages -->
-      <command>cd /opt/pantheon/fabric; /usr/bin/sudo /usr/bin/fab update_code:project=$$project,environment=$$environment,tag="$$tag",message="$$message"</command>
+      <command>cd /opt/pantheon/fabric; /usr/bin/sudo /usr/bin/fab update_code:project=$$project,environment=$$environment,tag=&quot;$$tag&quot;,message=&quot;$$message&quot;</command>
     </hudson.tasks.Shell>
   </builders>
-  <publishers/>
+  <publishers>
+    <hudson.plugins.postbuildtask.PostbuildTask>
+      <tasks>
+        <hudson.plugins.postbuildtask.TaskProperties>
+          <logTexts>
+            <hudson.plugins.postbuildtask.LogProperties>
+              <logText></logText>
+              <operator>AND</operator>
+            </hudson.plugins.postbuildtask.LogProperties>
+          </logTexts>
+          <script>/usr/bin/python /opt/pantheon/tools/hudson_postbuild.py</script>
+        </hudson.plugins.postbuildtask.TaskProperties>
+        <hudson.plugins.postbuildtask.TaskProperties>
+          <logTexts>
+            <hudson.plugins.postbuildtask.LogProperties>
+              <logText></logText>
+              <operator>AND</operator>
+            </hudson.plugins.postbuildtask.LogProperties>
+          </logTexts>
+          <script>/usr/bin/sudo /usr/bin/python /opt/pantheon/tools/hudson_gitstatus.py $$project</script>
+        </hudson.plugins.postbuildtask.TaskProperties>
+      </tasks>
+    </hudson.plugins.postbuildtask.PostbuildTask>
+  </publishers>
   <buildWrappers/>
 </project>
