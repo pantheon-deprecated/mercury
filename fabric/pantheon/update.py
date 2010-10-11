@@ -59,6 +59,11 @@ class Updater():
         with cd(self.env_path):
             local(command, capture=False)
 
+    def test_tag(self, tag):
+        #test of existing tag
+        if local(' git tag | grep ' + tag):
+            abort('waring - tag ' + tag + 'already exists!')
+
     def _tag_code(self, tag, message):
         with cd(os.path.join(self.project_path, 'dev')):
             local('git checkout %s' % self.project)
@@ -71,5 +76,4 @@ class Updater():
             local('git fetch -t')
             local('git reset --hard "%s"' % tag)
 
-#    def test_for_existing_tag(self, tag):
-#        tags = local('git -l')
+        
