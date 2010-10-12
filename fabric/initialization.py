@@ -52,8 +52,8 @@ def _initialize_support_account(server):
 def _initialize_package_manager(server):
     if server.distro == 'ubuntu':
         with cd('/opt/pantheon/fabric/templates'):
-            local('cp pantheon.list /etc/apt/sources.list.d/')
-            local('cp lucid /etc/apt/preferences.d/')
+            local('cp apt.pantheon.list /etc/apt/sources.list.d/pantheon.list')
+            local('cp apt.php.pin /etc/apt/preferences.d/php')
             local('apt-key add gpgkeys.txt')
         local('echo \'APT::Install-Recommends "0";\' >>  /etc/apt/apt.conf')
     elif server.distro == 'centos':
