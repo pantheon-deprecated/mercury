@@ -63,7 +63,7 @@ class Updater():
     def test_tag(self, tag):
         #test of existing tag
         with cd(self.env_path):
-            if local(' git tag | grep ' + tag):
+            if local('git tag | grep ' + tag):
                 abort('warning - tag ' + tag + ' already exists!')
 
     def _tag_code(self, tag, message):
