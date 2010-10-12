@@ -41,6 +41,7 @@ def build_ldap_client(base_domain = "example.com", require_group = None, server_
         local("sudo cp " + temp_file.name + " /etc/ldap.conf")
 
     local("sudo auth-client-config -t nss -p lac_ldap")
+    local('adduser ' + require_group + ' sudo')
 
 def _ldap_domain_to_ldap(domain):
     parts = domain.split(".")
