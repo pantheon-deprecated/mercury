@@ -18,7 +18,7 @@
     <Package name='bind9-host'/>
     <Package name='dnsutils'/>
     <Package name='git-core'/>
-    <Package name='python-software-properties'>
+    <Package name='python-software-properties'/>
     <Service name='rsync'/>
     <Service name='screen-cleanup'/>
   </Group>
