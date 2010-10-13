@@ -16,11 +16,9 @@ def build_ldap_client(base_domain = "example.com", require_group = None, server_
     if require_group:
         allow = '%s %s' % (allow, require_group)
     with open('/etc/ssh/sshd_config', 'a') as f:
-        f.write(allow + '\n')
+        f.write('\n%s\n' % allow)
         f.write('UseLPK yes\n')
         f.write('LpkLdapConf /etc/ldap.conf\n')
-
-    local("sudo /etc/init.d/ssh restart")
             
     ldap_domain = _ldap_domain_to_ldap(base_domain)
     values = {'ldap_domain':ldap_domain,'server_host':server_host}
@@ -40,7 +38,10 @@ def build_ldap_client(base_domain = "example.com", require_group = None, server_
     local("sudo auth-client-config -t nss -p lac_ldap")
 
     with open('/etc/sudoers', 'a') as f:
-        f.write('%%s ALL=(ALL) ALL' % require_group)    
+        f.write('%' + '%s ALL=(ALL) ALL' % require_group)    
+
+    # Restart after ldap is configured so openssh-lpk doesn't choke.
+    local("sudo /etc/init.d/ssh restart")
 
 def _ldap_domain_to_ldap(domain):
     return ','.join(['dc=%s' % part.lower() for part in domain.split('.')])
