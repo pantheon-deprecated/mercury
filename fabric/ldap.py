@@ -10,15 +10,6 @@ def build_ldap_client(base_domain = "example.com", require_group = None, server_
 
     if not server_host:
         server_host = "auth." + base_domain
-
-    allow = 'AllowGroups root sudo'
-    # If necessary, restrict by group
-    if require_group:
-        allow = '%s %s' % (allow, require_group)
-    with open('/etc/ssh/sshd_config', 'a') as f:
-        f.write('\n%s\n' % allow)
-        f.write('UseLPK yes\n')
-        f.write('LpkLdapConf /etc/ldap.conf\n')
             
     ldap_domain = _ldap_domain_to_ldap(base_domain)
     values = {'ldap_domain':ldap_domain,'server_host':server_host}
@@ -32,10 +23,23 @@ def build_ldap_client(base_domain = "example.com", require_group = None, server_
         
     template = '/opt/pantheon/fabric/templates/ldap.conf'
     ldap_conf = pantheon.build_template(template, values)
-    with open('/etc/ldap.conf', 'w') as f:
+    with open('/etc/ldap/ldap.conf', 'w') as f:
         f.write(ldap_conf)
 
+    allow = 'AllowGroups root sudo'
+    # If necessary, restrict by group
+    if require_group:
+        allow = '%s %s' % (allow, require_group)
+
+    with open('/etc/ssh/sshd_config', 'a') as f:
+        f.write('\n%s\n' % allow)
+        f.write('UseLPK yes\n')
+        f.write('LpkLdapConf /etc/ldap/ldap.conf\n')
+
     local("sudo auth-client-config -t nss -p lac_ldap")
+
+    with cd('/etc'):
+        local('ln -s ./ldap/ldap.conf ldap.conf')
 
     with open('/etc/sudoers', 'a') as f:
         f.write('%' + '%s ALL=(ALL) ALL' % require_group)    
