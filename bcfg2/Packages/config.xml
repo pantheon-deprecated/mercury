@@ -1,16 +1,5 @@
 <Sources>
   <APTSource>
-    <Group>jaunty</Group>
-    <URL>http://us.archive.ubuntu.com/ubuntu</URL>
-    <Version>jaunty</Version>
-    <Component>main</Component>
-    <Component>multiverse</Component>
-    <Component>restricted</Component>
-    <Component>universe</Component>
-    <Arch>amd64</Arch>
-    <Arch>i386</Arch>
-  </APTSource>
-  <APTSource>
     <Group>karmic</Group>
     <URL>http://us.archive.ubuntu.com/ubuntu</URL>
     <Version>karmic</Version>
@@ -101,6 +90,8 @@
     <Arch>i386</Arch>
   </APTSource>
 
+<!-- Uncomment for CentOS 
+
   <YUMSource>
     <Group>centos5.5</Group>
     <URL>http://mirror.rackspace.com/CentOS</URL>
@@ -141,6 +132,9 @@
     <RawURL>http://yum.fourkitchens.com/pub/centos/5/noarch</RawURL>
     <Arch>i386</Arch>
   </YUMSource>
+
+  -->
+
 
   <!-- Uncomment for Debian Support
 

@@ -6,20 +6,19 @@ import tempfile
 from fabric.api import *
 from pantheon import pantheon
 
-def build_ldap_client(base_domain = "example.com", require_group = None, server_host = "auth.example.com"):
-    """ Set permissions on project directory, settings.php, and files dir.
-    environments: Optional. List.
-    
-    """
-    if server_host == "auth.example.com":
+def build_ldap_client(base_domain = "example.com", require_group = None, server_host = None):
+
+    if not server_host:
         server_host = "auth." + base_domain
 
+    allow = 'AllowGroups root sudo'
     # If necessary, restrict by group
-    if require_group is not None:
-        #local("sudo echo '-:ALL EXCEPT root sudo (" + require_group + "):ALL' | tee -a /etc/security/access.conf")
-        local("sudo echo 'AllowGroups root sudo " + require_group + "' | tee -a /etc/ssh/sshd_config")
-    else:
-        local("sudo echo 'AllowGroups root sudo' | tee -a /etc/ssh/sshd_config")
+    if require_group:
+        allow = '%s %s' % (allow, require_group)
+    with open('/etc/ssh/sshd_config', 'a') as f:
+        f.write(allow + '\n')
+        f.write('UseLPK yes\n')
+        f.write('LpkLdapConf /etc/ldap.conf\n')
 
     local("sudo /etc/init.d/ssh restart")
             
@@ -35,19 +34,14 @@ def build_ldap_client(base_domain = "example.com", require_group = None, server_
         
     template = '/opt/pantheon/fabric/templates/ldap.conf'
     ldap_conf = pantheon.build_template(template, values)
-    with tempfile.NamedTemporaryFile() as temp_file:
-        temp_file.write(ldap_conf)
-        temp_file.seek(0)
-        local("sudo cp " + temp_file.name + " /etc/ldap.conf")
+    with open('/etc/ldap.conf', 'w') as f:
+        f.write(ldap_conf)
 
     local("sudo auth-client-config -t nss -p lac_ldap")
-    local('adduser ' + require_group + ' sudo')
+
+    with open('/etc/sudoers', 'a') as f:
+        f.write('%%s ALL=(ALL) ALL' % require_group)    
 
 def _ldap_domain_to_ldap(domain):
-    parts = domain.split(".")
-    ldap_domain_parts = []
-    for part in parts:
-        ldap_domain_parts.append("dc=" + part.lower())
-    ldap_domain = ",".join(ldap_domain_parts)
-    return ldap_domain
+    return ','.join(['dc=%s' % part.lower() for part in domain.split('.')])
 
