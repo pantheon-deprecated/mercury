@@ -294,16 +294,17 @@ class ImportTools(install.InstallTools):
         file_path = os.path.join(self.working_dir, file_location)
         file_dest = os.path.join(self.working_dir, 'sites/default/files')
 
+        # After moving site to 'default', does 'files' not exist?
         if not os.path.exists(file_dest):
             local('mkdir -p %s' % file_dest)
 
-        # Move files to sites/default/files and symlink from former location.
-        local('cp -R %s/* %s' % (file_path, file_dest))
-        local('rm -rf %s' % file_path)
-        path = os.path.split(file_path)
-        if not os.path.islink(path[0]):
-            rel_path = os.path.relpath(file_dest, os.path.split(file_path)[0])
-            local('ln -s %s %s' % (rel_path, file_path))
+            # Move files to sites/default/files and symlink from former location.
+            local('cp -R %s/* %s' % (file_path, file_dest))
+            local('rm -rf %s' % file_path)
+            path = os.path.split(file_path)
+            if not os.path.islink(path[0]):
+                rel_path = os.path.relpath(file_dest, os.path.split(file_path)[0])
+                local('ln -s %s %s' % (rel_path, file_path))
 
         # Change paths in the files table
         database = '%s_%s' % (self.project, 'dev')
