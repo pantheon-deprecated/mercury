@@ -34,7 +34,8 @@ class GitRepo():
         #log
         log = self._get_log(10)
 
-        return {'diff_dev_test':diff_dev_test,
+        return {'job_name':'git_status',
+                'diff_dev_test':diff_dev_test,
                 'diff_test_live':diff_test_live,
                 'log':log}
 
