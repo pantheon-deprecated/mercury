@@ -6,6 +6,7 @@ from pantheon import pantheon
 import update
 import time
 import urllib2
+import json
 
 def configure(vps="none"):
     '''configure the Pantheon system.'''
@@ -54,7 +55,7 @@ def _configure_certificates():
     local('mkdir -p /etc/pantheon')
 
     # Set the Helios CA server to use.
-    pki_server = 'http://pki.getpantheon.com/'
+    pki_server = 'http://pki.getpantheon.com'
 
     # Download and install the root CA.
     local('curl %s | sudo tee /usr/share/ca-certificates/pantheon.crt' % pki_server)
@@ -63,11 +64,13 @@ def _configure_certificates():
     local('sudo update-ca-certificates')
 
     # Now Helios cert is OTS
-    pki_server = 'https://pki.getpantheon.com/'
+    pki_server = 'https://pki.getpantheon.com'
 
-    # TODO: Replace the following with actual knowledge of the server's common name (hostname).
-    cn = local('curl https://dev.getpantheon.com/atlas/vminfo').rstrip('\n') + '.gotpantheon.com'
-    subject = '/C=US/ST=California/L=San Francisco/O=Pantheon Systems, Inc./OU=Olympians/CN=%s/emailAddress=hostmaster@%s/' % (cn, cn)
+    # Ask Helios about what to put into the certificate request.
+    host_info = json.loads(urllib2.urlopen('%s/info' % pki_server).read())
+    ou = host_info['ou']
+    cn = host_info['cn']
+    subject = '/C=US/ST=California/L=San Francisco/O=Pantheon Systems, Inc./OU=%s/CN=%s/emailAddress=hostmaster@%s/' % (ou, cn, cn)
 
     # Generate a local key and certificate-signing request.
     local('openssl genrsa 4096 > /etc/pantheon/system.key')
