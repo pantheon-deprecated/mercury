@@ -52,9 +52,9 @@ def build_ldap_client(base_domain = "example.com", require_group = None, server_
     local("sudo /etc/init.d/ssh restart")
     
     # Write the group to a file for later referenct.
-    # TODO: this may be refactored into call outs to LDAP
-    with open('/etc/pantheon/ldapgroup', 'w') as f:
-        f.write('%s' % require_group)
+    pantheon.PantheonServer().set_ldap_group(require_group)
+    
+        
     
     # Make the git repo and www directories writable by the group
     local("chgrp -R %s /var/git/projects" % require_group)

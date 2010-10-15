@@ -232,7 +232,7 @@ class InstallTools:
 
         """
         with cd(self.server.webroot):
-            local('chown -R root:%s %s' % (self.server.ldap_group, self.project))
+            local('chown -R root:%s %s' % (self.server.get_ldap_group(), self.project))
             local('dhmod -R g+w %s' % (self.project))
 
         for env in environments:
