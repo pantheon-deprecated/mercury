@@ -234,7 +234,7 @@ class ImportTools(install.InstallTools):
 
         """
         with cd(self.server.webroot):
-            local('chown -R root:%s %s' % (self.server.web_group, self.project))
+            local('chown -R root:%s %s' % (self.server.ldap_group, self.project))
         file_dir = self._get_files_dir()
         for env in environments:
             site_dir = os.path.join(self.server.webroot, \
@@ -252,6 +252,7 @@ class ImportTools(install.InstallTools):
                        while read FILE; do chmod 660 \"$FILE\"; done")
                 local("find . -type d -exec find '{}' -type d \; | \
                       while read DIR; do chmod 770 \"$DIR\"; done")
+                local("chown -R %s files" % self.server.web_group)
 
 
     def update_environment_databases(self, environments=pantheon.get_environments()):
