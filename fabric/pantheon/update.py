@@ -7,7 +7,7 @@ from fabric.api import *
 
 class Updater():
 
-    def __init__(self, project, environment):
+    def __init__(self, project, environment=''):
         self.project = project
         self.environment = environment
         self.author = 'Hudson User <hudson@pantheon>'
@@ -15,8 +15,43 @@ class Updater():
         self.project_path = os.path.join(self.server.webroot, self.project)
         self.env_path = os.path.join(self.project_path, environment)
 
-    def code_update(self, tag, message):
 
+    def core_update(self, keep=False):
+
+        # Update pantheon core master branch
+        with cd('/var/git/projects/%s' % self.project):
+            local('git pull git://gitorious.org/pantheon/6.git master')
+
+        # Commit all changes in dev working-tree.
+        self.code_commit('Core Update: Automated Commit.')
+
+        with cd(os.path.join(self.project_path, 'dev')):
+            with settings(warn_only=True):
+
+                # Merge latest pressflow.
+                merge = local('git pull origin master', capture=False)
+                if merge.failed:
+                    print 'Merge failed.'
+                    if keep == 'ours':
+                        print 'Re-merging - keeping local changes on conflict.'
+                        local('git reset --hard ORIG_HEAD')
+                        local('git pull -s recursive -Xours origin master')
+                        local('git push')
+                    elif keep == 'theirs':
+                        print 'Re-merging - keeping upstream changes on conflict.'
+                        local('git reset --hard ORIG_HEAD')
+                        local('git pull -s recursive -Xtheirs origin master')
+                        local('git push')
+                    elif keep == 'force':
+                        print 'Leaving merge conflicts. Please manually resolve.'
+                    else:
+                        print 'Rolling back failed changes.'
+                        local('git reset --hard ORIG_HEAD')
+                else:
+                    local('git push')
+                
+
+    def code_update(self, tag, message):
         # Update code in 'test' (commit & tag in 'dev', fetch in 'test')
         if self.environment == 'test':
             self.code_commit('Automated Commit.')

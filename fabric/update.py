@@ -15,17 +15,9 @@ def update_pantheon():
        local('/usr/sbin/bcfg2 -vq', capture=False)
        print("Pantheon Updated")
 
-def update_pressflow():
-       with cd('/var/git/projects/pantheon'):
-              local('git checkout master')
-              local('git pull')
-       with cd('/var/www/%s/dev' % project):
-              with settings(warn_only=True):
-                     pull = local('git pull origin master', capture=False)
-                     if pull.failed:
-                            print(pull)
-                            abort('Please review the above error message and fix')
-              local('git push')
+def update_core(project='pantheon', keep=False):
+    updater = update.Updater(project)
+    updater.core_update(keep)
 
 def update_code(project, environment, tag=None, message=None):
     """ Update the working-tree for project/environment.
