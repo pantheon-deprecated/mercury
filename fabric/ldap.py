@@ -53,7 +53,7 @@ def build_ldap_client(base_domain = "example.com", require_group = None, server_
     
     # Make the git repo writable by the group
     local("chgrp -R %s /var/git/projects" % require_group)
-    local("chmore -R g+w /var/git/projects")
+    local("chmod -R g+w /var/git/projects")
 
 def _ldap_domain_to_ldap(domain):
     return ','.join(['dc=%s' % part.lower() for part in domain.split('.')])
