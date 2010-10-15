@@ -4,7 +4,6 @@ import sys
 
 sys.path.append('/opt/pantheon/tools/ptools')
 import postback
-import gittools
 
 from fabric.api import cd
 from fabric.api import hide
@@ -41,9 +40,7 @@ if __name__ == '__main__':
                 (author_email != 'hudson@getpantheon')):
 
                 with hide('running'):
-                    repo = gittools.GitRepo(project)
-                    status = repo.get_update_status(revision_new)
-                    postback.postback({'status':status})
+                    postback.postback_gitstatus(project, revision_new)
 
         else:
             print "\n\nNo development environment for project '%s' found." % (project)
