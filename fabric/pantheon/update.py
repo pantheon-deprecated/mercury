@@ -54,6 +54,7 @@ class Updater():
                 elif keep == 'force':
                     print 'Leaving merge conflicts. Please manually resolve.'
                 else:
+                    #TODO: How do we want to report this back to user?
                     print 'Rolling back failed changes.'
                     local('git reset --hard ORIG_HEAD')
             # Successful merge.
