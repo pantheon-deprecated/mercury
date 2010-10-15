@@ -245,7 +245,7 @@ class InstallTools:
                                                 self.server.web_group))
                 local('chmod 660 settings.php')
                 local('chmod 440 pantheon.settings.php')
-                local('chmod -R 770 files')
+                local('chmod 770 files')
         
 
     def push_to_repo(self, tag='initialization'):
