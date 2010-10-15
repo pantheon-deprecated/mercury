@@ -15,7 +15,14 @@ def update_pantheon():
        local('/usr/sbin/bcfg2 -vq', capture=False)
        print("Pantheon Updated")
 
-def update_core(project='pantheon', keep=False):
+def update_core(project='pantheon', keep=None):
+    """Update Drupal core (from Drupal or Pressflow, to latest Pressflow).
+       keep: Option when merge fails:
+             'ours': Keep local changes when there are conflicts.
+             'theirs': Keep upstream changes when there are conflicts.
+             'force': Leave failed merge in working-tree (manual resolve).
+             None: Reset to ORIG_HEAD if merge fails.
+    """
     updater = update.Updater(project)
     updater.core_update(keep)
 
