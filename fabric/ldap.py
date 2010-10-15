@@ -46,15 +46,21 @@ def build_ldap_client(base_domain = "example.com", require_group = None, server_
     local("sudo auth-client-config -t nss -p lac_ldap")
 
     with open('/etc/sudoers', 'a') as f:
-        f.write('%' + '%s ALL=(ALL) ALL' % require_group)    
+        f.write('%' + '%s ALL=(ALL) ALL' % require_group)
 
     # Restart after ldap is configured so openssh-lpk doesn't choke.
     local("sudo /etc/init.d/ssh restart")
     
-    # Make the git repo writable by the group
+    # Write the group to a file for later referenct.
+    # TODO: this may be refactored into call outs to LDAP
+    with open('/etc/pantheon/ldapgroup', 'w') as f:
+        f.write('%s' % require_group)
+    
+    # Make the git repo and www directories writable by the group
     local("chgrp -R %s /var/git/projects" % require_group)
     local("chmod -R g+w /var/git/projects")
+    local("chgrp -R %s /var/www/*" % require_group)
+    local("chmod -R g+w /var/www/*")
 
 def _ldap_domain_to_ldap(domain):
     return ','.join(['dc=%s' % part.lower() for part in domain.split('.')])
-

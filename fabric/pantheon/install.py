@@ -232,7 +232,8 @@ class InstallTools:
 
         """
         with cd(self.server.webroot):
-            local('chown -R root:%s %s' % (self.server.web_group, self.project))
+            local('chown -R root:%s %s' % (self.server.ldap_group, self.project))
+            local('dhmod -R g+w %s' % (self.project))
 
         for env in environments:
             site_dir = os.path.join(self.server.webroot, \
@@ -240,9 +241,11 @@ class InstallTools:
             with cd(site_dir):
                 local('chown %s:%s settings.php' % (self.server.web_group, 
                                                     self.server.web_group))
+                local('chown -R %s:%s files' % (self.server.web_group, 
+                                                self.server.web_group))
                 local('chmod 660 settings.php')
                 local('chmod 440 pantheon.settings.php')
-                local('chmod 770 files')
+                local('chmod -R 770 files')
         
 
     def push_to_repo(self, tag='initialization'):

@@ -133,9 +133,21 @@ def _get_database_vars(project, environment):
             env_vars.get('db_name'))
 
 
+def get_ldap_group():
+    """Helper method to pull the ldap group we authorize.
+    Helpful in keeping filesystem permissions correct.
+    
+    /etc/pantheon/ldapgroup is written as part of the configure_ldap job.
+    
+    """
+    with open('/etc/pantheon/ldapgroup', 'w') as f:
+        return f.readlines()
+
 class PantheonServer:
 
     def __init__(self):
+        # Global
+        self.ldap_group = get_ldap_group()
         # Ubuntu / Debian
         if os.path.exists('/etc/debian_version'):
             self.distro = 'ubuntu'
