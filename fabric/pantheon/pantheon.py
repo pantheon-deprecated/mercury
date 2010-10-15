@@ -309,7 +309,7 @@ class PantheonServer:
         elif self.distro == 'centos':
             return '/etc/httpd/conf/vhosts/%s' % filename
 
-    def get_ldap_group():
+    def get_ldap_group(self):
         """Helper method to pull the ldap group we authorize.
         Helpful in keeping filesystem permissions correct.
         
@@ -319,7 +319,7 @@ class PantheonServer:
         with open('/etc/pantheon/ldapgroup', 'r') as f:
             return f.readlines()
 
-    def set_ldap_group():
+    def set_ldap_group(self, require_group):
         """Helper method to pull the ldap group we authorize.
         Helpful in keeping filesystem permissions correct.
         
