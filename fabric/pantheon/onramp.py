@@ -142,13 +142,14 @@ class ImportTools(install.InstallTools):
 
         with cd('/var/git/projects/%s' % self.project):
             if platform == 'PRESSFLOW':
-                local('git checkout master')
-                local('git pull')
+                local('git pull git://gitorious.org/pantheon/6.git master')
             elif platform == 'DRUPAL':
-                local('git checkout drupal_core')
-                local('git pull git://gitorious.org/drupal/6.git')
+                local('git pull git://gitorious.org/drupal/6.git master:drupal_core')
             with settings(hide('warnings'), warn_only=True):
                 local('git tag -d %s.import' % self.project)
+                #TODO: line below is temp fix until using bare repos.
+                # If project branch is checked out, can't delete.
+                local('git checkout master')
                 local('git branch -D %s' % self.project)
             local('git branch %s %s' % (self.project, revision))
         local('git clone -l /var/git/projects/%s -b %s %s' % (self.project, 
@@ -236,6 +237,8 @@ class ImportTools(install.InstallTools):
         with cd(self.server.webroot):
             local('chown -R root:%s %s' % (self.server.web_group, self.project))
         file_dir = self._get_files_dir()
+        if not file_dir:
+            file_dir = 'sites/default/files'
         for env in environments:
             site_dir = os.path.join(self.server.webroot, \
                                     '%s/%s/sites/default' % (self.project, env))
@@ -291,20 +294,24 @@ class ImportTools(install.InstallTools):
                    
     def _setup_default_files(self):
         file_location = self._get_files_dir()
-        file_path = os.path.join(self.working_dir, file_location)
+        if file_location:
+            file_path = os.path.join(self.working_dir, file_location)
+        else:
+            file_path = None
         file_dest = os.path.join(self.working_dir, 'sites/default/files')
 
         # After moving site to 'default', does 'files' not exist?
         if not os.path.exists(file_dest):
             local('mkdir -p %s' % file_dest)
 
-            # Move files to sites/default/files and symlink from former location.
-            local('cp -R %s/* %s' % (file_path, file_dest))
-            local('rm -rf %s' % file_path)
-            path = os.path.split(file_path)
-            if not os.path.islink(path[0]):
-                rel_path = os.path.relpath(file_dest, os.path.split(file_path)[0])
-                local('ln -s %s %s' % (rel_path, file_path))
+            if file_path:
+                # Move files to sites/default/files and symlink from former location.
+                local('cp -R %s/* %s' % (file_path, file_dest))
+                local('rm -rf %s' % file_path)
+                path = os.path.split(file_path)
+                if not os.path.islink(path[0]):
+                    rel_path = os.path.relpath(file_dest, os.path.split(file_path)[0])
+                    local('ln -s %s %s' % (rel_path, file_path))
 
         # Change paths in the files table
         database = '%s_%s' % (self.project, 'dev')
@@ -330,6 +337,8 @@ class ImportTools(install.InstallTools):
     def _get_site_name(self):
         with cd(self.processing_dir):
             settings_files = (local('find sites/ -name settings.php -type f')).rstrip('\n')
+        if not settings_files:
+            abort('No settings.php files found.')
         if '\n' in settings_files:
             abort('Multiple settings.php files found.')
         name = re.search(r'^.*sites/(.*)/settings.php', settings_files).group(1)
