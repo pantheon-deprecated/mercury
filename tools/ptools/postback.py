@@ -10,13 +10,12 @@ def postback(cargo, request_uuid=None, command='atlas'):
     uuid: uuid of requesting job.
 
     """
-    body = {'response': cargo,
-            'response_to': {'uuid':request_uuid}}
 
     return _send_response({'uuid': uuid.uuid4().hex,
                            'command':command,
                            'method':'POST',
-                           'body':body})
+                           'response': cargo,
+                           'response_to': {'uuid':request_uuid}})
 
 def _send_response(responsedict):
     """POST data to Prometheus.
