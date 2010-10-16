@@ -243,8 +243,8 @@ class ImportTools(install.InstallTools):
             site_dir = os.path.join(self.server.webroot, \
                                     '%s/%s/sites/default' % (self.project, env))
             with cd(site_dir):
-                local('chown %s:%s settings.php' % ('root',
-                                                    self.server.web_group))
+                local('chown %s:%s settings.php pantheon.settings.php' % ('root',
+                                                          self.server.web_group))
                 local('chmod 440 settings.php')
                 local('chmod 440 pantheon.settings.php')
             file_path = os.path.join(self.server.webroot, '%s/%s/%s' % (

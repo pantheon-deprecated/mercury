@@ -239,7 +239,8 @@ class InstallTools:
             site_dir = os.path.join(self.server.webroot, \
                                     '%s/%s/sites/default' % (self.project, env))
             with cd(site_dir):
-                local('chown %s:%s settings.php' % (self.server.web_group, 
+                local('chown %s:%s settings.php pantheon.settings.php' % (
+                                                    self.server.web_group,
                                                     self.server.web_group))
                 local('chown -R %s:%s files' % (self.server.web_group, 
                                                 self.server.web_group))
