@@ -17,7 +17,7 @@
     <BoundPath type='directory' name='/var/lib/hudson/jobs/update_data' owner='hudson' group='nogroup' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/update_files' owner='hudson' group='nogroup' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/update_pantheon' owner='hudson' group='nogroup' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_pressflow' owner='hudson' group='nogroup' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_site_core' owner='hudson' group='nogroup' perms='0755'/>
   </Group>
   
   
@@ -37,7 +37,7 @@
     <BoundPath type='directory' name='/var/lib/hudson/jobs/update_data' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/update_files' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/update_pantheon' owner='hudson' group='hudson' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_pressflow' owner='hudson' group='hudson' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/update_site_core' owner='hudson' group='hudson' perms='0755'/>
   </Group>    
   
   <!-- Jobs -->
@@ -55,6 +55,6 @@
   <Path name='/var/lib/hudson/jobs/update_data/config.xml' altsrc='/hudson/jobs/update_data/config.xml'/>
   <Path name='/var/lib/hudson/jobs/update_files/config.xml' altsrc='/hudson/jobs/update_files/config.xml'/>
   <Path name='/var/lib/hudson/jobs/update_pantheon/config.xml' altsrc='/hudson/jobs/update_pantheon/config.xml'/>
-  <Path name='/var/lib/hudson/jobs/update_pressflow/config.xml' altsrc='/hudson/jobs/update_pressflow/config.xml'/>
+  <Path name='/var/lib/hudson/jobs/update_site_core/config.xml' altsrc='/hudson/jobs/update_site_core/config.xml'/>
 
 </Bundle>

@@ -74,7 +74,6 @@ class _ImportProfile(onramp.ImportTools):
         self.build_environments(tag='import')
 
         # Build non-code site features
-        self.setup_permissions()
         self.build_solr_index()
         self.build_vhost()
         self.build_drupal_cron()
@@ -84,6 +83,7 @@ class _ImportProfile(onramp.ImportTools):
         self.import_drupal_settings()
         self.update_environment_databases()
         self.update_environment_files()
+        self.setup_permissions()
 
         self.cleanup()
         self.server.restart_services()
