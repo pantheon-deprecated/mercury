@@ -51,14 +51,13 @@ def build_ldap_client(base_domain = "example.com", require_group = None, server_
     # Restart after ldap is configured so openssh-lpk doesn't choke.
     local("sudo /etc/init.d/ssh restart")
     
-    # Write the group to a file for later referenct.
+    # Write the group to a file for later reference.
     pantheon.PantheonServer().set_ldap_group(require_group)
     
-        
-    
-    # Make the git repo and www directories writable by the group
+    # Make the git repo and www directories writable by the group and set GID
     local("chgrp -R %s /var/git/projects" % require_group)
     local("chmod -R g+w /var/git/projects")
+    local("chmod g+s /var/git/projects")
 
 def _ldap_domain_to_ldap(domain):
     return ','.join(['dc=%s' % part.lower() for part in domain.split('.')])
