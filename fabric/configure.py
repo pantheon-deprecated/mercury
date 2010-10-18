@@ -135,6 +135,9 @@ def _configure_iptables(server):
 def _configure_git_repo():
     if os.path.exists('/var/git/projects'):
         local('rm -rf /var/git/projects')
+    local('mkdir -p /var/git/projects')
+    # Set GID
+    local("chmod g+s /var/git/projects")
     # Pantheon Core
     local('git clone git://gitorious.org/pantheon/6.git /var/git/projects/pantheon')
     # Drupal Core
