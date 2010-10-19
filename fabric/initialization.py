@@ -9,7 +9,6 @@ from pantheon import pantheon
 def initialize(vps="none"):
     '''Initialize the Pantheon system.'''
     server = pantheon.PantheonServer()
-    _initialize_support_account(server)
     _initialize_package_manager(server)
     _initialize_bcfg2(vps, server)
     _initialize_iptables(server)
@@ -21,32 +20,6 @@ def initialize(vps="none"):
 def init():
     '''Alias of "initialize"'''
     initialize()
-
-def _initialize_support_account(server):
-    '''Generate a public/private key pair for root.'''
-    #local('mkdir -p ~/.ssh')
-    #with cd('~/.ssh'):
-    #    with settings(warn_only=True):
-    #        local('[ -f id_rsa ] || ssh-keygen -trsa -b1024 -f id_rsa -N ""')
-
-    '''Set up the Pantheon support account with sudo and the proper keys.'''
-    sudoers = local('cat /etc/sudoers')
-    if '%sudo ALL=(ALL) NOPASSWD: ALL' not in sudoers:
-        local('echo "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers')
-    if 'pantheon' not in local('cat /etc/passwd'):
-        if server.distro == 'ubuntu':
-            local('useradd pantheon --base-dir=/var --comment="Pantheon Support"'
-                  ' --create-home --groups=' + server.web_group + ',sudo --shell=/bin/bash')
-        elif server.distro == 'centos':
-            local('useradd pantheon --base-dir=/var --comment="Pantheon Support"'
-                  ' --create-home  --shell=/bin/bash')
-    with cd('~pantheon'):
-        local('mkdir -p .ssh')
-        local('chmod 700 .ssh')
-        local('cp /opt/pantheon/fabric/templates/authorized_keys .ssh/')
-        #local('cat ~/.ssh/id_rsa.pub > .ssh/authorized_keys')
-        local('chmod 600 .ssh/authorized_keys')
-        local('chown -R pantheon: .ssh')
 
 
 def _initialize_package_manager(server):
