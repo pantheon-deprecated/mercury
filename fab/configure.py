@@ -146,7 +146,9 @@ def _configure_git_repo():
 
         local('git config receive.denycurrentbranch ignore')
         local('git config core.sharedRepository group')
-    local('cp /opt/pantheon/fabric/templates/git.hook.post-receive /var/git/projects/pantheon/.git/hooks/post-receive')
+
+    pantheon.copy_template('git.hook.post-receive', 
+                         '/var/git/projects/pantheon/.git/hooks/post-receive')
     local('chmod +x /var/git/projects/pantheon/.git/hooks/post-receive')
 
 

@@ -22,7 +22,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>cd /opt/pantheon/fabric; /usr/bin/sudo /usr/bin/fab update_pantheon</command>
+      <command>cd /opt/pantheon/fab; /usr/bin/sudo /usr/bin/fab update_pantheon</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>

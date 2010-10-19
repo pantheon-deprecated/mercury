@@ -27,7 +27,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>cd /opt/pantheon/fabric; /usr/bin/sudo /usr/bin/fab build_ldap_client:getpantheon.com,$$group_client_name</command>
+      <command>cd /opt/pantheon/fab; /usr/bin/sudo /usr/bin/fab build_ldap_client:getpantheon.com,$$group_client_name</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>

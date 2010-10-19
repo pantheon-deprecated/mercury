@@ -43,7 +43,7 @@ def _initialize_support_account(server):
     with cd('~pantheon'):
         local('mkdir -p .ssh')
         local('chmod 700 .ssh')
-        local('cp /opt/pantheon/fabric/templates/authorized_keys .ssh/')
+        pantheon.copy_template('authorized_keys', '/home/pantheon/.ssh/')
         #local('cat ~/.ssh/id_rsa.pub > .ssh/authorized_keys')
         local('chmod 600 .ssh/authorized_keys')
         local('chown -R pantheon: .ssh')
@@ -51,7 +51,7 @@ def _initialize_support_account(server):
 
 def _initialize_package_manager(server):
     if server.distro == 'ubuntu':
-        with cd('/opt/pantheon/fabric/templates'):
+        with cd(server.template_dir):
             local('cp apt.pantheon.list /etc/apt/sources.list.d/pantheon.list')
             local('cp apt.php.pin /etc/apt/preferences.d/php')
             local('cp apt.openssh.pin /etc/apt/preferences.d/openssh')
@@ -78,8 +78,7 @@ def _initialize_bcfg2(vps, server):
         local('apt-get install -y bcfg2-server gamin python-gamin python-genshi')
     elif server.distro == 'centos':
         local('yum -y install bcfg2 bcfg2-server gamin gamin-python python-genshi python-ssl python-lxml libxslt')
-    with cd('/opt/pantheon/fabric/templates'):
-        local('cp bcfg2.conf /etc/')
+    pantheon.copy_template('bcfg2.conf', '/etc/')
     local('rm -f /etc/bcfg2.key bcfg2.crt')
     local('openssl req -batch -x509 -nodes -subj "/C=US/ST=California/L=San Francisco/CN=localhost" -days 1000 -newkey rsa:2048 -keyout /tmp/bcfg2.key -noout')
     local('cp /tmp/bcfg2.key /etc/')
@@ -88,7 +87,7 @@ def _initialize_bcfg2(vps, server):
     local('chmod 0600 /etc/bcfg2.key')
     local('[ -h /var/lib/bcfg2 ] || rmdir /var/lib/bcfg2')
     local('ln -sf /opt/pantheon/bcfg2 /var/lib/')
-    local('cp /opt/pantheon/fabric/templates/clients.xml /var/lib/bcfg2/Metadata/')
+    pantheon.copy_template('clients.xml', '/var/lib/bcfg2/Metadata')
     local('sed -i "s/^plugins = .*$/plugins = Bundler,Cfg,Metadata,Packages,Probes,Rules,TGenshi\\nfilemonitor = gamin/" /etc/bcfg2.conf')
 
     if server.distro == 'centos':
@@ -134,10 +133,12 @@ def _initialize_solr(server):
         local('tar xvzf apache-solr-1.4.1.tgz')
         local('mkdir -p /var/solr')
         local('mv apache-solr-1.4.1/dist/apache-solr-1.4.1.war /var/solr/solr.war')
-        local('cp -R apache-solr-1.4.1/example/solr /opt/pantheon/fabric/templates/')
+        local('cp -R apache-solr-1.4.1/example/solr %s' % server.template_dir)
         local('drush dl apachesolr') 
-        local('cp apachesolr/schema.xml /opt/pantheon/fabric/templates/solr/conf/')
-        local('cp apachesolr/solrconfig.xml /opt/pantheon/fabric/templates/solr/conf/')
+        local('cp apachesolr/schema.xml %s' % os.path.join(
+                         server.template_dir, 'solr/conf'))
+        local('cp apachesolr/solrconfig.xml %s' %  os.path.join(
+                              server.template_dir, 'solr/conf'))
         local('chown -R ' + server.tomcat_owner + ':root /var/solr/')
     local('rm -rf ' + temp_dir)
 

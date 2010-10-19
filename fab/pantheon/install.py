@@ -231,8 +231,9 @@ class InstallTools:
         environments: Optional. List.
 
         """
+        ldap_group = self.server.get_ldap_group()
         with cd(self.server.webroot):
-            local('chown -R root:%s %s' % (self.server.get_ldap_group(), self.project))
+            local('chown -R %s:%s %s' % (ldap_group, ldap_group, self.project))
             local('chmod -R g+w %s' % (self.project))
 
         for env in environments:
