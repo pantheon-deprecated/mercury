@@ -11,11 +11,9 @@ import json
 def configure(vps="none"):
     '''configure the Pantheon system.'''
     server = pantheon.PantheonServer()
-    _test_for_previous_run()
-    _check_connectivity()
     _configure_server(server)
-    _configure_certificates()
-    _initialize_support_account(server)
+    _test_for_previous_run()
+    _test_for_private_server()
     if (vps == "aws"):
         _config_ec2_(server)
     _configure_postfix(server)
@@ -28,6 +26,25 @@ def configure(vps="none"):
 def _test_for_previous_run():
     if os.path.exists("/etc/pantheon/incep"):
         abort("Pantheon config has already run. Exiting.")
+
+
+def _configure_server(server):
+    server.update_packages()
+    update.update_pantheon()
+    local('cp /etc/pantheon/templates/tuneables /etc/pantheon/server_tuneables')
+    local('chmod 755 /etc/pantheon/server_tuneables')
+
+
+def _test_for_private_server(server):
+    try:
+        urllib2.urlopen('http://pki.getpantheon.com/info', timeout=10)
+        print 'Appears to be a getpantheon.com server'
+        _check_connectivity()
+        _configure_certificates()
+        _initialize_support_account(server)
+    except urllib2.URLError, e:
+        print 'Appears to be a private server - skipping getpantheon.com-specific functions'
+
 
 # The Rackspace Cloud occasionally has connectivity issues unless a server gets
 # rebooted after initial provisioning.
@@ -45,11 +62,6 @@ def _check_connectivity():
             f.write('Dear Rackspace: Fix this issue.')
         local('sudo reboot')
 
-def _configure_server(server):
-    server.update_packages()
-    update.update_pantheon()
-    local('cp /etc/pantheon/templates/tuneables /etc/pantheon/server_tuneables')
-    local('chmod 755 /etc/pantheon/server_tuneables')
 
 def _configure_certificates():
     # Just in case we're testing, we need to ensure this path exists.
@@ -94,6 +106,7 @@ def _configure_certificates():
     time.sleep(20)
     print local('openssl verify -verbose /etc/pantheon/system.crt')
 
+
 def _initialize_support_account(server):
     '''Generate a public/private key pair for root.'''
     #local('mkdir -p ~/.ssh')
@@ -119,6 +132,7 @@ def _initialize_support_account(server):
         #local('cat ~/.ssh/id_rsa.pub > .ssh/authorized_keys')
         local('chmod 600 .ssh/authorized_keys')
         local('chown -R pantheon: .ssh')
+
 
 def _configure_ec2(server):
     local('chmod 1777 /tmp')
