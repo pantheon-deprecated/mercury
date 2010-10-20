@@ -72,6 +72,7 @@ def _initialize_bcfg2(vps, server):
     pantheon.restart_bcfg2()
     if (vps == "aws"):
         #creatuing mysql user and group to avoid tmp-dir creation issue
+        local('groupadd mysql')
         local('useradd -g mysql mysql')
         local('mkdir -p /mnt/mysql/tmp')
         local('chown root:root /mnt/mysql')
