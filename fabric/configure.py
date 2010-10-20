@@ -2,18 +2,21 @@
 from fabric.api import *
 import os
 
+
 from pantheon import pantheon
 import update
 import time
 import urllib2
 import json
 
+
 def configure(vps="none"):
     '''configure the Pantheon system.'''
     server = pantheon.PantheonServer()
     _configure_server(server)
+    _check_connectivity()
     _test_for_previous_run()
-    _test_for_private_server()
+    _test_for_private_server(server)
     if (vps == "aws"):
         _config_ec2_(server)
     _configure_postfix(server)
@@ -22,6 +25,7 @@ def configure(vps="none"):
     _configure_git_repo()
     _mark_incep(server)
     _report()
+
 
 def _test_for_previous_run():
     if os.path.exists("/etc/pantheon/incep"):
@@ -33,17 +37,6 @@ def _configure_server(server):
     update.update_pantheon()
     local('cp /etc/pantheon/templates/tuneables /etc/pantheon/server_tuneables')
     local('chmod 755 /etc/pantheon/server_tuneables')
-
-
-def _test_for_private_server(server):
-    try:
-        urllib2.urlopen('http://pki.getpantheon.com/info', timeout=10)
-        print 'Appears to be a getpantheon.com server'
-        _check_connectivity()
-        _configure_certificates()
-        _initialize_support_account(server)
-    except urllib2.URLError, e:
-        print 'Appears to be a private server - skipping getpantheon.com-specific functions'
 
 
 # The Rackspace Cloud occasionally has connectivity issues unless a server gets
@@ -61,6 +54,16 @@ def _check_connectivity():
         with open('/etc/pantheon/connectivity_reboot', 'w') as f:
             f.write('Dear Rackspace: Fix this issue.')
         local('sudo reboot')
+
+
+def _test_for_private_server(server):
+    try:
+        urllib2.urlopen('http://pki.getpantheon.com/info', timeout=10)
+        print 'Appears to be a getpantheon.com server'
+        _configure_certificates()
+        _initialize_support_account(server)
+    except urllib2.URLError, e:
+        print 'Appears to be a private server - skipping getpantheon.com-specific functions'
 
 
 def _configure_certificates():
