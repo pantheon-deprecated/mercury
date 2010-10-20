@@ -9,7 +9,7 @@ from pantheon import pantheon
 def initialize(vps="none"):
     '''Initialize the Pantheon system.'''
     server = pantheon.PantheonServer()
-    _initialize_package_manager(server)
+    _initialize_package_manager(vps, server)
     _initialize_bcfg2(vps, server)
     _initialize_iptables(server)
     _initialize_drush()
@@ -22,7 +22,7 @@ def init():
     initialize()
 
 
-def _initialize_package_manager(server):
+def _initialize_package_manager(vps, server):
     if server.distro == 'ubuntu':
         with cd('/opt/pantheon/fabric/templates'):
             local('cp apt.pantheon.list /etc/apt/sources.list.d/pantheon.list')

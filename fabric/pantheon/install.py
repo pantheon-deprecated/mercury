@@ -232,6 +232,7 @@ class InstallTools:
 
         """
         with cd(self.server.webroot):
+            #FAILS on non-getpantheon.com servers
             local('chown -R root:%s %s' % (self.server.get_ldap_group(), self.project))
             local('chmod -R g+w %s' % (self.project))
 
