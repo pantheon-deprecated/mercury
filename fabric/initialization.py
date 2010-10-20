@@ -71,9 +71,12 @@ def _initialize_bcfg2(vps, server):
 
     pantheon.restart_bcfg2()
     if (vps == "aws"):
+        #installing mysql-server to avoid tmp-dir creation issue
+        local('apt-get install mysql-server--5.1')
         local('mkdir -p /mnt/mysql/tmp')
         local('chown -R root:root /mnt/mysql')
         local('chmod 755 /mnt/mysql')
+        local('chown -R mysql_mysql /mnt/mysql/tmp')
         local('chmod 1777 /mnt/mysql/tmp')
         local('/usr/sbin/bcfg2 -vqed -p pantheon-aws', capture=False)
     elif (vps == "ebs"):
