@@ -45,6 +45,7 @@
   <Path name='/var/lib/hudson/jobs/bcfg2-client/config.xml' altsrc='/hudson/jobs/bcfg2-client/config.xml'/>
   <Path name='/var/lib/hudson/jobs/bcfg2-status/config.xml' altsrc='/hudson/jobs/bcfg2-status/config.xml'/>
   <Path name='/var/lib/hudson/jobs/configure_ldap/config.xml' altsrc='/hudson/jobs/configure_ldap/config.xml'/>
+  <Path name='/var/lib/hudson/jobs/drupal_update_status/config.xml' altsrc='/hudson/jobs/drupal_update_status/config.xml'/>
   <Path name='/var/lib/hudson/jobs/git_diff/config.xml' altsrc='/hudson/jobs/git_diff/config.xml'/>
   <Path name='/var/lib/hudson/jobs/git_status/config.xml' altsrc='/hudson/jobs/git_status/config.xml'/>
   <Path name='/var/lib/hudson/jobs/import_site/config.xml' altsrc='/hudson/jobs/import_site/config.xml'/>
@@ -56,5 +57,5 @@
   <Path name='/var/lib/hudson/jobs/update_files/config.xml' altsrc='/hudson/jobs/update_files/config.xml'/>
   <Path name='/var/lib/hudson/jobs/update_pantheon/config.xml' altsrc='/hudson/jobs/update_pantheon/config.xml'/>
   <Path name='/var/lib/hudson/jobs/update_site_core/config.xml' altsrc='/hudson/jobs/update_site_core/config.xml'/>
-
+  
 </Bundle>
