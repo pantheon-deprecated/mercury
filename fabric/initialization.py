@@ -71,6 +71,10 @@ def _initialize_bcfg2(vps, server):
 
     pantheon.restart_bcfg2()
     if (vps == "aws"):
+        local('mkdir -p /mnt/mysql/tmp')
+        local('chown -R root:root /mnt/mysql')
+        local('chmod 755 /mnt/mysql')
+        local('chmod 1777 /mnt/mysql/tmp')
         local('/usr/sbin/bcfg2 -vqed -p pantheon-aws', capture=False)
     elif (vps == "ebs"):
         local('/usr/sbin/bcfg2 -vqed -p pantheon-aws-ebs', capture=False)
