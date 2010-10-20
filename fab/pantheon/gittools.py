@@ -4,8 +4,7 @@ import sys
 sys.path.append('/opt/pantheon')
 from tools.ptools import postback
 
-from fabric.api import cd
-from fabric.api import local
+from fabric.api import * 
 
 import pantheon
 
