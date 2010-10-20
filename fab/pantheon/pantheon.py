@@ -147,7 +147,7 @@ def is_drupal_installed(project, environment):
     #TODO: Figure out a better way of determining this than hitting the db.
     # In most cases this is going to be false.
     (username, password, db_name) = _get_database_vars(project, environment)
-    status = local("mysql -u %s -p%s %s -e 'show tables;' | grep 'system'" % (
+    status = local("mysql -u %s -p%s %s -e 'show tables;' | awk '/system/'" % (
                                                       username,
                                                       password,
                                                       db_name), capture=False)

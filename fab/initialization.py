@@ -1,4 +1,5 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
+import os
 import tempfile
 
 from fabric.api import *
@@ -43,7 +44,7 @@ def _initialize_support_account(server):
     with cd('~pantheon'):
         local('mkdir -p .ssh')
         local('chmod 700 .ssh')
-        pantheon.copy_template('authorized_keys', '/home/pantheon/.ssh/')
+        pantheon.copy_template('authorized_keys', '~pantheon/.ssh/')
         #local('cat ~/.ssh/id_rsa.pub > .ssh/authorized_keys')
         local('chmod 600 .ssh/authorized_keys')
         local('chown -R pantheon: .ssh')
