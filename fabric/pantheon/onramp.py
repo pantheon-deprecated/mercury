@@ -255,7 +255,7 @@ class ImportTools(install.InstallTools):
                        while read FILE; do chmod 660 \"$FILE\"; done")
                 local("find . -type d -exec find '{}' -type d \; | \
                       while read DIR; do chmod 770 \"$DIR\"; done")
-                local("chown -R %s files" % self.server.web_group)
+                local("chown -R %s ." % self.server.web_group)
 
 
     def update_environment_databases(self, environments=pantheon.get_environments()):
