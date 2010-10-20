@@ -104,7 +104,7 @@ class Updater():
         local('rsync -av --delete %s %s' % (source, dest))
 
     def permissions_update(self):
-        owner = server.get_ldap_group()
+        owner = self.server.get_ldap_group()
         with cd(self.server.webroot):
             # Force ownership on everything exept files directory.
             local("find %s \( -path %s/%s/sites/default/files -prune \) \
