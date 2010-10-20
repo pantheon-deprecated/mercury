@@ -1,50 +1,12 @@
 #!/usr/bin/python
-import os
 import sys
 
 sys.path.append('/opt/pantheon')
-from tools.ptools import postback
-
-from fabric.api import cd
-from fabric.api import hide
-from fabric.api import local
-
-def _get_webroot():
-    if os.path.exists('/etc/debian_version'):
-        return '/var/www/'
-    elif os.path.exists('/etc/redhat-release'):
-        return '/var/www/html/'
-
+from fab.pantheon import gittools
 
 if __name__ == '__main__':
 
     params = sys.stdin.read()
     if params:
-        (revision_old, revision_new, refs) = params.split(' ')
-        project = refs.split('/')[2].rstrip('\n')
-        webroot = _get_webroot()
-
-        dest = os.path.join(webroot, project, 'dev')
-        if os.path.exists(dest):
-            #with cd(dest):
-            #    with hide('running'):
-            #        author_name, author_email = local(
-            #                       'env -i git log --pretty=format:%an%n%ae ' +
-            #                       '%s..%s' % (revision_old, revision_new)
-            #                       ).rstrip('\n').split('\n')
-            #if ((author_name != 'Hudson User') and
-            #    (author_email != 'hudson@getpantheon')):
-            #
-            #    with hide('running'):
-            #        postback.postback_gitstatus(project, revision_new)
-            
-            # Run hudson job to update dev environment code.
-            with hide('running'):
-                local('curl http://127.0.0.1:8090/job/post_receive_update/' + \
-                      'buildWithParameters?project=%s' % project)
-            print "\n\n \
-            The '%s' project is being updated in the development environment. \
-                   \n\n" % (project)
-        else:
-           print "\n\nNo development environment for project '%s' found." % (project)
+        gittools.post_receive_hook(params)
 

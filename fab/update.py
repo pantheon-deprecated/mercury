@@ -41,8 +41,10 @@ def update_code(project, environment, tag=None, message=None):
     updater.permissions_update()
 
 def post_receive_update(project):
-    environment = 'dev'
-    updater = update.Updater(project, environment)
+    """Update development environment with changes pushed from remote.
+
+    """
+    updater = update.Updater(project, 'dev')
     updater.code_update(None, None)
     updater.permissions_update()
 
