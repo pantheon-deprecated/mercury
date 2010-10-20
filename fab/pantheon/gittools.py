@@ -37,9 +37,9 @@ def post_receive_hook(params):
     running hook operations.
 
     """
+    (project, old_rev, new_rev) = _parse_hook_params(params)
     webroot = pantheon.PantheonServer().webroot
     dest = os.path.join(webroot, project, 'dev')
-    (project, old_rev, new_rev) = _parse_hook_params(params)
 
     if os.path.exists(dest):
         with cd(dest):
