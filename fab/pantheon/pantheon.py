@@ -150,7 +150,7 @@ def is_drupal_installed(project, environment):
     status = local("mysql -u %s -p%s %s -e 'show tables;' | awk '/system/'" % (
                                                       username,
                                                       password,
-                                                      db_name), capture=False)
+                                                      db_name))
     if status:
         return True
     else:
