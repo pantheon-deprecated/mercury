@@ -9,7 +9,7 @@ from fabric.api import local
 
 import pantheon
 
-def postback_gitstatus(project)
+def postback_gitstatus(project):
     """Send Atlas the git status with job_name='git_status' parameter. 
     project: project name. 
  
