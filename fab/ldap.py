@@ -51,7 +51,7 @@ def build_ldap_client(base_domain = "example.com", require_group = None, server_
         f.write('%' + '%s ALL=(ALL) ALL' % require_group)
 
     # Add LDAP user to www-data, and ssl-cert groups.
-    local('usermod -aG %s, %s' % (server.web_group, 'ssl-cert', require_group))
+    local('usermod -aG %s %s' % ('ssl-cert', require_group))
 
     # Restart after ldap is configured so openssh-lpk doesn't choke.
     local("sudo /etc/init.d/ssh restart")

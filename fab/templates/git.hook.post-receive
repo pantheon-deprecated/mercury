@@ -2,8 +2,8 @@
 import os
 import sys
 
-sys.path.append('/opt/pantheon/tools/ptools')
-import postback
+sys.path.append('/opt/pantheon')
+from tools.ptools import postback
 
 from fabric.api import cd
 from fabric.api import hide
@@ -26,22 +26,25 @@ if __name__ == '__main__':
 
         dest = os.path.join(webroot, project, 'dev')
         if os.path.exists(dest):
+            #with cd(dest):
+            #    with hide('running'):
+            #        author_name, author_email = local(
+            #                       'env -i git log --pretty=format:%an%n%ae ' +
+            #                       '%s..%s' % (revision_old, revision_new)
+            #                       ).rstrip('\n').split('\n')
+            #if ((author_name != 'Hudson User') and
+            #    (author_email != 'hudson@getpantheon')):
+            #
+            #    with hide('running'):
+            #        postback.postback_gitstatus(project, revision_new)
+            
+            # Run hudson job to update dev environment code.
+            with hide('running'):
+                local('curl http://127.0.0.1:8090/job/post_receive_update/' + \
+                      'buildWithParameters?project=%s' % project)
             print "\n\n \
             The '%s' project is being updated in the development environment. \
                    \n\n" % (project)
-            with cd(dest):
-                with hide('running'):
-                    local('env -i git pull')
-                    author_name, author_email = local(
-                                   'env -i git log --pretty=format:%an%n%ae ' +
-                                   '%s..%s' % (revision_old, revision_new)
-                                   ).rstrip('\n').split('\n')
-            if ((author_name != 'Hudson User') and
-                (author_email != 'hudson@getpantheon')):
-
-                with hide('running'):
-                    postback.postback_gitstatus(project, revision_new)
-
         else:
-            print "\n\nNo development environment for project '%s' found." % (project)
+           print "\n\nNo development environment for project '%s' found." % (project)
 

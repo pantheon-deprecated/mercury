@@ -63,8 +63,14 @@ class Updater():
                 
 
     def code_update(self, tag, message):
+        # Update code in 'dev' (Only used when updating from remote push)
+        if self.environment == 'dev':
+            self.code_commit('Automated Commit. Updating from remote push.')
+            with cd(self.env_path):
+                local('git pull')
+
         # Update code in 'test' (commit & tag in 'dev', fetch in 'test')
-        if self.environment == 'test':
+        elif self.environment == 'test':
             self.code_commit('Automated Commit.')
             self._tag_code(tag, message)
             self._fetch_and_reset(tag)
@@ -80,7 +86,8 @@ class Updater():
             local('git checkout %s' % self.project)
             local('git add -A .')
             with settings(warn_only=True):
-                local('git commit --author="%s" -m "%s"' % (self.author, message), capture=False)
+                local('git commit --author="%s" -m "%s"' % (
+                       self.author, message), capture=False)
             local('git push')
 
     def data_update(self, source_env):
@@ -90,17 +97,38 @@ class Updater():
         local('rm -rf %s' % tempdir)
 
     def files_update(self, source_env):
-        source = os.path.join(self.project_path, '%s/sites/default/files' % source_env)
-        dest = os.path.join(self.project_path,'%s/sites/default/' % self.environment)
+        source = os.path.join(self.project_path,
+                              '%s/sites/default/files' % source_env)
+        dest = os.path.join(self.project_path,
+                            '%s/sites/default/' % self.environment)
         local('rsync -av --delete %s %s' % (source, dest))
 
     def permissions_update(self):
+        owner = server.get_ldap_group()
         with cd(self.server.webroot):
-            local('chown -R root:%s %s' % (self.server.web_group, self.project))
-        site_path = os.path.join(self.project_path, '%s/sites/default' % self.environment)
+            # Force ownership on everything exept files directory.
+            local("find %s \( -path %s/%s/sites/default/files -prune \) \
+                   -o \( -exec chown %s:%s '{}' \; \)" % (self.project,
+                                                          self.project,
+                                                          self.environment,
+                                                          owner, owner))
+        site_path = os.path.join(self.project_path,
+                                 '%s/sites/default' % self.environment)
         with cd(site_path):
-            local('chmod 440 settings.php')
+            if pantheon.is_drupal_installed(self.project, self.environment):
+                local('chmod 440 settings.php')
+                local('chown %s:%s settings.php' % (owner,
+                                                    self.server.web_group))
+            else:
+                # If drupal is not installed, settings.php needs to be owned by
+                # apache, and have write permissions.
+                local('chmod 660 settings.php')
+                local('chown %s:%s settings.php' % (self.server.web_group,
+                                                    self.server.web_group))
+                
             local('chmod 440 pantheon.settings.php')
+            local('chown %s:%s pantheon.settings.php' % (owner,
+                                                         self.server.web_group))
 
     def run_command(self, command):
         with cd(self.env_path):
@@ -125,3 +153,4 @@ class Updater():
             local('git checkout %s' % self.project)
             local('git fetch -t')
             local('git reset --hard "%s"' % tag)
+
