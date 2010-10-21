@@ -71,15 +71,11 @@ def _initialize_bcfg2(vps, server):
 
     pantheon.restart_bcfg2()
     if (vps == "aws"):
-        #creating mysql user and group to avoid tmp-dir creation issue
-        local('apt-get install -y mysql-server-core-5.1')
-        local('groupadd mysql')
-        local('useradd -g mysql mysql')
+        #Aaron says this works:
         local('mkdir -p /mnt/mysql/tmp')
         local('chown root:root /mnt/mysql')
-        local('chmod 755 /mnt/mysql')
         local('chown mysql:mysql /mnt/mysql/tmp')
-        local('chmod 1777 /mnt/mysql/tmp')
+        local('chmod -R 777 /mnt/mysql')
         local('/usr/sbin/bcfg2 -vqed -p pantheon-aws', capture=False)
     elif (vps == "ebs"):
         local('/usr/sbin/bcfg2 -vqed -p pantheon-aws-ebs', capture=False)
