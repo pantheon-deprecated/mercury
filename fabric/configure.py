@@ -18,7 +18,7 @@ def configure(vps="none"):
     _test_for_previous_run()
     _test_for_private_server(server)
     if (vps == "aws"):
-        _config_ec2_(server)
+        _configure_ec2(server)
     _configure_postfix(server)
     _restart_services(server)
     _configure_iptables(server)
