@@ -79,7 +79,7 @@ def _initialize_bcfg2(vps, server):
         local('chmod 755 /mnt/mysql')
         local('chown mysql:mysql /mnt/mysql/tmp')
         local('chmod 1777 /mnt/mysql/tmp')
-        local('apt-get install mysql-client-5.1 mysql-server-5.1 mysql-server-core-5.1')
+        local('apt-get install -y mysql-client-5.1 mysql-server-5.1 mysql-server-core-5.1')
         local('/usr/sbin/bcfg2 -vqed -p pantheon-aws', capture=False)
     elif (vps == "ebs"):
         local('/usr/sbin/bcfg2 -vqed -p pantheon-aws-ebs', capture=False)
