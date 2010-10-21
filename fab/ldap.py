@@ -60,7 +60,7 @@ def build_ldap_client(base_domain = "example.com", require_group = None, server_
     server.set_ldap_group(require_group)
     
     # Make the git repo and www directories writable by the group
-    local("chown -R %s:%s /var/git/projects" % require_group, require_group)
+    local("chown -R %s:%s /var/git/projects" % (require_group, require_group))
     local("chmod -R g+w /var/git/projects")
 
 def _ldap_domain_to_ldap(domain):
