@@ -103,9 +103,9 @@ class GitRepo():
         """
         with cd(os.path.join(self.project_path, env)):
             if env == 'dev':
-                ref = local('env -i git rev-parse refs/heads/%s' %  self.project)
+                ref = local('git rev-parse refs/heads/%s' %  self.project)
             else:
-                ref = local('env -i git describe --tags %s' % self.project).rstrip('\n')
+                ref = local('git describe --tags %s' % self.project).rstrip('\n')
         return ref
 
     def _get_diff_stat(self, base, other):
@@ -115,7 +115,7 @@ class GitRepo():
 
         """
         with cd(self.repo):
-            diff = local('env -i git diff --stat refs/heads/%s %s %s' % (self.project, base, other))
+            diff = local('git diff --stat %s %s' % (base, other))
         return diff
 
     def _get_log(self, num_entries):
@@ -124,6 +124,6 @@ class GitRepo():
 
         """
         with cd(self.repo):
-            log = local('env -i git log -n%s %s' % (num_entries, self.project))
+            log = local('git log -n%s %s' % (num_entries, self.project))
         return log
 
