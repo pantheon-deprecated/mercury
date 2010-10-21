@@ -44,7 +44,6 @@ class InstallTools:
         """
         with cd('/var/git/projects/%s' % self.project):
             local('git pull origin master')
-            local('git pull')
             with settings(hide('warnings'), warn_only=True):
                 local('git tag -d %s.initialization' % self.project)
                 local('git branch -D %s' % self.project)
