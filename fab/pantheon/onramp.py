@@ -237,6 +237,7 @@ class ImportTools(install.InstallTools):
         owner = self.server.get_ldap_group()
         with cd(self.server.webroot):
             local('chown -R %s:%s %s' % (owner, owner, self.project))
+            local('chmod -R g+w %s' % self.project)
         file_dir = self._get_files_dir()
         if not file_dir:
             file_dir = 'sites/default/files'
