@@ -21,16 +21,11 @@ def post_receive_hook(params):
     """Perform post-receive actions when changes are made to git repo.
     params: hook params from git stdin.
 
-    1.) If development environment HEAD is different from central repo HEAD,
+    If development environment HEAD is different from central repo HEAD,
     update the dev environment. This can occur if changes are pushed from
     a remote location to the central repo. If the HEADs are the same, then
     we assume that changes were pushed from dev to central repo and no update
     is needed.
-
-    2.) If committer is Hudson, we do not want to post any information back to
-    Atlas, because we assume we will send the data at the end of the hudson job.
-    If the commiter is NOT hudson, it means a user has made changes outside a 
-    hudson job, and we need to report back the status of the repo.
 
     NOTE: we use 'env -i' to clear environmental variables git has set when
     running hook operations.
@@ -51,22 +46,10 @@ def post_receive_hook(params):
                         project).rstrip('\n')
                 repo_head = local('env -i git rev-parse refs/remotes/origin/%s' % \
                         project).rstrip('\n')
-                # Get author name and email of last commit in central repo.
-                (author, email) = local('env -i git log -1 --format=%an%n%ae ' + \
-                     '%s refs/remotes/origin/%s' % (commit,
-                                                    project)
-                                                   ).rstrip('\n').split('\n')
-        # Hide output from showing on git's report back to user.
-        with hide('running'):
-            # Only update dev environment if HEAD commits don't match.
-            if dev_head != repo_head:
-                    local('curl http://127.0.0.1:8090/job/post_receive_update/' + \
-                          'buildWithParameters?project=%s' % project)
-
-            # Only report back to Atlas if Author is not Hudson.
-            if (author != 'Hudson User') and (email != 'hudson@getpantheon'):
-                postback_gitstatus(project)
-
+                # Only update dev environment if HEAD commits don't match.
+                if dev_head != repo_head:
+                        local('curl http://127.0.0.1:8090/job/post_receive_update/' + \
+                              'buildWithParameters?project=%s' % project)
         print "\n\n \
         The '%s' project is being updated in the development environment. \
                \n\n" % (project)
@@ -95,6 +78,7 @@ class GitRepo():
         """Return dict of dev/test and test/live diffs, and last 10 log entries.
 
         """
+
         head = self._get_last_commit('dev')
         test = self._get_last_commit('test')
         live = self._get_last_commit('live')
@@ -117,13 +101,11 @@ class GitRepo():
         returns commit hash for dev, or current tag for test/live.
 
         """
-        if env == 'dev':
-            with cd(self.repo):
-                 ref = local('git log -n1 --pretty=format:%H ' +
-                             '%s' %  self.project)
-        else:
-            with cd(os.path.join(self.project_path, env)):
-                ref = local('git describe --tags %s' % self.project).rstrip('\n')
+        with cd(os.path.join(self.project_path, env)):
+            if env == 'dev':
+                ref = local('env -i git rev-parse refs/heads/%s' %  self.project)
+            else:
+                ref = local('env -i git describe --tags %s' % self.project).rstrip('\n')
         return ref
 
     def _get_diff_stat(self, base, other):
@@ -133,8 +115,7 @@ class GitRepo():
 
         """
         with cd(self.repo):
-            local('git checkout %s' % self.project)
-            diff = local('git diff --stat %s %s' % (base, other))
+            diff = local('env -i git diff --stat refs/heads/%s %s %s' % (self.project, base, other))
         return diff
 
     def _get_log(self, num_entries):
@@ -143,8 +124,6 @@ class GitRepo():
 
         """
         with cd(self.repo):
-            log = local('git log -n%s %s' % (num_entries, self.project))
+            log = local('env -i git log -n%s %s' % (num_entries, self.project))
         return log
-
-
 

@@ -65,7 +65,6 @@ class Updater():
     def code_update(self, tag, message):
         # Update code in 'dev' (Only used when updating from remote push)
         if self.environment == 'dev':
-            self.code_commit('Automated Commit. Updating from remote push.')
             with cd(self.env_path):
                 local('git pull')
 
@@ -129,6 +128,9 @@ class Updater():
             local('chmod 440 pantheon.settings.php')
             local('chown %s:%s pantheon.settings.php' % (owner,
                                                          self.server.web_group))
+        # Force repo perms.
+        with cd('/var/git/projects'):
+            local('chown -R %s:%s %s' % (owner, owner, self.project))
 
     def run_command(self, command):
         with cd(self.env_path):
