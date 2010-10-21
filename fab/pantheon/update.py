@@ -104,16 +104,18 @@ class Updater():
 
     def permissions_update(self):
         owner = self.server.get_ldap_group()
+        site_path = os.path.join(self.env_path, 'sites/default')
+
         with cd(self.server.webroot):
-            # Force ownership on everything exept files directory.
+            # Force ldap user ownership on everything exept files directory.
             local("find %s \( -path %s/%s/sites/default/files -prune \) \
                    -o \( -exec chown %s:%s '{}' \; \)" % (self.project,
                                                           self.project,
                                                           self.environment,
                                                           owner, owner))
-        site_path = os.path.join(self.project_path,
-                                 '%s/sites/default' % self.environment)
         with cd(site_path):
+            # Apache should own files dir
+            local('chown %s:%s files' % (self.server.web_group, self.server.web_group))
             if pantheon.is_drupal_installed(self.project, self.environment):
                 local('chmod 440 settings.php')
                 local('chown %s:%s settings.php' % (owner,
@@ -124,7 +126,7 @@ class Updater():
                 local('chmod 660 settings.php')
                 local('chown %s:%s settings.php' % (self.server.web_group,
                                                     self.server.web_group))
-                
+
             local('chmod 440 pantheon.settings.php')
             local('chown %s:%s pantheon.settings.php' % (owner,
                                                          self.server.web_group))
