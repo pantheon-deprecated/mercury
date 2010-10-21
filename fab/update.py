@@ -45,6 +45,14 @@ def update_code(project, environment, tag=None, message=None):
     updater.code_update(tag, message)
     updater.permissions_update()
 
+def post_receive_update(project):
+    """Update development environment with changes pushed from remote.
+
+    """
+    updater = update.Updater(project, 'dev')
+    updater.code_update(None, None)
+    updater.permissions_update()
+
 def rebuild_environment(project, environment):
     """Rebuild the project/environment with files and data from 'live'.
 

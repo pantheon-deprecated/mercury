@@ -8,7 +8,7 @@ import time
 from fabric.api import *
 
 ENVIRONMENTS = set(['dev','test','live'])
-
+TEMPLATE_DIR = '/opt/pantheon/fab/templates'
 
 def get_environments():
     """ Return list of development environments.
@@ -16,6 +16,38 @@ def get_environments():
     """
     return ENVIRONMENTS
 
+def get_template(template):
+    """Return full path to template file.
+    template: template file name
+
+    """
+    return os.path.join(get_template_dir(), template)
+
+def get_template_dir():
+    """Return template directory. 
+
+    """
+    return TEMPLATE_DIR
+
+def copy_template(template, destination):
+    """Copy template to destination.
+    template: template file name
+    destination: full path to destination
+
+    """
+    local('cp %s %s' % (get_template(template),
+                        destination))
+
+def build_template(template_file, values):
+    """Return a template object of the template_file with substitued values.
+    template_file: full path to template file
+    values: dictionary of values to be substituted in template file
+
+    """
+    contents = local('cat %s' % template_file)
+    template = string.Template(contents)
+    template = template.safe_substitute(values)
+    return template
 
 def random_string(length):
     """ Create random string of ascii letters & digits.
@@ -36,7 +68,7 @@ def create_pantheon_settings_file(site_dir):
     with open(os.path.join(site_dir, 'settings.php'), 'a') as f:
         f.write('\n/* Added by Pantheon */\n')
         f.write("include 'pantheon.settings.php';\n")
-    local('cp /opt/pantheon/fabric/templates/pantheon.settings.php ' + site_dir)
+    copy_template('pantheon.settings.php', site_dir)
 
 
 def export_data(project, environment, destination):
@@ -106,17 +138,23 @@ def restart_bcfg2():
         time.sleep(5)
 
 
-def build_template(template_file, values):
-    """Helper method that returns a template object of the template_file 
-    with substitued values.
-    template_file: full path to template file
-    values: dictionary of values to be substituted in template file
+def is_drupal_installed(project, environment):
+    """Return True if the Drupal installation process has been completed.
+       project: project name
+       environment: environment name.
 
     """
-    contents = local('cat %s' % template_file)
-    template = string.Template(contents)
-    template = template.safe_substitute(values)
-    return template
+    #TODO: Figure out a better way of determining this than hitting the db.
+    # In most cases this is going to be false.
+    (username, password, db_name) = _get_database_vars(project, environment)
+    status = local("mysql -u %s -p%s %s -e 'show tables;' | awk '/system/'" % (
+                                                      username,
+                                                      password,
+                                                      db_name))
+    if status:
+        return True
+    else:
+        return False
 
 
 def _get_database_vars(project, environment):
@@ -160,6 +198,8 @@ class PantheonServer:
             self.webroot = '/var/www/html/'
             self.ftproot = '/var/ftp/pantheon/'
             self.vhost_dir = '/etc/httpd/conf/vhosts/'
+        #global
+        self.template_dir = get_template_dir()
 
 
     def get_hostname(self):
@@ -206,7 +246,7 @@ class PantheonServer:
                     root: full path to drupal installation
         
         """
-        alias_template = '/opt/pantheon/fabric/templates/drush.alias.drushrc.php'
+        alias_template = get_template('drush.alias.drushrc.php')
         alias_file = '/opt/drush/aliases/%s_%s.alias.drushrc.php' % (
                                             drush_dict.get('project'), 
                                             drush_dict.get('environment'))
@@ -227,7 +267,7 @@ class PantheonServer:
                     memcache_prefix:
 
         """
-        vhost_template = '/opt/pantheon/fabric/templates/vhost.template.%s' % self.distro
+        vhost_template = get_template('vhost.template.%s' % self.distro)
         template = build_template(vhost_template, vhost_dict)
         vhost = os.path.join(self.vhost_dir, filename)
         with open(vhost, 'w') as f:
@@ -251,14 +291,14 @@ class PantheonServer:
         data_dir = os.path.join(project_dir, environment)
         if os.path.exists(data_dir):
             local('rm -rf ' + data_dir)
-        data_dir_template = '/opt/pantheon/fabric/templates/solr/'
+        data_dir_template = os.path.join(get_template_dir(), 'solr')
         local('cp -R %s %s' % (data_dir_template, data_dir))
         local('chown -R %s:%s %s' % (self.tomcat_owner,
                                      self.tomcat_owner,
                                      project_dir))
 
         # Tell Tomcat where indexes are located.
-        tomcat_template = '/opt/pantheon/fabric/templates/tomcat_solr_home.xml'
+        tomcat_template = get_template('tomcat_solr_home.xml')
         values = {'solr_path': '%s/%s' % (project, environment)}
         template = build_template(tomcat_template, values)
         tomcat_file = "/etc/tomcat%s/Catalina/localhost/%s_%s.xml" % (
@@ -285,7 +325,7 @@ class PantheonServer:
  
         # Create job from template
         values = {'drush_alias':'@%s_%s' % (project, environment)}
-        cron_template = '/opt/pantheon/fabric/templates/hudson.drupal.cron'
+        cron_template = get_template('hudson.drupal.cron')
         template = build_template(cron_template, values)
         with open(jobdir + 'config.xml', 'w') as f:
             f.write(template)
@@ -328,3 +368,4 @@ class PantheonServer:
         """
         with open('/etc/pantheon/ldapgroup', 'w') as f:
             f.write('%s' % require_group)
+

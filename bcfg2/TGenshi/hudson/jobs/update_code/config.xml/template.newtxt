@@ -42,7 +42,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>cd /opt/pantheon/fabric; /usr/bin/sudo /usr/bin/fab update_code:project=$$project,environment=$$environment,tag=&quot;$$tag&quot;,message=&quot;$$message&quot;</command>
+      <command>cd /opt/pantheon/fab; /usr/bin/sudo /usr/bin/fab update_code:project=$$project,environment=$$environment,tag=&quot;$$tag&quot;,message=&quot;$$message&quot;</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
