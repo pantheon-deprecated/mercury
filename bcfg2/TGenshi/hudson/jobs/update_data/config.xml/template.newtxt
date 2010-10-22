@@ -42,7 +42,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>cd /opt/pantheon/fabric; /usr/bin/sudo /usr/bin/fab update_data:$$source_project,$$source_environment,$$target_project,$$target_environment</command>
+      <command>cd /opt/pantheon/fab; /usr/bin/sudo /usr/bin/fab update_data:$$source_project,$$source_environment,$$target_project,$$target_environment</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>

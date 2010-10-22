@@ -3,6 +3,11 @@ from fabric.api import *
 import datetime
 import tempfile
 import os
+import sys
+
+sys.path.append('/opt/pantheon')
+
+from tools.ptools import postback
 
 from pantheon import pantheon
 from pantheon import update
@@ -38,6 +43,14 @@ def update_code(project, environment, tag=None, message=None):
     updater = update.Updater(project, environment)
     updater.test_tag(tag)
     updater.code_update(tag, message)
+    updater.permissions_update()
+
+def post_receive_update(project):
+    """Update development environment with changes pushed from remote.
+
+    """
+    updater = update.Updater(project, 'dev')
+    updater.code_update(None, None)
     updater.permissions_update()
 
 def rebuild_environment(project, environment):
@@ -79,3 +92,13 @@ def git_status(project, environment):
     updater = update.Updater(project, environment)
     updater.run_command('git status')
 
+def drupal_update_status(project):
+    """Return whether or not there's a core update available.
+    This will post back directly rather than using a post-build action.
+    
+    """
+    drushrc = project +'_dev';
+    text = local("drush @%s -n -p upc" % drushrc)
+    data = text.split("\n")
+    postback.postback({'update_status':data})
+    

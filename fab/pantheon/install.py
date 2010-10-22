@@ -43,8 +43,7 @@ class InstallTools:
 
         """
         with cd('/var/git/projects/%s' % self.project):
-            local('git checkout master')
-            local('git pull')
+            local('git pull origin master')
             with settings(hide('warnings'), warn_only=True):
                 local('git tag -d %s.initialization' % self.project)
                 local('git branch -D %s' % self.project)
@@ -231,9 +230,9 @@ class InstallTools:
         environments: Optional. List.
 
         """
+        ldap_group = self.server.get_ldap_group()
         with cd(self.server.webroot):
-            #FAILS on non-getpantheon.com servers
-            local('chown -R root:%s %s' % (self.server.get_ldap_group(), self.project))
+            local('chown -R %s:%s %s' % (ldap_group, ldap_group, self.project))
             local('chmod -R g+w %s' % (self.project))
 
         for env in environments:

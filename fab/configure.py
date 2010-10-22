@@ -131,7 +131,7 @@ def _initialize_support_account(server):
     with cd('~pantheon'):
         local('mkdir -p .ssh')
         local('chmod 700 .ssh')
-        local('cp /opt/pantheon/fabric/templates/authorized_keys .ssh/')
+        pantheon.copy_template('authorized_keys', '~pantheon/.ssh/')
         #local('cat ~/.ssh/id_rsa.pub > .ssh/authorized_keys')
         local('chmod 600 .ssh/authorized_keys')
         local('chown -R pantheon: .ssh')
@@ -190,7 +190,9 @@ def _configure_git_repo():
 
         local('git config receive.denycurrentbranch ignore')
         local('git config core.sharedRepository group')
-    local('cp /opt/pantheon/fabric/templates/git.hook.post-receive /var/git/projects/pantheon/.git/hooks/post-receive')
+
+    pantheon.copy_template('git.hook.post-receive', 
+                         '/var/git/projects/pantheon/.git/hooks/post-receive')
     local('chmod +x /var/git/projects/pantheon/.git/hooks/post-receive')
 
 

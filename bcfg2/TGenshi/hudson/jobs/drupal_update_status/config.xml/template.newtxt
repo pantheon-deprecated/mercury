@@ -1,32 +1,17 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>Script to run git diff</description>
+  <description>Check on the status of the site and report back to the mothership</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
           <name>project</name>
-          <description>project to update</description>
+          <description>Project name</description>
           <defaultValue>pantheon</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>environment</name>
-          <description>environment to update</description>
-          <defaultValue>test</defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>revision_1</name>
-          <description>revision/tag to diff</description>
-          <defaultValue></defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>revision_2</name>
-          <description>second revision/tag to diff (leave blank to diff against the filesystem)</description>
-          <defaultValue></defaultValue>
-        </hudson.model.StringParameterDefinition>
-	<hudson.model.StringParameterDefinition>
           <name>uuid</name>
           <description>Job Id</description>
           <defaultValue></defaultValue>
@@ -42,7 +27,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>cd /opt/pantheon/fab; /usr/bin/sudo /usr/bin/fab git_diff:$$project,$$environment,$$revision_1,$$revision_2</command>
+      <command>cd /opt/pantheon/fabric; sudo fab drupal_update_status:project=$$project</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
