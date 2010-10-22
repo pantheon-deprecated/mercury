@@ -106,8 +106,9 @@ class Updater():
         owner = self.server.get_ldap_group()
 
         with cd(self.env_path):
+            #TODO: Possibly restrict this to files changed in git diff?
             # Force ldap user ownership on everything exept files directory.
-            local("find . \( -path sites/default/files -prune \) \
+            local("find . \( -path ./sites/default/files -prune \) \
                    -o \( -exec chown %s:%s '{}' \; \)" % (owner, owner))
 
         site_path = os.path.join(self.env_path, 'sites/default')
