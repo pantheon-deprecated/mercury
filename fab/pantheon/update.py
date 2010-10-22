@@ -104,15 +104,13 @@ class Updater():
 
     def permissions_update(self):
         owner = self.server.get_ldap_group()
-        site_path = os.path.join(self.env_path, 'sites/default')
 
-        with cd(self.server.webroot):
+        with cd(self.env_path):
             # Force ldap user ownership on everything exept files directory.
-            local("find %s \( -path %s/%s/sites/default/files -prune \) \
-                   -o \( -exec chown %s:%s '{}' \; \)" % (self.project,
-                                                          self.project,
-                                                          self.environment,
-                                                          owner, owner))
+            local("find . \( -path sites/default/files -prune \) \
+                   -o \( -exec chown %s:%s '{}' \; \)" % (owner, owner))
+
+        site_path = os.path.join(self.env_path, 'sites/default')
         with cd(site_path):
             # Apache should own files dir
             local('chown %s:%s files' % (self.server.web_group, self.server.web_group))
