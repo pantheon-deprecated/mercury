@@ -71,7 +71,7 @@ def _initialize_bcfg2(vps, server):
 
     pantheon.restart_bcfg2()
     if (vps == "aws"):
-        local('/etc/pantheon')
+        local('mkdir /etc/pantheon')
         local('touch /etc/pantheon/aws')
         #Aaron says this works:
         local('mkdir -p /mnt/mysql/tmp')
