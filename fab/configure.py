@@ -63,6 +63,8 @@ def _test_for_private_server(server):
         _configure_certificates()
         _initialize_support_account(server)
     except urllib2.URLError, e:
+        with open('/etc/pantheon/private.server', 'w') as f:
+            f.write('Created by Pantheon, please do not remove.')
         print 'Appears to be a private server - skipping getpantheon.com-specific functions'
 
 

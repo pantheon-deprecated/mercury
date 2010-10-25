@@ -12,7 +12,7 @@ TEMPLATE_DIR = '/opt/pantheon/fab/templates'
 
 def get_environments():
     """ Return list of development environments.
-   
+
     """
     return ENVIRONMENTS
 
@@ -24,7 +24,7 @@ def get_template(template):
     return os.path.join(get_template_dir(), template)
 
 def get_template_dir():
-    """Return template directory. 
+    """Return template directory.
 
     """
     return TEMPLATE_DIR
@@ -48,6 +48,13 @@ def build_template(template_file, values):
     template = string.Template(contents)
     template = template.safe_substitute(values)
     return template
+
+def is_private_server(server):
+    # Check if private.server file was created during configure.
+    if os.path.isfile('/etc/pantheon/private.server'):
+        return True
+    else:
+        return False
 
 def random_string(length):
     """ Create random string of ascii letters & digits.
@@ -244,7 +251,7 @@ class PantheonServer:
                     environment:
                     vhost_path: full path to vhost file
                     root: full path to drupal installation
-        
+
         """
         alias_template = get_template('drush.alias.drushrc.php')
         alias_file = '/opt/drush/aliases/%s_%s.alias.drushrc.php' % (
@@ -253,12 +260,14 @@ class PantheonServer:
         template = build_template(alias_template, drush_dict)
         with open(alias_file, 'w') as f:
             f.write(template)
-        
+
 
     def create_vhost(self, filename, vhost_dict):
-        """ 
+        """
         filename:  vhost filename
-        vhost_dict: project:
+        vhost_dict: server_name:
+                    server_alias:
+                    project:
                     environment:
                     db_name:
                     db_username:
@@ -273,7 +282,7 @@ class PantheonServer:
         with open(vhost, 'w') as f:
             f.write(template)
         local('chmod 640 %s' % vhost)
-        
+
 
     def create_solr_index(self, project, environment):
         """ Create solr index in: /var/solr/project/environment.

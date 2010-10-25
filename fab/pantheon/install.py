@@ -21,7 +21,7 @@ def _drush_download(modules):
 
 class InstallTools:
     """ Generic Drupal installation helper functions.
-    
+
     """
 
     def __init__(self, project):
@@ -179,7 +179,14 @@ class InstallTools:
         """
         for env in environments:
 
-            vhost_dict = {'project': self.project,
+            if pantheon.is_private_server():
+                server_alias = '%s.*' % env
+            else:
+                server_alias = '%s.*.gotpantheon.com' % env
+
+            vhost_dict = {'server_name': env,
+                          'server_alias': server_alias,
+                          'project': self.project,
                           'environment': env,
                           'db_name': '%s_%s' % (self.project, env),
                           'db_username':self.project,
