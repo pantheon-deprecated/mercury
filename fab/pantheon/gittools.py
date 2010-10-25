@@ -23,9 +23,15 @@ def post_receive_hook(params):
 
     If development environment HEAD is different from central repo HEAD,
     update the dev environment. This can occur if changes are pushed from
-    a remote location to the central repo. If the HEADs are the same, then
-    we assume that changes were pushed from dev to central repo and no update
-    is needed.
+    a remote location to the central repo. In this case, we call a Hudson job
+    to update the development environment, then post back to Atlas with the
+    status of the project.
+
+    If the HEADs are the same, then we assume that changes were pushed from dev
+    to central repo and no update to dev environment is needed. However, we may
+    still need to update Atlas with the project status. If the author is Hudson
+    we assume the originating Hudson job will post back to Atlas. Otherwise,
+    call the post_receive_update job, but don't update the dev environment.
 
     NOTE: we use 'env -i' to clear environmental variables git has set when
     running hook operations.
@@ -46,15 +52,28 @@ def post_receive_hook(params):
                         project).rstrip('\n')
                 repo_head = local('env -i git rev-parse refs/remotes/origin/%s' % \
                         project).rstrip('\n')
-                # Only update dev environment if HEAD commits don't match.
+
+                # Update dev environmnt if HEAD from central repo doesn't match
                 if dev_head != repo_head:
+                    local('curl http://127.0.0.1:8090/job/post_receive_update/' + \
+                          'buildWithParameters?project=%s\\&dev_update=True' % project)
+                else:
+                    author_name, author_email = local(
+                            'env -i git log -1 --pretty=format:%an%n%ae ' +
+                            '%s' % dev_head).rstrip('\n').split('\n')
+                    if ((author_name != 'Hudson User') and
+                            (author_email != 'hudson@getpantheon')):
+                        # If author is not Hudson, report back - but don't update
+                        # the development environment.
                         local('curl http://127.0.0.1:8090/job/post_receive_update/' + \
-                              'buildWithParameters?project=%s' % project)
+                              'buildWithParameters?project=%s\\&dev_update=False' % project)
         print "\n\n \
         The '%s' project is being updated in the development environment. \
                \n\n" % (project)
     else:
-        print "\n\nWarning: No development environment for project '%s' was found." % (project)
+        print "\n\n \
+        Warning: No development environment for project '%s' was found." % (
+                                                                    project)
 
 def _parse_hook_params(params):
     """Parse the params received during a git push.
