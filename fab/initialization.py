@@ -74,9 +74,9 @@ def _initialize_bcfg2(vps, server):
         local('mkdir /etc/pantheon')
         local('touch /etc/pantheon/aws')
         #Aaron says this works:
-        local('mkdir -p /mnt/mysql/tmp')
-        local('chown -R root:root /mnt/mysql')
-        local('chmod -R 777 /mnt/mysql')
+#        local('mkdir -p /mnt/mysql/tmp')
+#        local('chown -R root:root /mnt/mysql')
+#        local('chmod -R 777 /mnt/mysql')
         local('/usr/sbin/bcfg2 -vqed -p pantheon-aws', capture=False)
     elif (vps == "ebs"):
         local('/usr/sbin/bcfg2 -vqed -p pantheon-aws-ebs', capture=False)
