@@ -230,7 +230,7 @@ class InstallTools:
         environments: Optional. List.
 
         """
-        if (-f /etc/pantheon/ldapgroup):
+        if os.path.exists("/etc/pantheon/ldapgroup"):
             ldap_group = self.server.get_ldap_group()
             with cd(self.server.webroot):
                 local('chown -R %s:%s %s' % (ldap_group, ldap_group, self.project))
