@@ -63,7 +63,7 @@
               <operator>AND</operator>
             </hudson.plugins.postbuildtask.LogProperties>
           </logTexts>
-          <script>curl --silent http://localhost:8090/reload</script>
+          <script>curl -X POST http://localhost:8090/safeRestart</script>
         </hudson.plugins.postbuildtask.TaskProperties>
       </tasks>
     </hudson.plugins.postbuildtask.PostbuildTask>
