@@ -43,7 +43,7 @@ basedir		= /usr
 datadir		= /var/lib/mysql
 {% python
     if "amazon-web-services" in metadata.groups :
-        tmpdir = '/mnt/mysql/tmp'
+        tmpdir = '/tmp:/mnt/mysql/tmp'
     else:
         tmpdir = '/tmp'
 %}\
