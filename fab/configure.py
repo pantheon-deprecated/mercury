@@ -17,7 +17,7 @@ def configure(vps="none"):
     _check_connectivity()
     _test_for_previous_run()
     _test_for_private_server(server)
-    if os.path.exists("/etc/pantheon/aws"):
+    if os.path.exists("/etc/pantheon/aws.server"):
         _configure_ec2(server)
     _configure_postfix(server)
     _restart_services(server)

@@ -72,6 +72,8 @@ def _initialize_bcfg2(vps, server):
     pantheon.restart_bcfg2()
     if (vps == "aws"):
         local('mkdir /etc/pantheon')
+        with open('/etc/pantheon/aws.server', 'w') as f:
+            f.write('Created by Pantheon, please do not remove.')
         local('touch /etc/pantheon/aws')
         local('groupadd mysql')
         local('useradd -g mysql mysql')

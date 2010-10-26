@@ -49,7 +49,7 @@ def build_template(template_file, values):
     template = template.safe_substitute(values)
     return template
 
-def is_private_server(server):
+def is_private_server():
     # Check if private.server file was created during configure.
     if os.path.isfile('/etc/pantheon/private.server'):
         return True
