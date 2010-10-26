@@ -294,6 +294,14 @@ class ImportTools(install.InstallTools):
         # Setup settings.php and pantheon.settings.php
         pantheon.create_pantheon_settings_file(destination)
 
+        # If no default.settings.php we get git conflicts
+        if os.path.isfile('%s/default.settings.php' % destination) == False:
+            # TODO: this should detect druoal 6 vs 7
+            version = 6
+            url = 'http://gitorious.org/pantheon/%d/blobs/raw/master/sites/default/default.settings.php' % version
+            _curl(url, '%s/default.settings.php' % destination)
+
+
                    
     def _setup_default_files(self):
         file_location = self._get_files_dir()
