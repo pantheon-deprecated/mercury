@@ -1,5 +1,6 @@
-
-ns/>
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
   <description>Script to update code. Triggered as part of the git post-receive hook process.</description>
   <keepDependencies>false</keepDependencies>
   <properties>

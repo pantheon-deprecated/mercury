@@ -27,7 +27,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>cd /opt/pantheon/fabric; sudo fab drupal_update_status:project=$$project</command>
+      <command>cd /opt/pantheon/fab; sudo fab drupal_update_status:project=$$project</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
