@@ -129,9 +129,11 @@ class Updater():
             local('chmod 440 pantheon.settings.php')
             local('chown %s:%s pantheon.settings.php' % (owner,
                                                          self.server.web_group))
+        # TODO: Is the below necesssary?
+
         # Force repo perms.
-        with cd('/var/git/projects'):
-            local('chown -R %s:%s %s' % (owner, owner, self.project))
+        #with cd('/var/git/projects'):
+        #    local('chown -R %s:%s %s' % (owner, owner, self.project))
 
     def run_command(self, command):
         with cd(self.env_path):

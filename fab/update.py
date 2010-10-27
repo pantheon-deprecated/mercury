@@ -51,16 +51,15 @@ def post_receive_update(project, dev_update=True):
     """Update development environment with changes pushed from remote.
     project: project name
     dev_update: if the development environment should be updated.
+
     """
     # if coming from fabric, update could be string. Make bool.
     dev_update = eval(str(dev_update))
     updater = update.Updater(project, 'dev')
     if dev_update:
-        updater.code_update(None, None)
         updater.permissions_update()
     else:
-        # We want the hudson job to post back the gitstatus, but
-        # do no processing.
+        # Let hudson post back the gitstatus, but do no processing.
         pass
 
 def rebuild_environment(project, environment):
