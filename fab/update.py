@@ -30,6 +30,7 @@ def update_site_core(project='pantheon', keep=None):
     """
     updater = update.Updater(project)
     updater.core_update(keep)
+    drupal_update_status(project)
 
 def update_code(project, environment, tag=None, message=None):
     """ Update the working-tree for project/environment.
@@ -44,6 +45,7 @@ def update_code(project, environment, tag=None, message=None):
     updater.test_tag(tag)
     updater.code_update(tag, message)
     updater.permissions_update()
+
 
 def post_receive_update(project, dev_update=True):
     """Update development environment with changes pushed from remote.
