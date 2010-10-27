@@ -108,5 +108,5 @@ def drupal_update_status(project):
     drushrc = project +'_dev';
     text = local("drush @%s -n -p upc" % drushrc)
     data = text.split("\n")
-    postback.postback({'update_status':data})
+    postback.postback({'update_status':data,'job_name':'drupal_update_status'})
     
