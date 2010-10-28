@@ -1,4 +1,5 @@
 from fabric.api import env
+from atlas_postback import *
 from configure import *
 from initialization import *
 from ldap import *
