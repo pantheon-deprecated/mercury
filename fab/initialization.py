@@ -75,6 +75,7 @@ def _initialize_bcfg2(vps, server):
         with open('/etc/pantheon/aws.server', 'w') as f:
             f.write('Created by Pantheon, please do not remove.')
         local('touch /etc/pantheon/aws')
+        local('cp /opt/pantheon/bcfg2/TGenshi/mysql/apparmor/template.newtxt.G00_lucid /etc/apparmor.d/usr.sbin.mysqld')
         local('groupadd mysql')
         local('useradd -g mysql mysql')
         local('mkdir -p /mnt/mysql/tmp')
