@@ -46,11 +46,13 @@ class Updater():
                     print 'Re-merging - keeping local changes on conflict.'
                     local('git reset --hard ORIG_HEAD')
                     merge = local('git pull -s recursive -Xours origin master')
+                    print merge
                     local('git push')
                 elif keep == 'theirs':
                     print 'Re-merging - keeping upstream changes on conflict.'
                     local('git reset --hard ORIG_HEAD')
                     merge = local('git pull -s recursive -Xtheirs origin master')
+                    print merge
                     local('git push')
                 elif keep == 'force':
                     print 'Leaving merge conflicts. Please manually resolve.'
