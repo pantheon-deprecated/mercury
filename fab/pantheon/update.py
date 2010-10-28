@@ -57,9 +57,11 @@ class Updater():
                     #TODO: How do we want to report this back to user?
                     print 'Rolling back failed changes.'
                     local('git reset --hard ORIG_HEAD')
+                    return 'fail'
             # Successful merge.
             else:
                 local('git push')
+        return 'success'
                 
 
     def code_update(self, tag, message):
