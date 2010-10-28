@@ -10,15 +10,15 @@ import urllib2
 import json
 
 
-def configure(vps="none"):
+def configure():
     '''configure the Pantheon system.'''
     server = pantheon.PantheonServer()
-    _configure_server(server)
-    _check_connectivity()
     _test_for_previous_run()
-    _test_for_private_server(server)
     if os.path.exists("/etc/pantheon/aws.server"):
         _configure_ec2(server)
+    _configure_server(server)
+    _test_for_private_server(server)
+    _check_connectivity()
     _configure_postfix(server)
     _restart_services(server)
     _configure_iptables(server)
@@ -32,28 +32,31 @@ def _test_for_previous_run():
         abort("Pantheon config has already run. Exiting.")
 
 
+def _configure_ec2(server):
+    local('/etc/init.d/mysql stop')
+    local('/etc/init.d/varnish stop')
+    local('chmod 1777 /tmp')
+    if(server.distro == 'centos'):
+        local('mv /var/log/mysqld.log /mnt/mysql/')
+        local('ln -s /mnt/mysql/mysqld.log /var/log/mysqld.log')
+    else:
+        local('mv /var/log/mysql /mnt/mysql/log')
+        local('ln -s /mnt/mysql/log /var/log/mysql')
+    local('mv /var/lib/mysql /mnt/mysql/lib')
+    local('ln -s /mnt/mysql/lib /var/lib/mysql')
+    local('/etc/init.d/varnish stop')
+    local('mv /var/lib/varnish /mnt/varnish/lib')
+    local('ln -s /mnt/varnish/lib /var/lib/varnish')
+    local('chown varnish:varnish /mnt/varnish/lib/pressflow/')
+    local('/etc/init.d/mysql start')
+    local('/etc/init.d/varnish start')
+
+
 def _configure_server(server):
     server.update_packages()
     update.update_pantheon()
     local('cp /etc/pantheon/templates/tuneables /etc/pantheon/server_tuneables')
     local('chmod 755 /etc/pantheon/server_tuneables')
-
-
-# The Rackspace Cloud occasionally has connectivity issues unless a server gets
-# rebooted after initial provisioning.
-def _check_connectivity():
-    try:
-        urllib2.urlopen('http://pki.getpantheon.com/', timeout=10)
-        print 'Connectivity to the PKI server seems to work.'
-    except urllib2.URLError, e:
-        print "Connectivity error: ", e
-        # Bail if a connectivity reboot has already been attempted.
-        if os.path.exists("/etc/pantheon/connectivity_reboot"):
-            abort("A Pantheon connectivity reboot has already been attempted. Exiting.")
-        # Record the running of a connectivity reboot.
-        with open('/etc/pantheon/connectivity_reboot', 'w') as f:
-            f.write('Dear Rackspace: Fix this issue.')
-        local('sudo reboot')
 
 
 def _test_for_private_server(server):
@@ -139,20 +142,21 @@ def _initialize_support_account(server):
         local('chown -R pantheon: .ssh')
 
 
-def _configure_ec2(server):
-    local('chmod 1777 /tmp')
-    if(server.distro == 'centos'):
-        local('mv /var/log/mysqld.log /mnt/mysql/')
-        local('ln -s /mnt/mysql/mysqld.log /var/log/mysqld.log')
-    else:
-        local('mv /var/log/mysql /mnt/mysql/log')
-        local('ln -s /mnt/mysql/log /var/log/mysql')
-    local('mv /var/lib/mysql /mnt/mysql/lib')
-    local('ln -s /mnt/mysql/lib /var/lib/mysql')
-    local('/etc/init.d/varnish stop')
-    local('mv /var/lib/varnish /mnt/varnish/lib')
-    local('ln -s /mnt/varnish/lib /var/lib/varnish')
-    local('chown varnish:varnish /mnt/varnish/lib/pressflow/')
+# The Rackspace Cloud occasionally has connectivity issues unless a server gets
+# rebooted after initial provisioning.
+def _check_connectivity():
+    try:
+        urllib2.urlopen('http://pki.getpantheon.com/', timeout=10)
+        print 'Connectivity to the PKI server seems to work.'
+    except urllib2.URLError, e:
+        print "Connectivity error: ", e
+        # Bail if a connectivity reboot has already been attempted.
+        if os.path.exists("/etc/pantheon/connectivity_reboot"):
+            abort("A Pantheon connectivity reboot has already been attempted. Exiting.")
+        # Record the running of a connectivity reboot.
+        with open('/etc/pantheon/connectivity_reboot', 'w') as f:
+            f.write('Dear Rackspace: Fix this issue.')
+        local('sudo reboot')
 
 
 def _configure_postfix(server):
