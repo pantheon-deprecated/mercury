@@ -47,6 +47,9 @@ class PantheonBackup():
         local('git clone --mirror /var/git/projects/%s -b %s %s/' % (self.project,
                                                                      self.project,
                                                                      dest))
+        #clone --mirror isn't an 'exact' copy (in terms of metadata).
+        #TODO: change this path once using bare repo.
+        local('rsync -avz /var/git/projects/%s/.git/* ')
 
     def make_archive(self):
         with cd(self.working_dir):

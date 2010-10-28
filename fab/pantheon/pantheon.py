@@ -12,7 +12,7 @@ TEMPLATE_DIR = '/opt/pantheon/fab/templates'
 
 def get_environments():
     """ Return list of development environments.
-   
+
     """
     return ENVIRONMENTS
 
@@ -24,7 +24,7 @@ def get_template(template):
     return os.path.join(get_template_dir(), template)
 
 def get_template_dir():
-    """Return template directory. 
+    """Return template directory.
 
     """
     return TEMPLATE_DIR
@@ -89,27 +89,33 @@ def export_data(project, environment, destination):
                                                        filename))
     return filename
 
-    
 def import_data(project, environment, source):
-    """Import a database into a particular project/environment. Expects user,
-    pass, grants to already be in place.
+    """Create database then import from source.
     project: project name
     environment: environment name
     source: full path to database dump file to import.
-    
-    """
-    username, password, db_name = _get_database_vars(project, environment)
 
-    local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % db_name)
-    local("mysql -u root -e 'CREATE DATABASE %s'" % db_name)
+    """
+    database = '%s_%s' % (project, environment)
+    create database(database)
+    import_db_dump(source, database)
+
+def create_database(database):
+    local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % database)
+    local("mysql -u root -e 'CREATE DATABASE %s'" % database)
+
+def set_database_grants(database, username, password):
+    local("mysql -u root -e \"GRANT ALL ON %s.* TO '%s'@'localhost' \
+           IDENTIFIED BY '%s';\"" % (database, username, password))
+
+def import_db_dump(database_dump, database_name):
     # Strip cache tables, convert MyISAM to InnoDB, and import.
     local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | \
            grep -v '^INSERT INTO `ctools_object_cache`' | \
            grep -v '^INSERT INTO `watchdog`' | \
            grep -v '^INSERT INTO `accesslog`' | \
            grep -v '^USE `' | \
-           mysql -u root %s" % (source, db_name))
-
+           mysql -u root %s" % (database_dump, database_name))
 
 def parse_vhost(path):
     """Helper method that returns environment variables from a vhost file.
@@ -244,7 +250,7 @@ class PantheonServer:
                     environment:
                     vhost_path: full path to vhost file
                     root: full path to drupal installation
-        
+
         """
         alias_template = get_template('drush.alias.drushrc.php')
         alias_file = '/opt/drush/aliases/%s_%s.alias.drushrc.php' % (
@@ -253,10 +259,10 @@ class PantheonServer:
         template = build_template(alias_template, drush_dict)
         with open(alias_file, 'w') as f:
             f.write(template)
-        
+
 
     def create_vhost(self, filename, vhost_dict):
-        """ 
+        """
         filename:  vhost filename
         vhost_dict: project:
                     environment:
@@ -273,7 +279,7 @@ class PantheonServer:
         with open(vhost, 'w') as f:
             f.write(template)
         local('chmod 640 %s' % vhost)
-        
+
 
     def create_solr_index(self, project, environment):
         """ Create solr index in: /var/solr/project/environment.
