@@ -29,9 +29,9 @@ def update_site_core(project='pantheon', keep=None, uuid=None):
              None: Reset to ORIG_HEAD if merge fails.
     """
     updater = update.Updater(project)
-    status = updater.core_update(keep)
-    postback.postback({'job_name':'update_site_core', 'merge':status, 'keep':keep}, uuid)
-    if status == 'success':
+    result = updater.core_update(keep)
+    postback.postback({'job_name':'update_site_core', 'merge':result['status'], 'log':result['log'], 'keep':keep}, uuid)
+    if result['status'] == 'success':
       drupal_update_status(project)
       
       
