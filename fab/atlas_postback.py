@@ -7,7 +7,7 @@ from pantheon import gittools
 
 from fabric.api import *
 
-def postback_general()
+def postback_general():
     # Gets all environmental variables, and the hudson job status.
     data = postback.get_job_data()
     # The keys for the data we want to send back.
@@ -38,3 +38,9 @@ def postback_core_update():
 
     postback.postback(response, data.get('uuid'))
 
+def postback_drupal_status():
+    #The change here will be similar. The 'work' of the job (running drush) will
+    #write data to a file in the workspace. This will pick up that data and send it back.
+
+    #This way, if the 'work' fails (permissions errors, for example), we will still report back to atlas.
+    pass

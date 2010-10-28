@@ -1,21 +1,9 @@
 import os
 import sys
 
-sys.path.append('/opt/pantheon')
-from tools.ptools import postback
-
 from fabric.api import * 
 
 import pantheon
-
-def postback_gitstatus(project):
-    """Send Atlas the git status with job_name='git_status' parameter. 
-    project: project name. 
- 
-    """
-    repo = GitRepo(project)
-    status = repo.get_update_status()
-    postback.postback({'status':status,'job_name':'git_status'})
 
 def post_receive_hook(params):
     """Perform post-receive actions when changes are made to git repo.

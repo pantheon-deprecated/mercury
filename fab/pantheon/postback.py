@@ -32,11 +32,12 @@ def get_build_status(job, id):
 def get_data_from_keys(data, keys):
     return dict([(k, v) for k, v in data.iteritems() if k in keys])
 
-def read_workspace_data()
+def read_workspace_data():
     # change to hudson workspace for current job/build.
     # read file
     # convert to dict
     # return.
+    pass
 
 def _send_response(responsedict):
     """POST data to Prometheus.

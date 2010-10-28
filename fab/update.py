@@ -5,10 +5,6 @@ import tempfile
 import os
 import sys
 
-sys.path.append('/opt/pantheon')
-
-from tools.ptools import postback
-
 from pantheon import pantheon
 from pantheon import update
 
@@ -30,7 +26,7 @@ def update_site_core(project='pantheon', keep=None, uuid=None):
     """
     updater = update.Updater(project)
     result = updater.core_update(keep)
-    postback.postback({'job_name':'update_site_core', 'merge':result['status'], 'log':result['log'], 'keep':keep}, uuid)
+    #postback.postback({'job_name':'update_site_core', 'merge':result['status'], 'log':result['log'], 'keep':keep}, uuid)
     if result['status'] == 'success':
       drupal_update_status(project)
       
@@ -113,5 +109,7 @@ def drupal_update_status(project):
     drushrc = project +'_dev';
     text = local("drush @%s -n -p upc" % drushrc).rstrip()
     data = text.split("\n")
-    postback.postback({'update_status':data,'job_name':'drupal_update_status'})
+    #TODO: instead, do the work here, write to hudson workspace, and let the postback
+    # send data as a post build job.
+    #postback.postback({'update_status':data,'job_name':'drupal_update_status'})
     
