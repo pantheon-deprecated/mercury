@@ -1,3 +1,5 @@
+import os
+
 from pantheon import postback
 
 def postback_atlas():
@@ -26,6 +28,10 @@ def postback_atlas():
 
     # Send response to Atlas.
     postback.postback(response)
+
+def clear_postback_workspace():
+    if os.path.exists('/etc/pantheon/hudson/workspace'):
+        os.system('rm -f /etc/pantheon/hudson/workspace/*')
 
 if __name__ == '__main__':
     postback_atlas()
