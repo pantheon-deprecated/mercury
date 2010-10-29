@@ -81,14 +81,14 @@ def _parse_hook_params(params):
 
 
 class GitRepo():
-    
+
     def __init__(self, project):
         self.project = project
         self.repo = os.path.join('/var/git/projects', self.project)
         self.server = pantheon.PantheonServer()
         self.project_path = os.path.join(self.server.webroot, self.project)
 
-    def get_update_status(self):
+    def get_repo_status(self):
         """Return dict of dev/test and test/live diffs, and last 10 log entries.
 
         """
@@ -96,7 +96,7 @@ class GitRepo():
         head = self._get_last_commit('dev')
         test = self._get_last_commit('test')
         live = self._get_last_commit('live')
-        
+
         #dev/test diff
         diff_dev_test = self._get_diff_stat(test, head)
         #test/live diff
@@ -111,7 +111,7 @@ class GitRepo():
     def _get_last_commit(self, env):
         """Get last commit or tag for the given environment.
         env: environment.
-        
+
         returns commit hash for dev, or current tag for test/live.
 
         """

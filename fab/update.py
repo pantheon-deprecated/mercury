@@ -26,11 +26,14 @@ def update_site_core(project='pantheon', keep=None, uuid=None):
     """
     updater = update.Updater(project)
     result = updater.core_update(keep)
-    #postback.postback({'job_name':'update_site_core', 'merge':result['status'], 'log':result['log'], 'keep':keep}, uuid)
-    if result['status'] == 'success':
-      drupal_update_status(project)
-      
-      
+
+    # Determine what Hudson job is running this (where to write data).
+    job_name = postback.get_job_and_id()[0]
+    postback.write_build_data('update_site_core', result)
+
+    if result['merge'] == 'success':
+        drupal_update_status(project)
+
 
 def update_code(project, environment, tag=None, message=None):
     """ Update the working-tree for project/environment.
@@ -87,7 +90,7 @@ def update_files(project, environment, source_env):
 def git_diff(project, environment, revision_1, revision_2=None):
     """Return git diff
 
-    """ 
+    """
     updater = update.Updater(project, environment)
     if not revision_2:
            updater.run_command('git diff %s' % revision_1)
@@ -97,19 +100,26 @@ def git_diff(project, environment, revision_1, revision_2=None):
 def git_status(project, environment):
     """Return git status
 
-    """ 
+    """
     updater = update.Updater(project, environment)
     updater.run_command('git status')
+
+def git_repo_status(project):
+    """Post back to Atlas with the status of the project Repo.
+
+    """
+    repo = gittools.GitRepo(project)
+    status = repo.get_repo_status()
+
+    postback.write_build_data('git_repo_status', {'status': status})
 
 def drupal_update_status(project):
     """Return whether or not there's a core update available.
     This will post back directly rather than using a post-build action.
-    
+
     """
     drushrc = project +'_dev';
-    text = local("drush @%s -n -p upc" % drushrc).rstrip()
-    data = text.split("\n")
-    #TODO: instead, do the work here, write to hudson workspace, and let the postback
-    # send data as a post build job.
-    #postback.postback({'update_status':data,'job_name':'drupal_update_status'})
-    
+    status = local("drush @%s -n -p upc" % drushrc).rstrip().split('\n')
+
+    postback.write_build_data('drupal_update_status', {'status': status})
+
