@@ -51,13 +51,13 @@ def get_build_data(job_name):
     The data is read from the build_data.txt file created during a Hudson job.
 
     """
-    data = list()
+    data = dict()
     build_data_path = os.path.join(get_workspace(), 'build_data.txt')
     if os.path.isfile(build_data_path):
         with open(build_data_path, 'r') as f:
             while True:
                 try:
-                    data.append(cPickle.load(f))
+                    data.update(cPickle.load(f))
                 except (EOFError, ImportError, IndexError):
                     break
         local('rm -f %s' % build_data_path)
