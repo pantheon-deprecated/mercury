@@ -7,11 +7,11 @@ from fabric.api import *
 import update
 from pantheon import pantheon
 
-def initialize(vps="none"):
+def initialize():
     '''Initialize the Pantheon system.'''
     server = pantheon.PantheonServer()
-    _initialize_package_manager(vps, server)
-    _initialize_bcfg2(vps, server)
+    _initialize_package_manager(server)
+    _initialize_bcfg2(server)
     _initialize_iptables(server)
     _initialize_drush()
     _initialize_solr(server)
@@ -23,13 +23,12 @@ def init():
     initialize()
 
 
-def _initialize_package_manager(vps, server):
+def _initialize_package_manager(server):
     if server.distro == 'ubuntu':
         with cd(server.template_dir):
             local('cp apt.pantheon.list /etc/apt/sources.list.d/pantheon.list')
             local('cp apt.php.pin /etc/apt/preferences.d/php')
-            if (vps == "none"):
-                local('cp apt.openssh.pin /etc/apt/preferences.d/openssh')
+            local('cp apt.openssh.pin /etc/apt/preferences.d/openssh')
             local('apt-key add apt.ppakeys.txt')
         local('echo \'APT::Install-Recommends "0";\' >>  /etc/apt/apt.conf')
     elif server.distro == 'centos':
@@ -48,7 +47,7 @@ def _initialize_package_manager(vps, server):
     server.update_packages()
 
 
-def _initialize_bcfg2(vps, server):
+def _initialize_bcfg2(server):
     if server.distro == 'ubuntu':
         local('apt-get install -y bcfg2-server gamin python-gamin python-genshi')
     elif server.distro == 'centos':
@@ -70,24 +69,7 @@ def _initialize_bcfg2(vps, server):
         local('sed -i "s/\t/    /" /usr/lib/python2.4/site-packages/Bcfg2/Server/Plugins/TGenshi.py')
 
     pantheon.restart_bcfg2()
-    if (vps == "aws"):
-        local('mkdir /etc/pantheon')
-        with open('/etc/pantheon/aws.server', 'w') as f:
-            f.write('Created by Pantheon, please do not remove.')
-        local('touch /etc/pantheon/aws')
-        local('cp /opt/pantheon/bcfg2/TGenshi/mysql/apparmor/template.newtxt.G00_lucid /etc/apparmor.d/usr.sbin.mysqld')
-        local('groupadd mysql')
-        local('useradd -g mysql mysql')
-        local('mkdir -p /mnt/mysql/tmp')
-        local('chown -R root:root /mnt/mysql')
-        local('chmod -R 777 /mnt/mysql')
-        local('chown -R mysql:mysql /mnt/mysql/tmp')
-        local('chmod -R 1777 /mnt/mysql/tmp')
-        local('/usr/sbin/bcfg2 -vqed -p pantheon-aws', capture=False)
-    elif (vps == "ebs"):
-        local('/usr/sbin/bcfg2 -vqed -p pantheon-aws-ebs', capture=False)
-    else:
-        local('/usr/sbin/bcfg2 -vqed', capture=False)
+    local('/usr/sbin/bcfg2 -vqed', capture=False)
 
 
 def _initialize_iptables(server):

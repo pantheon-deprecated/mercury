@@ -33,9 +33,15 @@ def _test_for_previous_run():
 
 
 def _configure_ec2(server):
-    local('/etc/init.d/mysql stop')
-    local('/etc/init.d/varnish stop')
     local('chmod 1777 /tmp')
+    #lucid only
+    local('cp /opt/pantheon/bcfg2/TGenshi/mysql/apparmor/template.newtxt.G00_lucid /etc/apparmor.d/usr.sbin.mysqld')
+    local('mkdir -p /mnt/mysql/tmp')
+    local('chown -R root:root /mnt/mysql')
+    local('chmod -R 755 /mnt/mysql')
+    local('chown -R mysql:mysql /mnt/mysql/tmp')
+    local('chmod -R 1777 /mnt/mysql/tmp')
+    local('/etc/init.d/mysql stop')
     if(server.distro == 'centos'):
         local('mv /var/log/mysqld.log /mnt/mysql/')
         local('ln -s /mnt/mysql/mysqld.log /var/log/mysqld.log')
@@ -54,7 +60,12 @@ def _configure_ec2(server):
 
 def _configure_server(server):
     server.update_packages()
-    update.update_pantheon()
+    if os.path.exists("/etc/pantheon/aws.server"):
+        update.update_pantheon(vps=aws)
+    elif os.path.exists("/etc/pantheon/ebs.server"):
+        update.update_pantheon(vps=ebs)
+    else:
+        update.update_pantheon()
     local('cp /etc/pantheon/templates/tuneables /etc/pantheon/server_tuneables')
     local('chmod 755 /etc/pantheon/server_tuneables')
 
