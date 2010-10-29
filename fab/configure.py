@@ -55,9 +55,9 @@ def _configure_ec2(server):
 def _configure_server(server):
     server.update_packages()
     if os.path.exists("/etc/pantheon/aws.server"):
-        update.update_pantheon(vps=aws)
+        update.update_pantheon(vps='aws')
     elif os.path.exists("/etc/pantheon/ebs.server"):
-        update.update_pantheon(vps=ebs)
+        update.update_pantheon(vps='ebs')
     else:
         update.update_pantheon()
     local('cp /etc/pantheon/templates/tuneables /etc/pantheon/server_tuneables')
