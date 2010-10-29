@@ -127,7 +127,7 @@ def _initialize_drush():
     local('drush dl drush_make')
 
 
-def initialize_solr(server=pantheon.PantheonServer()):
+def initialize_solr(server):
     temp_dir = tempfile.mkdtemp()
     with cd(temp_dir):
         local('wget http://apache.osuosl.org/lucene/solr/1.4.1/apache-solr-1.4.1.tgz')

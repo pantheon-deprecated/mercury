@@ -26,10 +26,6 @@ def get_job_and_id():
     These are set (and retrieved) as environmental variables during Hudson jobs.
 
     """
-    print os.environ
-    print os.environ.get('JOB_NAME')
-    print os.environ.get('BUILD_NUMBER')
-    
     return (os.environ.get('JOB_NAME'), os.environ.get('BUILD_NUMBER'))
 
 def get_workspace():
