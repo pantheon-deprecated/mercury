@@ -37,10 +37,6 @@ def _configure_ec2(server):
     #lucid only
     local('cp /opt/pantheon/bcfg2/TGenshi/mysql/apparmor/template.newtxt.G00_lucid /etc/apparmor.d/usr.sbin.mysqld')
     local('mkdir -p /mnt/mysql/tmp')
-    local('chown -R root:root /mnt/mysql')
-    local('chmod -R 755 /mnt/mysql')
-    local('chown -R mysql:mysql /mnt/mysql/tmp')
-    local('chmod -R 1777 /mnt/mysql/tmp')
     local('/etc/init.d/mysql stop')
     if(server.distro == 'centos'):
         local('mv /var/log/mysqld.log /mnt/mysql/')
@@ -51,11 +47,9 @@ def _configure_ec2(server):
     local('mv /var/lib/mysql /mnt/mysql/lib')
     local('ln -s /mnt/mysql/lib /var/lib/mysql')
     local('/etc/init.d/varnish stop')
+    local('mkdir /mnt/varnish')
     local('mv /var/lib/varnish /mnt/varnish/lib')
     local('ln -s /mnt/varnish/lib /var/lib/varnish')
-    local('chown varnish:varnish /mnt/varnish/lib/pressflow/')
-    local('/etc/init.d/mysql start')
-    local('/etc/init.d/varnish start')
 
 
 def _configure_server(server):
