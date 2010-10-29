@@ -17,9 +17,9 @@ def update_pantheon(vps=None):
        local('/etc/init.d/bcfg2-server stop')
        local('cd /opt/pantheon; bzr up')
        pantheon.restart_bcfg2()
-       if (vps == aws):
+       if (vps == 'aws'):
               local('/usr/sbin/bcfg2 -vq -p pantheon-aws', capture=False)
-       elif (vps == ebs):
+       elif (vps == 'ebs'):
               local('/usr/sbin/bcfg2 -vq -p pantheon-aws-ebs', capture=False)
        else:
               local('/usr/sbin/bcfg2 -vq', capture=False)
