@@ -1,12 +1,15 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
-from fabric.api import *
 import datetime
 import tempfile
 import os
 import sys
 
+from pantheon import gittools
 from pantheon import pantheon
+from pantheon import postback
 from pantheon import update
+
+from fabric.api import *
 
 def update_pantheon():
        print("Updating Pantheon from Launchpad")
@@ -27,8 +30,6 @@ def update_site_core(project='pantheon', keep=None, uuid=None):
     updater = update.Updater(project)
     result = updater.core_update(keep)
 
-    # Determine what Hudson job is running this (where to write data).
-    job_name = postback.get_job_and_id()[0]
     postback.write_build_data('update_site_core', result)
 
     if result['merge'] == 'success':

@@ -5,6 +5,8 @@ import os
 import urllib2
 import uuid
 
+from fabric.api import local
+
 def postback(cargo, request_uuid=None, command='atlas'):
     """Send data back to Atlas.
     cargo: dict of data to send.
@@ -24,11 +26,14 @@ def get_job_and_id():
     These are set (and retrieved) as environmental variables during Hudson jobs.
 
     """
-    return {'job_name': os.environ.get('JOB_NAME'),
-            'build_number': os.environ.get('BUILD_NUMBER')}
+    print os.environ
+    print os.environ.get('JOB_NAME')
+    print os.environ.get('BUILD_NUMBER')
+    
+    return (os.environ.get('JOB_NAME'), os.environ.get('BUILD_NUMBER'))
 
 def get_workspace():
-    return os.environ.get('WORKSPACE')
+    return '/opt/pantheon/hudson/workspace'
 
 def get_build_info(job_name, build_number):
     """Return a dictionary of Hudson build information.
@@ -47,15 +52,15 @@ def get_build_data(job_name):
 
     """
     data = list()
-    with cd('/var/lib/hudson/jobs/workspace'):
-        if os.path.isfile('build_data.txt'):
-            with open('build_data.txt', 'r') as f:
-                while True:
-                    try:
-                        data.append(cPickle.load(f))
-                    except (EOFError, ImportError, IndexError):
-                        break
-            local('rm -f %s' % 'build_data.txt')
+    build_data_path = os.path.join(get_workspace(), 'build_data.txt')
+    if os.path.isfile(build_data_path):
+        with open(build_data_path, 'r') as f:
+            while True:
+                try:
+                    data.append(cPickle.load(f))
+                except (EOFError, ImportError, IndexError):
+                    break
+        local('rm -f %s' % build_data_path)
     return {'build_data': data}
 
 def write_build_data(response_type, data):
@@ -67,6 +72,7 @@ def write_build_data(response_type, data):
     data: dict to be written to file for later retrieval in Atlas postback.
 
     """
+    response = dict()
     response[response_type] = data
     build_data_path = os.path.join(get_workspace(),'build_data.txt')
 

@@ -16,7 +16,8 @@ def postback_atlas():
     """
     # Get job_name and build_number.
     job_name, build_number = postback.get_job_and_id()
-
+    print "job name " + job_name
+    print "build number " + build_number
     # Get build info 
     #     job_name, build_number, build_status, and build_parameters.
     response = postback.get_build_info(job_name, build_number)
@@ -25,6 +26,9 @@ def postback_atlas():
     #     Data from build actions (in hudson workspace).
     response.update(postback.get_build_data(job_name))
 
+    print response
     # Send response to Atlas.
     postback.postback(response)
 
+if __name__ == '__main__':
+    postback_atlas()

@@ -1,3 +1,4 @@
+import update
 from pantheon import install
 
 def install_site(project='pantheon', profile='pantheon', **kw):
@@ -80,6 +81,8 @@ class _PantheonProfile(install.InstallTools):
         self.build_vhost()
         self.build_drupal_cron()
         self.build_drush_alias()
+
+        update.git_repo_status(self.project)
 
         self.cleanup()
         self.server.restart_services()
