@@ -29,7 +29,7 @@ def get_job_and_id():
     return (os.environ.get('JOB_NAME'), os.environ.get('BUILD_NUMBER'))
 
 def get_workspace():
-    return '/opt/pantheon/hudson/workspace'
+    return '/etc/pantheon/hudson/workspace'
 
 def get_build_info(job_name, build_number):
     """Return a dictionary of Hudson build information.
