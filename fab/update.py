@@ -50,6 +50,9 @@ def update_code(project, environment, tag=None, message=None):
     updater.code_update(tag, message)
     updater.permissions_update()
 
+    # Send back repo status.
+    git_repo_status(project)
+
 
 def post_receive_update(project, dev_update=True):
     """Update development environment with changes pushed from remote.
