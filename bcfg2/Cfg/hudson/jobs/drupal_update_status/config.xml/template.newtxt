@@ -1,20 +1,15 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>Update site core code files.</description>
+  <description>Check on the status of the site and report back to the mothership</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
           <name>project</name>
-          <description>Project Name</description>
-          <defaultValue></defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>keep</name>
-          <description>Merge option if conflicts detected.</description>
-          <defaultValue></defaultValue>
+          <description>Project name</description>
+          <defaultValue>pantheon</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>uuid</name>
@@ -32,10 +27,25 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>cd /opt/pantheon/fab; /usr/bin/sudo /usr/bin/fab update_site_core:$$project,$$keep,$$uuid</command>
+      <command>cd /opt/pantheon/fab
+/usr/bin/sudo fab clear_postback_workspace
+/usr/bin/sudo fab drupal_update_status:project=$project</command>
     </hudson.tasks.Shell>
   </builders>
-  <publishers/>
+  <publishers>
+    <hudson.plugins.postbuildtask.PostbuildTask>
+      <tasks>
+        <hudson.plugins.postbuildtask.TaskProperties>
+          <logTexts>
+            <hudson.plugins.postbuildtask.LogProperties>
+              <logText></logText>
+              <operator>AND</operator>
+            </hudson.plugins.postbuildtask.LogProperties>
+          </logTexts>
+          <script>python /opt/pantheon/fab/atlas_postback.py</script>
+        </hudson.plugins.postbuildtask.TaskProperties>
+      </tasks>
+    </hudson.plugins.postbuildtask.PostbuildTask>
+  </publishers>
   <buildWrappers/>
 </project>
-
