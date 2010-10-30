@@ -37,7 +37,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>cd /opt/pantheon/fab; sudo fab restore_siteurl:$$tarball_url,$$project,$$environment</command>
+      <command>cd /opt/pantheon/fab; sudo fab restore_siteurl:$tarball_url,$project,$environment</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>

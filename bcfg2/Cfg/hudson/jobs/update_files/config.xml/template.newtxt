@@ -37,7 +37,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>cd /opt/pantheon/fab; /usr/bin/sudo /usr/bin/fab update_files:$$project,$$environment,$$source_env</command>
+      <command>cd /opt/pantheon/fab; /usr/bin/sudo /usr/bin/fab update_files:$project,$environment,$source_env</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
