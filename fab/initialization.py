@@ -28,7 +28,8 @@ def _initialize_package_manager(server):
         with cd(server.template_dir):
             local('cp apt.pantheon.list /etc/apt/sources.list.d/pantheon.list')
             local('cp apt.php.pin /etc/apt/preferences.d/php')
-            #local('cp apt.openssh.pin /etc/apt/preferences.d/openssh')
+            if not os.path.exists("/etc/pantheon/aws.server") or not os.path.exists("/etc/pantheon/ebs.server"):
+                local('cp apt.openssh.pin /etc/apt/preferences.d/openssh')
             local('apt-key add apt.ppakeys.txt')
         local('echo \'APT::Install-Recommends "0";\' >>  /etc/apt/apt.conf')
     elif server.distro == 'centos':
