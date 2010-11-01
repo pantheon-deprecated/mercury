@@ -49,6 +49,14 @@ def build_template(template_file, values):
     template = template.safe_substitute(values)
     return template
 
+def is_aws_server():
+    # Check if aws.server file was created during configure.
+    return os.path.isfile('/etc/pantheon/private.server')
+
+def is_ebs_server():
+    # Check if ebs.server file was created during configure.
+    return os.path.isfile('/etc/pantheon/private.server')
+
 def is_private_server():
     # Check if private.server file was created during configure.
     return os.path.isfile('/etc/pantheon/private.server')

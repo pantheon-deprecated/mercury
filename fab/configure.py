@@ -14,11 +14,10 @@ def configure():
     '''configure the Pantheon system.'''
     server = pantheon.PantheonServer()
     _test_for_previous_run()
-    if os.path.exists("/etc/pantheon/aws.server"):
+    if pantheon.is_aws_server():
         _configure_ec2(server)
     _configure_server(server)
-    _test_for_private_server(server)
-    _check_connectivity()
+    _check_connectivity(server)
     _configure_postfix(server)
     _restart_services(server)
     _configure_iptables(server)
@@ -57,26 +56,31 @@ def _configure_ec2(server):
 
 def _configure_server(server):
     server.update_packages()
-    if os.path.exists("/etc/pantheon/aws.server"):
+    if pantheon.is_aws_server:
         update.update_pantheon(vps='aws')
-    elif os.path.exists("/etc/pantheon/ebs.server"):
-        update.update_pantheon(vps='ebs')
     else:
         update.update_pantheon()
     local('cp /etc/pantheon/templates/tuneables /etc/pantheon/server_tuneables')
     local('chmod 755 /etc/pantheon/server_tuneables')
 
 
-def _test_for_private_server(server):
+# The Rackspace Cloud occasionally has connectivity issues unless a server gets
+# rebooted after initial provisioning.
+def _check_connectivity(server):
     try:
-        urllib2.urlopen('http://pki.getpantheon.com/info', timeout=10)
-        print 'Appears to be a getpantheon.com server'
-        _configure_certificates()
+        urllib2.urlopen('http://pki.getpantheon.com/', timeout=10)
+        print 'Connectivity to the PKI server seems to work.'
+         _configure_certificates()
         _initialize_support_account(server)
     except urllib2.URLError, e:
-        with open('/etc/pantheon/private.server', 'w') as f:
-            f.write('Created by Pantheon, please do not remove.')
-        print 'Appears to be a private server - skipping getpantheon.com-specific functions'
+        print "Connectivity error: ", e
+        # Bail if a connectivity reboot has already been attempted.
+        if os.path.exists("/etc/pantheon/connectivity_reboot"):
+            abort("A Pantheon connectivity reboot has already been attempted. Exiting.")
+        # Record the running of a connectivity reboot.
+        with open('/etc/pantheon/connectivity_reboot', 'w') as f:
+            f.write('Dear Rackspace: Fix this issue.')
+        local('sudo reboot')
 
 
 def _configure_certificates():
@@ -148,23 +152,6 @@ def _initialize_support_account(server):
         #local('cat ~/.ssh/id_rsa.pub > .ssh/authorized_keys')
         local('chmod 600 .ssh/authorized_keys')
         local('chown -R pantheon: .ssh')
-
-
-# The Rackspace Cloud occasionally has connectivity issues unless a server gets
-# rebooted after initial provisioning.
-def _check_connectivity():
-    try:
-        urllib2.urlopen('http://pki.getpantheon.com/', timeout=10)
-        print 'Connectivity to the PKI server seems to work.'
-    except urllib2.URLError, e:
-        print "Connectivity error: ", e
-        # Bail if a connectivity reboot has already been attempted.
-        if os.path.exists("/etc/pantheon/connectivity_reboot"):
-            abort("A Pantheon connectivity reboot has already been attempted. Exiting.")
-        # Record the running of a connectivity reboot.
-        with open('/etc/pantheon/connectivity_reboot', 'w') as f:
-            f.write('Dear Rackspace: Fix this issue.')
-        local('sudo reboot')
 
 
 def _configure_postfix(server):
