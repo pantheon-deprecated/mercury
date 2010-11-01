@@ -37,6 +37,10 @@ def _configure_ec2(server):
     #lucid only
     local('cp /opt/pantheon/bcfg2/TGenshi/mysql/apparmor/template.newtxt.G00_lucid /etc/apparmor.d/usr.sbin.mysqld')
     local('mkdir -p /mnt/mysql/tmp')
+    local('chown -R root:root /mnt/mysql')
+    local('chmod -R 777 /mnt/mysql')
+    local('chown -R mysql:mysql /mnt/mysql/tmp')
+    local('chmod -R 1777 /mnt/mysql/tmp')
     local('/etc/init.d/mysql stop')
     if(server.distro == 'centos'):
         local('mv /var/log/mysqld.log /mnt/mysql/')
