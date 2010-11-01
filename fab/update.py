@@ -62,11 +62,11 @@ def post_receive_update(project, dev_update=True):
     # if coming from fabric, update could be string. Make bool.
     dev_update = eval(str(dev_update))
     updater = update.Updater(project, 'dev')
+    # Update development environment permissions.
     if dev_update:
         updater.permissions_update()
-    else:
-        # Let hudson post back the gitstatus, but do no processing.
-        pass
+    # Send back repo status
+    git_repo_status(project)
 
 def rebuild_environment(project, environment):
     """Rebuild the project/environment with files and data from 'live'.

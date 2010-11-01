@@ -54,8 +54,8 @@ def post_receive_hook(params):
                             '%s' % dev_head).rstrip('\n').split('\n')
                     if ((author_name != 'Hudson User') and
                             (author_email != 'hudson@getpantheon')):
-                        # If author is not Hudson, report back - but don't update
-                        # the development environment.
+                        # If author is not Hudson, report back repo status 
+                        # but don't update the development environment or permissions.
                         local('curl http://127.0.0.1:8090/job/post_receive_update/' + \
                               'buildWithParameters?project=%s\\&dev_update=False' % project)
 
