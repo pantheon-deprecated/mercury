@@ -6,9 +6,9 @@
   <properties>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
-	<hudson.model.StringParameterDefinition>
-          <name>uuid</name>
-          <description>Job Id</description>
+        <hudson.model.StringParameterDefinition>
+          <name>task_id</name>
+          <description>Task Id</description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>

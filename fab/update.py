@@ -20,7 +20,7 @@ def update_pantheon():
        local('/usr/sbin/bcfg2 -vq', capture=False)
        print("Pantheon Updated")
 
-def update_site_core(project='pantheon', keep=None, uuid=None):
+def update_site_core(project='pantheon', keep=None, task_id=None):
     """Update Drupal core (from Drupal or Pressflow, to latest Pressflow).
        keep: Option when merge fails:
              'ours': Keep local changes when there are conflicts.
@@ -30,7 +30,7 @@ def update_site_core(project='pantheon', keep=None, uuid=None):
     """
     updater = update.Updater(project)
     result = updater.core_update(keep)
-    postback.postback({'job_name':'update_site_core', 'merge':result['status'], 'log':result['log'], 'keep':keep}, uuid)
+    postback.postback({'job_name':'update_site_core', 'merge':result['status'], 'log':result['log'], 'keep':keep}, task_id)
     if result['status'] == 'success':
       drupal_update_status(project)
       

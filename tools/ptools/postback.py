@@ -3,7 +3,7 @@ import json
 import urllib2
 import uuid
 
-def postback(cargo, request_uuid=None, command='atlas'):
+def postback(cargo, task_id=None, command='atlas'):
     """Send data back to Atlas.
     cargo: dict of data to send.
     command: Prometheus command.
@@ -15,7 +15,7 @@ def postback(cargo, request_uuid=None, command='atlas'):
                            'command':command,
                            'method':'POST',
                            'response': cargo,
-                           'response_to': {'uuid':request_uuid}})
+                           'response_to': {'task_id':task_id}})
 
 def _send_response(responsedict):
     """POST data to Prometheus.
