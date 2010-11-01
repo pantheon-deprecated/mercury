@@ -21,9 +21,9 @@
           <description>environment to files code from</description>
           <defaultValue>live</defaultValue>
         </hudson.model.StringParameterDefinition>
-	<hudson.model.StringParameterDefinition>
-          <name>uuid</name>
-          <description>Job Id</description>
+        <hudson.model.StringParameterDefinition>
+          <name>task_id</name>
+          <description>Task Id</description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>

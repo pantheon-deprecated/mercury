@@ -7,7 +7,7 @@ import uuid
 
 from fabric.api import local
 
-def postback(cargo, request_uuid=None, command='atlas'):
+def postback(cargo, task_id=None, command='atlas'):
     """Send data back to Atlas.
     cargo: dict of data to send.
     command: Prometheus command.
@@ -19,7 +19,7 @@ def postback(cargo, request_uuid=None, command='atlas'):
                            'command':command,
                            'method':'POST',
                            'response': cargo,
-                           'response_to': {'uuid':request_uuid}})
+                           'response_to': {'task_id':task_id}})
 
 def get_job_and_id():
     """Return the job name and build number.
@@ -104,15 +104,17 @@ def _send_response(responsedict):
     """
     host = 'jobs.getpantheon.com'
     certificate = '/etc/pantheon/system.pem'
-    tube = 'atlas-in'
+    celery = 'atlas.notify'
     headers = {'Content-Type': 'application/json'}
 
     connection = httplib.HTTPSConnection(host,
                                          key_file = certificate,
                                          cert_file = certificate)
-    connection.request('POST', '/%s/' % tube,
+
+    connection.request('POST', '/%s/' % celery,
                        json.dumps(responsedict),
                        headers)
+
     response = connection.getresponse()
     return response
 

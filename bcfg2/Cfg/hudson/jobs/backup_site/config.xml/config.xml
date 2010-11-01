@@ -12,8 +12,8 @@
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>uuid</name>
-          <description>Job Id</description>
+          <name>task_id</name>
+          <description>Task Id</description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
@@ -29,7 +29,7 @@
     <hudson.tasks.Shell>
       <command>cd /opt/pantheon/fab
 /usr/bin/sudo fab clear_postback_workspace
-/usr/bin/sudo fab backup_site:archive_name=$uuid,project=$project</command>
+/usr/bin/sudo fab backup_site:archive_name=$task_id,project=$project</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>

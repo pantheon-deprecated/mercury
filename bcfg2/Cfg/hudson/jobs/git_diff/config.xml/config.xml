@@ -27,8 +27,8 @@
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
 	<hudson.model.StringParameterDefinition>
-          <name>uuid</name>
-          <description>Job Id</description>
+          <name>task_id</name>
+          <description>Task Id</description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
