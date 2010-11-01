@@ -69,7 +69,7 @@ def _initialize_bcfg2(server):
         local('sed -i "s/\t/    /" /usr/lib/python2.4/site-packages/Bcfg2/Server/Plugins/TGenshi.py')
 
     pantheon.restart_bcfg2()
-    if os.path.exists("/etc/pantheon/aws.server") || os.path.exists("/etc/pantheon/ebs.server"):
+    if os.path.exists("/etc/pantheon/aws.server") or os.path.exists("/etc/pantheon/ebs.server"):
         #start with ebs build to mitigate /mnt issues on AWS.
         local('/usr/sbin/bcfg2 -vqed -p pantheon-aws-ebs', capture=False)
     else:
