@@ -108,7 +108,7 @@ Pin: release a=karmic-updates
 
 Package: php5-mcrypt
 Pin-Priority: 991
-Pin: release a=karmic-updates
+Pin: release a=karmic
 
 Package: php5-memcache
 Pin-Priority: 991

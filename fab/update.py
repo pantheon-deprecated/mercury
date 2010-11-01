@@ -12,12 +12,17 @@ from tools.ptools import postback
 from pantheon import pantheon
 from pantheon import update
 
-def update_pantheon():
+def update_pantheon(vps=None):
        print("Updating Pantheon from Launchpad")
        local('/etc/init.d/bcfg2-server stop')
        local('cd /opt/pantheon; bzr up')
        pantheon.restart_bcfg2()
-       local('/usr/sbin/bcfg2 -vq', capture=False)
+       if (vps == 'aws'):
+              local('/usr/sbin/bcfg2 -vq -p pantheon-aws', capture=False)
+       elif (vps == 'ebs'):
+              local('/usr/sbin/bcfg2 -vq -p pantheon-aws-ebs', capture=False)
+       else:
+              local('/usr/sbin/bcfg2 -vq', capture=False)
        print("Pantheon Updated")
 
 def update_site_core(project='pantheon', keep=None, task_id=None):
