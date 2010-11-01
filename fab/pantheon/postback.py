@@ -7,7 +7,12 @@ import uuid
 
 from fabric.api import local
 
-def postback(cargo, task_id=None, command='atlas'):
+WORKSPACE = '/etc/pantheon/hudson/workspace'
+
+def get_workspace():
+    return WORKSPACE
+
+def postback(cargo, command='atlas'):
     """Send data back to Atlas.
     cargo: dict of data to send.
     command: Prometheus command.
@@ -19,7 +24,7 @@ def postback(cargo, task_id=None, command='atlas'):
                            'command':command,
                            'method':'POST',
                            'response': cargo,
-                           'response_to': {'task_id':task_id}})
+                           'response_to': {'task_id':cargo.get('task_id')}})
 
 def get_job_and_id():
     """Return the job name and build number.
@@ -27,9 +32,6 @@ def get_job_and_id():
 
     """
     return (os.environ.get('JOB_NAME'), os.environ.get('BUILD_NUMBER'))
-
-def get_workspace():
-    return '/etc/pantheon/hudson/workspace'
 
 def get_build_info(job_name, build_number):
     """Return a dictionary of Hudson build information.
@@ -62,18 +64,15 @@ def get_build_data(job_name):
 def write_build_data(response_type, data):
     """ Write pickled data to workspace for hudson job_name.
 
-    job_name: Hudson job name. Data will be stored in this workspace.
     response_type: The type of response data (generally a job name). May not
                be the same as the initiating hudson job (multiple responses).
     data: dict to be written to file for later retrieval in Atlas postback.
 
     """
-    response = dict()
-    response[response_type] = data
-    build_data_path = os.path.join(get_workspace(),'build_data.txt')
+    build_data_path = os.path.join(get_workspace(), 'build_data.txt')
 
     with open(build_data_path, 'a') as f:
-        cPickle.dump(response, f)
+        cPickle.dump({response_type:data}, f)
 
 def _get_build_parameters(data):
     """Return the build parameters from Hudson build API data.
@@ -93,7 +92,6 @@ def _get_hudson_data(job, build_id):
         req = urllib2.Request('http://localhost:8090/job/%s/%s/api/python' % (
                                                                job, build_id))
         return eval(urllib2.urlopen(req).read())
-        #return eval(urllib2.urlopen(req).read()).get('result').lower()
     except urllib2.URLError:
         return None
 
@@ -117,5 +115,4 @@ def _send_response(responsedict):
 
     response = connection.getresponse()
     return response
-
 
