@@ -33,7 +33,6 @@ def _test_for_previous_run():
 
 
 def _configure_ec2(server):
-    local('chmod 1777 /tmp')
     #lucid only
     local('cp /opt/pantheon/bcfg2/TGenshi/mysql/apparmor/template.newtxt.G00_lucid /etc/apparmor.d/usr.sbin.mysqld')
     local('mkdir -p /mnt/mysql/tmp')

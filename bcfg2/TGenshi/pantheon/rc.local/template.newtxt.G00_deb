@@ -15,6 +15,9 @@
 # ADDED BY PANTHEON #
 
 if [ ! -f /etc/pantheon/incep ]; then
+  #AWS starts with the wrong permissions on /tmp
+  chmod 1777 /tmp
+
   # Update Hudson first (if necessary) to prevent config from self-destructing
   apt-get update
   apt-get -y upgrade hudson
