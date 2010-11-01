@@ -69,7 +69,11 @@ def _initialize_bcfg2(server):
         local('sed -i "s/\t/    /" /usr/lib/python2.4/site-packages/Bcfg2/Server/Plugins/TGenshi.py')
 
     pantheon.restart_bcfg2()
-    local('/usr/sbin/bcfg2 -vqed', capture=False)
+    if os.path.exists("/etc/pantheon/aws.server") || os.path.exists("/etc/pantheon/ebs.server"):
+        #start with ebs build to mitigate /mnt issues on AWS.
+        local('/usr/sbin/bcfg2 -vqed -p pantheon-aws-ebs', capture=False)
+    else:
+        local('/usr/sbin/bcfg2 -vqed', capture=False)
 
 
 def _initialize_iptables(server):
