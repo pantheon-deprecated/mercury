@@ -51,7 +51,7 @@ def build_template(template_file, values):
 
 def is_private_server():
     # Check if private.server file was created during configure.
-    return os.path.isfile('/etc/pantheon/private.server'):
+    return os.path.isfile('/etc/pantheon/private.server')
 
 def random_string(length):
     """ Create random string of ascii letters & digits.
