@@ -6,16 +6,16 @@ import uuid
 def postback(cargo, task_id=None, command='atlas'):
     """Send data back to Atlas.
     cargo: dict of data to send.
+    task_id: uuid of requesting job.
     command: Prometheus command.
-    uuid: uuid of requesting job.
 
     """
 
-    return _send_response({'uuid': uuid.uuid4().hex,
+    return _send_response({'id': str(uuid.uuid4()),
                            'command':command,
                            'method':'POST',
                            'response': cargo,
-                           'response_to': {'task_id':task_id}})
+                           'response_to': {'task_id': task_id}})
 
 def _send_response(responsedict):
     """POST data to Prometheus.
