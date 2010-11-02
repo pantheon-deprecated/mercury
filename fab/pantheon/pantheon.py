@@ -51,11 +51,11 @@ def build_template(template_file, values):
 
 def is_aws_server():
     # Check if aws.server file was created during configure.
-    return os.path.isfile('/etc/pantheon/private.server')
+    return os.path.isfile('/etc/pantheon/aws.server')
 
 def is_ebs_server():
     # Check if ebs.server file was created during configure.
-    return os.path.isfile('/etc/pantheon/private.server')
+    return os.path.isfile('/etc/pantheon/ebs.server')
 
 def is_private_server():
     # Check if private.server file was created during configure.
