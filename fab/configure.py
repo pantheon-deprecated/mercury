@@ -17,7 +17,8 @@ def configure():
     if pantheon.is_aws_server():
         _configure_ec2(server)
     _configure_server(server)
-    _check_connectivity(server)
+    if not pantheon.is_private_server():
+        _check_connectivity(server)
     _configure_postfix(server)
     _restart_services(server)
     _configure_iptables(server)
