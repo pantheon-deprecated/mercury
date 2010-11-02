@@ -90,7 +90,7 @@ def _initialize_bcfg2(server):
     pantheon.restart_bcfg2()
     if pantheon.is_aws_server() or pantheon.is_ebs_server():
         #start with ebs build to mitigate /mnt issues on AWS.
-        update.update_pantheon(vps='aws')
+        update.update_pantheon(vps='ebs')
     else:
         update.update_pantheon()
 
