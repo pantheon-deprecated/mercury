@@ -70,7 +70,7 @@ def _check_connectivity(server):
     try:
         urllib2.urlopen('http://pki.getpantheon.com/', timeout=10)
         print 'Connectivity to the PKI server seems to work.'
-         _configure_certificates()
+        _configure_certificates()
         _initialize_support_account(server)
     except urllib2.URLError, e:
         print "Connectivity error: ", e
