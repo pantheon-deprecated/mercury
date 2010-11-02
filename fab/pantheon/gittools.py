@@ -48,6 +48,13 @@ def post_receive_hook(params):
                             dev_update = local('env -i git pull', capture=False)
                     local('curl http://127.0.0.1:8090/job/post_receive_update/' + \
                           'buildWithParameters?project=%s\\&dev_update=True' % project)
+                    # Output status to the PUSH initiator.
+                    if dev_update.failed:
+                        print "\nWARNING: Development environment could not be updated."
+                        print "\nPlease review any error messages above, and resolve any conflicts."
+                        print "\n\n"
+                    else:
+                        print "\nDevelopment environment updated.\n"
                 else:
                     author_name, author_email = local(
                             'env -i git log -1 --pretty=format:%an%n%ae ' +
@@ -58,14 +65,6 @@ def post_receive_hook(params):
                         # but don't update the development environment or permissions.
                         local('curl http://127.0.0.1:8090/job/post_receive_update/' + \
                               'buildWithParameters?project=%s\\&dev_update=False' % project)
-
-        # Output status to the PUSH initiator.
-        if dev_update.failed:
-            print "\nWARNING: Development environment could not be updated."
-            print "\nPlease review any error messages above, and resolve any conflicts."
-            print "\n\n"
-        else:
-            print "\nDevelopment environment updated.\n"
     else:
         print "\n\n"
         print "WARNING: No development environment for '%s', was found.\n" % (project)
