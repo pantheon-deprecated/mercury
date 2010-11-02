@@ -36,7 +36,7 @@ def _initialize_config(vps):
             f.write('Setting server to an EBS server')
         with open('/etc/pantheon/private.server', 'w') as f:
             f.write('Setting server to a non-getpantheon.com server')
-    elif (vps == 'other'):
+    elif (vps == 'default'):
         with open('/etc/pantheon/private.server', 'w') as f:
             f.write('Setting server to a non-getpantheon.com server')
 
