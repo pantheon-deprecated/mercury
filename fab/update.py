@@ -12,15 +12,20 @@ from tools.ptools import postback
 from pantheon import pantheon
 from pantheon import update
 
-def update_pantheon():
+def update_pantheon(vps=None):
        print("Updating Pantheon from Launchpad")
        local('/etc/init.d/bcfg2-server stop')
        local('cd /opt/pantheon; bzr up')
        pantheon.restart_bcfg2()
-       local('/usr/sbin/bcfg2 -vq', capture=False)
+       if (vps == 'aws'):
+              local('/usr/sbin/bcfg2 -vq -p pantheon-aws', capture=False)
+       elif (vps == 'ebs'):
+              local('/usr/sbin/bcfg2 -vq -p pantheon-aws-ebs', capture=False)
+       else:
+              local('/usr/sbin/bcfg2 -vq', capture=False)
        print("Pantheon Updated")
 
-def update_site_core(project='pantheon', keep=None):
+def update_site_core(project='pantheon', keep=None, task_id=None):
     """Update Drupal core (from Drupal or Pressflow, to latest Pressflow).
        keep: Option when merge fails:
              'ours': Keep local changes when there are conflicts.
@@ -29,8 +34,12 @@ def update_site_core(project='pantheon', keep=None):
              None: Reset to ORIG_HEAD if merge fails.
     """
     updater = update.Updater(project)
-    updater.core_update(keep)
-    drupal_update_status(project)
+    result = updater.core_update(keep)
+    postback.postback({'job_name':'update_site_core', 'merge':result['status'], 'log':result['log'], 'keep':keep}, task_id)
+    if result['status'] == 'success':
+      drupal_update_status(project)
+      
+      
 
 def update_code(project, environment, tag=None, message=None):
     """ Update the working-tree for project/environment.

@@ -17,5 +17,5 @@ if __name__ == '__main__':
     response_keys = ['build_status', 'job_name', 'build_number', 'project']
     responsebody = dict([(k, v) for k, v in results.iteritems() if k in response_keys])
 
-    postback.postback(responsebody, results.get('uuid'))
+    postback.postback(responsebody, results.get('task_id'))
 

@@ -36,7 +36,8 @@ class Updater():
         with cd(os.path.join(self.project_path, 'dev')):
             with settings(warn_only=True):
                 # Merge latest pressflow.
-                merge = local('git pull origin master', capture=False)
+                merge = local('git pull origin master')
+                print merge
 
             # Handle failed merges
             if merge.failed:
@@ -44,12 +45,14 @@ class Updater():
                 if keep == 'ours':
                     print 'Re-merging - keeping local changes on conflict.'
                     local('git reset --hard ORIG_HEAD')
-                    local('git pull -s recursive -Xours origin master')
+                    merge = local('git pull -s recursive -Xours origin master')
+                    print merge
                     local('git push')
                 elif keep == 'theirs':
                     print 'Re-merging - keeping upstream changes on conflict.'
                     local('git reset --hard ORIG_HEAD')
-                    local('git pull -s recursive -Xtheirs origin master')
+                    merge = local('git pull -s recursive -Xtheirs origin master')
+                    print merge
                     local('git push')
                 elif keep == 'force':
                     print 'Leaving merge conflicts. Please manually resolve.'
@@ -57,9 +60,11 @@ class Updater():
                     #TODO: How do we want to report this back to user?
                     print 'Rolling back failed changes.'
                     local('git reset --hard ORIG_HEAD')
+                    return {'status':'fail','log':merge}
             # Successful merge.
             else:
                 local('git push')
+        return {'status':'success','log':merge}
                 
 
     def code_update(self, tag, message):

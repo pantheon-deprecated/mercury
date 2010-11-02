@@ -49,6 +49,10 @@ def build_template(template_file, values):
     template = template.safe_substitute(values)
     return template
 
+def is_private_server():
+    # Check if private.server file was created during configure.
+    return os.path.isfile('/etc/pantheon/private.server')
+
 def random_string(length):
     """ Create random string of ascii letters & digits.
     length: Int. Character length of string to return.
@@ -264,7 +268,9 @@ class PantheonServer:
     def create_vhost(self, filename, vhost_dict):
         """
         filename:  vhost filename
-        vhost_dict: project:
+        vhost_dict: server_name:
+                    server_alias:
+                    project:
                     environment:
                     db_name:
                     db_username:

@@ -3,6 +3,8 @@
    <Path name='/etc/pantheon/templates/cron' altsrc='/pantheon/cron'/>
    <Path name='/etc/pantheon/templates/iptables' altsrc='/pantheon/iptables'/>
    <Path name='/etc/pantheon/templates/tuneables' altsrc='/pantheon/tuneables'/>
+   <Path name='/etc/skel/CHANGELOG.txt' altsrc='/root/CHANGELOG.txt'/>
+   <Path name='/etc/skel/README.txt' altsrc='/root/README.txt'/>
 
    <BoundPath type='directory' owner='root' group='root' perms='0700' name='/etc/pantheon/logs'/>
 

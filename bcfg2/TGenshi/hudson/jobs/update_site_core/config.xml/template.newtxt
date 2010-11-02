@@ -17,8 +17,8 @@
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>uuid</name>
-          <description>Job Id</description>
+          <name>task_id</name>
+          <description>Task Id</description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
@@ -32,7 +32,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>cd /opt/pantheon/fab; /usr/bin/sudo /usr/bin/fab update_site_core:$$project,$$keep</command>
+      <command>cd /opt/pantheon/fab; /usr/bin/sudo /usr/bin/fab update_site_core:$$project,$$keep,$$task_id</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>

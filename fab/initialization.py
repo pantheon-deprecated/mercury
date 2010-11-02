@@ -7,12 +7,11 @@ from fabric.api import *
 import update
 from pantheon import pantheon
 
-def initialize(vps="none"):
+def initialize():
     '''Initialize the Pantheon system.'''
     server = pantheon.PantheonServer()
-    _initialize_support_account(server)
     _initialize_package_manager(server)
-    _initialize_bcfg2(vps, server)
+    _initialize_bcfg2(server)
     _initialize_iptables(server)
     _initialize_drush()
     _initialize_solr(server)
@@ -23,39 +22,14 @@ def init():
     '''Alias of "initialize"'''
     initialize()
 
-def _initialize_support_account(server):
-    '''Generate a public/private key pair for root.'''
-    #local('mkdir -p ~/.ssh')
-    #with cd('~/.ssh'):
-    #    with settings(warn_only=True):
-    #        local('[ -f id_rsa ] || ssh-keygen -trsa -b1024 -f id_rsa -N ""')
-
-    '''Set up the Pantheon support account with sudo and the proper keys.'''
-    sudoers = local('cat /etc/sudoers')
-    if '%sudo ALL=(ALL) NOPASSWD: ALL' not in sudoers:
-        local('echo "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers')
-    if 'pantheon' not in local('cat /etc/passwd'):
-        if server.distro == 'ubuntu':
-            local('useradd pantheon --base-dir=/var --comment="Pantheon Support"'
-                  ' --create-home --groups=' + server.web_group + ',sudo --shell=/bin/bash')
-        elif server.distro == 'centos':
-            local('useradd pantheon --base-dir=/var --comment="Pantheon Support"'
-                  ' --create-home  --shell=/bin/bash')
-    with cd('~pantheon'):
-        local('mkdir -p .ssh')
-        local('chmod 700 .ssh')
-        pantheon.copy_template('authorized_keys', '~pantheon/.ssh/')
-        #local('cat ~/.ssh/id_rsa.pub > .ssh/authorized_keys')
-        local('chmod 600 .ssh/authorized_keys')
-        local('chown -R pantheon: .ssh')
-
 
 def _initialize_package_manager(server):
     if server.distro == 'ubuntu':
         with cd(server.template_dir):
             local('cp apt.pantheon.list /etc/apt/sources.list.d/pantheon.list')
             local('cp apt.php.pin /etc/apt/preferences.d/php')
-            local('cp apt.openssh.pin /etc/apt/preferences.d/openssh')
+            if not os.path.exists("/etc/pantheon/aws.server") and not os.path.exists("/etc/pantheon/ebs.server"):
+                local('cp apt.openssh.pin /etc/apt/preferences.d/openssh')
             local('apt-key add apt.ppakeys.txt')
         local('echo \'APT::Install-Recommends "0";\' >>  /etc/apt/apt.conf')
     elif server.distro == 'centos':
@@ -74,7 +48,7 @@ def _initialize_package_manager(server):
     server.update_packages()
 
 
-def _initialize_bcfg2(vps, server):
+def _initialize_bcfg2(server):
     if server.distro == 'ubuntu':
         local('apt-get install -y bcfg2-server gamin python-gamin python-genshi')
     elif server.distro == 'centos':
@@ -96,9 +70,8 @@ def _initialize_bcfg2(vps, server):
         local('sed -i "s/\t/    /" /usr/lib/python2.4/site-packages/Bcfg2/Server/Plugins/TGenshi.py')
 
     pantheon.restart_bcfg2()
-    if (vps == "aws"):
-        local('/usr/sbin/bcfg2 -vqed -p pantheon-aws', capture=False)
-    elif (vps == "ebs"):
+    if os.path.exists("/etc/pantheon/aws.server") or os.path.exists("/etc/pantheon/ebs.server"):
+        #start with ebs build to mitigate /mnt issues on AWS.
         local('/usr/sbin/bcfg2 -vqed -p pantheon-aws-ebs', capture=False)
     else:
         local('/usr/sbin/bcfg2 -vqed', capture=False)

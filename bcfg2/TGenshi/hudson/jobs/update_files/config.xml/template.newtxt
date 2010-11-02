@@ -7,28 +7,23 @@
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
-          <name>source_project</name>
-          <description>project to copy files from</description>
+          <name>project</name>
+          <description>project to use</description>
           <defaultValue>pantheon</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>source_environment</name>
-          <description>environment to copy files from</description>
+          <name>environment</name>
+          <description>environment to copy files to</description>
+          <defaultValue>test</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>source_env</name>
+          <description>environment to files code from</description>
           <defaultValue>live</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>target_project</name>
-          <description>project to copy files to</description>
-          <defaultValue>pantheon</defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>target_environment</name>
-          <description>environment to files code to</description>
-          <defaultValue>test</defaultValue>
-        </hudson.model.StringParameterDefinition>
-	<hudson.model.StringParameterDefinition>
-          <name>uuid</name>
-          <description>Job Id</description>
+          <name>task_id</name>
+          <description>Task Id</description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
@@ -42,7 +37,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>cd /opt/pantheon/fab; /usr/bin/sudo /usr/bin/fab update_files:$$source_project,$$source_environment,$$target_project,$$target_environment</command>
+      <command>cd /opt/pantheon/fab; /usr/bin/sudo /usr/bin/fab update_files:$$project,$$environment,$$source_env</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>

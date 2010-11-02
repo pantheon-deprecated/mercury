@@ -21,7 +21,7 @@ def _drush_download(modules):
 
 class InstallTools:
     """ Generic Drupal installation helper functions.
-    
+
     """
 
     def __init__(self, project):
@@ -179,7 +179,14 @@ class InstallTools:
         """
         for env in environments:
 
-            vhost_dict = {'project': self.project,
+            if pantheon.is_private_server():
+                server_alias = '%s.*' % env
+            else:
+                server_alias = '%s.*.gotpantheon.com' % env
+
+            vhost_dict = {'server_name': env,
+                          'server_alias': server_alias,
+                          'project': self.project,
                           'environment': env,
                           'db_name': '%s_%s' % (self.project, env),
                           'db_username':self.project,
@@ -230,11 +237,15 @@ class InstallTools:
         environments: Optional. List.
 
         """
-        ldap_group = self.server.get_ldap_group()
-        with cd(self.server.webroot):
-            local('chown -R %s:%s %s' % (ldap_group, ldap_group, self.project))
-            local('chmod -R g+w %s' % (self.project))
-
+        if os.path.exists("/etc/pantheon/ldapgroup"):
+            ldap_group = self.server.get_ldap_group()
+            with cd(self.server.webroot):
+                local('chown -R %s:%s %s' % (ldap_group, ldap_group, self.project))
+        else:
+            with cd(self.server.webroot):
+                local('chown -R %s:%s %s' % (self.server.web_group, self.server.web_group, self.project))
+                
+        local('chmod -R g+w %s' % (self.project))
         for env in environments:
             site_dir = os.path.join(self.server.webroot, \
                                     '%s/%s/sites/default' % (self.project, env))
