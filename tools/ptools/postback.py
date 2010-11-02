@@ -11,7 +11,7 @@ def postback(cargo, task_id=None, command='atlas'):
 
     """
 
-    return _send_response({'id': uuid.uuid4(),
+    return _send_response({'id': str(uuid.uuid4()),
                            'command':command,
                            'method':'POST',
                            'response': cargo,
