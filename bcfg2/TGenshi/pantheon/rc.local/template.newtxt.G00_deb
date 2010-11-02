@@ -15,9 +15,13 @@
 # ADDED BY PANTHEON #
 
 if [ ! -f /etc/pantheon/incep ]; then
+  #AWS starts with the wrong permissions on /tmp
+  chmod 1777 /tmp
+
   # Update Hudson first (if necessary) to prevent config from self-destructing
   apt-get update
   apt-get -y upgrade hudson
+  /etc/init.d/hudson restart
 
   # Wait for Hudson to spin Up
   while [ "`curl -sL --connect-timeout 1 -w "%{http_code}\\n" "127.0.0.1:8090" -o /dev/null`" != "200" ]; do

@@ -2,21 +2,23 @@
 from fabric.api import *
 import os
 
+
 from pantheon import pantheon
 import update
 import time
 import urllib2
 import json
 
-def configure(vps="none"):
+
+def configure():
     '''configure the Pantheon system.'''
     server = pantheon.PantheonServer()
     _test_for_previous_run()
-    _check_connectivity()
+    if os.path.exists("/etc/pantheon/aws.server"):
+        _configure_ec2(server)
     _configure_server(server)
-    _configure_certificates()
-    if (vps == "aws"):
-        _config_ec2_(server)
+    _test_for_private_server(server)
+    _check_connectivity()
     _configure_postfix(server)
     _restart_services(server)
     _configure_iptables(server)
@@ -24,31 +26,58 @@ def configure(vps="none"):
     _mark_incep(server)
     _report()
 
+
 def _test_for_previous_run():
     if os.path.exists("/etc/pantheon/incep"):
         abort("Pantheon config has already run. Exiting.")
 
-# The Rackspace Cloud occasionally has connectivity issues unless a server gets
-# rebooted after initial provisioning.
-def _check_connectivity():
-    try:
-        urllib2.urlopen('http://pki.getpantheon.com/', timeout=10)
-        print 'Connectivity to the PKI server seems to work.'
-    except urllib2.URLError, e:
-        print "Connectivity error: ", e
-        # Bail if a connectivity reboot has already been attempted.
-        if os.path.exists("/etc/pantheon/connectivity_reboot"):
-            abort("A Pantheon connectivity reboot has already been attempted. Exiting.")
-        # Record the running of a connectivity reboot.
-        with open('/etc/pantheon/connectivity_reboot', 'w') as f:
-            f.write('Dear Rackspace: Fix this issue.')
-        local('sudo reboot')
+
+def _configure_ec2(server):
+    #lucid only
+    local('cp /opt/pantheon/bcfg2/TGenshi/mysql/apparmor/template.newtxt.G00_lucid /etc/apparmor.d/usr.sbin.mysqld')
+    local('mkdir -p /mnt/mysql/tmp')
+    local('chown -R root:root /mnt/mysql')
+    local('chmod -R 777 /mnt/mysql')
+    local('chown -R mysql:mysql /mnt/mysql/tmp')
+    local('chmod -R 1777 /mnt/mysql/tmp')
+    local('/etc/init.d/mysql stop')
+    if(server.distro == 'centos'):
+        local('mv /var/log/mysqld.log /mnt/mysql/')
+        local('ln -s /mnt/mysql/mysqld.log /var/log/mysqld.log')
+    else:
+        local('mv /var/log/mysql /mnt/mysql/log')
+        local('ln -s /mnt/mysql/log /var/log/mysql')
+    local('mv /var/lib/mysql /mnt/mysql/lib')
+    local('ln -s /mnt/mysql/lib /var/lib/mysql')
+    local('/etc/init.d/varnish stop')
+    local('mkdir /mnt/varnish')
+    local('mv /var/lib/varnish /mnt/varnish/lib')
+    local('ln -s /mnt/varnish/lib /var/lib/varnish')
+
 
 def _configure_server(server):
     server.update_packages()
-    update.update_pantheon()
+    if os.path.exists("/etc/pantheon/aws.server"):
+        update.update_pantheon(vps='aws')
+    elif os.path.exists("/etc/pantheon/ebs.server"):
+        update.update_pantheon(vps='ebs')
+    else:
+        update.update_pantheon()
     local('cp /etc/pantheon/templates/tuneables /etc/pantheon/server_tuneables')
     local('chmod 755 /etc/pantheon/server_tuneables')
+
+
+def _test_for_private_server(server):
+    try:
+        urllib2.urlopen('http://pki.getpantheon.com/info', timeout=10)
+        print 'Appears to be a getpantheon.com server'
+        _configure_certificates()
+        _initialize_support_account(server)
+    except urllib2.URLError, e:
+        with open('/etc/pantheon/private.server', 'w') as f:
+            f.write('Created by Pantheon, please do not remove.')
+        print 'Appears to be a private server - skipping getpantheon.com-specific functions'
+
 
 def _configure_certificates():
     # Just in case we're testing, we need to ensure this path exists.
@@ -93,20 +122,49 @@ def _configure_certificates():
     time.sleep(20)
     print local('openssl verify -verbose /etc/pantheon/system.crt')
 
-def _configure_ec2(server):
-    local('chmod 1777 /tmp')
-    if(server.distro == 'centos'):
-        local('mv /var/log/mysqld.log /mnt/mysql/')
-        local('ln -s /mnt/mysql/mysqld.log /var/log/mysqld.log')
-    else:
-        local('mv /var/log/mysql /mnt/mysql/log')
-        local('ln -s /mnt/mysql/log /var/log/mysql')
-    local('mv /var/lib/mysql /mnt/mysql/lib')
-    local('ln -s /mnt/mysql/lib /var/lib/mysql')
-    local('/etc/init.d/varnish stop')
-    local('mv /var/lib/varnish /mnt/varnish/lib')
-    local('ln -s /mnt/varnish/lib /var/lib/varnish')
-    local('chown varnish:varnish /mnt/varnish/lib/pressflow/')
+
+def _initialize_support_account(server):
+    '''Generate a public/private key pair for root.'''
+    #local('mkdir -p ~/.ssh')
+    #with cd('~/.ssh'):
+    #    with settings(warn_only=True):
+    #        local('[ -f id_rsa ] || ssh-keygen -trsa -b1024 -f id_rsa -N ""')
+
+    '''Set up the Pantheon support account with sudo and the proper keys.'''
+    sudoers = local('cat /etc/sudoers')
+    if '%sudo ALL=(ALL) NOPASSWD: ALL' not in sudoers:
+        local('echo "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers')
+    if 'pantheon' not in local('cat /etc/passwd'):
+        if server.distro == 'ubuntu':
+            local('useradd pantheon --base-dir=/var --comment="Pantheon Support"'
+                  ' --create-home --groups=' + server.web_group + ',sudo --shell=/bin/bash')
+        elif server.distro == 'centos':
+            local('useradd pantheon --base-dir=/var --comment="Pantheon Support"'
+                  ' --create-home  --shell=/bin/bash')
+    with cd('~pantheon'):
+        local('mkdir -p .ssh')
+        local('chmod 700 .ssh')
+        pantheon.copy_template('authorized_keys', '~pantheon/.ssh/')
+        #local('cat ~/.ssh/id_rsa.pub > .ssh/authorized_keys')
+        local('chmod 600 .ssh/authorized_keys')
+        local('chown -R pantheon: .ssh')
+
+
+# The Rackspace Cloud occasionally has connectivity issues unless a server gets
+# rebooted after initial provisioning.
+def _check_connectivity():
+    try:
+        urllib2.urlopen('http://pki.getpantheon.com/', timeout=10)
+        print 'Connectivity to the PKI server seems to work.'
+    except urllib2.URLError, e:
+        print "Connectivity error: ", e
+        # Bail if a connectivity reboot has already been attempted.
+        if os.path.exists("/etc/pantheon/connectivity_reboot"):
+            abort("A Pantheon connectivity reboot has already been attempted. Exiting.")
+        # Record the running of a connectivity reboot.
+        with open('/etc/pantheon/connectivity_reboot', 'w') as f:
+            f.write('Dear Rackspace: Fix this issue.')
+        local('sudo reboot')
 
 
 def _configure_postfix(server):

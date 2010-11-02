@@ -15,12 +15,12 @@ def get_workspace():
 def postback(cargo, command='atlas'):
     """Send data back to Atlas.
     cargo: dict of data to send.
+    task_id: uuid of requesting job.
     command: Prometheus command.
-    uuid: uuid of requesting job.
 
     """
 
-    return _send_response({'uuid': uuid.uuid4().hex,
+    return _send_response({'id': str(uuid.uuid4()),
                            'command':command,
                            'method':'POST',
                            'response': cargo,
