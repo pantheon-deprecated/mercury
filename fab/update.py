@@ -18,11 +18,11 @@ def update_pantheon(vps=None):
        local('cd /opt/pantheon; bzr up')
        pantheon.restart_bcfg2()
        if (vps == 'aws'):
-              local('/usr/sbin/bcfg2 -vq -p pantheon-aws', capture=False)
+              local('/usr/sbin/bcfg2 -vqed -p pantheon-aws', capture=False)
        elif (vps == 'ebs'):
-              local('/usr/sbin/bcfg2 -vq -p pantheon-aws-ebs', capture=False)
+              local('/usr/sbin/bcfg2 -vqed -p pantheon-aws-ebs', capture=False)
        else:
-              local('/usr/sbin/bcfg2 -vq', capture=False)
+              local('/usr/sbin/bcfg2 -vqed', capture=False)
        print("Pantheon Updated")
 
 def update_site_core(project='pantheon', keep=None, task_id=None):
