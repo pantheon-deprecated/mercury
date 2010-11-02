@@ -33,7 +33,7 @@ def _test_for_previous_run():
 
 
 def _configure_ec2(server):
-    #lucid only
+    #lucid only for now...
     local('cp /opt/pantheon/bcfg2/TGenshi/mysql/apparmor/template.newtxt.G00_lucid /etc/apparmor.d/usr.sbin.mysqld')
     local('mkdir -p /mnt/mysql/tmp')
     local('chown -R root:root /mnt/mysql')
@@ -57,7 +57,7 @@ def _configure_ec2(server):
 
 def _configure_server(server):
     server.update_packages()
-    if pantheon.is_aws_server:
+    if pantheon.is_aws_server():
         update.update_pantheon(vps='aws')
     else:
         update.update_pantheon()
