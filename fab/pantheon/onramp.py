@@ -2,77 +2,25 @@ import os
 import re
 import tempfile
 
+import pantheon
+from project import project
+
 from fabric.api import *
 
-import install
-import pantheon
+class ImportTools(project.BuildTools):
 
-def download(url):
-    """Download url to temporary directory and return path to file.
-    url: fully qualified url of file to download.
-    returns: full path to downloaded file.
-
-    """
-    download_dir = tempfile.mkdtemp()
-    filebase = os.path.basename(url)
-    filename = os.path.join(download_dir, filebase)
-
-    _curl(url, filename)
-    return filename
-
-
-def drush(alias, cmd, option):
-    """Use drush to run a command on an aliased site.
-    alias: alias name of site (just name, no '@')
-    cmd: drush command to run
-    option: options / parameters for the command.
-
-    """
-    with settings(warn_only=True):
-        local('drush -y @%s %s %s' % (alias, cmd, option))
-   
-
-def drush_set_variables(alias, variables = dict()):
-    """Set drupal variables using drush. php-eval is used because drush vset 
-    always sets vars as strings.
-    alias: alias name of site (just name, no '@')
-    variables: dict of var_name/values.
-
-    """
-    for key, value in variables.iteritems():
-        # normalize strings and bools
-        if isinstance(value, str):
-            value = "'%s'" % value
-        if isinstance(value, bool):
-            if value == True:
-                value = 'TRUE'
-            elif value == False:
-                value = 'FALSE'
-        local("drush @%s php-eval \"variable_set('%s',%s);\"" % (alias, 
-                                                                key, 
-                                                                value))
-
-
-def _curl(url, destination):
-    """Use curl to save url to destination.
-    url: url to download
-    destination: full path/ filename to save curl output.
-
-    """
-    local('curl "%s" -o "%s"' % (url, destination)) 
-
-
-class ImportTools(install.InstallTools):
-
-
-    def __init__(self, project):
+    def __init__(self, project, **kw):
         """Inherit install.InstallTools and initialize. Create addtional
         processing directory for import process.
 
         """
-        install.InstallTools.__init__(self, project)
-        self.processing_dir = tempfile.mkdtemp()
+        project.BuildTools.__init__(self, project)
 
+        self.working_dir = tempfile.mkdtemp()
+        self.processing_dir = tempfile.mkdtemp()
+        self.destination = os.path.join(self.server.webroot, project)
+        self.author = 'Hudson User <hudson@pantheon>'
+        self.db_password = pantheon.random_string(10)
 
     def extract(self, tarball):
         """Use bzr import to extract archive. bzr import is used for this
@@ -93,7 +41,6 @@ class ImportTools(install.InstallTools):
 
         local('rm -rf %s' % os.path.dirname(tarball))
 
-
     def parse_archive(self):
         """Get the site name and database dump file from archive to be imported.
 
@@ -101,41 +48,22 @@ class ImportTools(install.InstallTools):
         self.site = self._get_site_name()
         self.db_dump = self._get_database_dump()
 
-
-    def import_database(self, environments=pantheon.get_environments()):
-        """ Create a new database and set user grants (all), then import
-        using 'project_dev' as the name.
+    def setup_database(self):
+        """ Create a new database and import from dumpfile.
 
         """
-        username = self.project
-        password = self.db_password
-
-        for env in environments:
-            database = '%s_%s' % (self.project, env)
-            local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % (database))
-            local("mysql -u root -e 'CREATE DATABASE IF NOT EXISTS %s'" % (database))
-            local("mysql -u root -e \"GRANT ALL ON %s.* TO '%s'@'localhost' \
-                                      IDENTIFIED BY '%s';\"" % (database,
-                                                                username,
-                                                                password))        
-
-        # Strip cache tables, convert MyISAM to InnoDB, and import into dev.
-        local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | \
-               grep -v '^INSERT INTO `ctools_object_cache`' | \
-               grep -v '^INSERT INTO `watchdog`' | \
-               grep -v '^INSERT INTO `accesslog`' | \
-               grep -v '^USE `' | \
-               sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | \
-               mysql -u root %s" %  (os.path.join(self.processing_dir,
-                                     self.db_dump), 
-                                     database))
+        for env in self.environments:
+            if env == 'dev':
+                db_dump = os.path.join(self.processing_dir, self.db_dump)
+            else:
+                db_dump = None
+            project.BuildTools.setup_database(self, env, self.db_password, db_dump)
         local('rm -f %s' % (os.path.join(self.processing_dir, self.db_dump)))
-   
- 
+
     def import_files(self):
-        """Create git branch of project at same revision and platform of 
+        """Create git branch of project at same revision and platform of
         imported site. Import files into this branch and setup default site.
-        
+
         """
         #TODO: add large file size sanity check (no commits over 20mb)
         platform, version, revision = self._get_drupal_version_info()
@@ -228,37 +156,14 @@ class ImportTools(install.InstallTools):
         with settings(warn_only=True):
             drush_set_variables(alias, drupal_vars)
 
+    def setup_environments(self):
+        project.BuildTools.setup_environments(self, tag='import')
 
-    def setup_permissions(self, environments=pantheon.get_environments()):
-        """ Set permissions on project directory, settings.php, and files dir.
-        environments: Optional. List.
+    def setup_permissions(self):
+        project.BuildTools.setup_permissions(self, handler='import')
 
-        """
-        owner = self.server.get_ldap_group()
-        with cd(self.server.webroot):
-            local('chown -R %s:%s %s' % (owner, owner, self.project))
-            local('chmod -R g+w %s' % self.project)
-        file_dir = self._get_files_dir()
-        if not file_dir:
-            file_dir = 'sites/default/files'
-        for env in environments:
-            site_dir = os.path.join(self.server.webroot, \
-                                    '%s/%s/sites/default' % (self.project, env))
-            with cd(site_dir):
-                local('chown %s:%s settings.php pantheon.settings.php' % ('root',
-                                                          self.server.web_group))
-                local('chmod 440 settings.php')
-                local('chmod 440 pantheon.settings.php')
-            file_path = os.path.join(self.server.webroot, '%s/%s/%s' % (
-                                           self.project, env, file_dir))
-            with cd(file_path): 
-                local("chmod 770 .")
-                local("find . -type d -exec find '{}' -type f \; | \
-                       while read FILE; do chmod 660 \"$FILE\"; done")
-                local("find . -type d -exec find '{}' -type d \; | \
-                      while read DIR; do chmod 770 \"$DIR\"; done")
-                local("chown -R %s:%s ." % (self.server.web_group, self.server.web_group))
-
+    def push_to_repo(self):
+        project.BuildTools.setup_permissions(self, tag='import')
 
     def update_environment_databases(self, environments=pantheon.get_environments()):
         tempdir = tempfile.mkdtemp()
@@ -418,4 +323,4 @@ class ImportTools(install.InstallTools):
                         sed 's/^.*\"\(.*\)\".*$/\\1/'" % (self.project,
                                                           self.db_password,
                                                           database)).rstrip('\n')
-        
+

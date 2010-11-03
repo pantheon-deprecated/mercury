@@ -2,17 +2,17 @@ import os
 import tempfile
 
 import pantheon
+from project import project
 
 from fabric.api import *
 
-class Updater():
+class Updater(project.BuildTools):
 
     def __init__(self, project, environment=''):
-        self.project = project
+        project.BuildTools.__init__(self, project)
+
         self.environment = environment
         self.author = 'Hudson User <hudson@pantheon>'
-        self.server = pantheon.PantheonServer()
-        self.project_path = os.path.join(self.server.webroot, self.project)
         self.env_path = os.path.join(self.project_path, environment)
 
 

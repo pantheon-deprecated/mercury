@@ -8,56 +8,20 @@ def install_site(project='pantheon', profile='pantheon', **kw):
     **kw: Optional dictionary of values to process on installation.
 
     """
-    data = {'profile':profile,'project':project}
+    data = {'profile':profile,
+            'project':project}
+
     data.update(kw)
 
     handler = _get_profile_handler(**data)
     handler.build(**data)
 
-
-def _get_profile_handler(profile, **kw):
-    """ Return instantiated profile object.
-        profile: name of the installation profile.
-
-    """
-    profiles = {'pantheon': _PantheonProfile,
-                'openatrium': _OpenAtriumProfile,
-                'openpublish': _OpenPublishProfile}
-
-    # If profile: doesn't exist, use 'pantheon'
-    return profiles.has_key(profile) and \
-           profiles[profile](**kw) or \
-           profiles['pantheon'](**kw)
-
-
-"""
-To define additional profile handlers:
-     1. Create a new profile class (example below)
-     2. Add the profile name & class name to the profiles dict in get_handler().
-     Example profile handler:
-
-class MIRProfile(install.InstallTools):
-    def __init__(self, project, **kw):
-        install.InstallTools.__init__(self, project)
-
-    def build(self, **kw):
-        # Step 1: create a working installation
-        # Step 2: ??? 
-        # Step 3: Make it rain.
-"""
-
-
 class _PantheonProfile(install.InstallTools):
     """ Default Pantheon Installation Profile.
-    
+
     """
-
-    def __init__(self, project, **kw):
-        install.InstallTools.__init__(self, project)
-  
-
     def build(self, **kw):
-        
+
         # Create a new project
         self.build_project_branch()
 
@@ -72,15 +36,15 @@ class _PantheonProfile(install.InstallTools):
         self.push_to_repo()
 
         # Clone project to all environments
-        self.build_environments()
+        self.setup_environments()
 
         # Build non-code site features.
-        self.build_permissions()
-        self.build_database()
-        self.build_solr_index()
-        self.build_vhost()
-        self.build_drupal_cron()
-        self.build_drush_alias()
+        self.setup_database()
+        self.setup_solr_index()
+        self.setup_vhost()
+        self.setup_drupal_cron()
+        self.setup_drush_alias()
+        self.setup_permissions()
 
         update.git_repo_status(self.project)
 
@@ -88,26 +52,21 @@ class _PantheonProfile(install.InstallTools):
         self.server.restart_services()
 
 
-class _OpenAtriumProfile(install.InstallTools):
-    """ Open Atrium Installation Profile.
+"""
+To define additional profile handlers:
+   1. Create a new profile class
+   2. Add profile name and class to profiles dict in _get_profiles_handler().
+"""
+
+def _get_profile_handler(profile, **kw):
+    """ Return instantiated profile object.
+        profile: name of the installation profile.
 
     """
-    def __init__(project, **kw):
-        install.InstallTools.__init__(self, project)
-  
+    profiles = {'pantheon': _PantheonProfile}
 
-    def build(self, **kw):
-        pass
-
-
-class _OpenPublishProfile(install.InstallTools):
-    """ Open Publish Installation Profile.
-
-    """
-    def __init__(project, **kw):
-        install.InstallTools.__init__(self, project)
-  
-
-    def build(self, **kw):
-        pass
+    # If profile: doesn't exist, use 'pantheon'
+    return profiles.has_key(profile) and \
+           profiles[profile](**kw) or \
+           profiles['pantheon'](**kw)
 

@@ -1,6 +1,6 @@
-from pantheon import onramp
+import pantheon
 
-def import_site(project='pantheon', profile='pantheon', url=None, **kw):
+def import_site(project='pantheon', profile=None, url=None, **kw):
     """ Create a new Drupal installation.
     project: Installation namespace.
     profile: The installation type (e.g. pantheon/openatrium)
@@ -17,48 +17,12 @@ def import_site(project='pantheon', profile='pantheon', url=None, **kw):
     handler.build(**data)
 
 
-def _get_profile_handler(profile, **kw):
-    """ Return instantiated profile object.
-        profile: name of the installation profile.
-
-    """
-    profiles = {'import': _ImportProfile}
-
-    # If profile doesn't exist, use 'import'
-    return profiles.has_key(profile) and \
-           profiles[profile](**kw) or \
-           profiles['import'](**kw)
-
-
-"""
-To define additional profile handlers:
-     1. Create a new profile class (example below)
-     2. Add the profile name & class name to the profiles dict in get_handler().
-     Example profile handler:
-
-class MIRProfile(install.InstallTools):
-    def __init__(self, project, **kw):
-        install.InstallTools.__init__(self, project)
-
-    def build(self, **kw):
-        # Step 1: create a working installation
-        # Step 2: ??? 
-        # Step 3: Make it rain.
-"""
-
-
-class _ImportProfile(onramp.ImportTools):
-
-
-    def __init__(self, project, **kw):
-        """Initialize onramp.ImportTools - inherits install.InstallTools"""
-        onramp.ImportTools.__init__(self, project)
-
+class _ImportProfile(pantheon.onramp.ImportTools):
 
     def build(self, url, **kw):
 
         # Download, extract, and parse the tarball.
-        tarball = onramp.download(url)
+        tarball = project.tools.download(url)
         self.extract(tarball)
         self.parse_archive()
 
@@ -71,7 +35,7 @@ class _ImportProfile(onramp.ImportTools):
         self.push_to_repo(tag='import')
 
         # Clone project to all environments
-        self.build_environments(tag='import')
+        self.setup_environments()
 
         # Build non-code site features
         self.build_solr_index()
@@ -87,3 +51,39 @@ class _ImportProfile(onramp.ImportTools):
 
         self.cleanup()
         self.server.restart_services()
+
+
+class _RestoreProfile(pantheon.restore.RestoreTools):
+
+    def build(self, url, **kw):
+
+        #Download, extract, and parse the backup.
+        backup = project.tools.download(url)
+        self.extract(archive)
+        self.parse_backup()
+
+        self.restore_database()
+        self.restore_files()
+
+
+"""
+To define additional profile handlers:
+    1. Create a new profile class (example below)
+    2. Add profile & class name to profiles dict in _get_profile_handler().
+
+"""
+
+def _get_profile_handler(profile, **kw):
+    """ Return instantiated profile object.
+        profile: name of the installation profile.
+
+    """
+    profiles = {'import': _ImportProfile
+                'restore': _RestoreProfile}
+
+    # If profile doesn't exist, use 'import'
+    return profiles.has_key(profile) and \
+           profiles[profile](**kw) or \
+           profiles['import'](**kw)
+
+
