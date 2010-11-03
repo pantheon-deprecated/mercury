@@ -7,9 +7,10 @@ from fabric.api import *
 import update
 from pantheon import pantheon
 
-def initialize():
+def initialize(vps=None):
     '''Initialize the Pantheon system.'''
     server = pantheon.PantheonServer()
+    _initialize_config(vps)
     _initialize_package_manager(server)
     _initialize_bcfg2(server)
     _initialize_iptables(server)
@@ -23,12 +24,29 @@ def init():
     initialize()
 
 
+def _initialize_config(vps):
+    local('mkdir /etc/pantheon')
+    if (vps == 'aws'):
+        with open('/etc/pantheon/aws.server', 'w') as f:
+            f.write('Setting server to an AWS server')
+        with open('/etc/pantheon/private.server', 'w') as f:
+            f.write('Setting server to a non-getpantheon.com server')
+    elif (vps == 'ebs'):
+        with open('/etc/pantheon/ebs.server', 'w') as f:
+            f.write('Setting server to an EBS server')
+        with open('/etc/pantheon/private.server', 'w') as f:
+            f.write('Setting server to a non-getpantheon.com server')
+    elif (vps == 'default'):
+        with open('/etc/pantheon/private.server', 'w') as f:
+            f.write('Setting server to a non-getpantheon.com server')
+
+
 def _initialize_package_manager(server):
     if server.distro == 'ubuntu':
         with cd(server.template_dir):
             local('cp apt.pantheon.list /etc/apt/sources.list.d/pantheon.list')
             local('cp apt.php.pin /etc/apt/preferences.d/php')
-            if not os.path.exists("/etc/pantheon/aws.server") and not os.path.exists("/etc/pantheon/ebs.server"):
+            if not pantheon.is_private_server():
                 local('cp apt.openssh.pin /etc/apt/preferences.d/openssh')
             local('apt-key add apt.ppakeys.txt')
         local('echo \'APT::Install-Recommends "0";\' >>  /etc/apt/apt.conf')
@@ -70,11 +88,11 @@ def _initialize_bcfg2(server):
         local('sed -i "s/\t/    /" /usr/lib/python2.4/site-packages/Bcfg2/Server/Plugins/TGenshi.py')
 
     pantheon.restart_bcfg2()
-    if os.path.exists("/etc/pantheon/aws.server") or os.path.exists("/etc/pantheon/ebs.server"):
+    if pantheon.is_aws_server() or pantheon.is_ebs_server():
         #start with ebs build to mitigate /mnt issues on AWS.
-        local('/usr/sbin/bcfg2 -vqed -p pantheon-aws-ebs', capture=False)
+        update.update_pantheon(vps='ebs')
     else:
-        local('/usr/sbin/bcfg2 -vqed', capture=False)
+        update.update_pantheon()
 
 
 def _initialize_iptables(server):
