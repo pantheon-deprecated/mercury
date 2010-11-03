@@ -75,7 +75,7 @@ class Updater():
 
         # Update code in 'test' (commit & tag in 'dev', fetch in 'test')
         elif self.environment == 'test':
-            self.code_commit('Automated Commit.')
+            self.code_commit(message)
             self._tag_code(tag, message)
             self._fetch_and_reset(tag)
 
