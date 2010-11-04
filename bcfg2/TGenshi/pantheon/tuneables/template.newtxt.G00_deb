@@ -28,7 +28,7 @@ export MYSQL_MAX_CONNECTIONS=""
 
 #/etc/php5/apache2/php.ini
 export PHP_MEMORY=""
-export ERROR_REPORTING=""
+export PHP_ERROR_REPORTING=""
 
 #/etc/php5/apache2/php.ini and #/etc/php5/cli/php.ini
 export PHP_UPLOAD_MAX_FILESIZE=""

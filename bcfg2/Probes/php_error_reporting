@@ -1,13 +1,13 @@
 #!/bin/bash
 #If you wish to replace our default value for error reporting in /etc/php5/apache2/php.ini,
-#edit the ERROR_REPORTING variable in /etc/pantheon/server_tuneables
+#edit the PHP_ERROR_REPORTING variable in /etc/pantheon/server_tuneables
 
 if [[ -a /etc/pantheon/server_tuneables ]]; then
 . /etc/pantheon/server_tuneables
 fi
 
-if [[ -n "$ERROR_REPORTING" ]]; then
-   echo "$ERROR_REPORTING"
+if [[ -n "$PHP_ERROR_REPORTING" ]]; then
+   echo "$PHP_ERROR_REPORTING"
 else
     echo "E_ALL & ~E_NOTICE"
 fi
