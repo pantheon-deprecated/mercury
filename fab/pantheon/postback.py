@@ -22,7 +22,7 @@ def postback(cargo, command='atlas'):
     try:
         task_id = cargo.get('build_parameters').get('task_id')
     except Exception:
-        taxk_id = None
+        task_id = None
         
     return _send_response({'id': str(uuid.uuid4()),
                            'command':command,
