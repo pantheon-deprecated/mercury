@@ -19,12 +19,16 @@ def postback(cargo, command='atlas'):
     command: Prometheus command.
 
     """
-
+    try:
+        task_id = cargo.get('build_parameters').get('task_id')
+    except Exception:
+        taxk_id = None
+        
     return _send_response({'id': str(uuid.uuid4()),
                            'command':command,
                            'method':'POST',
                            'response': cargo,
-                           'response_to': {'task_id':cargo.get('task_id')}})
+                           'response_to': {'task_id': task_id}})
 
 def get_job_and_id():
     """Return the job name and build number.
