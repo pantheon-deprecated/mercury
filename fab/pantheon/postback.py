@@ -80,8 +80,12 @@ def _get_build_parameters(data):
     """
     ret = dict()
     parameters = data.get('actions')[0].get('parameters')
-    for param in parameters:
-        ret[param['name']] = param['value']
+    try:
+      for param in parameters:
+          ret[param['name']] = param['value']
+    except Exception:
+      print "WARNING: No build parameters found.";
+    
     return ret
 
 def _get_hudson_data(job, build_id):
