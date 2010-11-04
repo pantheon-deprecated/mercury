@@ -1,21 +1,9 @@
 import os
 import sys
 
-sys.path.append('/opt/pantheon')
-from tools.ptools import postback
-
 from fabric.api import * 
 
 import pantheon
-
-def postback_gitstatus(project):
-    """Send Atlas the git status with job_name='git_status' parameter. 
-    project: project name. 
- 
-    """
-    repo = GitRepo(project)
-    status = repo.get_update_status()
-    postback.postback({'status':status,'job_name':'git_status'})
 
 def post_receive_hook(params):
     """Perform post-receive actions when changes are made to git repo.
@@ -60,24 +48,23 @@ def post_receive_hook(params):
                             dev_update = local('env -i git pull', capture=False)
                     local('curl http://127.0.0.1:8090/job/post_receive_update/' + \
                           'buildWithParameters?project=%s\\&dev_update=True' % project)
+                    # Output status to the PUSH initiator.
+                    if dev_update.failed:
+                        print "\nWARNING: Development environment could not be updated."
+                        print "\nPlease review any error messages above, and resolve any conflicts."
+                        print "\n\n"
+                    else:
+                        print "\nDevelopment environment updated.\n"
                 else:
                     author_name, author_email = local(
                             'env -i git log -1 --pretty=format:%an%n%ae ' +
                             '%s' % dev_head).rstrip('\n').split('\n')
                     if ((author_name != 'Hudson User') and
                             (author_email != 'hudson@getpantheon')):
-                        # If author is not Hudson, report back - but don't update
-                        # the development environment.
+                        # If author is not Hudson, report back repo status 
+                        # but don't update the development environment or permissions.
                         local('curl http://127.0.0.1:8090/job/post_receive_update/' + \
                               'buildWithParameters?project=%s\\&dev_update=False' % project)
-
-        # Output status to the PUSH initiator.
-        if dev_update.failed:
-            print "\nWARNING: Development environment could not be updated."
-            print "\nPlease review any error messages above, and resolve any conflicts."
-            print "\n\n"
-        else:
-            print "\nDevelopment environment updated.\n"
     else:
         print "\n\n"
         print "WARNING: No development environment for '%s', was found.\n" % (project)
@@ -93,14 +80,14 @@ def _parse_hook_params(params):
 
 
 class GitRepo():
-    
+
     def __init__(self, project):
         self.project = project
         self.repo = os.path.join('/var/git/projects', self.project)
         self.server = pantheon.PantheonServer()
         self.project_path = os.path.join(self.server.webroot, self.project)
 
-    def get_update_status(self):
+    def get_repo_status(self):
         """Return dict of dev/test and test/live diffs, and last 10 log entries.
 
         """
@@ -108,7 +95,7 @@ class GitRepo():
         head = self._get_last_commit('dev')
         test = self._get_last_commit('test')
         live = self._get_last_commit('live')
-        
+
         #dev/test diff
         diff_dev_test = self._get_diff_stat(test, head)
         #test/live diff
@@ -123,7 +110,7 @@ class GitRepo():
     def _get_last_commit(self, env):
         """Get last commit or tag for the given environment.
         env: environment.
-        
+
         returns commit hash for dev, or current tag for test/live.
 
         """

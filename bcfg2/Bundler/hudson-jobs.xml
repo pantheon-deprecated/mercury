@@ -20,6 +20,8 @@
     <BoundPath type='directory' name='/var/lib/hudson/jobs/update_files' owner='hudson' group='nogroup' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/update_pantheon' owner='hudson' group='nogroup' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/update_site_core' owner='hudson' group='nogroup' perms='0755'/>
+
+    <BoundPath type='directory' name='/etc/pantheon/hudson/workspace' owner='hudson' group='nogroup' perms='0755'/>
   </Group>
   
   
@@ -42,6 +44,8 @@
     <BoundPath type='directory' name='/var/lib/hudson/jobs/update_files' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/update_pantheon' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/update_site_core' owner='hudson' group='hudson' perms='0755'/>
+
+    <BoundPath type='directory' name='/etc/pantheon/hudson/workspace' owner='hudson' group='hudson' perms='0755'/>
   </Group>    
   
   <!-- Jobs -->
