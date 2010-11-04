@@ -3,7 +3,7 @@ from project import project
 class RestoreTools(project.BuildTools):
 
     def __init__(self, project, **kw):
-        project.BuildTools.__init__(self, project)
+        super(RestoreTools, self).__init__(project)
 
     def extract(self, tarball):
         local('tar xzf %s -C %s' % (tarball, self.working_dir))

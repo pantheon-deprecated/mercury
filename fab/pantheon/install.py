@@ -25,7 +25,7 @@ class InstallTools(project.BuildTools):
         project: the name of the project to be built.
 
         """
-        project.BuildTools.__init__(self, project)
+        super(InstallTools, self).__init__(project)
 
         self.working_dir = tempfile.mkdtemp()
         self.destination = os.path.join(self.server.webroot, project)
@@ -123,16 +123,20 @@ class InstallTools(project.BuildTools):
 
         """
         for env in self.environments:
-            project.BuildTools.setup_database(self, env, self.db_password)
+            super(InstallTools, self).setup_database(env, self.db_password)
+            #project.BuildTools.setup_database(self, env, self.db_password)
 
     def setup_permissions(self):
-        project.BuildTools.setup_permissions(self, handler='install')
+        super(InstallTools, self).setup_permissions(handler='install')
+        #project.BuildTools.setup_permissions(self, handler='install')
 
     def setup_environments(self):
-        project.BuildTools.setup_environments(self, tag='initialization')
+        super(InstallTools, self).setup_environments(tag='initialization')
+        #project.BuildTools.setup_environments(self, tag='initialization')
 
     def push_to_repo(self):
-        project.BuildTools.push_to_repo(tag='initialization')
+        super(InstallTools, self).push_to_repo(tag='initialization')
+        #project.BuildTools.push_to_repo(tag='initialization')
 
     def cleanup(self):
         """ Remove working directory.

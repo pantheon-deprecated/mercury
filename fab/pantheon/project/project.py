@@ -131,9 +131,11 @@ class BuildTools(object):
         # During code updates, we only make changes in one environment.
         # Otherwise, in some cases we are modifying all environments.
         environments = list()
-        if environment and handler == 'update':
+        if handler == 'update':
+            #Single environment
             environments.append(environment)
         else:
+            #All environments.
             environments = self.environments
 
 
@@ -142,7 +144,7 @@ class BuildTools(object):
 
         """
 
-        # For new installs / imports / restores, use simple recursive chown.
+        # For new installs / imports / restores, use recursive chown.
         if handler in ['install', 'import', 'restore']:
             with cd(self.server.webroot):
                 local('chown -R %s:%s %s' % (owner, owner, self.project))
@@ -167,25 +169,32 @@ class BuildTools(object):
         # For installs, just set 770 on files dir.
         if handler == 'install':
             for env in environments:
-                site_dir = os.path.join(self.project_path, env, 'sites/default')
+                site_dir = os.path.join(self.project_path,
+                                        env,
+                                        'sites/default')
                 with cd(site_directory):
                     local('chmod 770 files')
+                    local('chown %s:%s files' % (self.server.web_group,
+                                                 self.server.web_group))
 
         # For imports or restores: 770 on files dir (and subdirs). 660 on files
-        elif handler in ['import','restore']:
+        elif handler in ['import', 'restore']:
             for env in environments:
                 file_dir = os.path.join(self.project_path, env,
                                         'sites/default/files')
                 with cd(file_dir):
                     local("chmod 770 .")
+                    # All sub-files
                     local("find . -type d -exec find '{}' -type f \; | \
                            while read FILE; do chmod 660 \"$FILE\"; done")
+                    # All sub-directories
                     local("find . -type d -exec find '{}' -type d \; | \
                           while read DIR; do chmod 770 \"$DIR\"; done")
+                    # Apache should own files/*
                     local("chown -R %s:%s ." % (self.server.web_group,
                                                 self.server.web_group))
 
-        # For updates, set apache as owner of files dir in the environment.
+        # For updates, set apache as owner of files dir.
         elif handler == 'update':
             site_dir = os.path.join(self.project_path,
                                     environments[0],
@@ -200,6 +209,8 @@ class BuildTools(object):
 
         """
 
+        #TODO: We could split this up based on handler, but changing perms on
+        # two files is fast. Ignoring for now, and treating all the same.
         for env in environments:
             if pantheon.is_drupal_installed(self.project, env):
                 # Drupal installed, Apache does not need to own settings.php

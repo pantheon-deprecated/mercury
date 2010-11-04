@@ -14,7 +14,7 @@ class ImportTools(project.BuildTools):
         processing directory for import process.
 
         """
-        project.BuildTools.__init__(self, project)
+        super(ImportTools, self).__init__(project)
 
         self.working_dir = tempfile.mkdtemp()
         self.processing_dir = tempfile.mkdtemp()
@@ -57,7 +57,8 @@ class ImportTools(project.BuildTools):
                 db_dump = os.path.join(self.processing_dir, self.db_dump)
             else:
                 db_dump = None
-            project.BuildTools.setup_database(self, env, self.db_password, db_dump)
+            super(ImportTools, self).setup_database(env, self.db_password, db_dump)
+            #project.BuildTools.setup_database(self, env, self.db_password, db_dump)
         local('rm -f %s' % (os.path.join(self.processing_dir, self.db_dump)))
 
     def import_files(self):
@@ -157,13 +158,16 @@ class ImportTools(project.BuildTools):
             drush_set_variables(alias, drupal_vars)
 
     def setup_environments(self):
-        project.BuildTools.setup_environments(self, tag='import')
+        super(ImportTools, self).setup_environments(tag='import')
+        #project.BuildTools.setup_environments(self, tag='import')
 
     def setup_permissions(self):
-        project.BuildTools.setup_permissions(self, handler='import')
+        super(ImportTools, self).setup_permissions(self, handler='import')
+        #project.BuildTools.setup_permissions(self, handler='import')
 
     def push_to_repo(self):
-        project.BuildTools.setup_permissions(self, tag='import')
+        super(ImportTools, self).push_to_repo(tag='import')
+        #project.BuildTools.push_to_repo(self, tag='import')
 
     def update_environment_databases(self, environments=pantheon.get_environments()):
         tempdir = tempfile.mkdtemp()

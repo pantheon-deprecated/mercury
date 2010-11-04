@@ -9,7 +9,7 @@ from fabric.api import *
 class Updater(project.BuildTools):
 
     def __init__(self, project, environment=''):
-        project.BuildTools.__init__(self, project)
+        super(Updater, self).__init__(project)
 
         self.environment = environment
         self.author = 'Hudson User <hudson@pantheon>'
