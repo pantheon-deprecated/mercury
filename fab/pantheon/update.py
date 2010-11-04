@@ -24,7 +24,7 @@ class Updater():
               'theirs': Keep upstream changes when there are conflicts.
               'force': Leave failed merge in working-tree (manual resolve).
               None: Reset to ORIG_HEAD if merge fails.
-                             
+
         """
         # Update pantheon core master branch
         with cd('/var/git/projects/%s' % self.project):
@@ -60,12 +60,12 @@ class Updater():
                     #TODO: How do we want to report this back to user?
                     print 'Rolling back failed changes.'
                     local('git reset --hard ORIG_HEAD')
-                    return {'status':'fail','log':merge}
+                    return {'merge':'fail','log':merge}
             # Successful merge.
             else:
                 local('git push')
-        return {'status':'success','log':merge}
-                
+        return {'merge':'success','log':merge}
+
 
     def code_update(self, tag, message):
         # Update code in 'dev' (Only used when updating from remote push)
