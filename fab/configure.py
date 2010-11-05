@@ -1,14 +1,14 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
-from fabric.api import *
 import os
-
-
-from pantheon import pantheon
 import update
 import time
 import urllib2
 import json
 
+from fabric.api import *
+
+from pantheon import pantheon
+from pantheon import project
 
 def configure():
     '''configure the Pantheon system.'''
@@ -196,19 +196,7 @@ def _configure_git_repo():
     local('mkdir -p /var/git/projects')
     # Set GID
     local("chmod g+s /var/git/projects")
-    # Pantheon Core
-    local('git clone git://gitorious.org/pantheon/6.git /var/git/projects/pantheon')
-    # Drupal Core
-    with cd('/var/git/projects/pantheon'):
-        local('git fetch git://gitorious.org/drupal/6.git master:drupal_core')
-
-        local('git config receive.denycurrentbranch ignore')
-        local('git config core.sharedRepository group')
-
-    pantheon.copy_template('git.hook.post-receive', 
-                         '/var/git/projects/pantheon/.git/hooks/post-receive')
-    local('chmod +x /var/git/projects/pantheon/.git/hooks/post-receive')
-
+    #project.BuildTools('pantheon').setup_project_repo()
 
 def _mark_incep(server):
     '''Mark incep date. This prevents us from ever running again.'''

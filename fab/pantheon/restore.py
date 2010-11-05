@@ -32,7 +32,5 @@ class RestoreTools(project.BuildTools):
         local('mkdir -p' % self.destination)
         for env in self.environments:
             with cd(os.path.join(self.working_dir, self.backup_project)):
-                local('rsync -avz %s %s' % (env, self.destination)
-
-    def restore_repo(self):
+                local('rsync -avz %s %s' % (env, self.destination))
 

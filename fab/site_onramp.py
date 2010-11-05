@@ -1,4 +1,6 @@
-import pantheon
+from pantheon import onramp
+from pantheon import restore
+from pantheon.project import tools
 
 def import_site(project='pantheon', profile=None, url=None, **kw):
     """ Create a new Drupal installation.
@@ -17,7 +19,7 @@ def import_site(project='pantheon', profile=None, url=None, **kw):
     handler.build(**data)
 
 
-class _ImportProfile(pantheon.onramp.ImportTools):
+class _ImportProfile(onramp.ImportTools):
 
     def build(self, url, **kw):
 
@@ -26,34 +28,45 @@ class _ImportProfile(pantheon.onramp.ImportTools):
         self.extract(tarball)
         self.parse_archive()
 
-        # Import site and download pantheon modules.
-        self.import_database()
-        self.import_files()
-        self.import_pantheon_modules()
+        # Create a new project
+        self.setup_project_repo()
+        self.setup_project_branch()
+        self.setup_working_dir()
+
+        # Import existing site into the project.
+        self.setup_database()
+        self.import_site_files()
+        self.setup_files_dir()
+        self.setup_settings_file()
+        self.setup_pantheon_modules()
+        self.setup_pantheon_libraries()
 
         # Push imported project from working directory to central repo
-        self.push_to_repo(tag='import')
+        self.push_to_repo()
+
+        # Build non-code site features
+        self.setup_solr_index()
+        self.setup_vhost()
+        self.setup_drupal_cron()
+        self.setup_drush_alias()
+
+        # Turn on modules, set variables
+        self.enable_pantheon_settings()
 
         # Clone project to all environments
         self.setup_environments()
 
-        # Build non-code site features
-        self.build_solr_index()
-        self.build_vhost()
-        self.build_drupal_cron()
-        self.build_drush_alias()
-
-        # Enable modules & set variables. Then push changes to test/live.
-        self.import_drupal_settings()
-        self.update_environment_databases()
-        self.update_environment_files()
+        # Set permissions on project.
         self.setup_permissions()
 
+        #TODO: respond to atlast with gitsatus
+
+        # Cleanup and restart services.
         self.cleanup()
         self.server.restart_services()
 
 
-class _RestoreProfile(pantheon.restore.RestoreTools):
+class _RestoreProfile(restore.RestoreTools):
 
     def build(self, url, **kw):
 
@@ -78,7 +91,7 @@ def _get_profile_handler(profile, **kw):
         profile: name of the installation profile.
 
     """
-    profiles = {'import': _ImportProfile
+    profiles = {'import': _ImportProfile,
                 'restore': _RestoreProfile}
 
     # If profile doesn't exist, use 'import'

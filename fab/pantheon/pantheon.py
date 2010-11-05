@@ -62,19 +62,6 @@ def random_string(length):
                                           string.digits) \
                                           for i in range(length)])
 
-
-def create_pantheon_settings_file(site_dir):
-    """Add an include to pantheon.settings.php to the site_dir/settings.php. 
-    Copies the pantheon.settings.php file from templates to the site_dir.
-    site_dir: path to the site directory. E.g. /var/www/sites/default
-
-    """
-    with open(os.path.join(site_dir, 'settings.php'), 'a') as f:
-        f.write('\n/* Added by Pantheon */\n')
-        f.write("include 'pantheon.settings.php';\n")
-    copy_template('pantheon.settings.php', site_dir)
-
-
 def export_data(project, environment, destination):
     """Export the database for a particular project/environment to destination.
     exported database will have a name in the form of: project_environment.sql
@@ -101,7 +88,7 @@ def import_data(project, environment, source):
 
     """
     database = '%s_%s' % (project, environment)
-    create database(database)
+    create_database(database)
     import_db_dump(source, database)
 
 def create_database(database):

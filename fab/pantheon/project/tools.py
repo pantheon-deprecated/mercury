@@ -46,7 +46,7 @@ def drush_set_variables(alias, variables = dict()):
                                                                 key,
                                                                 value))
 
-def _curl(url, destination):
+def curl(url, destination):
     """Use curl to save url to destination.
     url: url to download
     destination: full path/ filename to save curl output.

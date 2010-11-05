@@ -23,31 +23,35 @@ class _PantheonProfile(install.InstallTools):
     def build(self, **kw):
 
         # Create a new project
-        self.build_project_branch()
+        self.setup_project_repo()
+        self.setup_project_branch()
+        self.setup_working_dir()
 
-        # Build project in a temporary directory
-        self.build_working_dir()
-        self.build_project_modules()  #NOTE: temporary until integrated with repo
-        self.build_project_libraries()#NOTE: temporary until integrated with repo
-        self.build_file_dirs()
-        self.build_settings_file()
+        # Setup project
+        self.setup_database()
+        self.setup_files_dir()
+        self.setup_settings_file()
+        self.setup_pantheon_modules()
+        self.setup_pantheon_libraries()
 
         # Push changes from working directory to central repo
         self.push_to_repo()
 
-        # Clone project to all environments
-        self.setup_environments()
-
         # Build non-code site features.
-        self.setup_database()
         self.setup_solr_index()
         self.setup_vhost()
         self.setup_drupal_cron()
         self.setup_drush_alias()
+
+        # Clone project to all environments
+        self.setup_environments()
+
+        # Set permissions on project
         self.setup_permissions()
 
-        update.git_repo_status(self.project)
+        #respond to atlas with gitstatus
 
+        # Cleanup and restart services
         self.cleanup()
         self.server.restart_services()
 

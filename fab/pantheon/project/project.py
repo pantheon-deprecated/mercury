@@ -2,6 +2,7 @@ import sys
 
 sys.path.append('/opt/pantheon/fab')
 from pantheon import pantheon
+from pantheon.project import tools
 
 from fabric.api import *
 
@@ -19,7 +20,45 @@ class BuildTools(object):
 
         self.project = project
         self.environments = pantheon.get_environments()
-        self.project_path = os.path.join(self.server.webroot, project))
+        self.project_path = os.path.join(self.server.webroot, project)
+
+    def setup_project_repo(self):
+        project_repo = os.path.join('/var/git/projects', self.project)
+
+        # Clear existing
+        if os.path.exists(project_repo):
+            local('rm -rf %s' % project_repo)
+
+        # Get Pantheon core
+        local('git clone git://gitorious.org/pantheon/6.git %s' % project_repo)
+
+        with cd(project_repo):
+            # Drupal Core
+            local('git fetch git://gitorious.org/drupal/6.git master:drupal_core')
+            # Repo config
+            local('git config receive.denycurrentbranch ignore')
+            local('git config core.sharedRepository group')
+
+        # post-receive-hook
+        post_receive_hook = os.path.join(project_repo,
+                                         '.git/hooks/post-receive')
+        pantheon.copy_template('git.hook.post-receive', post_receive_hook)
+        local('chmod +x %s' % post_receive_hook)
+
+    def setup_project_branch(self, revision=None):
+        project_repo = os.path.join('/var/git/projects', self.project)
+        with cd(project_repo):
+            if revision:
+                local('git branch %s %s' % (self.project, revision))
+            else:
+                local('git branch %s' % self.project)
+
+
+    def setup_working_dir(self, working_dir):
+        local('git clone -l /var/git/projects/%s -b %s %s' % (self.project,
+                                                              self.project,
+                                                              working_dir))
+
 
     def setup_database(self, environment, password, db_dump=None):
         username = self.project
@@ -29,6 +68,39 @@ class BuildTools(object):
         pantheon.set_database_grants(database, username, password)
         if db_dump:
             pantheon.import_db_dump(db_dump, database)
+
+    def setup_pantheon_libraries(self, working_dir):
+        module_dir = os.path.join(working_dir, 'sites/all/modules')
+        # SolrPhpClient
+        with cd(os.path.join(module_dir, 'apachesolr')):
+            local('wget http://solr-php-client.googlecode.com/files/SolrPhpClient.r22.2009-11-09.tgz')
+            local('tar xzf SolrPhpClient.r22.2009-11-09.tgz')
+            local('rm -f SolrPhpClient.r22.2009-11-09.tgz')
+
+    def setup_settings_file(self, site_dir):
+        """ Setup pantheon.settings.php and settings.php.
+        site_dir: path to the site directory. E.g. /var/www/sites/default
+
+        """
+        settings_file = os.path.join(site_dir, 'settings.php')
+        settings_default = os.path.join(site_dir, 'default.settings.php')
+        settings_pantheon = os.path.join(site_dir, 'pantheon.settings.php')
+
+        # Make sure default.settings.php exists.
+        if not os.path.isfile(settings_default):
+            tools.curl('http://gitorious.org/pantheon/6/blobs/raw/master/sites\
+                       /default/default.settings.php', settings_default)
+
+        # Make sure settings.php exists.
+        if not os.path.isfile(settings_file):
+            local('cp %s %s' % (settings_default, settings_file))
+
+        # Create pantheon.settings.php and include it from settings.php
+        pantheon.copy_template('pantheon.settings.php', site_dir)
+        with open(os.path.join(site_dir, 'settings.php'), 'a') as f:
+            f.write('\n/* Added by Pantheon */\n')
+            f.write("include 'pantheon.settings.php';\n")
+
 
     def setup_drush_alias(self):
         """ Create drush aliases for each environment in a project.
@@ -86,23 +158,33 @@ class BuildTools(object):
         for env in self.environments:
             self.server.create_drupal_cron(self.project, env)
 
-    def setup_environments(self, tag):
-       """ Clone project from central repo to all environments.
-           environments: Optional. List.
+    def setup_environments(self, handler=None, working_dir=None):
+        local('rm -rf %s' % (os.path.join(self.server.webroot, self.project)))
 
-       """
-       local('rm -rf %s' % (os.path.join(self.server.webroot, self.project)))
-       for env in self.environments:
-           destination = os.path.join(self.project_path, env)
-           local('git clone -l /var/git/projects/%s -b %s %s' % (self.project,
+        if handler == 'import':
+            tempdir = tempfile.mkdtemp()
+            dump_file = pantheon.export_data(self.project, 'dev', tempdir)
+
+        for env in self.environments:
+            # Code
+            destination = os.path.join(self.project_path, env)
+            local('git clone -l /var/git/projects/%s -b %s %s' % (self.project,
                                                                  self.project,
                                                                  destination))
-           with cd(destination):
-               if env == 'dev':
-                   local('git checkout %s' % self.project)
-               else:
-                   local('git fetch')
-                   local('git reset --hard %s.%s' % (self.project, tag))
+            # On import setup environment data and files.
+            if handler == 'import':
+                # Data (already exists in 'dev')
+                if env != 'dev':
+                    pantheon.import_data(self.project, env, dump_file)
+
+                # Files
+                    source = os.path.join(working_dir, 'sites/default/files')
+                    file_dir = os.path.join(self.project_path, env,
+                                                   'sites/default')
+                    local('rsync -av %s %s' % (source, file_dir))
+
+
+        local('rm -rf %s' % tempdir)
 
     def push_to_repo(self, tag='initialization'):
         """ Commit changes in working directory and push to central repo.
