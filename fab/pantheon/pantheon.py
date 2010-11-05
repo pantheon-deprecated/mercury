@@ -280,7 +280,10 @@ class PantheonServer:
         project_dir = '/var/solr/%s/' % project
         if not os.path.exists(project_dir):
             local('mkdir %s' % project_dir)
-        
+        local('chown %s:%s %s' % (self.tomcat_owner,
+                                  self.tomcat_owner,
+                                  project_dir))
+
         # Create data directory from sample solr data.
         data_dir = os.path.join(project_dir, environment)
         if os.path.exists(data_dir):
@@ -289,7 +292,7 @@ class PantheonServer:
         local('cp -R %s %s' % (data_dir_template, data_dir))
         local('chown -R %s:%s %s' % (self.tomcat_owner,
                                      self.tomcat_owner,
-                                     project_dir))
+                                     data_dir))
 
         # Tell Tomcat where indexes are located.
         tomcat_template = get_template('tomcat_solr_home.xml')

@@ -174,21 +174,45 @@ class ImportTools(project.BuildTools):
         drupal_vars['preprocess_js'] = True
         drupal_vars['preprocess_css'] = True
 
-        alias = '%s_%s' % (self.project, 'dev')
+        alias = 'working_dir'
         for module in required_modules:
-            drush(alias, 'en', module)
+            project.tools.drush(alias, 'en', module)
         with settings(warn_only=True):
-            drush_set_variables(alias, drupal_vars)
+            project.tools.drush_set_variables(alias, drupal_vars)
+
+        # Remove temporary working_dir drush alias.
+        alias_file = '/opt/drush/aliases/working_dir.alias.drushrc.php'
+        if os.path.exists(alias_file):
+            local('rm -f %s' % alias_file)
 
     def setup_settings_file(self):
         site_dir = os.path.join(self.working_dir, 'sites/default')
         super(ImportTools, self).setup_settings_file(site_dir)
 
+    def setup_drush_alias(self):
+        super(ImportTools, self).setup_drush_alias()
+
+        # Create a temporary drush alias for the working_dir.
+        # It will be removed after enable_pantheon_settings() finishes.
+        lines = ["<?php",
+                 "$_SERVER['db_name'] = %s_%s;" % (self.project, 'dev'),
+                 "$_SERVER['db_username'] = %s;" % self.project,
+                 "$_SERVER['db_password'] = %s;" % self.db_password,
+                 "$options['uri'] = 'default';",
+                 "$options['root'] = '%s';" % self.working_dir]
+
+        with open('/opt/drush/aliases/working_dir.alias.drushrc.php', 'w') as f:
+            for line in lines:
+                f.write(line + '\n')
+
+    def setup_vhost(self):
+        super(ImportTools, self).setup_vhost(self.db_password)
+
     def setup_environments(self):
         super(ImportTools, self).setup_environments('import', self.working_dir)
 
     def setup_permissions(self):
-        super(ImportTools, self).setup_permissions(self, 'import')
+        super(ImportTools, self).setup_permissions('import')
 
     def push_to_repo(self):
         super(ImportTools, self).push_to_repo('import')

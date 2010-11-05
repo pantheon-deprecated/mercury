@@ -1,5 +1,6 @@
 import os
 import sys
+import tempfile
 
 sys.path.append('/opt/pantheon/fab')
 from pantheon import pantheon
@@ -39,7 +40,8 @@ class BuildTools(object):
             # Repo config
             local('git config receive.denycurrentbranch ignore')
             local('git config core.sharedRepository group')
-
+            # Group write.
+            local('chmod -R g+w .')
         # post-receive-hook
         post_receive_hook = os.path.join(project_repo,
                                          '.git/hooks/post-receive')
@@ -89,8 +91,8 @@ class BuildTools(object):
 
         # Make sure default.settings.php exists.
         if not os.path.isfile(settings_default):
-            tools.curl('http://gitorious.org/pantheon/6/blobs/raw/master/sites\
-                       /default/default.settings.php', settings_default)
+            tools.curl('http://gitorious.org/pantheon/6/blobs/raw/master/' + \
+                       'sites/default/default.settings.php', settings_default)
 
         # Make sure settings.php exists.
         if not os.path.isfile(settings_file):
@@ -179,10 +181,10 @@ class BuildTools(object):
                     pantheon.import_data(self.project, env, dump_file)
 
                 # Files
-                    source = os.path.join(working_dir, 'sites/default/files')
-                    file_dir = os.path.join(self.project_path, env,
-                                                   'sites/default')
-                    local('rsync -av %s %s' % (source, file_dir))
+                source = os.path.join(working_dir, 'sites/default/files')
+                file_dir = os.path.join(self.project_path, env,
+                                                'sites/default')
+                local('rsync -av %s %s' % (source, file_dir))
 
         if handler == 'import':
             local('rm -rf %s' % tempdir)
@@ -255,7 +257,7 @@ class BuildTools(object):
                 site_dir = os.path.join(self.project_path,
                                         env,
                                         'sites/default')
-                with cd(site_directory):
+                with cd(site_dir):
                     local('chmod 770 files')
                     local('chown %s:%s files' % (self.server.web_group,
                                                  self.server.web_group))
@@ -314,15 +316,7 @@ class BuildTools(object):
                                                     settings_group))
                 # pantheon.settings.php
                 local('chmod 440 pantheon.settings.php')
-                local('chmod %s:%s pantheon.settings.php' % (owner,
+                local('chown %s:%s pantheon.settings.php' % (owner,
                                                              settings_group))
-
-                # Apache should own settings.php and pantheon.settings.php
-                local('chown %s:%s settings.php pantheon.settings.php' % (
-                                                    self.server.web_group,
-                                                    self.server.web_group))
-                # Apache should own files directory.
-                local('chown -R %s:%s files' % (self.server.web_group,
-                                                self.server.web_group))
 
 

@@ -1,6 +1,6 @@
 from pantheon import onramp
 from pantheon import restore
-from pantheon.project import tools
+from pantheon import project
 
 def import_site(project='pantheon', profile=None, url=None, **kw):
     """ Create a new Drupal installation.

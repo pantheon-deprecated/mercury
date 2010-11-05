@@ -2,6 +2,7 @@ import os
 import tempfile
 
 from fabric.api import local
+from fabric.api import settings
 
 def download(url):
     """Download url to temporary directory and return path to file.
