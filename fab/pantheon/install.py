@@ -9,14 +9,18 @@ from fabric.api import *
 import pantheon
 from project import project
 
-def _drush_download(modules):
+def _drush_download(modules, destination):
     """ Download list of modules using Drush.
     modules: list of module names.
 
     """
     #TODO: temporary until integrated in pantheon repo
-    for module in modules:
-         local('drush -y dl %s' % module)
+    temp_dir = tempfile.mkdtemp()
+    with cd(temp_dir):
+        for module in modules:
+             local('drush -y dl %s' % module)
+        local('mv * %s' % destination)
+    local('rm -rf %s' % temp_dir)
 
 class InstallTools(project.BuildTools):
 
@@ -41,15 +45,13 @@ class InstallTools(project.BuildTools):
         modules=['apachesolr','memcache','varnish']
         module_dir = os.path.join(self.working_dir, 'sites/all/modules')
         local('mkdir %s' % module_dir)
-        with cd(module_dir):
-            _drush_download(modules)
-        with cd(self.working_dir):
-            local('git add -A .')
-            local("git commit --author=\"%s\" -m 'Add required modules'" % \
-                  self.author)
+        _drush_download(modules, module_dir)
 
     def setup_pantheon_libraries(self):
         super(InstallTools, self).setup_pantheon_libraries(self.working_dir)
+
+    def setup_vhost(self):
+        super(InstallTools, self).setup_vhost(self.db_password)
 
     def setup_files_dir(self):
         """ Creates Drupal files directory and sets gitignore for all sub-files
@@ -94,5 +96,4 @@ class InstallTools(project.BuildTools):
             local('git add -A .')
             local("git commit --author=\"%s\" -m 'Site from makefile'" % self.author)
         local('rm -rf %s' % tempdir)
-
 

@@ -1,3 +1,4 @@
+import os
 import sys
 
 sys.path.append('/opt/pantheon/fab')
@@ -183,8 +184,8 @@ class BuildTools(object):
                                                    'sites/default')
                     local('rsync -av %s %s' % (source, file_dir))
 
-
-        local('rm -rf %s' % tempdir)
+        if handler == 'import':
+            local('rm -rf %s' % tempdir)
 
     def push_to_repo(self, tag='initialization'):
         """ Commit changes in working directory and push to central repo.
