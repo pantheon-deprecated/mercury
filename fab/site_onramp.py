@@ -2,7 +2,7 @@ from pantheon import onramp
 from pantheon import restore
 from pantheon import project
 
-def import_site(project='pantheon', profile=None, url=None, **kw):
+def onramp_site(project='pantheon', profile=None, url=None, **kw):
     """ Create a new Drupal installation.
     project: Installation namespace.
     profile: The installation type (e.g. pantheon/openatrium)
@@ -72,12 +72,21 @@ class _RestoreProfile(restore.RestoreTools):
 
         #Download, extract, and parse the backup.
         backup = project.tools.download(url)
-        self.extract(archive)
+        self.extract(backup)
         self.parse_backup()
 
-        self.restore_database()
-        self.restore_files()
+        self.setup_database()
+        self.restore_site_files()
+        self.restore_repository()
 
+        # Build non-code site features
+        self.setup_solr_index()
+        self.setup_vhost()
+        self.setup_drupal_cron()
+        self.setup_drush_alias()
+
+        self.setup_permissions()
+        self.server.restart_services()
 
 """
 To define additional profile handlers:

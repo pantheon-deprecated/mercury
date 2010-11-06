@@ -14,7 +14,7 @@
         <hudson.model.StringParameterDefinition>
           <name>profile</name>
           <description>Installation profile</description>
-          <defaultValue>pantheon</defaultValue>
+          <defaultValue>import</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>url</name>
@@ -39,7 +39,7 @@
     <hudson.tasks.Shell>
       <command>cd /opt/pantheon/fab
 /usr/bin/sudo fab clear_postback_workspace
-/usr/bin/sudo fab import_site:project=$project,profile=$profile,url=$url</command>
+/usr/bin/sudo fab onramp_site:project=$project,profile=$profile,url=$url</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
