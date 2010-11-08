@@ -4,7 +4,7 @@ from pantheon import restore
 from pantheon import project
 
 def onramp_site(project='pantheon', profile=None, url=None, **kw):
-    """ Create a new Drupal installation.
+    """Create a new Drupal installation.
     project: Installation namespace.
     profile: The installation type (e.g. pantheon/openatrium)
     **kw: Optional dictionary of values to process on installation.
@@ -20,8 +20,27 @@ def onramp_site(project='pantheon', profile=None, url=None, **kw):
     handler.build(**data)
 
 
-class _ImportProfile(onramp.ImportTools):
+def _get_profile_handler(profile, **kw):
+    """Return instantiated profile object.
+    profile: name of the installation profile.
 
+    To define additional profile handlers:
+        1. Create a new profile class (example below)
+        2. Add profile & class name to profiles dict in _get_profile_handler().
+
+    """
+    profiles = {'import': _ImportProfile,
+                'restore': _RestoreProfile}
+
+    # If profile doesn't exist, use 'import'
+    return profiles.has_key(profile) and \
+           profiles[profile](**kw) or \
+           profiles['import'](**kw)
+
+class _ImportProfile(onramp.ImportTools):
+    """Generic Pantheon Import Profile.
+
+    """
     def build(self, url, **kw):
 
         # Download, extract, and parse the tarball.
@@ -68,7 +87,9 @@ class _ImportProfile(onramp.ImportTools):
 
 
 class _RestoreProfile(restore.RestoreTools):
+    """Generic Pantheon Restore Profile.
 
+    """
     def build(self, url, **kw):
 
         #Download, extract, and parse the backup.
@@ -88,25 +109,4 @@ class _RestoreProfile(restore.RestoreTools):
 
         self.setup_permissions()
         self.server.restart_services()
-
-"""
-To define additional profile handlers:
-    1. Create a new profile class (example below)
-    2. Add profile & class name to profiles dict in _get_profile_handler().
-
-"""
-
-def _get_profile_handler(profile, **kw):
-    """ Return instantiated profile object.
-        profile: name of the installation profile.
-
-    """
-    profiles = {'import': _ImportProfile,
-                'restore': _RestoreProfile}
-
-    # If profile doesn't exist, use 'import'
-    return profiles.has_key(profile) and \
-           profiles[profile](**kw) or \
-           profiles['import'](**kw)
-
 

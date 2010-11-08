@@ -9,8 +9,11 @@ from fabric.api import *
 class BuildTools(object):
     """ Generic Pantheon project installation helper functions.
 
-    """
+    This is generally used as a base object, inherited by other project
+    building classes (install, import, and restore). The child classes
+    can use these methods directly or override/expand base processes.
 
+    """
     def __init__(self, project):
         """ Initialize generic project installation object & helper functions.
         project: the name of the project to be built.
@@ -23,6 +26,9 @@ class BuildTools(object):
         self.project_path = os.path.join(self.server.webroot, project)
 
     def setup_project_repo(self):
+        """ Create a new project repo, and download pantheon/drupal core.
+
+        """
         project_repo = os.path.join('/var/git/projects', self.project)
 
         # Clear existing
@@ -40,6 +46,7 @@ class BuildTools(object):
             local('git config core.sharedRepository group')
             # Group write.
             local('chmod -R g+w .')
+
         # post-receive-hook
         post_receive_hook = os.path.join(project_repo,
                                          '.git/hooks/post-receive')
@@ -47,6 +54,10 @@ class BuildTools(object):
         local('chmod +x %s' % post_receive_hook)
 
     def setup_project_branch(self, revision=None):
+        """ Create a branch of the project.
+        revision: optional revision (hash/tag) at which to create the branch.
+
+        """
         project_repo = os.path.join('/var/git/projects', self.project)
         with cd(project_repo):
             if revision:
@@ -56,12 +67,22 @@ class BuildTools(object):
 
 
     def setup_working_dir(self, working_dir):
+        """ Clone a project to a working directory for processing.
+        working_dir: temp directory for project processing (import/restore)
+
+        """
         local('git clone -l /var/git/projects/%s -b %s %s' % (self.project,
                                                               self.project,
                                                               working_dir))
 
 
     def setup_database(self, environment, password, db_dump=None):
+        """ Create a new database based on project_environment, using password.
+        environment: the environment name (dev/test/live) in which to create db
+        password: password to identify user (username is same as project name).
+        db_dump (optional): full path to database dump to import into db.
+
+        """
         username = self.project
         database = '%s_%s' % (self.project, environment)
 
@@ -71,6 +92,10 @@ class BuildTools(object):
             pantheon.import_db_dump(db_dump, database)
 
     def setup_pantheon_libraries(self, working_dir):
+        """ Download Pantheon required libraries.
+        working_dir: full path to the temp processing directory.
+
+        """
         module_dir = os.path.join(working_dir, 'sites/all/modules')
         # SolrPhpClient
         with cd(os.path.join(module_dir, 'apachesolr')):
@@ -102,7 +127,6 @@ class BuildTools(object):
             f.write('\n/* Added by Pantheon */\n')
             f.write("include 'pantheon.settings.php';\n")
 
-
     def setup_drush_alias(self):
         """ Create drush aliases for each environment in a project.
 
@@ -125,6 +149,7 @@ class BuildTools(object):
 
     def setup_vhost(self, db_password):
         """ Create vhost files for each environment in a project.
+        db_password: database password to store as an env var in the vhost file
 
         """
         for env in self.environments:
@@ -153,15 +178,25 @@ class BuildTools(object):
                local('a2ensite %s' % filename)
 
     def setup_drupal_cron(self):
-        """ Create drupal cron jobs in hudson for each development environment.
+        """ Create drupal cron jobs in hudson for each environment.
 
         """
         for env in self.environments:
             self.server.create_drupal_cron(self.project, env)
 
     def setup_environments(self, handler=None, working_dir=None):
+        """ Send code/data/files from processing to destination (dev/test/live)
+        All import and restore processing is done in temp directories. Once
+        processing is complete, it is pushed out to the final destination.
+
+        handler: 'import' or None. If import, complete extra import processing.
+        working_dir: If handler is import, also needs full path to working_dir.
+
+        """
         local('rm -rf %s' % (os.path.join(self.server.webroot, self.project)))
 
+        # During import, only run updates/import processes a single database.
+        # Once complete, we import this 'final' database into each environment.
         if handler == 'import':
             tempdir = tempfile.mkdtemp()
             dump_file = pantheon.export_data(self.project, 'dev', tempdir)
@@ -174,7 +209,7 @@ class BuildTools(object):
                                                                  destination))
             # On import setup environment data and files.
             if handler == 'import':
-                # Data (already exists in 'dev')
+                # Data (already exists in 'dev' - import into other envs)
                 if env != 'dev':
                     pantheon.import_data(self.project, env, dump_file)
 
@@ -184,10 +219,11 @@ class BuildTools(object):
                                                 'sites/default')
                 local('rsync -av %s %s' % (source, file_dir))
 
+        # Cleanup
         if handler == 'import':
             local('rm -rf %s' % tempdir)
 
-    def push_to_repo(self, tag='initialization'):
+    def push_to_repo(self, tag):
         """ Commit changes in working directory and push to central repo.
 
         """
@@ -203,6 +239,13 @@ class BuildTools(object):
     def setup_permissions(self, handler, environment=None):
         """ Set permissions on project directory, settings.php, and files dir.
 
+        handler: one of: 'import','restore','update','install'. How the
+        permissions are set is determined by the handler.
+
+        environment: In most cases this is left to None, as we will be
+        processing all environments. However, if handler='update' we need
+        to know the specific environment for which the update is being run.
+
         """
         # Get  owner
         #TODO: Allow non-getpantheon users to set a default user.
@@ -215,10 +258,10 @@ class BuildTools(object):
         # Otherwise, in some cases we are modifying all environments.
         environments = list()
         if handler == 'update':
-            #Single environment
+            #Single environment during update.
             environments.append(environment)
         else:
-            #All environments.
+            #All environments for install/import/restore.
             environments = self.environments
 
 
