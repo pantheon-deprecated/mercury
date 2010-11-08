@@ -1,3 +1,4 @@
+from pantheon import pantheon
 from pantheon import onramp
 from pantheon import restore
 from pantheon import project
@@ -24,7 +25,7 @@ class _ImportProfile(onramp.ImportTools):
     def build(self, url, **kw):
 
         # Download, extract, and parse the tarball.
-        tarball = project.tools.download(url)
+        tarball = pantheon.download(url)
         self.extract(tarball)
         self.parse_archive()
 
@@ -71,7 +72,7 @@ class _RestoreProfile(restore.RestoreTools):
     def build(self, url, **kw):
 
         #Download, extract, and parse the backup.
-        backup = project.tools.download(url)
+        backup = pantheon.download(url)
         self.extract(backup)
         self.parse_backup()
 

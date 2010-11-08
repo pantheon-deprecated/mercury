@@ -2,9 +2,7 @@ import os
 import sys
 import tempfile
 
-sys.path.append('/opt/pantheon/fab')
-from pantheon import pantheon
-from pantheon.project import tools
+import pantheon
 
 from fabric.api import *
 
@@ -91,7 +89,7 @@ class BuildTools(object):
 
         # Make sure default.settings.php exists.
         if not os.path.isfile(settings_default):
-            tools.curl('http://gitorious.org/pantheon/6/blobs/raw/master/' + \
+            pantheon.curl('http://gitorious.org/pantheon/6/blobs/raw/master/' + \
                        'sites/default/default.settings.php', settings_default)
 
         # Make sure settings.php exists.

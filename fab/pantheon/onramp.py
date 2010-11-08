@@ -3,7 +3,7 @@ import re
 import tempfile
 
 import pantheon
-from project import project
+import project
 
 from fabric.api import *
 
@@ -176,9 +176,9 @@ class ImportTools(project.BuildTools):
 
         alias = 'working_dir'
         for module in required_modules:
-            project.tools.drush(alias, 'en', module)
+            pantheon.drush(alias, 'en', module)
         with settings(warn_only=True):
-            project.tools.drush_set_variables(alias, drupal_vars)
+            pantheon.drush_set_variables(alias, drupal_vars)
 
         # Remove temporary working_dir drush alias.
         alias_file = '/opt/drush/aliases/working_dir.alias.drushrc.php'
