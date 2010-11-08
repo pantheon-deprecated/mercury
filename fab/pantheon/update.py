@@ -108,7 +108,7 @@ class Updater(project.BuildTools):
         local('rsync -av --delete %s %s' % (source, dest))
 
     def permissions_update(self):
-        self.setup_permissions(handler='update', environment=self.environment)
+        self.setup_permissions('update', self.environment)
 
     def run_command(self, command):
         with cd(self.env_path):
