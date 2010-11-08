@@ -1,6 +1,7 @@
 import os
 import tempfile
 
+from configobj import ConfigObj
 from fabric.api import *
 
 import pantheon
@@ -42,10 +43,25 @@ class PantheonBackup():
         """Backup central repository for a project.
 
         """
-        dest = os.path.join(self.backup_dir, '%s.git' % (self.project))
+        dest = os.path.join(self.backup_dir, 'repo.git')
         local('rsync -avz /var/git/projects/%s/ %s' % (self.project, dest))
 
+    def backup_config(self, version):
+        """Write the backup config file.
+        version: int. Backup schema version. Used to maintain backward
+                 compatibility as backup formats could change.
+
+        """
+        config_file = os.path.join(self.backup_dir, 'pantheon.backup')
+        config = ConfigObj(config_file)
+        config['backup_version'] = version
+        config['project'] = self.project
+        config.write()
+
     def make_archive(self):
+        """Tar/gzip the files to be backed up.
+
+        """
         with cd(self.working_dir):
             local('tar czf %s %s' % (self.name, self.project))
 
@@ -57,6 +73,7 @@ class PantheonBackup():
             local('mv %s %s' % (self.name, self.server.ftproot))
 
     def cleanup(self):
+        """ Remove working_dir """
         local('rm -rf %s' % self.working_dir)
 
     def _dump_data(self, destination, db_dict):

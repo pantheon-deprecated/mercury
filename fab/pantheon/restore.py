@@ -66,7 +66,7 @@ class RestoreTools(project.BuildTools):
         project_repo = os.path.join('/var/git/projects', self.project)
         backup_repo = os.path.join(self.working_dir,
                                    self.backup_project,
-                                   '%s.git' % self.project)
+                                   '%s.git' % self.backup_project)
         if os.path.exists(project_repo):
             local('rm -rf %s' % project_repo)
         local('rsync -avz %s/ %s/' % (backup_repo, project_repo))
