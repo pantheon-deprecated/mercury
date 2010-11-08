@@ -19,12 +19,16 @@ def postback(cargo, command='atlas'):
     command: Prometheus command.
 
     """
-
+    try:
+        task_id = cargo.get('build_parameters').get('task_id')
+    except Exception:
+        task_id = None
+        
     return _send_response({'id': str(uuid.uuid4()),
                            'command':command,
                            'method':'POST',
                            'response': cargo,
-                           'response_to': {'task_id':cargo.get('task_id')}})
+                           'response_to': {'task_id': task_id}})
 
 def get_job_and_id():
     """Return the job name and build number.
@@ -80,8 +84,12 @@ def _get_build_parameters(data):
     """
     ret = dict()
     parameters = data.get('actions')[0].get('parameters')
-    for param in parameters:
-        ret[param['name']] = param['value']
+    try:
+      for param in parameters:
+          ret[param['name']] = param['value']
+    except Exception:
+      print "WARNING: No build parameters found.";
+    
     return ret
 
 def _get_hudson_data(job, build_id):
