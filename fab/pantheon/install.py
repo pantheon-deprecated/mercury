@@ -7,7 +7,7 @@ import tempfile
 from fabric.api import *
 
 import pantheon
-from project import project
+import project
 
 def _drush_download(modules, destination):
     """ Download list of modules using Drush.

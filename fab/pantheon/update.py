@@ -2,7 +2,7 @@ import os
 import tempfile
 
 import pantheon
-from project import project
+import project
 
 from fabric.api import *
 
