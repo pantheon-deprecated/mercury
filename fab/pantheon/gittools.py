@@ -1,7 +1,7 @@
 import os
 import sys
 
-from fabric.api import * 
+from fabric.api import *
 
 import pantheon
 
@@ -41,11 +41,12 @@ def post_receive_hook(params):
                 repo_head = local('env -i git rev-parse refs/remotes/origin/%s' % \
                         project).rstrip('\n')
 
-                # Update dev environmnt if HEAD from central repo doesn't match
+                # Dev and central repo HEADs don't match.
                 if dev_head != repo_head:
                     with settings(warn_only=True):
                         with hide('warnings'):
                             dev_update = local('env -i git pull', capture=False)
+                    # Trigger Hudson job to update dev environment and set permissions.
                     local('curl http://127.0.0.1:8090/job/post_receive_update/' + \
                           'buildWithParameters?project=%s\\&dev_update=True' % project)
                     # Output status to the PUSH initiator.
@@ -55,14 +56,15 @@ def post_receive_hook(params):
                         print "\n\n"
                     else:
                         print "\nDevelopment environment updated.\n"
+                # Dev and Central repo HEADs match. 
                 else:
                     author_name, author_email = local(
                             'env -i git log -1 --pretty=format:%an%n%ae ' +
                             '%s' % dev_head).rstrip('\n').split('\n')
+                    # Code change initiated by user (not hudson job). Report back with status.
+                    # However, don't update dev environment or permissions (dev_update=False param)
                     if ((author_name != 'Hudson User') and
                             (author_email != 'hudson@getpantheon')):
-                        # If author is not Hudson, report back repo status 
-                        # but don't update the development environment or permissions.
                         local('curl http://127.0.0.1:8090/job/post_receive_update/' + \
                               'buildWithParameters?project=%s\\&dev_update=False' % project)
     else:

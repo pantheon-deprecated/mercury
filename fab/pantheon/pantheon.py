@@ -70,19 +70,6 @@ def random_string(length):
                                           string.digits) \
                                           for i in range(length)])
 
-
-def create_pantheon_settings_file(site_dir):
-    """Add an include to pantheon.settings.php to the site_dir/settings.php. 
-    Copies the pantheon.settings.php file from templates to the site_dir.
-    site_dir: path to the site directory. E.g. /var/www/sites/default
-
-    """
-    with open(os.path.join(site_dir, 'settings.php'), 'a') as f:
-        f.write('\n/* Added by Pantheon */\n')
-        f.write("include 'pantheon.settings.php';\n")
-    copy_template('pantheon.settings.php', site_dir)
-
-
 def export_data(project, environment, destination):
     """Export the database for a particular project/environment to destination.
     exported database will have a name in the form of: project_environment.sql
@@ -101,27 +88,33 @@ def export_data(project, environment, destination):
                                                        filename))
     return filename
 
-    
 def import_data(project, environment, source):
-    """Import a database into a particular project/environment. Expects user,
-    pass, grants to already be in place.
+    """Create database then import from source.
     project: project name
     environment: environment name
     source: full path to database dump file to import.
-    
-    """
-    username, password, db_name = _get_database_vars(project, environment)
 
-    local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % db_name)
-    local("mysql -u root -e 'CREATE DATABASE %s'" % db_name)
+    """
+    database = '%s_%s' % (project, environment)
+    create_database(database)
+    import_db_dump(source, database)
+
+def create_database(database):
+    local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % database)
+    local("mysql -u root -e 'CREATE DATABASE %s'" % database)
+
+def set_database_grants(database, username, password):
+    local("mysql -u root -e \"GRANT ALL ON %s.* TO '%s'@'localhost' \
+           IDENTIFIED BY '%s';\"" % (database, username, password))
+
+def import_db_dump(database_dump, database_name):
     # Strip cache tables, convert MyISAM to InnoDB, and import.
     local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | \
            grep -v '^INSERT INTO `ctools_object_cache`' | \
            grep -v '^INSERT INTO `watchdog`' | \
            grep -v '^INSERT INTO `accesslog`' | \
            grep -v '^USE `' | \
-           mysql -u root %s" % (source, db_name))
-
+           mysql -u root %s" % (database_dump, database_name))
 
 def parse_vhost(path):
     """Helper method that returns environment variables from a vhost file.
@@ -156,18 +149,64 @@ def is_drupal_installed(project, environment):
        environment: environment name.
 
     """
-    #TODO: Figure out a better way of determining this than hitting the db.
-    # In most cases this is going to be false.
+    #TODO: Find better way of determining this than hitting the db.
     (username, password, db_name) = _get_database_vars(project, environment)
-    status = local("mysql -u %s -p%s %s -e 'show tables;' | awk '/system/'" % (
-                                                      username,
-                                                      password,
-                                                      db_name))
-    if status:
-        return True
-    else:
-        return False
+    with hide('running'):
+        status = local("mysql -u %s -p%s %s -e 'show tables;' | \
+                        awk '/system/'" % (username, password, db_name))
+    # If any data is in status, assume site is installed.
+    return bool(status)
 
+def download(url):
+    """Download url to temporary directory and return path to file.
+    url: fully qualified url of file to download.
+    returns: full path to downloaded file.
+
+    """
+    download_dir = tempfile.mkdtemp()
+    filebase = os.path.basename(url)
+    filename = os.path.join(download_dir, filebase)
+
+    curl(url, filename)
+    return filename
+
+def drush(alias, cmd, option):
+    """Use drush to run a command on an aliased site.
+    alias: alias name of site (just name, no '@')
+    cmd: drush command to run
+    option: options / parameters for the command.
+
+    """
+    with settings(warn_only=True):
+        local('drush -y @%s %s %s' % (alias, cmd, option))
+
+def drush_set_variables(alias, variables = dict()):
+    """Set drupal variables using drush.
+    php-eval is used because drush vset always sets vars as strings.
+    alias: alias name of site (just name, no '@')
+    variables: dict of var_name/values.
+
+    """
+    for key, value in variables.iteritems():
+        # normalize strings and bools
+        if isinstance(value, str):
+            value = "'%s'" % value
+        if isinstance(value, bool):
+            if value == True:
+                value = 'TRUE'
+            elif value == False:
+                value = 'FALSE'
+        local("drush @%s php-eval \"variable_set('%s',%s);\"" % (alias,
+                                                                key,
+                                                                value))
+
+def curl(url, destination):
+    """Use curl to save url to destination.
+    url: url to download
+    destination: full path/ filename to save curl output.
+
+    """
+    local('curl "%s" -o "%s"' % (url, destination))
 
 def _get_database_vars(project, environment):
     """Helper method that returns database variables for a project/environment.
@@ -178,8 +217,8 @@ def _get_database_vars(project, environment):
     """
     vhost = PantheonServer().get_vhost_file(project, environment)
     env_vars = parse_vhost(vhost)
-    return (env_vars.get('db_username'), 
-            env_vars.get('db_password'), 
+    return (env_vars.get('db_username'),
+            env_vars.get('db_password'),
             env_vars.get('db_name'))
 
 
@@ -213,13 +252,11 @@ class PantheonServer:
         #global
         self.template_dir = get_template_dir()
 
-
     def get_hostname(self):
         if os.path.exists("/usr/local/bin/ec2-metadata"):
             return local('/usr/local/bin/ec2-metadata -p | sed "s/public-hostname: //"').rstrip('\n')
         else:
             return local('hostname').rstrip('\n')
-
 
     def update_packages(self):
         if (self.distro == "centos"):
@@ -228,7 +265,6 @@ class PantheonServer:
         else:
             local('apt-get -y update')
             local('apt-get -y dist-upgrade')
-
 
     def restart_services(self):
         if self.distro == 'ubuntu':
@@ -244,11 +280,9 @@ class PantheonServer:
             local('/etc/init.d/varnish restart')
             local('/etc/init.d/mysqld restart')
 
-
     def setup_iptables(self, file):
         local('/sbin/iptables-restore < ' + file)
         local('/sbin/iptables-save > /etc/iptables.rules')
-
 
     def create_drush_alias(self, drush_dict):
         """ Create an alias.drushrc.php file.
@@ -260,12 +294,11 @@ class PantheonServer:
         """
         alias_template = get_template('drush.alias.drushrc.php')
         alias_file = '/opt/drush/aliases/%s_%s.alias.drushrc.php' % (
-                                            drush_dict.get('project'), 
+                                            drush_dict.get('project'),
                                             drush_dict.get('environment'))
         template = build_template(alias_template, drush_dict)
         with open(alias_file, 'w') as f:
             f.write(template)
-
 
     def create_vhost(self, filename, vhost_dict):
         """
@@ -288,7 +321,6 @@ class PantheonServer:
             f.write(template)
         local('chmod 640 %s' % vhost)
 
-
     def create_solr_index(self, project, environment):
         """ Create solr index in: /var/solr/project/environment.
         project: project name
@@ -300,7 +332,10 @@ class PantheonServer:
         project_dir = '/var/solr/%s/' % project
         if not os.path.exists(project_dir):
             local('mkdir %s' % project_dir)
-        
+        local('chown %s:%s %s' % (self.tomcat_owner,
+                                  self.tomcat_owner,
+                                  project_dir))
+
         # Create data directory from sample solr data.
         data_dir = os.path.join(project_dir, environment)
         if os.path.exists(data_dir):
@@ -309,7 +344,7 @@ class PantheonServer:
         local('cp -R %s %s' % (data_dir_template, data_dir))
         local('chown -R %s:%s %s' % (self.tomcat_owner,
                                      self.tomcat_owner,
-                                     project_dir))
+                                     data_dir))
 
         # Tell Tomcat where indexes are located.
         tomcat_template = get_template('tomcat_solr_home.xml')
@@ -336,7 +371,7 @@ class PantheonServer:
         jobdir = '/var/lib/hudson/jobs/cron_%s_%s/' % (project, environment)
         if not os.path.exists(jobdir):
             local('mkdir -p ' + jobdir)
- 
+
         # Create job from template
         values = {'drush_alias':'@%s_%s' % (project, environment)}
         cron_template = get_template('hudson.drupal.cron')
@@ -345,7 +380,7 @@ class PantheonServer:
             f.write(template)
 
         # Set Perms
-        local('chown -R %s:%s %s' % ('hudson', self.hudson_group, jobdir))     
+        local('chown -R %s:%s %s' % ('hudson', self.hudson_group, jobdir))
 
 
     def get_vhost_file(self, project, environment):
@@ -366,9 +401,9 @@ class PantheonServer:
     def get_ldap_group(self):
         """Helper method to pull the ldap group we authorize.
         Helpful in keeping filesystem permissions correct.
-        
+
         /etc/pantheon/ldapgroup is written as part of the configure_ldap job.
-        
+
         """
         with open('/etc/pantheon/ldapgroup', 'r') as f:
             return f.readline().rstrip("\n")
@@ -376,9 +411,9 @@ class PantheonServer:
     def set_ldap_group(self, require_group):
         """Helper method to pull the ldap group we authorize.
         Helpful in keeping filesystem permissions correct.
-        
+
         /etc/pantheon/ldapgroup is written as part of the configure_ldap job.
-        
+
         """
         with open('/etc/pantheon/ldapgroup', 'w') as f:
             f.write('%s' % require_group)

@@ -2,17 +2,17 @@ import os
 import tempfile
 
 import pantheon
+import project
 
 from fabric.api import *
 
-class Updater():
+class Updater(project.BuildTools):
 
     def __init__(self, project, environment=''):
-        self.project = project
+        super(Updater, self).__init__(project)
+
         self.environment = environment
         self.author = 'Hudson User <hudson@pantheon>'
-        self.server = pantheon.PantheonServer()
-        self.project_path = os.path.join(self.server.webroot, self.project)
         self.env_path = os.path.join(self.project_path, environment)
 
 
@@ -84,7 +84,7 @@ class Updater():
             with cd(os.path.join(self.project_path, 'test')):
                 tag = local('git describe --tags').rstrip('\n')
             self._fetch_and_reset(tag)
-    
+
     def code_commit(self, message):
         with cd(os.path.join(self.project_path, 'dev')):
             local('git checkout %s' % self.project)
@@ -108,37 +108,7 @@ class Updater():
         local('rsync -av --delete %s %s' % (source, dest))
 
     def permissions_update(self):
-        owner = self.server.get_ldap_group()
-
-        with cd(self.env_path):
-            #TODO: Possibly restrict this to files changed in git diff?
-            # Force ldap user ownership on everything exept files directory.
-            local("find . \( -path ./sites/default/files -prune \) \
-                   -o \( -exec chown %s:%s '{}' \; \)" % (owner, owner))
-
-        site_path = os.path.join(self.env_path, 'sites/default')
-        with cd(site_path):
-            # Apache should own files dir
-            local('chown %s:%s files' % (self.server.web_group, self.server.web_group))
-            if pantheon.is_drupal_installed(self.project, self.environment):
-                local('chmod 440 settings.php')
-                local('chown %s:%s settings.php' % (owner,
-                                                    self.server.web_group))
-            else:
-                # If drupal is not installed, settings.php needs to be owned by
-                # apache, and have write permissions.
-                local('chmod 660 settings.php')
-                local('chown %s:%s settings.php' % (self.server.web_group,
-                                                    self.server.web_group))
-
-            local('chmod 440 pantheon.settings.php')
-            local('chown %s:%s pantheon.settings.php' % (owner,
-                                                         self.server.web_group))
-        # TODO: Is the below necesssary?
-
-        # Force repo perms.
-        #with cd('/var/git/projects'):
-        #    local('chown -R %s:%s %s' % (owner, owner, self.project))
+        self.setup_permissions('update', self.environment)
 
     def run_command(self, command):
         with cd(self.env_path):
