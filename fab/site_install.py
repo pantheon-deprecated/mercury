@@ -1,5 +1,6 @@
 import update
 from pantheon import install
+from pantheon import status
 
 def install_site(project='pantheon', profile='pantheon', **kw):
     """ Create a new Drupal installation.
@@ -54,6 +55,9 @@ class _PantheonProfile(install.InstallTools):
         # Cleanup and restart services
         self.cleanup()
         self.server.restart_services()
+
+        # Send back repo status.
+        status.git_repo_status(self.project)
 
 
 """

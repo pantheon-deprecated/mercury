@@ -4,9 +4,9 @@ import tempfile
 import os
 import sys
 
-from pantheon import gittools
 from pantheon import pantheon
 from pantheon import postback
+from pantheon import status
 from pantheon import update
 
 from fabric.api import *
@@ -38,7 +38,8 @@ def update_site_core(project='pantheon', keep=None):
     postback.write_build_data('update_site_core', result)
 
     if result['merge'] == 'success':
-        drupal_update_status(project)
+        # Send drupal version information.
+        status.drupal_update_status(project)
 
 def update_code(project, environment, tag=None, message=None):
     """ Update the working-tree for project/environment.
@@ -55,7 +56,7 @@ def update_code(project, environment, tag=None, message=None):
     updater.permissions_update()
 
     # Send back repo status.
-    git_repo_status(project)
+    status.git_repo_status(project)
 
 
 def post_receive_update(project, dev_update=True):
@@ -71,7 +72,7 @@ def post_receive_update(project, dev_update=True):
     if dev_update:
         updater.permissions_update()
     # Send back repo status
-    git_repo_status(project)
+    status.git_repo_status(project)
 
 def rebuild_environment(project, environment):
     """Rebuild the project/environment with files and data from 'live'.
@@ -111,23 +112,4 @@ def git_status(project, environment):
     """
     updater = update.Updater(project, environment)
     updater.run_command('git status')
-
-def git_repo_status(project):
-    """Post back to Atlas with the status of the project Repo.
-
-    """
-    repo = gittools.GitRepo(project)
-    status = repo.get_repo_status()
-
-    postback.write_build_data('git_repo_status', {'status': status})
-
-def drupal_update_status(project):
-    """Return whether or not there's a core update available.
-    This will post back directly rather than using a post-build action.
-
-    """
-    drushrc = project +'_dev';
-    status = local("drush @%s -n -p upc" % drushrc).rstrip().split('\n')
-
-    postback.write_build_data('drupal_update_status', {'status': status})
 

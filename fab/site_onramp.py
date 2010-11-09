@@ -1,7 +1,7 @@
 from pantheon import pantheon
 from pantheon import onramp
 from pantheon import restore
-from pantheon import project
+from pantheon import status
 
 def onramp_site(project='pantheon', profile=None, url=None, **kw):
     """Create a new Drupal installation.
@@ -85,6 +85,10 @@ class _ImportProfile(onramp.ImportTools):
         self.cleanup()
         self.server.restart_services()
 
+        # Send version and repo status.
+        status.git_repo_status(self.project)
+        status.drupal_update_status(self.project)
+
 
 class _RestoreProfile(restore.RestoreTools):
     """Generic Pantheon Restore Profile.
@@ -109,4 +113,8 @@ class _RestoreProfile(restore.RestoreTools):
 
         self.setup_permissions()
         self.server.restart_services()
+
+        # Send version and repo status.
+        status.git_repo_status(self.project)
+        status.drupal_update_status(self.project)
 
