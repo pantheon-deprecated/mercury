@@ -43,7 +43,7 @@ class PantheonBackup():
         """Backup central repository for a project.
 
         """
-        dest = os.path.join(self.backup_dir, 'repo.git')
+        dest = os.path.join(self.backup_dir, '%s.git' % (self.project))
         local('rsync -avz /var/git/projects/%s/ %s' % (self.project, dest))
 
     def backup_config(self, version):
