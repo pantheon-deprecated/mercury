@@ -1,6 +1,8 @@
 import gittools
 import postback
 
+from fabric.api import * 
+
 def git_repo_status(project):
     """Post back to Atlas with the status of the project Repo.
 

@@ -40,6 +40,7 @@ def update_site_core(project='pantheon', keep=None):
     if result['merge'] == 'success':
         # Send drupal version information.
         status.drupal_update_status(project)
+        status.git_repo_status(project)
 
 def update_code(project, environment, tag=None, message=None):
     """ Update the working-tree for project/environment.
@@ -55,9 +56,9 @@ def update_code(project, environment, tag=None, message=None):
     updater.code_update(tag, message)
     updater.permissions_update()
 
-    # Send back repo status.
+    # Send back repo status and drupal update status
     status.git_repo_status(project)
-
+    status.drupal_update_status(project)
 
 def post_receive_update(project, dev_update=True):
     """Update development environment with changes pushed from remote.
@@ -71,8 +72,9 @@ def post_receive_update(project, dev_update=True):
     # Update development environment permissions.
     if dev_update:
         updater.permissions_update()
-    # Send back repo status
+    # Send back repo status and drupal update status
     status.git_repo_status(project)
+    status.drupal_update_status(project)
 
 def rebuild_environment(project, environment):
     """Rebuild the project/environment with files and data from 'live'.
