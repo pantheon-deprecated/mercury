@@ -34,7 +34,8 @@ def update_site_core(project='pantheon', keep=None):
     """
     updater = update.Updater(project)
     result = updater.core_update(keep)
-
+    updater.permissions_update()
+    
     postback.write_build_data('update_site_core', result)
 
     if result['merge'] == 'success':
