@@ -8,10 +8,10 @@ from fabric.api import *
 
 class Updater(project.BuildTools):
 
-    def __init__(self, project, environment=''):
+    def __init__(self, project, environment):
         super(Updater, self).__init__(project)
 
-        self.environment = environment
+        self.project_env = environment
         self.author = 'Hudson User <hudson@pantheon>'
         self.env_path = os.path.join(self.project_path, environment)
 
@@ -69,18 +69,18 @@ class Updater(project.BuildTools):
 
     def code_update(self, tag, message):
         # Update code in 'dev' (Only used when updating from remote push)
-        if self.environment == 'dev':
+        if self.project_env == 'dev':
             with cd(self.env_path):
                 local('git pull')
 
         # Update code in 'test' (commit & tag in 'dev', fetch in 'test')
-        elif self.environment == 'test':
+        elif self.project_env == 'test':
             self.code_commit(message)
             self._tag_code(tag, message)
             self._fetch_and_reset(tag)
 
         # Update code in 'live' (get latest tag from 'test', fetch in 'live')
-        elif self.environment == 'live':
+        elif self.project_env == 'live':
             with cd(os.path.join(self.project_path, 'test')):
                 tag = local('git describe --tags').rstrip('\n')
             self._fetch_and_reset(tag)
@@ -97,18 +97,18 @@ class Updater(project.BuildTools):
     def data_update(self, source_env):
         tempdir = tempfile.mkdtemp()
         export = pantheon.export_data(self.project, source_env, tempdir)
-        pantheon.import_data(self.project, self.environment, export)
+        pantheon.import_data(self.project, self.project_env, export)
         local('rm -rf %s' % tempdir)
 
     def files_update(self, source_env):
         source = os.path.join(self.project_path,
                               '%s/sites/default/files' % source_env)
         dest = os.path.join(self.project_path,
-                            '%s/sites/default/' % self.environment)
+                            '%s/sites/default/' % self.project_env)
         local('rsync -av --delete %s %s' % (source, dest))
 
     def permissions_update(self):
-        self.setup_permissions('update', self.environment)
+        self.setup_permissions('update', self.project_env)
 
     def run_command(self, command):
         with cd(self.env_path):
@@ -129,7 +129,7 @@ class Updater(project.BuildTools):
             local('git push --tags')
 
     def _fetch_and_reset(self, tag):
-        with cd(os.path.join(self.project_path, self.environment)):
+        with cd(os.path.join(self.project_path, self.project_env)):
             local('git checkout %s' % self.project)
             local('git fetch -t')
             local('git reset --hard "%s"' % tag)

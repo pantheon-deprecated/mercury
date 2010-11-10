@@ -32,10 +32,10 @@ def update_site_core(project='pantheon', keep=None):
              'force': Leave failed merge in working-tree (manual resolve).
              None: Reset to ORIG_HEAD if merge fails.
     """
-    updater = update.Updater(project)
+    updater = update.Updater(project, 'dev')
     result = updater.core_update(keep)
     updater.permissions_update()
-    
+
     postback.write_build_data('update_site_core', result)
 
     if result['merge'] == 'success':

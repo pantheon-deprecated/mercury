@@ -243,8 +243,10 @@ class BuildTools(object):
         permissions are set is determined by the handler.
 
         environment: In most cases this is left to None, as we will be
-        processing all environments. However, if handler='update' we need
-        to know the specific environment for which the update is being run.
+        processing all environments using self.environments. However,
+        if handler='update' we need to know the specific environment for which
+        the update is being run. We do this so we are not forcing permissions
+        updates on files that have not changed.
 
         """
         # Get  owner
@@ -255,7 +257,7 @@ class BuildTools(object):
             owner = self.server.web_group
 
         # During code updates, we only make changes in one environment.
-        # Otherwise, in some cases we are modifying all environments.
+        # Otherwise, we are modifying all environments.
         environments = list()
         if handler == 'update':
             #Single environment during update.
