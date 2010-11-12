@@ -34,6 +34,7 @@ def update_site_core(project='pantheon', keep=None):
     """
     updater = update.Updater(project, 'dev')
     result = updater.core_update(keep)
+    updater.drupal_updatedb()
     updater.permissions_update()
 
     postback.write_build_data('update_site_core', result)
@@ -55,6 +56,7 @@ def update_code(project, environment, tag=None, message=None):
     updater = update.Updater(project, environment)
     updater.test_tag(tag)
     updater.code_update(tag, message)
+    updater.drupal_updatedb()
     updater.permissions_update()
 
     # Send back repo status and drupal update status

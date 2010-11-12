@@ -107,6 +107,11 @@ class Updater(project.BuildTools):
                             '%s/sites/default/' % self.project_env)
         local('rsync -av --delete %s %s' % (source, dest))
 
+    def drupal_updatedb(self):
+        alias = '@%s_%s' % (self.project, self.project_env)
+        with settings(warn_only=True):
+            local('drush %s updatedb' % alias)
+
     def permissions_update(self):
         self.setup_permissions('update', self.project_env)
 
