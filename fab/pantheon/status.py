@@ -23,7 +23,7 @@ def drupal_update_status(project, environment='dev'):
     if status.failed:
         status = 'FAILED'
     else:
-        status.rstrip().split('\n')
+        status = status.rstrip().split('\n')
         
     postback.write_build_data('drupal_update_status', {'status': status})
 
