@@ -18,7 +18,8 @@ def drupal_update_status(project):
 
     """
     drushrc = project +'_dev';
-    status = local("drush @%s -n -p upc" % drushrc).rstrip().split('\n')
+    with settings(warn_only=True):
+        status = local("drush @%s -n -p upc" % drushrc).rstrip().split('\n')
 
     postback.write_build_data('drupal_update_status', {'status': status})
 
