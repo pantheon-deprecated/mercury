@@ -90,7 +90,7 @@ class Updater(project.BuildTools):
             local('git checkout %s' % self.project)
             local('git add -A .')
             with settings(warn_only=True):
-                local('git commit --author="%s" -m "%s"' % (
+                local('git commit --allow-empty --author="%s" -m "%s"' % (
                        self.author, message), capture=False)
             local('git push')
 
