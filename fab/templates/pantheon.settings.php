@@ -1,6 +1,5 @@
 <?php
 
-$base_url = "";
 $db_url = "mysqli://$_SERVER[db_username]:$_SERVER[db_password]@localhost/$_SERVER[db_name]";
 
 $conf['pressflow_smart_start'] = TRUE;
