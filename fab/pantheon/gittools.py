@@ -34,7 +34,8 @@ def post_receive_hook(params):
             # Hide output from showing on git's report back to user.
             with hide('running'):
                 # Update metadata in dev environment.
-                local('env -i git fetch')
+                with settings(warn_only=True):
+                    local('env -i git fetch')
                 # Get last commit id for dev, and central repo.
                 dev_head = local('env -i git rev-parse refs/heads/%s' % \
                         project).rstrip('\n')
