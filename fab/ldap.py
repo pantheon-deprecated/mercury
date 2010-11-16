@@ -48,12 +48,13 @@ def build_ldap_client(base_domain = "example.com", require_group = None, server_
     local("sudo auth-client-config -t nss -p lac_ldap")
 
     with open('/etc/sudoers', 'a') as f:
-        f.write('%' + '%s ALL=(ALL) ALL' % require_group)
+        f.write("\n%" + '%s ALL=(ALL) ALL' % require_group)
 
     # Add LDAP user to www-data, and ssl-cert groups.
     #local('usermod -aG %s %s' % ('ssl-cert', require_group))
     # Use sed because usermod may fail if the user does not already exist.
-    local('sudo sed -i "s/%s:x:[0-9]*:/\0%s,/g" /etc/group' % ('ssl-cert', require_group))
+    ssl_group = "ssl-cert"
+    local('sudo sed -i "s/' + ssl_group + ':x:[0-9]*:/\\0' + require_group + ',/g" /etc/group')
 
     # Restart after ldap is configured so openssh-lpk doesn't choke.
     local("sudo /etc/init.d/ssh restart")
