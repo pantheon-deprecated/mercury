@@ -31,7 +31,7 @@ class ImportTools(project.BuildTools):
 
         # Find the Drupal installation and move it to the processing_dir
         drupal_location = os.path.join(extract_location, archive.get_drupal_tld())
-        local('rsync -avz %s/ %s/' % (drupal_location, self.processing_dir))
+        local('rsync -avz %s/ %s/' % (drupal_location.rstrip('/'), self.processing_dir))
         local('rm -rf %s' % extract_location)
 
         # Remove existing VCS files.
