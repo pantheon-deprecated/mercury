@@ -113,7 +113,8 @@ def import_db_dump(database_dump, database_name):
     #grep -v '^INSERT INTO `ctools_object_cache`' | \
     #grep -v '^INSERT INTO `watchdog`' | \
     #grep -v '^INSERT INTO `accesslog`' | \
-             # Strip cache tables, convert MyISAM to InnoDB, and import.
+
+    # Strip cache tables, convert MyISAM to InnoDB, and import.
     local("cat %s | grep -v '^USE `' | \
            sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | \
            mysql -u root %s" % (database_dump, database_name))
