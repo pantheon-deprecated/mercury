@@ -2,8 +2,10 @@
 import os
 import random
 import string
+import tarfile
 import tempfile
 import time
+from zipfile import ZipFile
 
 from fabric.api import *
 
@@ -420,4 +422,64 @@ class PantheonServer:
         """
         with open('/etc/pantheon/ldapgroup', 'w') as f:
             f.write('%s' % require_group)
+
+class PantheonArchive(object):
+
+    def __init__(self, path):
+        self.path = path
+        self.filetype = self._get_archive_type()
+        self.archive = self._open_archive()
+
+    def extract(self):
+        """Extract a tar/tar.gz/zip archive into a temporary directory.
+
+        """
+        destination = tempfile.mkdtemp()
+        self.archive.extractall(destination)
+        return destination
+
+    def close(self):
+        """Close the archive file object.
+
+        """
+        self.archive.close()
+
+    def get_drupal_tld(self):
+        """Return the relative path to the drupal install within an archive.
+
+        Example: archive contains: ./www/mysite/install.php with 'mysite' being
+                 a valid drupal installation. This would return 'www/mysite'.
+
+        """
+        if self.filetype == 'tar':
+            for member in self.archive.getmembers():
+                head, tail = os.path.split(member.name)
+                if tail == 'install.php':
+                    return head
+        elif self.filetype == 'zip':
+            for member in self.archive.infolist():
+                head, tail = os.path.split(member.filename)
+                if tail == 'install.php':
+                    return head
+        abort('Cannot locate install.php.')
+
+    def _get_archive_type(self):
+        """Return the generic type of archive (tar/zip).
+
+        """
+        if tarfile.is_tarfile(self.path):
+            return 'tar'
+        elif zipfile.is_zipfile(self.path):
+            return 'zip'
+        else:
+            abort('Unable to determine archive type.')
+
+    def _open_archive(self):
+        """Return an opened archive file object.
+
+        """
+        if self.filetype == 'tar':
+            return tarfile.open(self.path, 'r')
+        elif self.filetype == 'zip':
+            return ZipFile(self.path, 'r')
 
