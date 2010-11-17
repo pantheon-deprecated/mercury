@@ -79,10 +79,8 @@ class _ImportProfile(onramp.ImportTools):
         # Set permissions on project.
         self.setup_permissions()
 
-        #TODO: respond to atlast with gitsatus
-
         # Cleanup and restart services.
-        self.cleanup()
+        self.cleanup(tarball)
         self.server.restart_services()
 
         # Send version and repo status.

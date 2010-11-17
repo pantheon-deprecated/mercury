@@ -23,23 +23,26 @@ class ImportTools(project.BuildTools):
         self.db_password = pantheon.random_string(10)
 
     def extract(self, tarball):
-        """Use bzr import to extract archive. bzr import is used for this
-        because it can handle zero or one top level directories, and supports
-        .tar.gz/.tar/.gz/.zip archives. After extraction remove all VCS files
-        (including bzr/git/cvs/svn)
-        tarball: full path to archive to extract.
+        """ tarball: full path to archive to extract."""
 
-        """
-        local('bzr init %s' % self.processing_dir)
+        # Extract the archive
+        archive = pantheon.PantheonArchive(tarball)
+        extract_location = archive.extract()
+
+        # Find the Drupal installation and move it to the processing_dir
+        drupal_location = os.path.join(extract_location, archive.get_drupal_tld())
+        local('rsync -avz %s/ %s/' % (drupal_location.rstrip('/'), self.processing_dir))
+        local('rm -rf %s' % extract_location)
+
+        # Remove existing VCS files.
         with cd(self.processing_dir):
-            local("bzr import %s" % tarball)
             with settings(hide('warnings'), warn_only=True):
                 local("rm -r ./.bzr")
                 local("rm -r ./.git")
                 local("find . -depth -name .svn -exec rm -fr {} \;")
                 local("find . -depth -name CVS -exec rm -fr {} \;")
 
-        local('rm -rf %s' % os.path.dirname(tarball))
+        archive.close()
 
     def parse_archive(self):
         """Get the site name and database dump file from archive to be imported.
@@ -217,11 +220,12 @@ class ImportTools(project.BuildTools):
     def push_to_repo(self):
         super(ImportTools, self).push_to_repo('import')
 
-    def cleanup(self):
-        """ Remove working directory.
+    def cleanup(self, tarball):
+        """ Remove working directory and downloaded tarball.
 
         """
         local('rm -rf %s' % self.working_dir)
+        local('rm -rf %s' % os.path.dirname(tarball))
 
     def _get_site_name(self):
         with cd(self.processing_dir):
