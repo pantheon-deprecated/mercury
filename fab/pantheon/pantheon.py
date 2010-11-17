@@ -108,12 +108,14 @@ def set_database_grants(database, username, password):
            IDENTIFIED BY '%s';\"" % (database, username, password))
 
 def import_db_dump(database_dump, database_name):
-    # Strip cache tables, convert MyISAM to InnoDB, and import.
-    local("cat %s | grep -v '^INSERT INTO `cache[_a-z]*`' | \
-           grep -v '^INSERT INTO `ctools_object_cache`' | \
-           grep -v '^INSERT INTO `watchdog`' | \
-           grep -v '^INSERT INTO `accesslog`' | \
-           grep -v '^USE `' | \
+    #NOTE: saved the below for now. causes issues with dumps from phpmyadmin.
+    #grep -v '^INSERT INTO `cache[_a-z]*`' | \
+    #grep -v '^INSERT INTO `ctools_object_cache`' | \
+    #grep -v '^INSERT INTO `watchdog`' | \
+    #grep -v '^INSERT INTO `accesslog`' | \
+             # Strip cache tables, convert MyISAM to InnoDB, and import.
+    local("cat %s | grep -v '^USE `' | \
+           sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | \
            mysql -u root %s" % (database_dump, database_name))
 
 def parse_vhost(path):
