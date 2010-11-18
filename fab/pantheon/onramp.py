@@ -39,6 +39,7 @@ class ImportTools(project.BuildTools):
             with settings(hide('warnings'), warn_only=True):
                 local("rm -r ./.bzr")
                 local("rm -r ./.git")
+                local("find . -depth -name .git -exec rm -fr {} \;")
                 local("find . -depth -name .svn -exec rm -fr {} \;")
                 local("find . -depth -name CVS -exec rm -fr {} \;")
 
