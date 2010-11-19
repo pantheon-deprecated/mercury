@@ -268,7 +268,7 @@ class ImportTools(project.BuildTools):
     def _get_drupal_version(self):
         return ((local("awk \"/define\(\'VERSION\'/\" " + \
                 self.processing_dir + "/modules/system/system.module" + \
-                "| sed \"s_^.*'\(6\)\.\([0-9]\{1,2\}\)'.*_\\1-\\2_\"")
+                "| sed \"s_^.*'\(6\)\.\([0-9]\{1,2\}\).*_\\1-\\2_\"")
                 ).rstrip('\n'))
 
     def _get_pressflow_revision(self):
