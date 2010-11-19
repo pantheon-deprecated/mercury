@@ -110,7 +110,7 @@ class Updater(project.BuildTools):
     def drupal_updatedb(self):
         alias = '@%s_%s' % (self.project, self.project_env)
         with settings(warn_only=True):
-            local('drush %s updatedb' % alias)
+            local('drush %s -y updatedb' % alias)
 
     def permissions_update(self):
         self.setup_permissions('update', self.project_env)
