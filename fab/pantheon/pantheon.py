@@ -5,7 +5,7 @@ import string
 import tarfile
 import tempfile
 import time
-from zipfile import ZipFile
+import zipfile
 
 from fabric.api import *
 
@@ -481,5 +481,5 @@ class PantheonArchive(object):
         if self.filetype == 'tar':
             return tarfile.open(self.path, 'r')
         elif self.filetype == 'zip':
-            return ZipFile(self.path, 'r')
+            return zipfile.ZipFile(self.path, 'r')
 
