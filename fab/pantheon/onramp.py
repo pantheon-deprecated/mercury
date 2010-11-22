@@ -21,6 +21,7 @@ class ImportTools(project.BuildTools):
         self.destination = os.path.join(self.server.webroot, project)
         self.author = 'Hudson User <hudson@pantheon>'
         self.db_password = pantheon.random_string(10)
+        self.force_update = False
 
     def extract(self, tarball):
         """ tarball: full path to archive to extract."""
@@ -54,6 +55,10 @@ class ImportTools(project.BuildTools):
 
     def setup_project_branch(self):
         platform, version, revision = self._get_drupal_version_info()
+        # Pressflow branches at 6.6. If on an earlier version, force update.
+        if revision in ['DRUPAL-6-%s' % i for i in range(6)]:
+            revision = 'DRUPAL-6-6'
+            self.force_update = True
         super(ImportTools, self).setup_project_branch(revision)
 
     def setup_working_dir(self):
@@ -81,6 +86,8 @@ class ImportTools(project.BuildTools):
             local('rm -rf %s/*' % self.working_dir)
             local('rsync -avz %s/* %s' % (self.processing_dir, self.working_dir))
             local('rm -f PRESSFLOW.txt')
+            if self.force_update:
+                local('git reset --hard')
         local('rm -rf %s' % self.processing_dir)
 
         source = os.path.join(self.working_dir, 'sites/%s' % self.site)
@@ -128,7 +135,8 @@ class ImportTools(project.BuildTools):
 
             if file_path:
                 # Move files to sites/default/files and symlink from former location.
-                local('cp -R %s/* %s' % (file_path, file_dest))
+                with settings(warn_only=True):
+                    local('cp -R %s/* %s' % (file_path, file_dest))
                 local('rm -rf %s' % file_path)
                 path = os.path.split(file_path)
                 if not os.path.islink(path[0]):
@@ -149,6 +157,14 @@ class ImportTools(project.BuildTools):
                                     WHERE name = \'file_directory_path\';"' % (
                                     database,
                                     file_directory_path))
+        # Change file_directory_temp drupal variable
+        file_directory_temp = 's:4:\\"/tmp\\";'
+        local('mysql -u root %s -e "UPDATE variable \
+                                    SET value = \'%s\' \
+                                    WHERE name = \'file_directory_temp\';"' % (
+                                    database,
+                                    file_directory_temp))
+
 
         # Ignore files directory
         with open(os.path.join(file_dest,'.gitignore'), 'a') as f:
