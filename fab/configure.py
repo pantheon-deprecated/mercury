@@ -19,6 +19,8 @@ def configure():
     _configure_server(server)
     if not pantheon.is_private_server():
         _check_connectivity(server)
+        _configure_certificates()
+        _initialize_support_account(server)
     _configure_postfix(server)
     _restart_services(server)
     _configure_iptables(server)
@@ -71,8 +73,6 @@ def _check_connectivity(server):
     try:
         urllib2.urlopen('http://pki.getpantheon.com/', timeout=10)
         print 'Connectivity to the PKI server seems to work.'
-        _configure_certificates()
-        _initialize_support_account(server)
     except urllib2.URLError, e:
         print "Connectivity error: ", e
         # Bail if a connectivity reboot has already been attempted.
@@ -82,7 +82,6 @@ def _check_connectivity(server):
         with open('/etc/pantheon/connectivity_reboot', 'w') as f:
             f.write('Dear Rackspace: Fix this issue.')
         local('sudo reboot')
-
 
 def _configure_certificates():
     # Just in case we're testing, we need to ensure this path exists.
@@ -207,3 +206,10 @@ def _report():
 
     local('echo "DEAR SYSADMIN: PANTHEON IS READY FOR YOU NOW.  Do not forget the README.txt, CHANGELOG.txt and docs!" | wall')
 
+def preconfigure():
+    '''Pre-configuration steps meant to be run from rc.local.'''
+    server = pantheon.PantheonServer()
+    _check_connectivity(server)
+    local('apt-get update')
+    local('apt-get -y upgrade hudson')
+    local('/etc/init.d/hudson restart')
