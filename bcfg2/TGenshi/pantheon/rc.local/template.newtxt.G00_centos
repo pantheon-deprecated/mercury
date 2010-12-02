@@ -10,9 +10,24 @@ touch /var/lock/subsys/local
 
 if [ ! -f /etc/pantheon/incep ]; then
   # Run preconfigure
-  cd /opt/pantheon/fab
-  fab preconfigure
-
+  test=`curl http://pki.getpantheon.com/`
+  if [ `expr "$test" : '-----BEGIN CERTIFICATE-----'` != 27 ] ; then
+    echo "Connectivity error!"
+    if [ -f /etc/pantheon/connectivity_reboot ]; then
+      echo "A Pantheon connectivity reboot has already been attempted. Exiting."
+      exit 1
+    else
+      echo "Failure to connect to PKI; attempting reboot"
+      `echo 'Dear Rackspace: please fix this problem.' >> /etc/pantheon/connectivity_reboot`
+      reboot
+    fi
+  else
+    echo "Connectivity to PKI server seems ok; updating/rebooting Hudson"
+    apt-get update
+    apt-get -y upgrade hudson
+    /etc/init.d/hudson restart
+  fi
+  
   # Wait for Hudson to spin Up
   while [ "`curl -sL --connect-timeout 1 -w "%{http_code}\\n" "127.0.0.1:8090" -o /dev/null`" != "200" ]; do
     sleep 5
