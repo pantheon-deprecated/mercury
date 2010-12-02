@@ -11,7 +11,7 @@ touch /var/lock/subsys/local
 if [ ! -f /etc/pantheon/incep ]; then
   # Run preconfigure
   test=`curl http://pki.getpantheon.com/`
-  if [ `expr "$test" : '-----BEGIN CERTIFICATE-----'` != 27 ] ; then
+  if [ `expr "$$test" : '-----BEGIN CERTIFICATE-----'` != 27 ] ; then
     echo "Connectivity error!"
     if [ -f /etc/pantheon/connectivity_reboot ]; then
       echo "A Pantheon connectivity reboot has already been attempted. Exiting."
