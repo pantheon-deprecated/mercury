@@ -1,0 +1,5 @@
+apt-get install git-core
+git clone git://github.com/pantheon-systems/mercury.git -b master /opt/pantheon
+cd /opt/pantheon
+python setup.py
+
