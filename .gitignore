@@ -1,0 +1,5 @@
+*.pyc
+./bcfg2/Packages/cache
+./bcfg2/Metadata/clients.xml
+./fabric/drush-*.tar.gz
+./bcfg2/Probes/probed.xml
