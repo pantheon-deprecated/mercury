@@ -73,7 +73,6 @@
 
     <!-- tools -->
     <Service type='deb' status='off' name='rsync'/>
-    <Service type='deb' status='off' name='screen-cleanup'/>
 
     <!-- pound -->
     <Service type='deb' status='on' name='pound'/>
@@ -113,6 +112,7 @@
       <Service type='upstart' status='on' name='upstart-udev-bridge'/>
 
       <!-- manual services (don't start/stop) -->
+      <Service mode='manual' status='off' type='upstart' name='console-setup'/>
       <Service mode='manual' status='off' type='upstart' name='control-alt-delete'/>
       <Service mode='manual' status='off' type='upstart' name='failsafe-x'/>
       <Service mode='manual' status='off' type='upstart' name='hostname'/>
@@ -137,12 +137,12 @@
       <Service mode='manual' status='off' type='upstart' name='rc'/>
       <Service mode='manual' status='off' type='upstart' name='rc-sysinit'/>
       <Service mode='manual' status='off' type='upstart' name='rcS'/>
+      <Service mode='manual' status='off' type='upstart' name='screen-cleanup'/>
       <Service mode='manual' status='off' type='upstart' name='udev-finish'/>
       <Service mode='manual' status='off' type='upstart' name='udevmonitor'/>
       <Service mode='manual' status='off' type='upstart' name='udevtrigger'/>
       <Service mode='manual' status='off' type='upstart' name='ureadahead'/>
       <Service mode='manual' status='off' type='upstart' name='ureadahead-other'/> 
-      <Service mode='manual' status='off' type='upstart' name='console-setup'/>
 
     </Group> 
     
