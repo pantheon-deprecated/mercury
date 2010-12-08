@@ -18,6 +18,8 @@
     <Package name='bind9-host'/>
     <Package name='dnsutils'/>
     <Package name='git-core'/>
+    <Package name='python-dev'/>
+    <Package name='python-setuptools'/>
     <Package name='python-software-properties'/>
     <Service name='rsync'/>
     <Service name='screen-cleanup'/>
@@ -30,7 +32,6 @@
   
   <!-- Ubuntu Only -->
   <Group name='ubuntu'>
-    <Package name='fabric'/>
     <Service name='vnstat'/>
     
     <!-- AWS Only -->

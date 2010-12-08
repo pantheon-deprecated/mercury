@@ -5,7 +5,6 @@ from fabric.api import *
 
 from pantheon import backup
 
-
 def backup_site(archive_name, project='pantheon'):
     archive = backup.PantheonBackup(archive_name, project)
 

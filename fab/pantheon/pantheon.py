@@ -7,6 +7,8 @@ import tempfile
 import time
 import zipfile
 
+import postback
+
 from fabric.api import *
 
 ENVIRONMENTS = set(['dev','test','live'])
@@ -174,36 +176,6 @@ def download(url):
 
     curl(url, filename)
     return filename
-
-def drush(alias, cmd, option):
-    """Use drush to run a command on an aliased site.
-    alias: alias name of site (just name, no '@')
-    cmd: drush command to run
-    option: options / parameters for the command.
-
-    """
-    with settings(warn_only=True):
-        local('drush -y @%s %s %s' % (alias, cmd, option))
-
-def drush_set_variables(alias, variables = dict()):
-    """Set drupal variables using drush.
-    php-eval is used because drush vset always sets vars as strings.
-    alias: alias name of site (just name, no '@')
-    variables: dict of var_name/values.
-
-    """
-    for key, value in variables.iteritems():
-        # normalize strings and bools
-        if isinstance(value, str):
-            value = "'%s'" % value
-        if isinstance(value, bool):
-            if value == True:
-                value = 'TRUE'
-            elif value == False:
-                value = 'FALSE'
-        local("drush @%s php-eval \"variable_set('%s',%s);\"" % (alias,
-                                                                key,
-                                                                value))
 
 def curl(url, destination):
     """Use curl to save url to destination.
@@ -461,7 +433,7 @@ class PantheonArchive(object):
                 head, tail = os.path.split(member.filename)
                 if tail == 'install.php':
                     return head
-        abort('Cannot locate install.php.')
+        postback.build_error('Error: Cannot locate drupal install in archive.')
 
     def _get_archive_type(self):
         """Return the generic type of archive (tar/zip).
@@ -472,7 +444,7 @@ class PantheonArchive(object):
         elif zipfile.is_zipfile(self.path):
             return 'zip'
         else:
-            abort('Unable to determine archive type.')
+            postback.build_error('Error: Not a valid tar/zip archive.')
 
     def _open_archive(self):
         """Return an opened archive file object.

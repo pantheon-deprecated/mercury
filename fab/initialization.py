@@ -11,11 +11,13 @@ def initialize(vps=None):
     '''Initialize the Pantheon system.'''
     server = pantheon.PantheonServer()
     _initialize_config(vps)
+    _initialize_fabric()
     _initialize_package_manager(server)
     _initialize_bcfg2(server)
     _initialize_iptables(server)
     _initialize_drush()
     _initialize_solr(server)
+    _initialize_sudoers(server)
     _initialize_hudson(server)
     _initialize_apache(server)
 
@@ -23,6 +25,16 @@ def init():
     '''Alias of "initialize"'''
     initialize()
 
+def _initialize_fabric():
+    """Make symlink of /usr/local/bin/fab -> /usr/bin/fab.
+
+    This is because using pip to install fabric will install it to
+    /usr/local/bin but we want to maintaing compatibility with existing
+    servers and hudson jobs.
+
+    """
+    if not os.path.exists('/usr/bin/fab'):
+        local('ln -s /usr/local/bin/fab /usr/bin/fab')
 
 def _initialize_config(vps):
     local('mkdir /etc/pantheon')
@@ -104,7 +116,6 @@ def _initialize_iptables(server):
     else:
         local('cp /etc/pantheon/templates/iptables /etc/iptables.rules')
 
-
 def _initialize_drush():
     local('[ ! -d drush ] || rm -rf drush')
     local('wget http://ftp.drupal.org/files/projects/drush-6.x-3.3.tar.gz')
@@ -117,7 +128,6 @@ def _initialize_drush():
     local('ln -sf /opt/drush/drush /usr/local/bin/drush')
     local('drush dl drush_make')
 
-
 def _initialize_solr(server=pantheon.PantheonServer()):
     temp_dir = tempfile.mkdtemp()
     with cd(temp_dir):
@@ -126,7 +136,7 @@ def _initialize_solr(server=pantheon.PantheonServer()):
         local('mkdir -p /var/solr')
         local('mv apache-solr-1.4.1/dist/apache-solr-1.4.1.war /var/solr/solr.war')
         local('cp -R apache-solr-1.4.1/example/solr %s' % server.template_dir)
-        local('drush dl apachesolr') 
+        local('drush dl apachesolr')
         local('cp apachesolr/schema.xml %s' % os.path.join(
                          server.template_dir, 'solr/conf'))
         local('cp apachesolr/solrconfig.xml %s' %  os.path.join(
@@ -134,21 +144,18 @@ def _initialize_solr(server=pantheon.PantheonServer()):
         local('chown -R ' + server.tomcat_owner + ':root /var/solr/')
     local('rm -rf ' + temp_dir)
 
+def _initialize_sudoers(server):
+    """Create placeholder sudoers files. """
+    local('touch /etc/sudoers.d/003_pantheon_extra')
+    local('chmod 0440 /etc/sudoers.d/003_pantheon_extra')
 
 def _initialize_hudson(server):
-    sudoers = local('cat /etc/sudoers')
-    hudson_sudoer = ('hudson ALL = NOPASSWD: /usr/local/bin/drush, '
-                     '/usr/bin/fab, /usr/sbin/bcfg2, /usr/bin/python')
-    if 'hudson ALL = NOPASSWD:' not in sudoers:
-        local('echo "%s" >> /etc/sudoers' % hudson_sudoer)
-    if server.distro == 'centos':
-        local('sed -i "s/Defaults    requiretty/#Defaults    requiretty/" /etc/sudoers')
     local('usermod -aG ssl-cert hudson')
     local('/etc/init.d/hudson restart')
-
 
 def _initialize_apache(server):
     if server.distro == 'ubuntu':
         local('a2dissite default')
         local('rm -f /etc/apache2/sites-available/default*')
         local('rm -f /var/www/*')
+

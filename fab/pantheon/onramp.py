@@ -2,8 +2,10 @@ import os
 import re
 import tempfile
 
+import drupaltools
 import pantheon
 import project
+import postback
 
 from fabric.api import *
 
@@ -40,6 +42,7 @@ class ImportTools(project.BuildTools):
             with settings(hide('warnings'), warn_only=True):
                 local("rm -r ./.bzr")
                 local("rm -r ./.git")
+                local("find . -depth -name '._*' -exec rm -fr {} \;")
                 local("find . -depth -name .git -exec rm -fr {} \;")
                 local("find . -depth -name .svn -exec rm -fr {} \;")
                 local("find . -depth -name CVS -exec rm -fr {} \;")
@@ -157,6 +160,7 @@ class ImportTools(project.BuildTools):
                                     WHERE name = \'file_directory_path\';"' % (
                                     database,
                                     file_directory_path))
+
         # Change file_directory_temp drupal variable
         file_directory_temp = 's:4:\\"/tmp\\";'
         local('mysql -u root %s -e "UPDATE variable \
@@ -164,7 +168,6 @@ class ImportTools(project.BuildTools):
                                     WHERE name = \'file_directory_temp\';"' % (
                                     database,
                                     file_directory_temp))
-
 
         # Ignore files directory
         with open(os.path.join(file_dest,'.gitignore'), 'a') as f:
@@ -181,26 +184,42 @@ class ImportTools(project.BuildTools):
                             'locale',
                             'syslog',
                             'varnish']
+        # Enable modules.
+        with settings(hide('warnings'), warn_only=True):
+            for module in required_modules:
+                result = local('drush -y @working_dir en %s' % module)
+                if result.failed:
+                    # If importing vanilla drupal, this module wont exist.
+                    if module != 'cookie_cache_bypass':
+                        postback.build_warning('Could not enable %s module.' % (
+                                               module))
+                        print '\n%s module could not be enabled. ' % module + \
+                              'Error Message:'
+                        print '\n%s' % result.stderr
+
         # Solr variables
         drupal_vars = {}
         drupal_vars['apachesolr_search_make_default'] = 1
-        drupal_vars['apachesolr_search_spellcheck'] = True
+        drupal_vars['apachesolr_search_spellcheck'] = 1
 
         # admin/settings/performance variables
-        drupal_vars['cache'] = '3' # external
-        drupal_vars['page_cache_max_age'] = 900
-        drupal_vars['block_cache'] = True
-        drupal_vars['page_compression'] = 0
-        drupal_vars['preprocess_js'] = True
-        drupal_vars['preprocess_css'] = True
+        drupal_vars['cache'] = '3'
+        drupal_vars['page_cache_max_age'] = '900'
+        drupal_vars['block_cache'] = '1'
+        drupal_vars['page_compression'] = '0'
+        drupal_vars['preprocess_js'] = '1'
+        drupal_vars['preprocess_css'] = '1'
 
-        alias = 'working_dir'
-        for module in required_modules:
-            pantheon.drush(alias, 'en', module)
-        with settings(warn_only=True):
-            pantheon.drush_set_variables(alias, drupal_vars)
+        # Set variables.
+        database = '%s_dev' % self.project
+        db = drupaltools.DrupalDB(database=database,
+                                  username = self.project,
+                                  password = self.db_password)
+        for key, value in drupal_vars.iteritems():
+            db.vset(key, value)
+        db.close()
 
-        # Remove temporary working_dir drush alias.
+       # Remove temporary working_dir drush alias.
         alias_file = '/opt/drush/aliases/working_dir.alias.drushrc.php'
         if os.path.exists(alias_file):
             local('rm -f %s' % alias_file)
@@ -215,9 +234,9 @@ class ImportTools(project.BuildTools):
         # Create a temporary drush alias for the working_dir.
         # It will be removed after enable_pantheon_settings() finishes.
         lines = ["<?php",
-                 "$_SERVER['db_name'] = %s_%s;" % (self.project, 'dev'),
-                 "$_SERVER['db_username'] = %s;" % self.project,
-                 "$_SERVER['db_password'] = %s;" % self.db_password,
+                 "$_SERVER['db_name'] = '%s_%s';" % (self.project, 'dev'),
+                 "$_SERVER['db_username'] = '%s';" % self.project,
+                 "$_SERVER['db_password'] = '%s';" % self.db_password,
                  "$options['uri'] = 'default';",
                  "$options['root'] = '%s';" % self.working_dir]
 
@@ -246,24 +265,35 @@ class ImportTools(project.BuildTools):
 
     def _get_site_name(self):
         with cd(self.processing_dir):
-            settings_files = (local('find sites/ -name settings.php -type f')).rstrip('\n')
+            settings_files = (local('find sites/ -name settings.php -type f')
+                             ).rstrip('\n')
         if not settings_files:
-            abort('No settings.php files found.')
+            postback.build_error('Error: No settings.php files were found.')
         if '\n' in settings_files:
-            abort('Multiple settings.php files found.')
+            postback.build_error('Error: Multiple settings.php files found: '+\
+                         '\n'.join(['[%s]' % line for line in
+                                    settings_files.split('\n')]))
         name = re.search(r'^.*sites/(.*)/settings.php', settings_files).group(1)
         return name
 
     def _get_database_dump(self):
-        with cd(self.processing_dir):
-            with settings(warn_only=True):
-                sql_dump = (local("find . -maxdepth 1 -type f | grep '\.sql'"
-                                  )).replace('./','').rstrip('\n')
-                if not sql_dump:
-                    abort("No .sql files found")
-        if '\n' in sql_dump:
-            abort('Multiple database dumps found.')
-        return sql_dump
+        """Return the filename of the database dump.
+
+        This will look for *.mysql or *.sql files in the root drupal directory.
+        If more than one dump is found, the build will exit with an error.
+
+        """
+        sql_dump = [dump for dump in os.listdir(self.processing_dir) \
+                    if os.path.splitext(dump)[1] in ['.sql', '.mysql']]
+        count = len(sql_dump)
+        if count == 0:
+            postback.build_error('No database dump files were found ' + \
+                                '(*.mysql or *.sql)')
+        elif count > 1:
+            postback.build_error('Multiple database dump files were found ' + \
+                                 '(*.mysql or *.sql)')
+        else:
+            return sql_dump[0]
 
     def _get_drupal_version_info(self):
         platform = self._get_drupal_platform()
@@ -282,10 +312,13 @@ class ImportTools(project.BuildTools):
                 ).rstrip('\n').upper())
 
     def _get_drupal_version(self):
-        return ((local("awk \"/define\(\'VERSION\'/\" " + \
-                self.processing_dir + "/modules/system/system.module" + \
-                "| sed \"s_^.*'\(6\)\.\([0-9]\{1,2\}\).*_\\1-\\2_\"")
-                ).rstrip('\n'))
+        version = ((local("awk \"/define\(\'VERSION\'/\" " + \
+                  self.processing_dir + "/modules/system/system.module" + \
+                  "| sed \"s_^.*'\(6\)\.\([0-9]\{1,2\}\).*_\\1-\\2_\"")
+                  ).rstrip('\n'))
+        if version[0:1] != '6':
+            postback.build_error('Error: This does not appear to be a Drupal 6 site.')
+        return version
 
     def _get_pressflow_revision(self):
         #TODO: Optimize this (restrict search to revisions within Drupal minor version)

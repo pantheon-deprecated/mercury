@@ -58,6 +58,7 @@ class _PantheonProfile(install.InstallTools):
 
         # Send back repo status.
         status.git_repo_status(self.project)
+        status.drupal_update_status(self.project)
 
 
 """

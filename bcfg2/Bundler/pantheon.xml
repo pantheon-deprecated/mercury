@@ -30,6 +30,8 @@
 
   <!-- Ubuntu/Deb Only -->
   <Group name='deb'>
+    <Path name='/etc/sudoers'/>
+    <Path name='/etc/sudoers.d/001_pantheon_default'/>
     <Path name='/etc/motd.tail' altsrc='/etc/motd'/>
     <Path name='/etc/rc.local' altsrc='/pantheon/rc.local'/>
     <Path name='/etc/network/if-pre-up.d/iptablesload'/>

@@ -5,8 +5,7 @@ from pantheon import postback
 def postback_atlas():
     """ Send information about a Hudson job (and resulting data) back to Atlas.
 
-    This should only be called from within a Hudson job.
-    Ideally from within a Post-Build Action.
+    This should only be called from within a Hudson Post-Build Action.
 
     """
     # Get job_name and build_number.
@@ -18,18 +17,10 @@ def postback_atlas():
 
     # Get build data 
     #     Data from build actions (in hudson workspace).
-    response.update(postback.get_build_data(job_name))
+    response.update({'build_data': postback.get_build_data()})
 
     # Send response to Atlas.
     postback.postback(response)
-
-def clear_postback_workspace():
-    """Remove all files in the shared Panthoen workspace.
-
-    """
-    workspace = postback.get_workspace()
-    if os.path.exists(workspace):
-        os.system('rm -f %s' % os.path.join(workspace, '*'))
 
 if __name__ == '__main__':
     postback_atlas()

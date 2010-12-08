@@ -33,11 +33,16 @@
   <builders>
     <hudson.tasks.Shell>
       <command>cd /opt/pantheon/fab
-/usr/bin/sudo fab clear_postback_workspace
-/usr/bin/sudo fab install_site:project=$project,profile=$profile</command>
+/usr/bin/sudo -E /usr/bin/fab clean_workspace
+/usr/bin/sudo -E /usr/bin/fab install_site:project=$project,profile=$profile
+/usr/bin/sudo -E /usr/bin/fab parse_build_data</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
+    <hudson.tasks.junit.JUnitResultArchiver>
+      <testResults>warnings.xml</testResults>
+      <keepLongStdio>false</keepLongStdio>
+    </hudson.tasks.junit.JUnitResultArchiver>
     <hudson.plugins.postbuildtask.PostbuildTask>
       <tasks>
         <hudson.plugins.postbuildtask.TaskProperties>
