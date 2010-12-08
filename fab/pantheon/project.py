@@ -36,7 +36,7 @@ class BuildTools(object):
             local('rm -rf %s' % project_repo)
 
         # Get Pantheon core
-        local('git clone git://gitorious.org/pantheon/6.git %s' % project_repo)
+        local('git clone --bare git://gitorious.org/pantheon/6.git %s' % project_repo)
 
         with cd(project_repo):
             # Drupal Core
