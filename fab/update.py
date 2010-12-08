@@ -12,9 +12,9 @@ from pantheon import update
 from fabric.api import *
 
 def update_pantheon(vps=None):
-       print("Updating Pantheon from Launchpad")
        local('/etc/init.d/bcfg2-server stop')
-       local('cd /opt/pantheon; bzr up')
+       with cd('/opt/pantheon'):
+           local('git pull origin')
        pantheon.restart_bcfg2()
        if (vps == 'aws'):
               local('/usr/sbin/bcfg2 -vqed -p pantheon-aws', capture=False)
@@ -22,7 +22,6 @@ def update_pantheon(vps=None):
               local('/usr/sbin/bcfg2 -vqed -p pantheon-aws-ebs', capture=False)
        else:
               local('/usr/sbin/bcfg2 -vqed', capture=False)
-       print("Pantheon Updated")
 
 def update_site_core(project='pantheon', keep=None):
     """Update Drupal core (from Drupal or Pressflow, to latest Pressflow).
