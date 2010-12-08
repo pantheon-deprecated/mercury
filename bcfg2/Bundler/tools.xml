@@ -18,7 +18,12 @@
     <Package name='bind9-host'/>
     <Package name='dnsutils'/>
     <Package name='git-core'/>
+    <Package name='manpages-dev'/>
+    <Package name='python-crypto'/>
     <Package name='python-dev'/>
+    <Package name='python-mysqldb'/>
+    <Package name='python-paramiko'/>
+    <Package name='python-pip'/>
     <Package name='python-setuptools'/>
     <Package name='python-software-properties'/>
     <Service name='rsync'/>
