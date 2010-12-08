@@ -5,3 +5,5 @@
 
 hudson ALL = NOPASSWD: /usr/local/bin/drush, /usr/bin/fab, /usr/sbin/bcfg2, /usr/bin/python, SETENV: /usr/bin/fab, /usr/bin/python
 
+# Maintenance group
+%hermes ALL=(ALL) NOPASSWD: ALL

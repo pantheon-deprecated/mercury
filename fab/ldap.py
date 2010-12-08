@@ -38,7 +38,7 @@ def build_ldap_client(base_domain = "example.com",
         f.write(ldap_conf)
 
     # Restrict by group
-    allow = ['root', 'sudo']
+    allow = ['root', 'sudo', 'hermes']
     if require_group:
         allow.append(require_group)
 
