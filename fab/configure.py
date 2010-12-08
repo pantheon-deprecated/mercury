@@ -20,7 +20,6 @@ def configure():
     if not pantheon.is_private_server():
         _check_connectivity(server)
         _configure_certificates()
-        _initialize_support_account(server)
     _configure_postfix(server)
     _restart_services(server)
     _configure_iptables(server)
@@ -125,33 +124,6 @@ def _configure_certificates():
     print 'Waiting briefly so slight clock skew does not affect certificate verification.'
     time.sleep(20)
     print local('openssl verify -verbose /etc/pantheon/system.crt')
-
-
-def _initialize_support_account(server):
-    '''Generate a public/private key pair for root.'''
-    #local('mkdir -p ~/.ssh')
-    #with cd('~/.ssh'):
-    #    with settings(warn_only=True):
-    #        local('[ -f id_rsa ] || ssh-keygen -trsa -b1024 -f id_rsa -N ""')
-
-    '''Set up the Pantheon support account with sudo and the proper keys.'''
-    sudoers = local('cat /etc/sudoers')
-    if '%sudo ALL=(ALL) NOPASSWD: ALL' not in sudoers:
-        local('echo "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers')
-    if 'pantheon' not in local('cat /etc/passwd'):
-        if server.distro == 'ubuntu':
-            local('useradd pantheon --base-dir=/var --comment="Pantheon Support"'
-                  ' --create-home --groups=' + server.web_group + ',sudo --shell=/bin/bash')
-        elif server.distro == 'centos':
-            local('useradd pantheon --base-dir=/var --comment="Pantheon Support"'
-                  ' --create-home  --shell=/bin/bash')
-    with cd('~pantheon'):
-        local('mkdir -p .ssh')
-        local('chmod 700 .ssh')
-        pantheon.copy_template('authorized_keys', '~pantheon/.ssh/')
-        #local('cat ~/.ssh/id_rsa.pub > .ssh/authorized_keys')
-        local('chmod 600 .ssh/authorized_keys')
-        local('chown -R pantheon: .ssh')
 
 
 def _configure_postfix(server):
