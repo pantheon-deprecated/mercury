@@ -12,10 +12,8 @@ from pantheon import update
 from fabric.api import *
 
 def update_pantheon(vps=None):
-       local('/etc/init.d/bcfg2-server stop')
        with cd('/opt/pantheon'):
            local('git pull origin')
-       pantheon.restart_bcfg2()
        if (vps == 'aws'):
               local('/usr/sbin/bcfg2 -vqed -p pantheon-aws', capture=False)
        elif (vps == 'ebs'):

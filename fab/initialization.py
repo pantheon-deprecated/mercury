@@ -38,6 +38,8 @@ def _initialize_fabric():
 
 def _initialize_config(vps):
     local('mkdir /etc/pantheon')
+    # Get our root cert
+    configure_root_certificate('http://pki.getpantheon.com')
     if (vps == 'aws'):
         with open('/etc/pantheon/aws.server', 'w') as f:
             f.write('Setting server to an AWS server')
@@ -80,26 +82,17 @@ def _initialize_package_manager(server):
 
 def _initialize_bcfg2(server):
     if server.distro == 'ubuntu':
-        local('apt-get install -y bcfg2-server gamin python-gamin python-genshi')
+        local('apt-get install -y gamin python-gamin python-genshi')
     elif server.distro == 'centos':
-        local('yum -y install bcfg2 bcfg2-server gamin gamin-python python-genshi python-ssl python-lxml libxslt')
+        local('yum -y install bcfg2 gamin gamin-python python-genshi python-ssl python-lxml libxslt')
     pantheon.copy_template('bcfg2.conf', '/etc/')
     local('rm -f /etc/bcfg2.key bcfg2.crt')
-    local('openssl req -batch -x509 -nodes -subj "/C=US/ST=California/L=San Francisco/CN=localhost" -days 1000 -newkey rsa:2048 -keyout /tmp/bcfg2.key -noout')
-    local('cp /tmp/bcfg2.key /etc/')
-    local('openssl req -batch -new  -subj "/C=US/ST=California/L=San Francisco/CN=localhost" -key /etc/bcfg2.key | openssl x509 -req -days 1000 -signkey /tmp/bcfg2.key -out /tmp/bcfg2.crt')
-    local('cp /tmp/bcfg2.crt /etc/')
-    local('chmod 0600 /etc/bcfg2.key')
-    local('[ -h /var/lib/bcfg2 ] || rmdir /var/lib/bcfg2')
     local('ln -sf /opt/pantheon/bcfg2 /var/lib/')
-    pantheon.copy_template('clients.xml', '/var/lib/bcfg2/Metadata')
-    local('sed -i "s/^plugins = .*$/plugins = Bundler,Cfg,Metadata,Packages,Probes,Rules,TGenshi\\nfilemonitor = gamin/" /etc/bcfg2.conf')
 
     if server.distro == 'centos':
         '''temp bug fix for upstream tab issue in TGenshi'''
         local('sed -i "s/\t/    /" /usr/lib/python2.4/site-packages/Bcfg2/Server/Plugins/TGenshi.py')
 
-    pantheon.restart_bcfg2()
     if pantheon.is_aws_server() or pantheon.is_ebs_server():
         #start with ebs build to mitigate /mnt issues on AWS.
         update.update_pantheon(vps='ebs')

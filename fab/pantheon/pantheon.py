@@ -198,6 +198,16 @@ def _get_database_vars(project, environment):
             env_vars.get('db_password'),
             env_vars.get('db_name'))
 
+def configure_root_certificate(pki_server):
+    """Helper function that connects to pki.getpantheon.com and configures the
+    root certificate used throughout the infrastructure."""
+    
+    # Download and install the root CA.
+    local('curl %s | sudo tee /usr/share/ca-certificates/pantheon.crt' % pki_server)
+    local('echo "pantheon.crt" | sudo tee -a /etc/ca-certificates.conf')
+    #local('cat /etc/ca-certificates.conf | sort | uniq | sudo tee /etc/ca-certificates.conf') # Remove duplicates.
+    local('sudo update-ca-certificates')
+
 
 class PantheonServer:
 
