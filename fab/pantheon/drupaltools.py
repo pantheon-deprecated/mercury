@@ -19,7 +19,7 @@ def get_drupal_update_status(project):
 
     with cd(repo_path):
         # Update master.
-        local('git pull origin master')
+        local('git fetch origin')
         # Get system module contents in master branch.
         contents = local('git cat-file blob refs/heads/master:' + \
                               'modules/system/system.module')
