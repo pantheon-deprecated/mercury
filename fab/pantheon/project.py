@@ -276,7 +276,7 @@ class BuildTools(object):
         if handler in ['install', 'import', 'restore']:
             with cd(self.server.webroot):
                 local('chown -R %s:%s %s' % (owner, owner, self.project))
-                local('chmod -R g+w %s' % (self.project))
+                local('chmod -R g+ws %s' % (self.project))
 
         # For code updates, be more specific (for performance reasons)
         elif handler == 'update':
