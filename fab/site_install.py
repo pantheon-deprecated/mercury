@@ -23,6 +23,9 @@ class _PantheonProfile(install.InstallTools):
     """
     def build(self, **kw):
 
+        # Remove existing project.
+        self.remove_project()
+
         # Create a new project
         self.setup_project_repo()
         self.setup_project_branch()
