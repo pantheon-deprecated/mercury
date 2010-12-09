@@ -39,7 +39,7 @@ def _initialize_fabric():
 def _initialize_config(vps):
     local('mkdir /etc/pantheon')
     # Get our root cert
-    configure_root_certificate('http://pki.getpantheon.com')
+    pantheon.configure_root_certificate('http://pki.getpantheon.com')
     if (vps == 'aws'):
         with open('/etc/pantheon/aws.server', 'w') as f:
             f.write('Setting server to an AWS server')

@@ -86,7 +86,7 @@ def configure_certificates():
     # Just in case we're testing, we need to ensure this path exists.
     local('mkdir -p /etc/pantheon')
 
-    configure_root_certificate('http://pki.getpantheon.com')
+    pantheon.configure_root_certificate('http://pki.getpantheon.com')
 
     # Now Helios cert is OTS
     pki_server = 'https://pki.getpantheon.com'
