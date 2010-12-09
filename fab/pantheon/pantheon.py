@@ -139,17 +139,6 @@ def parse_vhost(path):
             env_vars[var[1]] = var[2]
     return env_vars
 
-
-def restart_bcfg2():
-    local('/etc/init.d/bcfg2-server restart')
-    server_running = False
-    warn('Waiting for bcfg2 server to start')
-    while not server_running:
-        with settings(hide('warnings'), warn_only=True):
-            server_running = (local('netstat -atn | grep :6789')).rstrip('\n')
-        time.sleep(5)
-
-
 def is_drupal_installed(project, environment):
     """Return True if the Drupal installation process has been completed.
        project: project name
