@@ -87,7 +87,6 @@ def _initialize_bcfg2(server):
         local('yum -y install bcfg2 gamin gamin-python python-genshi python-ssl python-lxml libxslt')
     pantheon.copy_template('bcfg2.conf', '/etc/')
     local('rm -f /etc/bcfg2.key bcfg2.crt')
-    local('ln -sf /opt/pantheon/bcfg2 /var/lib/')
 
     if server.distro == 'centos':
         '''temp bug fix for upstream tab issue in TGenshi'''
