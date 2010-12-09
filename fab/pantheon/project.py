@@ -49,7 +49,7 @@ class BuildTools(object):
 
         # post-receive-hook
         post_receive_hook = os.path.join(project_repo,
-                                         '.git/hooks/post-receive')
+                                         'hooks/post-receive')
         pantheon.copy_template('git.hook.post-receive', post_receive_hook)
         local('chmod +x %s' % post_receive_hook)
 
