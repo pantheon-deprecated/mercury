@@ -82,7 +82,7 @@ def _initialize_package_manager(server):
 
 def _initialize_bcfg2(server):
     if server.distro == 'ubuntu':
-        local('apt-get install -y gamin python-gamin python-genshi')
+        local('apt-get install -y gamin python-gamin python-genshi bcfg2')
     elif server.distro == 'centos':
         local('yum -y install bcfg2 gamin gamin-python python-genshi python-ssl python-lxml libxslt')
     pantheon.copy_template('bcfg2.conf', '/etc/')
