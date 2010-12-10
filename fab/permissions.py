@@ -6,7 +6,7 @@ import tempfile
 from fabric.api import *
 from pantheon import pantheon
 
-def build_ldap_client(base_domain = "example.com",
+def configure_permissions(base_domain = "example.com",
                       require_group = None,
                       server_host = None):
 
@@ -73,6 +73,28 @@ def build_ldap_client(base_domain = "example.com",
     local("chown -R %s:%s /var/git/projects" % (require_group, require_group))
     local("chmod -R g+w /var/git/projects")
 
+    # Make the git repo and www directories writable by the group
+    local("chown -R %s:%s /var/www" % (require_group, require_group))
+    local("chmod -R g+w /var/www")
+    
+    # Set up ACLability
+    local('sudo tune2fs -o acl /dev/sda1')
+    local('sudo mount -o remount,acl /')
+    # For after restarts
+    local('sudo sed -i "s/noatime /noatime,acl /g" /etc/fstab') 
+    
+    # Set ACLs
+    set_acl_groupwritability(require_group, '/var/www')
+    set_acl_groupwritability(require_group, '/var/git/projects')
+    
+
 def _ldap_domain_to_ldap(domain):
     return ','.join(['dc=%s' % part.lower() for part in domain.split('.')])
 
+def set_acl_groupwritability(require_group, directory):
+    """Set up ACLs for a directory."""
+    local('sudo setfacl --recursive --remove-all /%s') % directory
+    local('sudo setfacl --recursive --no-mask --modify mask:rwx /%s') % directory
+    local('sudo setfacl --recursive --no-mask --modify group:%s:rwx %s') % (require_group, directory)
+    local('sudo setfacl --recursive --modify default:mask:rwx /%s') % directory
+    local('sudo setfacl --recursive --modify default:group:%s:rwx /%s') % (require_group, directory)
