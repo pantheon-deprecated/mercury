@@ -197,6 +197,9 @@ def configure_root_certificate(pki_server):
     #local('cat /etc/ca-certificates.conf | sort | uniq | sudo tee /etc/ca-certificates.conf') # Remove duplicates.
     local('sudo update-ca-certificates')
 
+def hudson_restart():
+    local('curl -X POST http://localhost:8090/safeRestart')
+    
 
 class PantheonServer:
 

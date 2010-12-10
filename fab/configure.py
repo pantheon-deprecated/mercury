@@ -64,6 +64,7 @@ def _configure_server(server):
         update.update_pantheon()
     local('cp /etc/pantheon/templates/tuneables /etc/pantheon/server_tuneables')
     local('chmod 755 /etc/pantheon/server_tuneables')
+    pantheon.hudson_restart()
 
 
 # The Rackspace Cloud occasionally has connectivity issues unless a server gets
@@ -170,11 +171,3 @@ def _report():
     print('##############################')
 
     local('echo "DEAR SYSADMIN: PANTHEON IS READY FOR YOU NOW.  Do not forget the README.txt, CHANGELOG.txt and docs!" | wall')
-
-def preconfigure():
-    '''Pre-configuration steps meant to be run from rc.local.'''
-    server = pantheon.PantheonServer()
-    _check_connectivity(server)
-    local('apt-get update')
-    local('apt-get -y upgrade hudson')
-    local('/etc/init.d/hudson restart')
