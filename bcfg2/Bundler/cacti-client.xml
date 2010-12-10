@@ -1,8 +1,0 @@
-<Bundle name='cacti-client'>
-  <Group name='deb'>
-    <Package name='snmp'/>
-    <Package name='snmpd'/>
-    <Path name='/etc/snmp/snmpd.conf' altsrc='/snmpd'/>
-    <Service name='snmpd'/>
-  </Group>
-</Bundle>

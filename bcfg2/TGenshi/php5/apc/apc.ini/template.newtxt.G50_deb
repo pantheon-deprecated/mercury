@@ -1,6 +1,0 @@
-// PLEASE DON'T EDIT THIS FILE DIRECTLY - SEE /etc/pantheon/server_tuneables
-extension=apc.so
-apc.shm_size=${metadata.Probes['apc_memory']}
-apc.include_once_override = 1 
-apc.stat = ${metadata.Probes['apc_stat']}
-apc.num_files_hint = ${metadata.Probes['apc_num_files_hint']}

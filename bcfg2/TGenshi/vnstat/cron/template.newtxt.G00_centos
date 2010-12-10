@@ -1,2 +1,0 @@
-MAILTO=root
-*/5 * * * *  vnstat /usr/sbin/vnstat.cron
