@@ -60,7 +60,6 @@ class BuildTools(object):
             # Drupal Core
             local('git fetch git://gitorious.org/drupal/6.git master:drupal_core')
             # Repo config
-            local('git config receive.denycurrentbranch ignore')
             local('git config core.sharedRepository group')
             # Group write.
             local('chmod -R g+w .')
