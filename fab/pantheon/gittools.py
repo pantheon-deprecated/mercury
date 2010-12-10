@@ -41,7 +41,7 @@ def post_receive_hook(params):
             # If not inside a hudson job, send back data about repo and drupal.
             # Otherwise, we assume the job we are inside of will do this.
             if not os.environ.get('BUILD_TAG'):
-                local('curl http://127.0.0.1:8090/job/post_receive_update/' + \
+                local('curl http://127.0.0.1:8090/job/post_hook_status/' + \
                       'buildWithParameters?project=%s' % project)
 
 def _parse_hook_params(params):
