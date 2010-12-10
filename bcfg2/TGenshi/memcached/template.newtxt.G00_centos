@@ -1,5 +1,0 @@
-PORT="11211"
-USER="nobody"
-MAXCONN="1024"
-CACHESIZE="${metadata.Probes['memcached_memory']}"
-OPTIONS="-d -l 127.0.0.1"
