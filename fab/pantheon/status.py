@@ -21,3 +21,4 @@ def drupal_update_status(project):
 
     postback.write_build_data('drupal_core_status', {'status': status})
 
+

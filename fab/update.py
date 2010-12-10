@@ -62,22 +62,6 @@ def update_code(project, environment, tag=None, message=None):
     status.git_repo_status(project)
     status.drupal_update_status(project)
 
-def post_receive_update(project, dev_update=True):
-    """Update development environment with changes pushed from remote.
-    project: project name
-    dev_update: if the development environment should be updated.
-
-    """
-    # if coming from fabric, update could be string. Make bool.
-    dev_update = eval(str(dev_update))
-    updater = update.Updater(project, 'dev')
-    # Update development environment permissions.
-    if dev_update:
-        updater.permissions_update()
-    # Send back repo status and drupal update status
-    status.git_repo_status(project)
-    status.drupal_update_status(project)
-
 def rebuild_environment(project, environment):
     """Rebuild the project/environment with files and data from 'live'.
 

@@ -8,15 +8,10 @@
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
           <name>project</name>
-          <description>project to update</description>
+          <description>project name</description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>dev_update</name>
-          <description>Does the development environment need to be updated?</description>
-          <defaultValue></defaultValue>
-        </hudson.model.StringParameterDefinition>
-      </parameterDefinitions>
+     </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
   <scm class="hudson.scm.NullSCM"/>
@@ -29,7 +24,8 @@
     <hudson.tasks.Shell>
       <command>cd /opt/pantheon/fab
 /usr/bin/sudo -E /usr/bin/fab clean_workspace
-/usr/bin/sudo -E /usr/bin/fab post_receive_update:project=$project,dev_update=$dev_update
+/usr/bin/sudo -E /usr/bin/fab drupal_update_status:project=$project
+/usr/bin/sudo -E /usr/bin/fab git_repo_status:project=$project
 /usr/bin/sudo -E /usr/bin/fab parse_build_data</command>
     </hudson.tasks.Shell>
   </builders>

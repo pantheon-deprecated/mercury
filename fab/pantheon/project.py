@@ -291,26 +291,12 @@ class BuildTools(object):
 
         # installs / imports / restores.
         if handler in ['install', 'import', 'restore']:
+            # setup shared repo config and set gid
+            for env in environments:
+                with cd(os.path.join(self.server.webroot, self.project, env)):
+                    local('git config core.sharedRepository group')
             with cd(self.server.webroot):
                 local('chown -R %s:%s %s' % (owner, owner, self.project))
-                # setup shared repo config and set gid
-                with cd(self.project):
-                    for env in environments:
-                        with cd(env):
-                            local('git config core.sharedRepository group')
-                            local('chown %s:%s .git/config' % (owner, owner))
-                            local("find .git -type d -exec chmod g+s '{}' \;")
-                local('chmod -R g+w %s' % (self.project))
-
-        # For code updates just change perms on everything but files dir.
-        elif handler == 'update':
-            # Only make changes in the environment being updated.
-            with cd(os.path.join(self.project_path,
-                                 environments[0])):
-                # Set ownership on everything exept files directory.
-                #TODO: Restrict chown to files changed in git diff.
-                local("find . \( -path ./sites/default/files -prune \) \
-                       -o \( -exec chown %s:%s '{}' \; \)" % (owner, owner))
 
 
         """
