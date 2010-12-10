@@ -167,5 +167,3 @@ def _report():
     print('#   Pantheon Setup Complete! #')
     print('##############################')
 
-   local('echo "DEAR SYSADMIN: PANTHEON IS READY FOR YOU NOW.  Do not forget the README.txt, CHANGELOG.txt and docs!" | wall')
-
