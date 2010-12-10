@@ -6,14 +6,14 @@
     <BoundPath type='directory' name='/var/lib/hudson/jobs/backup_site' owner='hudson' group='nogroup' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/bcfg2-client' owner='hudson' group='nogroup' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/bcfg2-status' owner='hudson' group='nogroup' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/configure_ldap' owner='hudson' group='nogroup' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/configure_permissions' owner='hudson' group='nogroup' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/drupal_update_status' owner='hudson' group='nogroup' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/git_diff' owner='hudson' group='nogroup' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/git_status' owner='hudson' group='nogroup' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/import_site' owner='hudson' group='nogroup' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/install_site' owner='hudson' group='nogroup' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/pantheon_config' owner='hudson' group='nogroup' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/post_receive_update' owner='hudson' group='nogroup' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/post_hook_status' owner='hudson' group='nogroup' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/restore_site' owner='hudson' group='nogroup' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/update_code' owner='hudson' group='nogroup' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/update_data' owner='hudson' group='nogroup' perms='0755'/>
@@ -30,14 +30,14 @@
     <BoundPath type='directory' name='/var/lib/hudson/jobs/backup_site' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/bcfg2-client' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/bcfg2-status' owner='hudson' group='hudson' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/configure_ldap' owner='hudson' group='hudson' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/configure_permissions' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/drupal_update_status' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/git_diff' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/git_status' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/import_site' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/install_site' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/pantheon_config' owner='hudson' group='hudson' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/post_receive_update' owner='hudson' group='hudson' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/post_hook_status' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/restore_site' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/update_code' owner='hudson' group='hudson' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/update_data' owner='hudson' group='hudson' perms='0755'/>
@@ -52,14 +52,14 @@
   <Path name='/var/lib/hudson/jobs/backup_site/config.xml' altsrc='/hudson/jobs/backup_site/config.xml'/>
   <Path name='/var/lib/hudson/jobs/bcfg2-client/config.xml' altsrc='/hudson/jobs/bcfg2-client/config.xml'/>
   <Path name='/var/lib/hudson/jobs/bcfg2-status/config.xml' altsrc='/hudson/jobs/bcfg2-status/config.xml'/>
-  <Path name='/var/lib/hudson/jobs/configure_ldap/config.xml' altsrc='/hudson/jobs/configure_ldap/config.xml'/>
+  <Path name='/var/lib/hudson/jobs/configure_permissions/config.xml' altsrc='/hudson/jobs/configure_permissions/config.xml'/>
   <Path name='/var/lib/hudson/jobs/drupal_update_status/config.xml' altsrc='/hudson/jobs/drupal_update_status/config.xml'/>
   <Path name='/var/lib/hudson/jobs/git_diff/config.xml' altsrc='/hudson/jobs/git_diff/config.xml'/>
   <Path name='/var/lib/hudson/jobs/git_status/config.xml' altsrc='/hudson/jobs/git_status/config.xml'/>
   <Path name='/var/lib/hudson/jobs/import_site/config.xml' altsrc='/hudson/jobs/import_site/config.xml'/>
   <Path name='/var/lib/hudson/jobs/install_site/config.xml' altsrc='/hudson/jobs/install_site/config.xml'/>
   <Path name='/var/lib/hudson/jobs/pantheon_config/config.xml' altsrc='/hudson/jobs/pantheon_config/config.xml'/>
-  <Path name='/var/lib/hudson/jobs/post_receive_update/config.xml' altsrc='/hudson/jobs/post_receive_update/config.xml'/>
+  <Path name='/var/lib/hudson/jobs/post_hook_status/config.xml' altsrc='/hudson/jobs/post_hook_status/config.xml'/>
   <Path name='/var/lib/hudson/jobs/restore_site/config.xml' altsrc='/hudson/jobs/restore_site/config.xml'/>
   <Path name='/var/lib/hudson/jobs/update_code/config.xml' altsrc='/hudson/jobs/update_code/config.xml'/>
   <Path name='/var/lib/hudson/jobs/update_data/config.xml' altsrc='/hudson/jobs/update_data/config.xml'/>

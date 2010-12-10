@@ -25,15 +25,33 @@ class BuildTools(object):
         self.environments = pantheon.get_environments()
         self.project_path = os.path.join(self.server.webroot, project)
 
+    def remove_project(self):
+        """ Remove a project and all related files/configs from the server.
+
+        """
+        locations = list()
+
+        # Git repository
+        locations.append(os.path.join('/var/git/projects', self.project))
+        # Project webroot
+        locations.append(self.project_path)
+
+        # TODO: We also need to remove the following:
+        # Solr Index
+        # Apache vhost
+        # Hudson cron
+        # Drush alias
+        # Databases
+
+        for location in locations:
+            if os.path.exists(location):
+                local('rm -rf %s' % location)
+
     def setup_project_repo(self):
         """ Create a new project repo, and download pantheon/drupal core.
 
         """
         project_repo = os.path.join('/var/git/projects', self.project)
-
-        # Clear existing
-        if os.path.exists(project_repo):
-            local('rm -rf %s' % project_repo)
 
         # Get Pantheon core
         local('git clone --mirror git://gitorious.org/pantheon/6.git %s' % project_repo)
@@ -193,7 +211,6 @@ class BuildTools(object):
         working_dir: If handler is import, also needs full path to working_dir.
 
         """
-        local('rm -rf %s' % (os.path.join(self.server.webroot, self.project)))
 
         # During import, only run updates/import processes a single database.
         # Once complete, we import this 'final' database into each environment.
@@ -272,21 +289,14 @@ class BuildTools(object):
 
         """
 
-        # For new installs / imports / restores, use recursive chown.
+        # installs / imports / restores.
         if handler in ['install', 'import', 'restore']:
+            # setup shared repo config and set gid
+            for env in environments:
+                with cd(os.path.join(self.server.webroot, self.project, env)):
+                    local('git config core.sharedRepository group')
             with cd(self.server.webroot):
                 local('chown -R %s:%s %s' % (owner, owner, self.project))
-                local('chmod -R g+w %s' % (self.project))
-
-        # For code updates, be more specific (for performance reasons)
-        elif handler == 'update':
-            # Only make changes in the environment being updated.
-            with cd(os.path.join(self.project_path,
-                                 environments[0])):
-                # Set ownership on everything exept files directory.
-                #TODO: Restrict chown to files changed in git diff.
-                local("find . \( -path ./sites/default/files -prune \) \
-                       -o \( -exec chown %s:%s '{}' \; \)" % (owner, owner))
 
 
         """

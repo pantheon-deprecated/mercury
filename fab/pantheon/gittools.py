@@ -9,18 +9,6 @@ def post_receive_hook(params):
     """Perform post-receive actions when changes are made to git repo.
     params: hook params from git stdin.
 
-    If development environment HEAD is different from central repo HEAD,
-    update the dev environment. This can occur if changes are pushed from
-    a remote location to the central repo. In this case, we call a Hudson job
-    to update the development environment, then post back to Atlas with the
-    status of the project.
-
-    If the HEADs are the same, then we assume that changes were pushed from dev
-    to central repo and no update to dev environment is needed. However, we may
-    still need to update Atlas with the project status. If the author is Hudson
-    we assume the originating Hudson job will post back to Atlas. Otherwise,
-    call the post_receive_update job, but don't update the dev environment.
-
     NOTE: we use 'env -i' to clear environmental variables git has set when
     running hook operations.
 
@@ -29,48 +17,32 @@ def post_receive_hook(params):
     webroot = pantheon.PantheonServer().webroot
     dest = os.path.join(webroot, project, 'dev')
 
-    if os.path.exists(dest):
+    # Check for development environment.
+    if not os.path.exists(dest):
+        print "\n\nWARNING: No development environment for " + \
+              "'%s' was found.\n" % (project)
+    # Development environment exists.
+    else:
         with cd(dest):
             # Hide output from showing on git's report back to user.
-            with hide('running'):
-                # Update metadata in dev environment.
-                with settings(warn_only=True):
-                    local('env -i git fetch')
-                # Get last commit id for dev, and central repo.
-                dev_head = local('env -i git rev-parse refs/heads/%s' % \
-                        project).rstrip('\n')
-                repo_head = local('env -i git rev-parse refs/remotes/origin/%s' % \
-                        project).rstrip('\n')
-
-                # Dev and central repo HEADs don't match.
-                if dev_head != repo_head:
-                    with settings(warn_only=True):
-                        with hide('warnings'):
-                            dev_update = local('env -i git pull', capture=False)
-                    # Trigger Hudson job to update dev environment and set permissions.
-                    local('curl http://127.0.0.1:8090/job/post_receive_update/' + \
-                          'buildWithParameters?project=%s\\&dev_update=True' % project)
-                    # Output status to the PUSH initiator.
-                    if dev_update.failed:
-                        print "\nWARNING: Development environment could not be updated."
-                        print "\nPlease review any error messages above, and resolve any conflicts."
-                        print "\n\n"
-                    else:
-                        print "\nDevelopment environment updated.\n"
-                # Dev and Central repo HEADs match. 
+                with settings(hide('running', 'warnings'), warn_only=True):
+                    dev_update = local('env -i git pull')
+                # Output status to the git push initiator.
+                if dev_update.failed:
+                    print "\n\nWARNING: The development environment could" + \
+                    "not be updated. Please review any error messages, and " + \
+                    "resolve any conflicts in /var/www/%s/dev\n" % project
+                    print "ERROR:"
+                    print dev_update.stderr + "\n\n"
                 else:
-                    author_name, author_email = local(
-                            'env -i git log -1 --pretty=format:%an%n%ae ' +
-                            '%s' % dev_head).rstrip('\n').split('\n')
-                    # Code change initiated by user (not hudson job). Report back with status.
-                    # However, don't update dev environment or permissions (dev_update=False param)
-                    if ((author_name != 'Hudson User') and
-                            (author_email != 'hudson@getpantheon')):
-                        local('curl http://127.0.0.1:8090/job/post_receive_update/' + \
-                              'buildWithParameters?project=%s\\&dev_update=False' % project)
-    else:
-        print "\n\n"
-        print "WARNING: No development environment for '%s', was found.\n" % (project)
+                    print "\nDevelopment environment updated.\n"
+
+        with hide('running'):
+            # If not inside a hudson job, send back data about repo and drupal.
+            # Otherwise, we assume the job we are inside of will do this.
+            if not os.environ.get('BUILD_TAG'):
+                local('curl http://127.0.0.1:8090/job/post_hook_status/' + \
+                      'buildWithParameters?project=%s' % project)
 
 def _parse_hook_params(params):
     """Parse the params received during a git push.
@@ -94,7 +66,6 @@ class GitRepo():
         """Return dict of dev/test and test/live diffs, and last 10 log entries.
 
         """
-
         head = self._get_last_commit('dev')
         test = self._get_last_commit('test')
         live = self._get_last_commit('live')

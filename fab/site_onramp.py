@@ -48,6 +48,9 @@ class _ImportProfile(onramp.ImportTools):
         self.extract(tarball)
         self.parse_archive()
 
+        # Remove existing project.
+        self.remove_project()
+
         # Create a new project
         self.setup_project_repo()
         self.setup_project_branch()

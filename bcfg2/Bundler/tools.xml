@@ -15,6 +15,7 @@
   
   <!-- Debian/Ubuntu Only -->
   <Group name='deb'>
+    <Package name='acl'/>
     <Package name='bind9-host'/>
     <Package name='dnsutils'/>
     <Package name='git-core'/>

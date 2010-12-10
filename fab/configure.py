@@ -18,8 +18,7 @@ def configure():
     _configure_server(server)
     if not pantheon.is_private_server():
         _check_connectivity(server)
-        _configure_certificates()
-        _initialize_support_account(server)
+        configure_certificates()
     _configure_postfix(server)
     _restart_services(server)
     _configure_iptables(server)
@@ -64,6 +63,7 @@ def _configure_server(server):
         update.update_pantheon()
     local('cp /etc/pantheon/templates/tuneables /etc/pantheon/server_tuneables')
     local('chmod 755 /etc/pantheon/server_tuneables')
+    pantheon.hudson_restart()
 
 
 # The Rackspace Cloud occasionally has connectivity issues unless a server gets
@@ -82,18 +82,11 @@ def _check_connectivity(server):
             f.write('Dear Rackspace: Fix this issue.')
         local('sudo reboot')
 
-def _configure_certificates():
+def configure_certificates():
     # Just in case we're testing, we need to ensure this path exists.
     local('mkdir -p /etc/pantheon')
 
-    # Set the Helios CA server to use.
-    pki_server = 'http://pki.getpantheon.com'
-
-    # Download and install the root CA.
-    local('curl %s | sudo tee /usr/share/ca-certificates/pantheon.crt' % pki_server)
-    local('echo "pantheon.crt" | sudo tee -a /etc/ca-certificates.conf')
-    #local('cat /etc/ca-certificates.conf | sort | uniq | sudo tee /etc/ca-certificates.conf') # Remove duplicates.
-    local('sudo update-ca-certificates')
+    pantheon.configure_root_certificate('http://pki.getpantheon.com')
 
     # Now Helios cert is OTS
     pki_server = 'https://pki.getpantheon.com'
@@ -124,33 +117,6 @@ def _configure_certificates():
     print 'Waiting briefly so slight clock skew does not affect certificate verification.'
     time.sleep(20)
     print local('openssl verify -verbose /etc/pantheon/system.crt')
-
-
-def _initialize_support_account(server):
-    '''Generate a public/private key pair for root.'''
-    #local('mkdir -p ~/.ssh')
-    #with cd('~/.ssh'):
-    #    with settings(warn_only=True):
-    #        local('[ -f id_rsa ] || ssh-keygen -trsa -b1024 -f id_rsa -N ""')
-
-    '''Set up the Pantheon support account with sudo and the proper keys.'''
-    sudoers = local('cat /etc/sudoers')
-    if '%sudo ALL=(ALL) NOPASSWD: ALL' not in sudoers:
-        local('echo "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers')
-    if 'pantheon' not in local('cat /etc/passwd'):
-        if server.distro == 'ubuntu':
-            local('useradd pantheon --base-dir=/var --comment="Pantheon Support"'
-                  ' --create-home --groups=' + server.web_group + ',sudo --shell=/bin/bash')
-        elif server.distro == 'centos':
-            local('useradd pantheon --base-dir=/var --comment="Pantheon Support"'
-                  ' --create-home  --shell=/bin/bash')
-    with cd('~pantheon'):
-        local('mkdir -p .ssh')
-        local('chmod 700 .ssh')
-        pantheon.copy_template('authorized_keys', '~pantheon/.ssh/')
-        #local('cat ~/.ssh/id_rsa.pub > .ssh/authorized_keys')
-        local('chmod 600 .ssh/authorized_keys')
-        local('chown -R pantheon: .ssh')
 
 
 def _configure_postfix(server):
@@ -201,12 +167,5 @@ def _report():
     print('#   Pantheon Setup Complete! #')
     print('##############################')
 
-    local('echo "DEAR SYSADMIN: PANTHEON IS READY FOR YOU NOW.  Do not forget the README.txt, CHANGELOG.txt and docs!" | wall')
+   local('echo "DEAR SYSADMIN: PANTHEON IS READY FOR YOU NOW.  Do not forget the README.txt, CHANGELOG.txt and docs!" | wall')
 
-def preconfigure():
-    '''Pre-configuration steps meant to be run from rc.local.'''
-    server = pantheon.PantheonServer()
-    _check_connectivity(server)
-    local('apt-get update')
-    local('apt-get -y upgrade hudson')
-    local('/etc/init.d/hudson restart')
