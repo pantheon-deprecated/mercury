@@ -6,7 +6,7 @@
     <BoundPath type='directory' name='/var/lib/hudson/jobs/backup_site' owner='hudson' group='nogroup' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/bcfg2-client' owner='hudson' group='nogroup' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/bcfg2-status' owner='hudson' group='nogroup' perms='0755'/>
-    <BoundPath type='directory' name='/var/lib/hudson/jobs/configure_permissiosn' owner='hudson' group='nogroup' perms='0755'/>
+    <BoundPath type='directory' name='/var/lib/hudson/jobs/configure_permissions' owner='hudson' group='nogroup' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/drupal_update_status' owner='hudson' group='nogroup' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/git_diff' owner='hudson' group='nogroup' perms='0755'/>
     <BoundPath type='directory' name='/var/lib/hudson/jobs/git_status' owner='hudson' group='nogroup' perms='0755'/>
