@@ -20,6 +20,7 @@ def initialize(vps=None):
     _initialize_sudoers(server)
     _initialize_hudson(server)
     _initialize_apache(server)
+    _initialize_acl(server)
 
 def init():
     '''Alias of "initialize"'''
@@ -151,3 +152,9 @@ def _initialize_apache(server):
         local('rm -f /etc/apache2/sites-available/default*')
         local('rm -f /var/www/*')
 
+def _initialize_acl(server):
+    # Set up ACLability
+    local('sudo tune2fs -o acl /dev/sda1')
+    local('sudo mount -o remount,acl /')
+    # For after restarts
+    local('sudo sed -i "s/noatime /noatime,acl /g" /etc/fstab') 

@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>Configure LDAP</description>
+  <description>Configure Permissions</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <hudson.model.ParametersDefinitionProperty>
@@ -29,7 +29,7 @@
     <hudson.tasks.Shell>
       <command>cd /opt/pantheon/fab
 /usr/bin/sudo -E /usr/bin/fab clean_workspace
-/usr/bin/sudo -E /usr/bin/fab build_ldap_client:getpantheon.com,$group_client_name
+/usr/bin/sudo -E /usr/bin/fab configure_permissions:getpantheon.com,$group_client_name
 /usr/bin/sudo -E /usr/bin/fab parse_build_data</command>
     </hudson.tasks.Shell>
   </builders>

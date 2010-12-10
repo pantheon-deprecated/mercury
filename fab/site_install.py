@@ -23,6 +23,9 @@ class _PantheonProfile(install.InstallTools):
     """
     def build(self, **kw):
 
+        # Remove existing project.
+        self.remove_project()
+
         # Create a new project
         self.setup_project_repo()
         self.setup_project_branch()
@@ -47,11 +50,6 @@ class _PantheonProfile(install.InstallTools):
         # Clone project to all environments
         self.setup_environments()
 
-        # Set permissions on project
-        self.setup_permissions()
-
-        #respond to atlas with gitstatus
-
         # Cleanup and restart services
         self.cleanup()
         self.server.restart_services()
@@ -60,6 +58,8 @@ class _PantheonProfile(install.InstallTools):
         status.git_repo_status(self.project)
         status.drupal_update_status(self.project)
 
+        # Set permissions on project
+        self.setup_permissions()
 
 """
 To define additional profile handlers:
