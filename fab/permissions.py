@@ -77,12 +77,6 @@ def configure_permissions(base_domain = "example.com",
     local("chown -R %s:%s /var/www" % (require_group, require_group))
     local("chmod -R g+w /var/www")
     
-    # Set up ACLability
-    local('sudo tune2fs -o acl /dev/sda1')
-    local('sudo mount -o remount,acl /')
-    # For after restarts
-    local('sudo sed -i "s/noatime /noatime,acl /g" /etc/fstab') 
-    
     # Set ACLs
     set_acl_groupwritability(require_group, '/var/www')
     set_acl_groupwritability(require_group, '/var/git/projects')
