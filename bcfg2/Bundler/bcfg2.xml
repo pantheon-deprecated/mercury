@@ -1,12 +1,10 @@
 <Bundle name='bcfg2'>
   
   <Package name='bcfg2'/>
-  <Package name='bcfg2-server'/>
   <Package name='gamin'/>
   <Package name='python-genshi'/>
   <Package name='python-lxml'/>
   <Service name='bcfg2'/>
-  <Service name='bcfg2-server'/>
   
   <!-- Ubuntu/Debian Only -->
   <Group name='deb'>

@@ -139,17 +139,6 @@ def parse_vhost(path):
             env_vars[var[1]] = var[2]
     return env_vars
 
-
-def restart_bcfg2():
-    local('/etc/init.d/bcfg2-server restart')
-    server_running = False
-    warn('Waiting for bcfg2 server to start')
-    while not server_running:
-        with settings(hide('warnings'), warn_only=True):
-            server_running = (local('netstat -atn | grep :6789')).rstrip('\n')
-        time.sleep(5)
-
-
 def is_drupal_installed(project, environment):
     """Return True if the Drupal installation process has been completed.
        project: project name
@@ -197,6 +186,16 @@ def _get_database_vars(project, environment):
     return (env_vars.get('db_username'),
             env_vars.get('db_password'),
             env_vars.get('db_name'))
+
+def configure_root_certificate(pki_server):
+    """Helper function that connects to pki.getpantheon.com and configures the
+    root certificate used throughout the infrastructure."""
+    
+    # Download and install the root CA.
+    local('curl %s | sudo tee /usr/share/ca-certificates/pantheon.crt' % pki_server)
+    local('echo "pantheon.crt" | sudo tee -a /etc/ca-certificates.conf')
+    #local('cat /etc/ca-certificates.conf | sort | uniq | sudo tee /etc/ca-certificates.conf') # Remove duplicates.
+    local('sudo update-ca-certificates')
 
 
 class PantheonServer:
