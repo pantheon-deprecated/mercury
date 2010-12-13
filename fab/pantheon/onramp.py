@@ -270,8 +270,8 @@ class ImportTools(project.BuildTools):
         if not settings_files:
             postback.build_error('Error: No settings.php files were found.')
         if '\n' in settings_files:
-            postback.build_error('Error: Multiple settings.php files found: '+\
-                         '\n'.join(['[%s]' % line for line in
+            postback.build_error('Error: Multiple settings.php files found:\n'+\
+                         '\n'.join(['./%s' % line for line in
                                     settings_files.split('\n')]))
         name = re.search(r'^.*sites/(.*)/settings.php', settings_files).group(1)
         return name
