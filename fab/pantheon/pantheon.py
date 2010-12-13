@@ -190,7 +190,7 @@ def _get_database_vars(project, environment):
 def configure_root_certificate(pki_server):
     """Helper function that connects to pki.getpantheon.com and configures the
     root certificate used throughout the infrastructure."""
-    
+
     # Download and install the root CA.
     local('curl %s | sudo tee /usr/share/ca-certificates/pantheon.crt' % pki_server)
     local('echo "pantheon.crt" | sudo tee -a /etc/ca-certificates.conf')
@@ -199,7 +199,7 @@ def configure_root_certificate(pki_server):
 
 def hudson_restart():
     local('curl -X POST http://localhost:8090/safeRestart')
-    
+
 
 class PantheonServer:
 
@@ -298,6 +298,7 @@ class PantheonServer:
         vhost = os.path.join(self.vhost_dir, filename)
         with open(vhost, 'w') as f:
             f.write(template)
+        local('chown root:%s %s' % (self.web_group, vhost))
         local('chmod 640 %s' % vhost)
 
     def create_solr_index(self, project, environment):
