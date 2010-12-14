@@ -6,6 +6,16 @@ from fabric.api import *
 
 import pantheon
 
+def remove(archive):
+    """Remove a backup tarball from the server.
+    archive: name of the archive to remove.
+
+    """
+    server = pantheon.PantheonServer()
+    path = os.path.join(server.ftproot, archive)
+    if os.path.exists(path):
+        local('rm -f %s' % path)
+
 class PantheonBackup():
 
     def __init__(self, name, project):
