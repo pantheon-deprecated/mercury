@@ -137,6 +137,8 @@ class BuildTools(object):
         # Make sure settings.php exists.
         if not os.path.isfile(settings_file):
             local('cp %s %s' % (settings_default, settings_file))
+        # Comment out $base_url entries.
+        local("sed -i 's/^[^#|*]*\$base_url/# $base_url/' %s" % settings_file)
 
         # Create pantheon.settings.php and include it from settings.php
         pantheon.copy_template('pantheon.settings.php', site_dir)
