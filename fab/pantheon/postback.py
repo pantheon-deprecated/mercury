@@ -53,7 +53,7 @@ def get_build_data():
     data = dict()
     data['build_messages'] = list()
     data['build_warnings'] = list()
-    data['build_errors'] = ''
+    data['build_error'] = ''
 
     build_data_path = os.path.join(get_workspace(), 'build_data.txt')
     if os.path.isfile(build_data_path):

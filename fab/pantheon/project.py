@@ -54,20 +54,19 @@ class BuildTools(object):
         project_repo = os.path.join('/var/git/projects', self.project)
 
         # Get Pantheon core
-        local('git clone git://gitorious.org/pantheon/6.git %s' % project_repo)
+        local('git clone --mirror git://gitorious.org/pantheon/6.git %s' % project_repo)
 
         with cd(project_repo):
             # Drupal Core
             local('git fetch git://gitorious.org/drupal/6.git master:drupal_core')
             # Repo config
-            local('git config receive.denycurrentbranch ignore')
             local('git config core.sharedRepository group')
             # Group write.
             local('chmod -R g+w .')
 
         # post-receive-hook
         post_receive_hook = os.path.join(project_repo,
-                                         '.git/hooks/post-receive')
+                                         'hooks/post-receive')
         pantheon.copy_template('git.hook.post-receive', post_receive_hook)
         local('chmod +x %s' % post_receive_hook)
 
@@ -138,6 +137,8 @@ class BuildTools(object):
         # Make sure settings.php exists.
         if not os.path.isfile(settings_file):
             local('cp %s %s' % (settings_default, settings_file))
+        # Comment out $base_url entries.
+        local("sed -i 's/^[^#|*]*\$base_url/# $base_url/' %s" % settings_file)
 
         # Create pantheon.settings.php and include it from settings.php
         pantheon.copy_template('pantheon.settings.php', site_dir)

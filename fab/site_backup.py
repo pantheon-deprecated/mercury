@@ -1,8 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-import tempfile
-
-from fabric.api import *
-
 from pantheon import backup
 
 def backup_site(archive_name, project='pantheon'):
@@ -15,4 +10,7 @@ def backup_site(archive_name, project='pantheon'):
     archive.make_archive()
     archive.move_archive()
     archive.cleanup()
+
+def remove_backup(archive):
+    backup.remove(archive)
 

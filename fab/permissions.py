@@ -59,7 +59,7 @@ def configure_permissions(base_domain = "example.com",
 
     # Add LDAP user to www-data, and ssl-cert groups.
     ssl_group = "ssl-cert"
-    local('usermod -aG %s %s' % (ssl_group, require_group))
+    local('usermod -aG %s,%s %s' % (server.web_group, ssl_group, require_group))
     # Use sed because usermod may fail if the user does not already exist.
     #local('sudo sed -i "s/' + ssl_group + ':x:[0-9]*:/\\0' + require_group + ',/g" /etc/group')
 

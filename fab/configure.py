@@ -8,7 +8,6 @@ import json
 from fabric.api import *
 
 from pantheon import pantheon
-from pantheon import project
 
 def configure():
     '''configure the Pantheon system.'''
@@ -150,9 +149,7 @@ def _configure_git_repo():
     if os.path.exists('/var/git/projects'):
         local('rm -rf /var/git/projects')
     local('mkdir -p /var/git/projects')
-    # Set GID
     local("chmod g+s /var/git/projects")
-    #project.BuildTools('pantheon').setup_project_repo()
 
 def _mark_incep(server):
     '''Mark incep date. This prevents us from ever running again.'''
