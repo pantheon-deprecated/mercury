@@ -114,7 +114,7 @@ def configure_certificates():
     local('/etc/init.d/pound start');
 
     # Update BCFG2's client configuration to use the zone (a.k.a. OU) from the certificate
-    local('sed -i "s/^bcfg2 = .*/bcfg2 = https:\/\/%s:6789/g" /etc/bcfg2.conf' % ou)
+    local('sed -i "s/^bcfg2 = .*/bcfg2 = https:\/\/config.%s:6789/g" /etc/bcfg2.conf' % ou)
 
     # Wait 20 seconds so
     print 'Waiting briefly so slight clock skew does not affect certificate verification.'
