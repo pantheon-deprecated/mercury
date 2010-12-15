@@ -15,10 +15,10 @@ def configure():
     _test_for_previous_run()
     if pantheon.is_aws_server():
         _configure_ec2(server)
-    _configure_server(server)
     if not pantheon.is_private_server():
         _check_connectivity(server)
         configure_certificates()
+    _configure_server(server)
     _configure_postfix(server)
     _restart_services(server)
     _configure_iptables(server)
