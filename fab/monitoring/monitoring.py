@@ -10,8 +10,8 @@ from xml.dom.minidom import Document
 
 
 def check_for_package_updates():
-    local('sudo apt-get update')
-    message = local('sudo apt-get -qqys dist-upgrade')
+    local('apt-get update')
+    message = local('apt-get -qqys dist-upgrade')
     if (message):
         _error(message)
     else:
@@ -57,7 +57,7 @@ def check_io_wait_time(limit):
 def check_mysql(slow_query_limit, memory_usage, innodb_memory_usage, threads):
     with settings(warn_only=True):
         messages = list()
-        report = local('sudo mysqlreport')
+        report = local('mysqlreport')
         if report.failed:
             _fail('mysql server does not appear to be running: %s' % report)
         for line in report.splitlines():
