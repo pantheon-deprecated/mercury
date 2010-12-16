@@ -3,3 +3,15 @@ git clone git://github.com/pantheon-systems/mercury.git -b master /opt/pantheon
 cd /opt/pantheon
 python setup.py
 
+For non-getpantheon.com servers:
+
+apt-get install git-core bzr fabric python-mysqldb
+git clone git://github.com/pantheon-systems/mercury.git -b master /opt/pantheon
+cd /opt/pantheon/fab
+
+The last command should one of the following:
+fab initialize:vps=aws (for instance-based AWS servers)
+fab initialize:vps=ebs (for ebs-based AWS servers - experimental)
+fab initialize:vps=default (for all other Pantheon servers)
+
+After the init script is complete, reboot your server and Pantheon will automatically initialize.
