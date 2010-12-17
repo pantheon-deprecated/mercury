@@ -13,7 +13,7 @@ from fabric.api import *
 
 def update_pantheon(vps=None):
        with cd('/opt/pantheon'):
-           local('git pull origin')
+           local('git pull origin master')
        if (vps == 'aws'):
               local('/usr/sbin/bcfg2 -vqed -p pantheon-aws', capture=False)
        elif (vps == 'ebs'):
