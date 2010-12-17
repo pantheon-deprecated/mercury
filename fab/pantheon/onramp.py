@@ -271,8 +271,7 @@ class ImportTools(project.BuildTools):
             postback.build_error('Error: No settings.php files were found.')
         if '\n' in settings_files:
             postback.build_error('Error: Multiple settings.php files found:\n'+\
-                         '\n'.join(['./%s' % line for line in
-                                    settings_files.split('\n')]))
+                                 '\n./'.join(settings_files.split('\n')))
         name = re.search(r'^.*sites/(.*)/settings.php', settings_files).group(1)
         return name
 
@@ -288,10 +287,10 @@ class ImportTools(project.BuildTools):
         count = len(sql_dump)
         if count == 0:
             postback.build_error('No database dump files were found ' + \
-                                '(*.mysql or *.sql)')
-        elif count > 1:
-            postback.build_error('Multiple database dump files were found ' + \
                                  '(*.mysql or *.sql)')
+        elif count > 1:
+            postback.build_error('Multiple database dump files were found:\n'+\
+                                 '\n./'.join(sql_dump))
         else:
             return sql_dump[0]
 
