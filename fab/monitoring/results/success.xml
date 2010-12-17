@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="MyTest" file="." tests="1" assertions="0" failures="0" errors="0" time="1">
+    <testcase name="success" assertions="0" time="1">
+    </testcase>
+  </testsuite>
+</testsuites>
