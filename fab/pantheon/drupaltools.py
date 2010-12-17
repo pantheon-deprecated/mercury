@@ -43,7 +43,9 @@ def get_drupal_update_status(project):
 
             # Get drupal update status
             drupal_version = _get_drupal_version(system_module)
-            drupal_update = (latest_drupal_version != drupal_version)
+
+            # python -> json -> php boolean disagreements. Just use int.
+            drupal_update = int(latest_drupal_version != drupal_version)
 
             # Pantheon log only makes sense if already using Pressflow/Pantheon
             # If using Drupal, the log would show every pressflow commit ever.
@@ -58,7 +60,7 @@ def get_drupal_update_status(project):
             # other git plumbing to check for updates.
 
             # If log is impty, no updates.
-            pantheon_update = bool(pantheon_log)
+            pantheon_update = int(bool(pantheon_log))
 
             status[env] = {'drupal_update': drupal_update,
                            'pantheon_update': pantheon_update,
