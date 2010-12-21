@@ -5,6 +5,7 @@ import string
 import tarfile
 import tempfile
 import time
+import urllib2
 import zipfile
 
 import postback
