@@ -174,6 +174,16 @@ def curl(url, destination):
     """
     local('curl "%s" -o "%s"' % (url, destination))
 
+def hudson_running():
+    """Check if hudson is running. Returns True if http code == 200.
+
+    """
+    try:
+        result = urllib2.urlopen('http://127.0.0.1:8090').code
+    except:
+        return False
+    return result == 200
+
 def _get_database_vars(project, environment):
     """Helper method that returns database variables for a project/environment.
     project: project name

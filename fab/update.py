@@ -1,6 +1,8 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 import datetime
 import tempfile
+import time
+import urllib2
 import os
 import sys
 
@@ -11,15 +13,63 @@ from pantheon import update
 
 from fabric.api import *
 
-def update_pantheon(vps=None):
-       with cd('/opt/pantheon'):
-           local('git pull origin master')
-       if (vps == 'aws'):
-              local('/usr/sbin/bcfg2 -vqed -p pantheon-aws', capture=False)
-       elif (vps == 'ebs'):
-              local('/usr/sbin/bcfg2 -vqed -p pantheon-aws-ebs', capture=False)
-       else:
-              local('/usr/sbin/bcfg2 -vqed', capture=False)
+def update_pantheon(first_boot=False):
+    """Update pantheon code and server configurations.
+
+    first_boot: bool. If this is being called from the configure job. If it
+    is the first boot, we don't need to wait for hudson or send back update
+    data.
+
+    Otherwise:
+
+    This script is run from a cron job because it may update Hudson (and
+    therefor cannot be run inside hudson.)
+
+    If the script is successful, a known message will be printed to
+    stdout which will be redirected to a log file. The hudson job
+    post_update_pantheon will check this log file for the message to
+    determine if it was successful.
+
+    """
+    # Update from repo
+    with cd('/opt/pantheon'):
+        local('git pull origin master')
+    # Update from BCFG2
+    local('/usr/sbin/bcfg2 -vqed', capture=False)
+    # Restart Hudson
+    local('curl -X POST http://localhost:8090/safeRestart')
+
+    # If this is not the first boot, send back update data.
+    if not first_boot:
+        # wait for hudson to restart.
+        while not panthoen.hudson_running():
+            time.sleep(5)
+        # Run post_pantheon_update hudson job
+        urllib2.urlopen('http://localhost:8090/build/post_update_pantheon')
+        # stdout is redirected in cron, so this will go to log file.
+        print "UPDATE COMPLETED SUCCESSFULLY"
+
+def post_update_pantheon():
+    """Determine if cron run of panthoen_update was successful.
+
+    """
+    log_path = '/tmp/pantheon_update.log'
+    if os.path.isfile(log_path):
+        log = local('cat %s' % log_path)
+        local('rm -f %s' % log_path)
+        if 'UPDATE COMPLETED SUCCESSFULLY' in log:
+            postback.post_build_data('update_pantheon', {'status': 'SUCCESS',
+                                                         'msg':''})
+        else:
+            postback.post_build_data('update_pantheon',
+                                            {'status': 'FAILURE',
+                                             'msg': 'Update did not complete.'})
+        print log
+    else:
+        print 'No update log found.'
+        postback.post_build_data('update_pantheon',
+                                           {'status': 'FAILURE',
+                                            'msg':'No update log found'})
 
 def update_site_core(project='pantheon', keep=None):
     """Update Drupal core (from Drupal or Pressflow, to latest Pressflow).
