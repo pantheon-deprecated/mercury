@@ -250,11 +250,11 @@ class PantheonServer:
 
     def update_packages(self):
         if (self.distro == "centos"):
-            local('yum clean all')
-            local('yum -y update')
+            local('yum clean all', capture=False)
+            local('yum -y update', capture=False)
         else:
-            local('apt-get -y update')
-            local('apt-get -y dist-upgrade')
+            local('apt-get -y update', capture=False)
+            local('apt-get -y dist-upgrade', capture=False)
 
     def restart_services(self):
         if self.distro == 'ubuntu':
