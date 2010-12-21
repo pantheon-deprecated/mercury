@@ -42,7 +42,7 @@ def update_pantheon(first_boot=False):
     # If this is not the first boot, send back update data.
     if not first_boot:
         # wait for hudson to restart.
-        while not panthoen.hudson_running():
+        while not pantheon.hudson_running():
             time.sleep(5)
         # Run post_pantheon_update hudson job
         urllib2.urlopen('http://localhost:8090/build/post_update_pantheon')
