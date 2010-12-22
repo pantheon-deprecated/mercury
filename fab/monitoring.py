@@ -151,7 +151,7 @@ def _test_url(service, url):
 
 
 def _success(message):
-    f = open(os.environ.get('WORKSPACE') + 'results.xml', 'w')
+    f = open(os.environ.get('WORKSPACE') + '/results.xml', 'w')
 
     doc = Document()
 
@@ -185,7 +185,7 @@ def _success(message):
 
 
 def _error(message):
-    f = open(os.environ.get('WORKSPACE') + 'results.xml', 'w')
+    f = open(os.environ.get('WORKSPACE') + '/results.xml', 'w')
 
     doc = Document()
 
@@ -222,7 +222,7 @@ def _error(message):
 
 
 def _fail(message):
-    f = open(os.environ.get('WORKSPACE') + 'results.xml', 'w')
+    f = open(os.environ.get('WORKSPACE') + '/results.xml', 'w')
 
     doc = Document()
 
