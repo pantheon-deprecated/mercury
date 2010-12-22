@@ -54,7 +54,7 @@ def update_pantheon(first_boot=False):
         """
 
         # wait for any jobs that were queued to finish. Or -1 (unreachable).
-        while pantheon.hudson_queued > 0:
+        while pantheon.hudson_queued() > 0:
             time.sleep(5)
         # wait for hudson to restart.
         while not pantheon.hudson_running():
@@ -77,16 +77,16 @@ def post_update_pantheon():
         log = local('cat %s' % log_path)
         local('rm -f %s' % log_path)
         if 'UPDATE COMPLETED SUCCESSFULLY' in log:
-            postback.post_build_data('update_pantheon', {'status': 'SUCCESS',
+            postback.write_build_data('update_pantheon', {'status': 'SUCCESS',
                                                          'msg':''})
         else:
-            postback.post_build_data('update_pantheon',
+            postback.write_build_data('update_pantheon',
                                             {'status': 'FAILURE',
                                              'msg': 'Update did not complete.'})
         print log
     else:
         print 'No update log found.'
-        postback.post_build_data('update_pantheon',
+        postback.write_build_data('update_pantheon',
                                            {'status': 'FAILURE',
                                             'msg':'No update log found'})
 
