@@ -9,6 +9,13 @@ from fabric.api import *
 from xml.dom.minidom import Document
 
 
+def check_for_script_updates():
+    message = local('git pull')
+    if 'Already' in message:
+        _success(message)
+    else:
+        _error(message)
+
 def check_for_package_updates():
     local('apt-get update')
     message = local('apt-get -qqys dist-upgrade')
