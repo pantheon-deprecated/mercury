@@ -53,9 +53,18 @@ def update_pantheon(first_boot=False):
 
         """
 
-        # wait for any jobs that were queued to finish. Or -1 (unreachable).
-        while pantheon.hudson_queued() > 0:
-            time.sleep(5)
+        # wait for any jobs that were queued to finish.
+        while True:
+            queued = pantheon.hudson_queued()
+            if queued == 0:
+                # No more jobs, give hudson a few seconds to begin restart.
+                time.sleep(5)
+                break
+            # Hudson is unreachable (already in restart process)
+            elif queued == -1:
+                break
+            else:
+                time.sleep(5)
         # wait for hudson to restart.
         while not pantheon.hudson_running():
             time.sleep(5)
@@ -63,8 +72,7 @@ def update_pantheon(first_boot=False):
         try:
             urllib2.urlopen('http://localhost:8090/job/post_update_pantheon/build')
         except Exception as detail:
-            print "Could not run post_update_pantheon job:\n%s" % detail
-            return
+            print "Warning: Could not run post_update_pantheon job:\n%s" % detail
         # stdout is redirected in cron, so this will go to log file.
         print "UPDATE COMPLETED SUCCESSFULLY"
 
