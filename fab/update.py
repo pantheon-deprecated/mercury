@@ -45,7 +45,7 @@ def update_pantheon(first_boot=False):
         while not pantheon.hudson_running():
             time.sleep(5)
         # Run post_pantheon_update hudson job
-        urllib2.urlopen('http://localhost:8090/build/post_update_pantheon')
+        urllib2.urlopen('http://localhost:8090/job/post_update_pantheon/build')
         # stdout is redirected in cron, so this will go to log file.
         print "UPDATE COMPLETED SUCCESSFULLY"
 
