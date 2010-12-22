@@ -72,23 +72,23 @@ def post_update_pantheon():
     """Determine if cron run of panthoen_update was successful.
 
     """
+    response = dict()
     log_path = '/tmp/pantheon_update.log'
     if os.path.isfile(log_path):
         log = local('cat %s' % log_path)
         local('rm -f %s' % log_path)
         if 'UPDATE COMPLETED SUCCESSFULLY' in log:
-            postback.write_build_data('update_pantheon', {'status': 'SUCCESS',
-                                                         'msg':''})
+            response['status'] = 'SUCCESS'
+            response['msg'] = ''
         else:
-            postback.write_build_data('update_pantheon',
-                                            {'status': 'FAILURE',
-                                             'msg': 'Update did not complete.'})
+            response['status'] = 'FAILURE'
+            response['msg'] = 'Panthoen update did not complete.'
         print log
     else:
+        response['status'] = 'FAILURE'
+        response['msg'] = 'No Pantheon update log was found.'
         print 'No update log found.'
-        postback.write_build_data('update_pantheon',
-                                           {'status': 'FAILURE',
-                                            'msg':'No update log found'})
+    postback.write_build_data('update_pantheon', response)
 
 def update_site_core(project='pantheon', keep=None):
     """Update Drupal core (from Drupal or Pressflow, to latest Pressflow).
