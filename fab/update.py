@@ -31,6 +31,8 @@ def update_pantheon(first_boot=False):
     determine if it was successful.
 
     """
+    # Put hudson into quietDown mode so no more jobs are started.
+    urllib2.urlopen('http://localhost:8090/quietDown')
     # Update from repo
     with cd('/opt/pantheon'):
         local('git pull origin master')
@@ -41,6 +43,19 @@ def update_pantheon(first_boot=False):
 
     # If this is not the first boot, send back update data.
     if not first_boot:
+        """
+        We have to check for both queued jobs then the hudson restart.
+        This is because jobs could have been queued before the update
+        was started, and a check on 'hudson_running' would return True
+        because the restart hasn't occured yet (safeRestart). This way,
+        we first make sure the queue is 0 or hudson is unreachable, then
+        wait until it is back up.
+
+        """
+
+        # wait for any jobs that were queued to finish. Or -1 (unreachable).
+        while pantheon.hudson_queued > 0:
+            time.sleep(5)
         # wait for hudson to restart.
         while not pantheon.hudson_running():
             time.sleep(5)

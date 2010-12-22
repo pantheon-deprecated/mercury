@@ -185,6 +185,16 @@ def hudson_running():
         return False
     return result == 200
 
+def hudson_queued():
+    """Returns number of jobs Hudson currently has in its queue. -1 if unknown.
+
+    """
+    try:
+        result = urllib2.urlopen('http://127.0.0.1:8090')
+    except:
+        return -1
+    return len(eval(result.read()).get('items'))
+
 def _get_database_vars(project, environment):
     """Helper method that returns database variables for a project/environment.
     project: project name
