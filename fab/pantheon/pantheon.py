@@ -190,8 +190,10 @@ def hudson_queued():
 
     """
     try:
-        result = urllib2.urlopen('http://127.0.0.1:8090')
+        result = urllib2.urlopen('http://127.0.0.1:8090/queue/api/python')
     except:
+        return -1
+    if result.code != 200:
         return -1
     return len(eval(result.read()).get('items'))
 
