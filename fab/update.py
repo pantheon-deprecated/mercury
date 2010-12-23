@@ -35,11 +35,11 @@ def update_pantheon(first_boot=False):
     urllib2.urlopen('http://localhost:8090/quietDown')
     # Update from repo
     with cd('/opt/pantheon'):
-        local('git pull origin master')
+        local('git pull origin master', capture=False)
     # Update from BCFG2
     local('/usr/sbin/bcfg2 -vqed', capture=False)
     # Restart Hudson
-    local('curl -X POST http://localhost:8090/safeRestart')
+    local('curl -X POST http://localhost:8090/safeRestart', capture=False)
 
     # If this is not the first boot, send back update data.
     if not first_boot:
