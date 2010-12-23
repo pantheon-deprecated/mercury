@@ -35,16 +35,21 @@ def get_job_and_id():
     """
     return (os.environ.get('JOB_NAME'), os.environ.get('BUILD_NUMBER'))
 
-def get_build_info(job_name, build_number):
+def get_build_info(job_name, build_number, changed):
     """Return a dictionary of Hudson build information.
 
     """
     data = _get_hudson_data(job_name, build_number)
+    if (changed):
+        prev_build_number = int(build_number) - 1
+        prev_data = _get_hudson_data(job_name, prev_build_number)
+        changed = (data.get('result') == prev_data.get('result'))
 
     return {'job_name': job_name,
             'build_number': build_number,
             'build_status': data.get('result'),
-            'build_parameters': _get_build_parameters(data)}
+            'build_parameters': _get_build_parameters(data),
+            'changed': changed}
 
 def get_build_data():
     """ Return a dict of build data, messages, warnings, errors.

@@ -2,7 +2,7 @@ import os
 
 from pantheon import postback
 
-def postback_atlas():
+def postback_atlas(ifchanged=False):
     """ Send information about a Hudson job (and resulting data) back to Atlas.
 
     This should only be called from within a Hudson Post-Build Action.
@@ -13,7 +13,11 @@ def postback_atlas():
 
     # Get build info 
     #     job_name, build_number, build_status, and build_parameters.
-    response = postback.get_build_info(job_name, build_number)
+    response = postback.get_build_info(job_name, build_number, ifchanged)
+    
+    # Check status and exit(0) if we're only into changes
+    if (ifchanged && response.changed == True):
+        exit(0)
 
     # Get build data 
     #     Data from build actions (in hudson workspace).
