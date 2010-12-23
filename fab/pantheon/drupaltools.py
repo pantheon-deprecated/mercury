@@ -43,12 +43,9 @@ def get_drupal_update_status(project):
 
             # Get drupal update status
             drupal_version = _get_drupal_version(system_module)
-            # Convert bool to string because python->json->php mucks this up.
-            drupal_update = str((latest_drupal_version != drupal_version)
-                               ).upper()
-            drupal_log = _parse_changelog(
-                                 local('git log -p refs/heads/%s' % project + \
-                                 '..refs/remotes/origin/master CHANGELOG.txt'))
+
+            # python -> json -> php boolean disagreements. Just use int.
+            drupal_update = int(latest_drupal_version != drupal_version)
 
             # Pantheon log only makes sense if already using Pressflow/Pantheon
             # If using Drupal, the log would show every pressflow commit ever.
@@ -59,17 +56,17 @@ def get_drupal_update_status(project):
             else:
                 pantheon_log = 'Upgrade to Pressflow/Pantheon'
 
+            # NOTE: Removed reporting back with log entries, could use some
+            # other git plumbing to check for updates.
+
             # If log is impty, no updates.
-            pantheon_update = str(bool(pantheon_log)).upper()
+            pantheon_update = int(bool(pantheon_log))
 
             status[env] = {'drupal_update': drupal_update,
                            'pantheon_update': pantheon_update,
                            'current': {'platform': platform,
-                                       'drupal_version': drupal_version
-                                      },
-                           'available': {'drupal_version': latest_drupal_version,
-                                         'drupal_changelog': drupal_log,
-                                         'pantheon_changelog': pantheon_log}}
+                                       'drupal_version': drupal_version},
+                           'available': {'drupal_version': latest_drupal_version,}}
     return status
 
 def _get_drupal_platform(system_module):

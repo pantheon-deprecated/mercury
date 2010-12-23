@@ -5,6 +5,7 @@ import string
 import tarfile
 import tempfile
 import time
+import urllib2
 import zipfile
 
 import postback
@@ -174,6 +175,28 @@ def curl(url, destination):
     """
     local('curl "%s" -o "%s"' % (url, destination))
 
+def hudson_running():
+    """Check if hudson is running. Returns True if http code == 200.
+
+    """
+    try:
+        result = urllib2.urlopen('http://127.0.0.1:8090').code
+    except:
+        return False
+    return result == 200
+
+def hudson_queued():
+    """Returns number of jobs Hudson currently has in its queue. -1 if unknown.
+
+    """
+    try:
+        result = urllib2.urlopen('http://127.0.0.1:8090/queue/api/python')
+    except:
+        return -1
+    if result.code != 200:
+        return -1
+    return len(eval(result.read()).get('items'))
+
 def _get_database_vars(project, environment):
     """Helper method that returns database variables for a project/environment.
     project: project name
@@ -239,11 +262,11 @@ class PantheonServer:
 
     def update_packages(self):
         if (self.distro == "centos"):
-            local('yum clean all')
-            local('yum -y update')
+            local('yum clean all', capture=False)
+            local('yum -y update', capture=False)
         else:
-            local('apt-get -y update')
-            local('apt-get -y dist-upgrade')
+            local('apt-get -y update', capture=False)
+            local('apt-get -y dist-upgrade', capture=False)
 
     def restart_services(self):
         if self.distro == 'ubuntu':
