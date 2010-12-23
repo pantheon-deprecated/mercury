@@ -35,21 +35,25 @@ def get_job_and_id():
     """
     return (os.environ.get('JOB_NAME'), os.environ.get('BUILD_NUMBER'))
 
-def get_build_info(job_name, build_number, changed):
+def get_build_info(job_name, build_number, check_previous):
     """Return a dictionary of Hudson build information.
+    job_name: hudson job name.
+    build_number: hudson build number.
+    check_previous: bool. If we should return data only if there is a change in
+                          build status.
 
     """
     data = _get_hudson_data(job_name, build_number)
-    if (changed):
-        prev_build_number = int(build_number) - 1
-        prev_data = _get_hudson_data(job_name, prev_build_number)
-        changed = (data.get('result') == prev_data.get('result'))
 
+    # If we care, determine if status changed from previous run.
+    if check_previous and not _status_changed(job_name, data):
+        return None
+
+    # Either we dont care if status changed, or there were changes.
     return {'job_name': job_name,
             'build_number': build_number,
             'build_status': data.get('result'),
-            'build_parameters': _get_build_parameters(data),
-            'changed': changed}
+            'build_parameters': _get_build_parameters(data)}
 
 def get_build_data():
     """ Return a dict of build data, messages, warnings, errors.
@@ -135,6 +139,23 @@ def get_workspace():
         return workspace
     else:
         return '/etc/pantheon/hudson/workspace'
+
+def _status_changed(job_name, data):
+    """Returns True if the build status changed from the previous run.
+    Will also return true if there is no previous status.
+    job_name: hudson job name.
+    data: dict from hudsons python api for the current build.
+
+    """
+    prev_build_number = int(data.get('number')) - 1
+    # Valid previous build exists.
+    if prev_build_number > 0:
+        result = data.get('result')
+        prev_result = _get_hudson_data(job_name, prev_build_number).get('result')
+        return result != prev_result
+    else:
+        # First run, status has changed from "none" to something.
+        return True
 
 def _get_build_parameters(data):
     """Return the build parameters from Hudson build API data.
