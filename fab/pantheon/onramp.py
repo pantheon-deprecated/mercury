@@ -125,6 +125,13 @@ class ImportTools(project.BuildTools):
         super(ImportTools, self).setup_pantheon_libraries(self.working_dir)
 
     def setup_files_dir(self):
+        """Move site files to sites/default/files if they are not already.
+
+        This will move the files from their former location, change the file
+        path in the database (for all files and the variable itself), then
+        create a symlink in their former location.
+
+        """
         file_location = self._get_files_dir()
         if file_location:
             file_path = os.path.join(self.working_dir, file_location)
@@ -136,15 +143,16 @@ class ImportTools(project.BuildTools):
         if not os.path.exists(file_dest):
             local('mkdir -p %s' % file_dest)
 
-            if file_path:
-                # Move files to sites/default/files and symlink from former location.
-                with settings(warn_only=True):
-                    local('cp -R %s/* %s' % (file_path, file_dest))
-                local('rm -rf %s' % file_path)
-                path = os.path.split(file_path)
-                if not os.path.islink(path[0]):
-                    rel_path = os.path.relpath(file_dest, os.path.split(file_path)[0])
-                    local('ln -s %s %s' % (rel_path, file_path))
+        # if files are not located in default location, move them there.
+        if (file_path) and (file_location != 'sites/default/files')
+            with settings(warn_only=True):
+                local('cp -R %s/* %s' % (file_path, file_dest))
+            local('rm -rf %s' % file_path)
+            path = os.path.split(file_path)
+            # Symlink from former location to sites/default/files
+            if not os.path.islink(path[0]):
+                rel_path = os.path.relpath(file_dest, os.path.split(file_path)[0])
+                local('ln -s %s %s' % (rel_path, file_path))
 
         # Change paths in the files table
         database = '%s_%s' % (self.project, 'dev')
