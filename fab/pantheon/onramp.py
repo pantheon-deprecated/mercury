@@ -1,5 +1,4 @@
 import os
-import re
 import tempfile
 
 import drupaltools
@@ -280,16 +279,28 @@ class ImportTools(project.BuildTools):
         local('rm -rf %s' % os.path.dirname(tarball))
 
     def _get_site_name(self):
-        with cd(self.processing_dir):
-            settings_files = (local('find sites/ -name settings.php -type f')
-                             ).rstrip('\n')
-        if not settings_files:
+        """Return the name of the site to be imported.
+
+        A valid site is any directory under sites/ that contains a settings.php
+
+        """
+        # Get all directories under sites/
+        site_directories = [s for s in os.listdir(
+                                       os.path.join(self.processing_dir,'sites')
+                                       ) if os.path.isdir(s)]
+        # Of the above directories, get the ones that contain a settings.php
+        sites = [site for site in site_directories
+                                  if 'settings.php' in os.listdir(site)]
+
+        # Unless only one site is found, post error and exit.  
+        site_count = len(sites)
+        if site_count > 1:
+            postback.build_error('Multiple settings.php files were found:\n' +\
+                                 '\nsites/'.join(sites))
+        elif site_count == 0:
             postback.build_error('Error: No settings.php files were found.')
-        if '\n' in settings_files:
-            postback.build_error('Error: Multiple settings.php files found:\n'+\
-                                 '\n'.join(settings_files.split('\n')))
-        name = re.search(r'^.*sites/(.*)/settings.php', settings_files).group(1)
-        return name
+        else:
+            return sites[0]
 
     def _get_database_dump(self):
         """Return the filename of the database dump.
