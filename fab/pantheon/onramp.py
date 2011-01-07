@@ -72,11 +72,19 @@ class ImportTools(project.BuildTools):
 
         """
         for env in self.environments:
+            # The database is only imported into the dev environment initially
+            # so that we can do all import processing in one place, then deploy
+            # to the other environments.
             if env == 'dev':
                 db_dump = os.path.join(self.processing_dir, self.db_dump)
             else:
                 db_dump = None
-            super(ImportTools, self).setup_database(env, self.db_password, db_dump)
+
+            super(ImportTools, self).setup_database(env,
+                                                    self.db_password,
+                                                    db_dump,
+                                                    True)
+
         local('rm -f %s' % (os.path.join(self.processing_dir, self.db_dump)))
 
     def import_site_files(self):
@@ -144,7 +152,7 @@ class ImportTools(project.BuildTools):
             local('mkdir -p %s' % file_dest)
 
         # if files are not located in default location, move them there.
-        if (file_path) and (file_location != 'sites/default/files')
+        if (file_path) and (file_location != 'sites/default/files'):
             with settings(warn_only=True):
                 local('cp -R %s/* %s' % (file_path, file_dest))
             local('rm -rf %s' % file_path)

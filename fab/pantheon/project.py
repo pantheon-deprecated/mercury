@@ -3,6 +3,7 @@ import sys
 import tempfile
 
 import pantheon
+import dbtools
 
 from fabric.api import *
 
@@ -93,7 +94,7 @@ class BuildTools(object):
                                                               working_dir))
 
 
-    def setup_database(self, environment, password, db_dump=None):
+    def setup_database(self, environment, password, db_dump=None, onramp=False):
         """ Create a new database based on project_environment, using password.
         environment: the environment name (dev/test/live) in which to create db
         password: password to identify user (username is same as project name).
@@ -103,10 +104,12 @@ class BuildTools(object):
         username = self.project
         database = '%s_%s' % (self.project, environment)
 
-        pantheon.create_database(database)
-        pantheon.set_database_grants(database, username, password)
+        dbtools.create_database(database)
+        dbtools.set_database_grants(database, username, password)
         if db_dump:
-            pantheon.import_db_dump(db_dump, database)
+            if onramp:
+                dbtools.prepare_db_dump(db_dump)
+            dbtools.import_db_dump(db_dump, database)
 
     def setup_pantheon_libraries(self, working_dir):
         """ Download Pantheon required libraries.
@@ -217,7 +220,7 @@ class BuildTools(object):
         # Once complete, we import this 'final' database into each environment.
         if handler == 'import':
             tempdir = tempfile.mkdtemp()
-            dump_file = pantheon.export_data(self.project, 'dev', tempdir)
+            dump_file = dbtools.export_data(self.project, 'dev', tempdir)
 
         for env in self.environments:
             # Code
@@ -229,7 +232,7 @@ class BuildTools(object):
             if handler == 'import':
                 # Data (already exists in 'dev' - import into other envs)
                 if env != 'dev':
-                    pantheon.import_data(self.project, env, dump_file)
+                    dbtools.import_data(self.project, env, dump_file)
 
                 # Files
                 source = os.path.join(working_dir, 'sites/default/files')

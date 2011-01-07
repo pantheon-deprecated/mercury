@@ -75,55 +75,6 @@ def random_string(length):
                                           string.digits) \
                                           for i in range(length)])
 
-def export_data(project, environment, destination):
-    """Export the database for a particular project/environment to destination.
-    exported database will have a name in the form of: project_environment.sql
-    project: project name
-    environment: environment name
-    destination: path where database file should be exported
-
-    """
-    filename = os.path.join(destination, '%s_%s.sql' % (project, environment))
-    username, password, db_name = _get_database_vars(project, environment)
-    local("mysqldump --single-transaction --user='%s' \
-                                          --password='%s' \
-                                            %s > %s" % (username,
-                                                       password,
-                                                       db_name,
-                                                       filename))
-    return filename
-
-def import_data(project, environment, source):
-    """Create database then import from source.
-    project: project name
-    environment: environment name
-    source: full path to database dump file to import.
-
-    """
-    database = '%s_%s' % (project, environment)
-    create_database(database)
-    import_db_dump(source, database)
-
-def create_database(database):
-    local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % database)
-    local("mysql -u root -e 'CREATE DATABASE %s'" % database)
-
-def set_database_grants(database, username, password):
-    local("mysql -u root -e \"GRANT ALL ON %s.* TO '%s'@'localhost' \
-           IDENTIFIED BY '%s';\"" % (database, username, password))
-
-def import_db_dump(database_dump, database_name):
-    #NOTE: saved the below for now. causes issues with dumps from phpmyadmin.
-    #grep -v '^INSERT INTO `cache[_a-z]*`' | \
-    #grep -v '^INSERT INTO `ctools_object_cache`' | \
-    #grep -v '^INSERT INTO `watchdog`' | \
-    #grep -v '^INSERT INTO `accesslog`' | \
-
-    # Strip cache tables, convert MyISAM to InnoDB, and import.
-    local("cat %s | grep -v '^USE `' | \
-           sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | \
-           mysql -u root %s" % (database_dump, database_name))
-
 def parse_vhost(path):
     """Helper method that returns environment variables from a vhost file.
     path: full path to vhost file.

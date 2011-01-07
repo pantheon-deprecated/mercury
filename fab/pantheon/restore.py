@@ -44,7 +44,8 @@ class RestoreTools(project.BuildTools):
             # Create database and import from dumpfile.
             super(RestoreTools, self).setup_database(env,
                                                      self.db_password,
-                                                     db_dump)
+                                                     db_dump,
+                                                     False)
             # Cleanup dump file before copying files over.
             local('rm -f %s' % db_dump)
 
