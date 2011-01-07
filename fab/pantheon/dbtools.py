@@ -47,12 +47,6 @@ def set_database_grants(database, username, password):
                                                   username,
                                                   password))
 
-def prepare_db_dump(database_dump):
-    """Convert MyISAM to InnoDb.
-
-    """
-    local("sed -i 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' %s" % database_dump)
-
 def import_db_dump(database_dump, database_name):
     """Import database_dump into database_name.
     database_dump: full path to the database dump.
@@ -60,6 +54,41 @@ def import_db_dump(database_dump, database_name):
 
     """
     local('mysql -u root %s < %s' % (database_name, database_dump))
+
+def convert_to_innodb(database):
+    """Convert all table engines to InnoDB (if possible).
+
+    """
+    with MySQLConn() as db:
+        tables = db.execute("SELECT TABLE_NAME AS name, ENGINE AS engine " + \
+                            "FROM information_schema.TABLES "+ \
+                            "WHERE TABLE_SCHEMA = '%s'" % database)
+        for table in tables:
+            if table.get('engine') == 'InnoDB':
+                print '%s already uses InnoDB' % table.get('name')
+            else:
+                db.execute("ALTER TABLE `%s.%s` ENGINE='InnoDB'" % (database,
+                                                          table.get('name')),
+                                                                 warn_only=True)
+
+def clear_cache_tables(database):
+    """Clear Drupal cache tables.
+
+    """
+    with MySQLConn() as db:
+        # tuple of strings to match agains table_name.startswith()
+        caches = ('cache_')
+        # Other exact matches to look for and clear.
+        other = ['ctools_object_cache',
+                 'accesslog',
+                 'watchdog']
+        tables = db.execute("SELECT TABLE_NAME AS name " + \
+                              "FROM information_schema.TABLES " + \
+                              "WHERE TABLE_SCHEMA = '%s'" % database)
+        for table in tables:
+            table_name = table.get('name')
+            if (table_name.startswith(caches)) or (table_name in other):
+                db.execute('TRUNCATE %s.%s' % (database, table_name))
 
 
 @contextmanager
@@ -86,11 +115,11 @@ class MySQLConn(object):
         """
         try:
             self.cursor.execute(query)
-        except MySQL.Error, e:
+        except MySQLdb.Error, e:
             print "MySQL Error %d: %s" % (e.args[0], e.args[1])
             if not warn_only:
                 raise
-        except MySQL.Warning, w:
+        except MySQLdb.Warning, w:
             print "MySQL Warning: %s" % (w)
         return self.cursor.fetchall()
 
@@ -117,4 +146,5 @@ class MySQLConn(object):
         except MySQLdb.Error, e:
             print "MySQL Error %d: %s" % (e.args[0], e.args[1])
             raise
+
 

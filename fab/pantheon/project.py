@@ -99,6 +99,7 @@ class BuildTools(object):
         environment: the environment name (dev/test/live) in which to create db
         password: password to identify user (username is same as project name).
         db_dump (optional): full path to database dump to import into db.
+        onramp (optional): bool. perform additional prep during import process.
 
         """
         username = self.project
@@ -107,9 +108,10 @@ class BuildTools(object):
         dbtools.create_database(database)
         dbtools.set_database_grants(database, username, password)
         if db_dump:
-            if onramp:
-                dbtools.prepare_db_dump(db_dump)
             dbtools.import_db_dump(db_dump, database)
+            if onramp:
+                dbtools.clear_cache_tables(database)
+                dbtools.convert_to_innodb(database)
 
     def setup_pantheon_libraries(self, working_dir):
         """ Download Pantheon required libraries.

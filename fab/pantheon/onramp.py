@@ -15,7 +15,7 @@ def get_drupal_root(base):
     for root, dirs, files in os.walk(base, topdown=True):
         if ('index.php' in files) and ('sites' in dirs):
             return root
-    postback.build_error('Canno locate drupal install in archive.')
+    postback.build_error('Cannot locate drupal install in archive.')
 
 
 class ImportTools(project.BuildTools):
@@ -90,7 +90,7 @@ class ImportTools(project.BuildTools):
                                                     self.db_password,
                                                     db_dump,
                                                     True)
-
+        # Remove the database dump from processing dir after import.
         local('rm -f %s' % (os.path.join(self.processing_dir, self.db_dump)))
 
     def import_site_files(self):
