@@ -290,13 +290,10 @@ class ImportTools(project.BuildTools):
         A valid site is any directory under sites/ that contains a settings.php
 
         """
-        # Get all directories under sites/
-        site_directories = [s for s in os.listdir(
-                                       os.path.join(self.processing_dir,'sites')
-                                       ) if os.path.isdir(s)]
-        # Of the above directories, get the ones that contain a settings.php
-        sites = [site for site in site_directories
-                                  if 'settings.php' in os.listdir(site)]
+        root = os.path.join(self.processing_dir, 'sites')
+        sites =[s for s in os.listdir(root) \
+                        if os.path.isdir(os.path.join(root,s)) and (
+                           'settings.php' in os.listdir(os.path.join(root,s)))]
 
         # Unless only one site is found, post error and exit.  
         site_count = len(sites)
