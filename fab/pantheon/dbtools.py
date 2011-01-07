@@ -1,5 +1,4 @@
 import os
-from contextlib import contextmanager
 
 import MySQLdb
 from fabric.api import local
@@ -33,19 +32,21 @@ def create_database(database):
     """Drop database if it already exists, then create a new empty db.
 
     """
-    with MySQLconn() as dbconn:
-        dbconn.execute('DROP DATABASE IF EXISTS %s' % database)
-        dbconn.execute('CREATE DATABASE %s' % database)
+    db = MySQLConn()
+    db.execute('DROP DATABASE IF EXISTS %s' % database)
+    db.execute('CREATE DATABASE %s' % database)
+    db.close()
 
 def set_database_grants(database, username, password):
     """Grant ALL on database using username/password.
 
     """
-    with MySQLconn() as dbconn:
-        dbconn.execute("GRANT ALL ON %s.* TO '%s'@'localhost' \
-                        IDENTIFIED BY '%s';\"" % (database,
-                                                  username,
-                                                  password))
+    db = MySQLConn()
+    db.execute("GRANT ALL ON %s.* TO '%s'@'localhost' \
+                IDENTIFIED BY '%s';\"" % (database,
+                                          username,
+                                          password))
+    db.close()
 
 def import_db_dump(database_dump, database_name):
     """Import database_dump into database_name.
@@ -59,39 +60,40 @@ def convert_to_innodb(database):
     """Convert all table engines to InnoDB (if possible).
 
     """
-    with MySQLConn() as db:
-        tables = db.execute("SELECT TABLE_NAME AS name, ENGINE AS engine " + \
-                            "FROM information_schema.TABLES "+ \
-                            "WHERE TABLE_SCHEMA = '%s'" % database)
-        for table in tables:
-            if table.get('engine') == 'InnoDB':
-                print '%s already uses InnoDB' % table.get('name')
-            else:
-                db.execute("ALTER TABLE `%s.%s` ENGINE='InnoDB'" % (database,
-                                                          table.get('name')),
-                                                                 warn_only=True)
+    db = MySQLConn()
+    tables = db.execute("SELECT TABLE_NAME AS name, ENGINE AS engine " + \
+                        "FROM information_schema.TABLES "+ \
+                        "WHERE TABLE_SCHEMA = '%s'" % database)
+    for table in tables:
+        if table.get('engine') == 'InnoDB':
+            print '%s already uses InnoDB' % table.get('name')
+        else:
+            db.execute("ALTER TABLE `%s.%s` ENGINE='InnoDB'" % (database,
+                                                      table.get('name')),
+                                                             warn_only=True)
+    db.close()
 
 def clear_cache_tables(database):
     """Clear Drupal cache tables.
 
     """
-    with MySQLConn() as db:
-        # tuple of strings to match agains table_name.startswith()
-        caches = ('cache_')
-        # Other exact matches to look for and clear.
-        other = ['ctools_object_cache',
-                 'accesslog',
-                 'watchdog']
-        tables = db.execute("SELECT TABLE_NAME AS name " + \
-                              "FROM information_schema.TABLES " + \
-                              "WHERE TABLE_SCHEMA = '%s'" % database)
-        for table in tables:
-            table_name = table.get('name')
-            if (table_name.startswith(caches)) or (table_name in other):
-                db.execute('TRUNCATE %s.%s' % (database, table_name))
+    db = MySQLConn()
+    # tuple of strings to match agains table_name.startswith()
+    caches = ('cache_')
+    # Other exact matches to look for and clear.
+    other = ['ctools_object_cache',
+             'accesslog',
+             'watchdog']
+    tables = db.execute("SELECT TABLE_NAME AS name " + \
+                        "FROM information_schema.TABLES " + \
+                        "WHERE TABLE_SCHEMA = '%s'" % database)
+    for table in tables:
+        table_name = table.get('name')
+        if (table_name.startswith(caches)) or (table_name in other):
+            db.execute('TRUNCATE %s.%s' % (database, table_name))
+    db.close()
 
 
-@contextmanager
 class MySQLConn(object):
 
     def __init__(self, username='root', password='', database=None):
@@ -101,12 +103,6 @@ class MySQLConn(object):
         """
         self.connection = self._mysql_connect(database, username, password)
         self.cursor = self.connection.cursor(MySQLdb.cursors.DictCursor)
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, type, value, trackback):
-        self.close()
 
     def execute(self, query, warn_only=False):
         """Execute a command on the connection.
@@ -146,5 +142,4 @@ class MySQLConn(object):
         except MySQLdb.Error, e:
             print "MySQL Error %d: %s" % (e.args[0], e.args[1])
             raise
-
 
