@@ -83,7 +83,7 @@ class _ImportProfile(onramp.ImportTools):
         self.setup_permissions()
 
         # Cleanup and restart services.
-        self.cleanup(tarball)
+        self.cleanup()
         self.server.restart_services()
 
         # Send version and repo status.

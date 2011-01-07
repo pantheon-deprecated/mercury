@@ -393,25 +393,6 @@ class PantheonArchive(object):
         """
         self.archive.close()
 
-    def get_drupal_tld(self):
-        """Return the relative path to the drupal install within an archive.
-
-        Example: archive contains: ./www/mysite/install.php with 'mysite' being
-                 a valid drupal installation. This would return 'www/mysite'.
-
-        """
-        if self.filetype == 'tar':
-            for member in self.archive.getmembers():
-                head, tail = os.path.split(member.name)
-                if tail == 'install.php':
-                    return head
-        elif self.filetype == 'zip':
-            for member in self.archive.infolist():
-                head, tail = os.path.split(member.filename)
-                if tail == 'install.php':
-                    return head
-        postback.build_error('Error: Cannot locate drupal install in archive.')
-
     def _get_archive_type(self):
         """Return the generic type of archive (tar/zip).
 

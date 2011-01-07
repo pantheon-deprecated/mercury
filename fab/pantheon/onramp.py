@@ -8,6 +8,16 @@ import postback
 
 from fabric.api import *
 
+def get_drupal_root(base):
+    """Return the location of drupal root within 'base' dir tree.
+
+    """
+    for root, dirs, files in os.walk(base, topdown=True):
+        if ('index.php' in files) and ('sites' in dirs):
+            return root
+    postback.build_error('Canno locate drupal install in archive.')
+
+
 class ImportTools(project.BuildTools):
 
     def __init__(self, project, **kw):
@@ -18,7 +28,6 @@ class ImportTools(project.BuildTools):
         super(ImportTools, self).__init__(project)
 
         self.working_dir = tempfile.mkdtemp()
-        self.processing_dir = tempfile.mkdtemp()
         self.destination = os.path.join(self.server.webroot, project)
         self.author = 'Hudson User <hudson@pantheon>'
         self.db_password = pantheon.random_string(10)
@@ -30,11 +39,11 @@ class ImportTools(project.BuildTools):
         # Extract the archive
         archive = pantheon.PantheonArchive(tarball)
         extract_location = archive.extract()
+        archive.close()
+        local('rm -rf %s' % os.path.dirname(tarball))
 
-        # Find the Drupal installation and move it to the processing_dir
-        drupal_location = os.path.join(extract_location, archive.get_drupal_tld())
-        local('rsync -avz %s/ %s/' % (drupal_location.rstrip('/'), self.processing_dir))
-        local('rm -rf %s' % extract_location)
+        # Find the Drupal installation and set it as the processing_dir
+        self.processing_dir = get_drupal_root(extract_location)
 
         # Remove existing VCS files.
         with cd(self.processing_dir):
@@ -45,8 +54,6 @@ class ImportTools(project.BuildTools):
                 local("find . -depth -name .git -exec rm -fr {} \;")
                 local("find . -depth -name .svn -exec rm -fr {} \;")
                 local("find . -depth -name CVS -exec rm -fr {} \;")
-
-        archive.close()
 
     def parse_archive(self):
         """Get the site name and database dump file from archive to be imported.
@@ -271,12 +278,11 @@ class ImportTools(project.BuildTools):
     def push_to_repo(self):
         super(ImportTools, self).push_to_repo('import')
 
-    def cleanup(self, tarball):
-        """ Remove working directory and downloaded tarball.
+    def cleanup(self):
+        """ Remove working directory.
 
         """
         local('rm -rf %s' % self.working_dir)
-        local('rm -rf %s' % os.path.dirname(tarball))
 
     def _get_site_name(self):
         """Return the name of the site to be imported.
