@@ -124,7 +124,6 @@ class MySQLConn(object):
         """Close database connection.
 
         """
-        self.cursor.close()
         self.connection.close()
 
     def _mysql_connect(self, database, username, password):
