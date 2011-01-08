@@ -1,6 +1,7 @@
 import os
 
 import MySQLdb
+import pantheon
 from fabric.api import local
 
 def export_data(project, environment, destination):
@@ -11,7 +12,7 @@ def export_data(project, environment, destination):
 
     """
     filepath = os.path.join(destination, '%s_%s.sql' % (project, environment))
-    username, password, db_name = _get_database_vars(project, environment)
+    username, password, db_name = pantheon.get_database_vars(project, environment)
     local("mysqldump --single-transaction --user='%s' \
                                           --password='%s' \
                                             %s > %s" % (username,
@@ -68,9 +69,9 @@ def convert_to_innodb(database):
         if table.get('engine') == 'InnoDB':
             print '%s already uses InnoDB' % table.get('name')
         else:
-            db.execute("ALTER TABLE `%s.%s` ENGINE='InnoDB'" % (database,
-                                                      table.get('name')),
-                                                             warn_only=True)
+            db.execute("ALTER TABLE %s.%s ENGINE='InnoDB'" % (database,
+                                                    table.get('name')),
+                                                        warn_only=True)
     db.close()
 
 def clear_cache_tables(database):
@@ -123,6 +124,7 @@ class MySQLConn(object):
         """Close database connection.
 
         """
+        self.cursor.close()
         self.connection.close()
 
     def _mysql_connect(self, database, username, password):

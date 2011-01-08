@@ -98,7 +98,7 @@ def is_drupal_installed(project, environment):
 
     """
     #TODO: Find better way of determining this than hitting the db.
-    (username, password, db_name) = _get_database_vars(project, environment)
+    (username, password, db_name) = get_database_vars(project, environment)
     with hide('running'):
         status = local("mysql -u %s -p%s %s -e 'show tables;' | \
                         awk '/system/'" % (username, password, db_name))
@@ -148,7 +148,7 @@ def hudson_queued():
         return -1
     return len(eval(result.read()).get('items'))
 
-def _get_database_vars(project, environment):
+def get_database_vars(project, environment):
     """Helper method that returns database variables for a project/environment.
     project: project name
     environment: environment name.
