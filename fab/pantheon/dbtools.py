@@ -44,9 +44,9 @@ def set_database_grants(database, username, password):
     """
     db = MySQLConn()
     db.execute("GRANT ALL ON %s.* TO '%s'@'localhost' \
-                IDENTIFIED BY '%s';\"" % (database,
-                                          username,
-                                          password))
+                IDENTIFIED BY '%s';" % (database,
+                                        username,
+                                        password))
     db.close()
 
 def import_db_dump(database_dump, database_name):
@@ -124,6 +124,7 @@ class MySQLConn(object):
         """Close database connection.
 
         """
+        self.cursor.close()
         self.connection.close()
 
     def _mysql_connect(self, database, username, password):
