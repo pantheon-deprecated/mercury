@@ -105,13 +105,14 @@ def is_drupal_installed(project, environment):
     # If any data is in status, assume site is installed.
     return bool(status)
 
-def download(url):
+def download(url, prefix='tmp'):
     """Download url to temporary directory and return path to file.
     url: fully qualified url of file to download.
+    prefix: optional prefix to use for the temporary directory name.
     returns: full path to downloaded file.
 
     """
-    download_dir = tempfile.mkdtemp()
+    download_dir = tempfile.mkdtemp(prefix=prefix)
     filebase = os.path.basename(url)
     filename = os.path.join(download_dir, filebase)
 

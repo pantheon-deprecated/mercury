@@ -33,6 +33,14 @@ class ImportTools(project.BuildTools):
         self.db_password = pantheon.random_string(10)
         self.force_update = False
 
+    def download(self, url):
+        if url.startswith('file:///'):
+            # Local file - return path
+            return url[7:]
+        else:
+            # Download remote file into temp location with known prefix.
+            return pantheon.download(url,'tmp_dl_')
+
     def extract(self, tarball):
         """ tarball: full path to archive to extract."""
 
@@ -40,7 +48,10 @@ class ImportTools(project.BuildTools):
         archive = pantheon.PantheonArchive(tarball)
         extract_location = archive.extract()
         archive.close()
-        local('rm -rf %s' % os.path.dirname(tarball))
+
+        #TODO: We could remove the tarball at this point to save on disk space,
+        # which may be an issue for very large sites. However, this also makes
+        # troubleshooting bad imports more difficult (No tarball to test).
 
         # Find the Drupal installation and set it as the processing_dir
         self.processing_dir = get_drupal_root(extract_location)
@@ -278,11 +289,23 @@ class ImportTools(project.BuildTools):
     def push_to_repo(self):
         super(ImportTools, self).push_to_repo('import')
 
-    def cleanup(self):
-        """ Remove working directory.
+    def cleanup(self, tarball):
+        """ Remove leftover temporary import files..
 
         """
         local('rm -rf %s' % self.working_dir)
+
+        # In the case of very large sites, people will manually upload the
+        # tarball to the machine. In these cases, we don't want to remove this
+        # file. However if the import script downloaded the file from a remote
+        # location, go ahead and remove it at the end of processing.
+
+        archive_location = os.path.dirname(tarball)
+
+        # Downloaded by import script (known location), remove after extract.
+        if archive_location.startswith('/tmp/tmp_dl_'):
+            local('rm -rf %s' % archive_location)
+
 
     def _get_site_name(self):
         """Return the name of the site to be imported.
