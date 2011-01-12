@@ -75,55 +75,6 @@ def random_string(length):
                                           string.digits) \
                                           for i in range(length)])
 
-def export_data(project, environment, destination):
-    """Export the database for a particular project/environment to destination.
-    exported database will have a name in the form of: project_environment.sql
-    project: project name
-    environment: environment name
-    destination: path where database file should be exported
-
-    """
-    filename = os.path.join(destination, '%s_%s.sql' % (project, environment))
-    username, password, db_name = _get_database_vars(project, environment)
-    local("mysqldump --single-transaction --user='%s' \
-                                          --password='%s' \
-                                            %s > %s" % (username,
-                                                       password,
-                                                       db_name,
-                                                       filename))
-    return filename
-
-def import_data(project, environment, source):
-    """Create database then import from source.
-    project: project name
-    environment: environment name
-    source: full path to database dump file to import.
-
-    """
-    database = '%s_%s' % (project, environment)
-    create_database(database)
-    import_db_dump(source, database)
-
-def create_database(database):
-    local("mysql -u root -e 'DROP DATABASE IF EXISTS %s'" % database)
-    local("mysql -u root -e 'CREATE DATABASE %s'" % database)
-
-def set_database_grants(database, username, password):
-    local("mysql -u root -e \"GRANT ALL ON %s.* TO '%s'@'localhost' \
-           IDENTIFIED BY '%s';\"" % (database, username, password))
-
-def import_db_dump(database_dump, database_name):
-    #NOTE: saved the below for now. causes issues with dumps from phpmyadmin.
-    #grep -v '^INSERT INTO `cache[_a-z]*`' | \
-    #grep -v '^INSERT INTO `ctools_object_cache`' | \
-    #grep -v '^INSERT INTO `watchdog`' | \
-    #grep -v '^INSERT INTO `accesslog`' | \
-
-    # Strip cache tables, convert MyISAM to InnoDB, and import.
-    local("cat %s | grep -v '^USE `' | \
-           sed 's/^[)] ENGINE=MyISAM/) ENGINE=InnoDB/' | \
-           mysql -u root %s" % (database_dump, database_name))
-
 def parse_vhost(path):
     """Helper method that returns environment variables from a vhost file.
     path: full path to vhost file.
@@ -147,20 +98,21 @@ def is_drupal_installed(project, environment):
 
     """
     #TODO: Find better way of determining this than hitting the db.
-    (username, password, db_name) = _get_database_vars(project, environment)
+    (username, password, db_name) = get_database_vars(project, environment)
     with hide('running'):
         status = local("mysql -u %s -p%s %s -e 'show tables;' | \
                         awk '/system/'" % (username, password, db_name))
     # If any data is in status, assume site is installed.
     return bool(status)
 
-def download(url):
+def download(url, prefix='tmp'):
     """Download url to temporary directory and return path to file.
     url: fully qualified url of file to download.
+    prefix: optional prefix to use for the temporary directory name.
     returns: full path to downloaded file.
 
     """
-    download_dir = tempfile.mkdtemp()
+    download_dir = tempfile.mkdtemp(prefix=prefix)
     filebase = os.path.basename(url)
     filename = os.path.join(download_dir, filebase)
 
@@ -197,7 +149,7 @@ def hudson_queued():
         return -1
     return len(eval(result.read()).get('items'))
 
-def _get_database_vars(project, environment):
+def get_database_vars(project, environment):
     """Helper method that returns database variables for a project/environment.
     project: project name
     environment: environment name.
@@ -441,25 +393,6 @@ class PantheonArchive(object):
 
         """
         self.archive.close()
-
-    def get_drupal_tld(self):
-        """Return the relative path to the drupal install within an archive.
-
-        Example: archive contains: ./www/mysite/install.php with 'mysite' being
-                 a valid drupal installation. This would return 'www/mysite'.
-
-        """
-        if self.filetype == 'tar':
-            for member in self.archive.getmembers():
-                head, tail = os.path.split(member.name)
-                if tail == 'install.php':
-                    return head
-        elif self.filetype == 'zip':
-            for member in self.archive.infolist():
-                head, tail = os.path.split(member.filename)
-                if tail == 'install.php':
-                    return head
-        postback.build_error('Error: Cannot locate drupal install in archive.')
 
     def _get_archive_type(self):
         """Return the generic type of archive (tar/zip).

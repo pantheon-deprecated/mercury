@@ -19,7 +19,6 @@ def onramp_site(project='pantheon', profile=None, url=None, **kw):
     handler = _get_profile_handler(**data)
     handler.build(**data)
 
-
 def _get_profile_handler(profile, **kw):
     """Return instantiated profile object.
     profile: name of the installation profile.
@@ -37,6 +36,7 @@ def _get_profile_handler(profile, **kw):
            profiles[profile](**kw) or \
            profiles['import'](**kw)
 
+
 class _ImportProfile(onramp.ImportTools):
     """Generic Pantheon Import Profile.
 
@@ -44,7 +44,7 @@ class _ImportProfile(onramp.ImportTools):
     def build(self, url, **kw):
 
         # Download, extract, and parse the tarball.
-        tarball = pantheon.download(url)
+        tarball = self.download(url)
         self.extract(tarball)
         self.parse_archive()
 
@@ -54,7 +54,6 @@ class _ImportProfile(onramp.ImportTools):
         # Create a new project
         self.setup_project_repo()
         self.setup_project_branch()
-        self.setup_working_dir()
 
         # Import existing site into the project.
         self.setup_database()
