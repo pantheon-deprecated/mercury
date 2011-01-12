@@ -54,7 +54,6 @@ class _ImportProfile(onramp.ImportTools):
         # Create a new project
         self.setup_project_repo()
         self.setup_project_branch()
-        self.setup_working_dir()
 
         # Import existing site into the project.
         self.setup_database()
