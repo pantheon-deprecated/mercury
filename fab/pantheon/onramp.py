@@ -111,12 +111,16 @@ class ImportTools(project.BuildTools):
         """
         with cd(self.working_dir):
             local('git checkout pantheon')
-            local('rm -rf %s/*' % self.working_dir)
-            local('rsync -avz %s/* %s' % (self.processing_dir, self.working_dir))
+            local('cp -R .git %s' % self.processing_dir)
+        with cd(self.processing_dir):
             local('rm -f PRESSFLOW.txt')
             if self.force_update:
                 local('git reset --hard')
-        local('rm -rf %s' % self.processing_dir)
+
+        local('rm -rf %s' % self.working_dir)
+        #TODO: The need for separate processing_dir / working_dir has been
+        #      depricated. Should clean this up as it is just confusing now.
+        self.working_dir = self.processing_dir
 
         source = os.path.join(self.working_dir, 'sites/%s' % self.site)
         destination = os.path.join(self.working_dir, 'sites/default')
