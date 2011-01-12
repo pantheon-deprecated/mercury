@@ -120,7 +120,7 @@ class ImportTools(project.BuildTools):
             # force an upgrade to 6.6 (so later operations are supported).
             if self.force_update:
                 local('git reset --hard')
-        local('rm -rf %s' % self.temp_dir)
+        local('rm -rf %s' % temp_dir)
 
         source = os.path.join(self.working_dir, 'sites/%s' % self.site)
         destination = os.path.join(self.working_dir, 'sites/default')
