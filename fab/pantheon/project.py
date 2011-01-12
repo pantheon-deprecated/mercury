@@ -192,9 +192,9 @@ class BuildTools(object):
             filename = '%s_%s' % (self.project, env)
             if env == 'live':
                 filename = '000_' + filename
-                vhost_dict['robots_settigs'] = ''
+                vhost_dict['robots_settings'] = ''
             else:
-                vhost_dict['robots_settigs'] = 'alias /robots.txt /usr/local/share/robots-deny.txt'
+                vhost_dict['robots_settings'] = 'alias /robots.txt /usr/local/share/robots-deny.txt'
 
             self.server.create_vhost(filename, vhost_dict)
             if self.server.distro == 'ubuntu':
