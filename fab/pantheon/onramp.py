@@ -27,7 +27,6 @@ class ImportTools(project.BuildTools):
         """
         super(ImportTools, self).__init__(project)
 
-        self.working_dir = tempfile.mkdtemp()
         self.destination = os.path.join(self.server.webroot, project)
         self.author = 'Hudson User <hudson@pantheon>'
         self.db_password = pantheon.random_string(10)
@@ -39,7 +38,7 @@ class ImportTools(project.BuildTools):
             return url[7:]
         else:
             # Download remote file into temp location with known prefix.
-            return pantheon.download(url,'tmp_dl_')
+            return pantheon.download(url, 'tmp_dl_')
 
     def extract(self, tarball):
         """ tarball: full path to archive to extract."""
@@ -53,11 +52,11 @@ class ImportTools(project.BuildTools):
         # which may be an issue for very large sites. However, this also makes
         # troubleshooting bad imports more difficult (No tarball to test).
 
-        # Find the Drupal installation and set it as the processing_dir
-        self.processing_dir = get_drupal_root(extract_location)
+        # Find the Drupal installation and set it as the working_dir
+        self.working_dir = get_drupal_root(extract_location)
 
         # Remove existing VCS files.
-        with cd(self.processing_dir):
+        with cd(self.working_dir):
             with settings(hide('warnings'), warn_only=True):
                 local("rm -r ./.bzr")
                 local("rm -r ./.git")
@@ -81,9 +80,6 @@ class ImportTools(project.BuildTools):
             self.force_update = True
         super(ImportTools, self).setup_project_branch(revision)
 
-    def setup_working_dir(self):
-        super(ImportTools, self).setup_working_dir(self.working_dir)
-
     def setup_database(self):
         """ Create a new database and import from dumpfile.
 
@@ -93,7 +89,7 @@ class ImportTools(project.BuildTools):
             # so that we can do all import processing in one place, then deploy
             # to the other environments.
             if env == 'dev':
-                db_dump = os.path.join(self.processing_dir, self.db_dump)
+                db_dump = os.path.join(self.working_dir, self.db_dump)
             else:
                 db_dump = None
 
@@ -102,25 +98,29 @@ class ImportTools(project.BuildTools):
                                                     db_dump,
                                                     True)
         # Remove the database dump from processing dir after import.
-        local('rm -f %s' % (os.path.join(self.processing_dir, self.db_dump)))
+        local('rm -f %s' % (os.path.join(self.working_dir, self.db_dump)))
 
     def import_site_files(self):
         """Create git branch of project at same revision and platform of
         imported site. Import files into this branch and setup default site.
 
         """
-        with cd(self.working_dir):
+        # Get git metadata at correct branch/version point.
+        temp_dir = tempfile.mkdtemp()
+        local('git clone -l /var/git/projects/%s -b %s %s' % (self.project,
+                                                              self.project,
+                                                              temp_dir))
+        # Put the .git metadata on top of imported site.
+        with cd(temp_dir):
             local('git checkout pantheon')
-            local('cp -R .git %s' % self.processing_dir)
-        with cd(self.processing_dir):
+            local('cp -R .git %s' % self.working_dir)
+        with cd(self.working_dir):
             local('rm -f PRESSFLOW.txt')
+            # If drupal version is prior to 6.6 (when pressflow was forked),
+            # force an upgrade to 6.6 (so later operations are supported).
             if self.force_update:
                 local('git reset --hard')
-
-        local('rm -rf %s' % self.working_dir)
-        #TODO: The need for separate processing_dir / working_dir has been
-        #      depricated. Should clean this up as it is just confusing now.
-        self.working_dir = self.processing_dir
+        local('rm -rf %s' % self.temp_dir)
 
         source = os.path.join(self.working_dir, 'sites/%s' % self.site)
         destination = os.path.join(self.working_dir, 'sites/default')
@@ -317,7 +317,7 @@ class ImportTools(project.BuildTools):
         A valid site is any directory under sites/ that contains a settings.php
 
         """
-        root = os.path.join(self.processing_dir, 'sites')
+        root = os.path.join(self.working_dir, 'sites')
         sites =[s for s in os.listdir(root) \
                         if os.path.isdir(os.path.join(root,s)) and (
                            'settings.php' in os.listdir(os.path.join(root,s)))]
@@ -339,7 +339,7 @@ class ImportTools(project.BuildTools):
         If more than one dump is found, the build will exit with an error.
 
         """
-        sql_dump = [dump for dump in os.listdir(self.processing_dir) \
+        sql_dump = [dump for dump in os.listdir(self.working_dir) \
                     if os.path.splitext(dump)[1] in ['.sql', '.mysql']]
         count = len(sql_dump)
         if count == 0:
@@ -362,14 +362,14 @@ class ImportTools(project.BuildTools):
 
     def _get_drupal_platform(self):
         return ((local("awk \"/\'info\' =>/\" " + \
-                self.processing_dir + \
+                self.working_dir + \
                 "/modules/system/system.module" + \
                 r' | sed "s_^.*Powered by \([a-zA-Z]*\).*_\1_"')
                 ).rstrip('\n').upper())
 
     def _get_drupal_version(self):
         version = ((local("awk \"/define\(\'VERSION\'/\" " + \
-                  self.processing_dir + "/modules/system/system.module" + \
+                  self.working_dir + "/modules/system/system.module" + \
                   "| sed \"s_^.*'\(6\)\.\([0-9]\{1,2\}\).*_\\1-\\2_\"")
                   ).rstrip('\n'))
         if version[0:1] != '6':
@@ -389,7 +389,7 @@ class ImportTools(project.BuildTools):
                 if len(commit) > 1:
                     with hide('running'):
                         local("git reset --hard " + commit)
-                        difference = int(local("diff -rup " + self.processing_dir + " ./ | wc -l"))
+                        difference = int(local("diff -rup " + self.working_dir + " ./ | wc -l"))
                         # print("Commit " + commit + " shows difference of " + str(difference))
                         if match['commit'] == None or difference < match['difference']:
                             match['difference'] = difference
