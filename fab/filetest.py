@@ -20,55 +20,57 @@ class FilePathTestCase(unittest.TestCase):
         self.working_dir = tempfile.mkdtemp()
         self.test_import = self.TestImportTools(self.working_dir)
 
-    def test_defaultpath_defaultname(self):
-        """Files are in sites/default/files.
-
-        """
+    def test_directory_defaultpath_defaultname(self):
+        """sites/default/files."""
         start_path, final_path = self.setup_environment(
                                           files_dir='sites/default/files',
                                           exists=True)
-
-        # Final path should exist
-        dir_exists = os.path.exists(final_path)
-        # Two test files and a .gitignore should exist.
-        files_exist = len(os.listdir(final_path)) == 3
-
+        dir_exists, files_exist, symlink_exists = self.run_checks(start_path,
+                                                                  final_path)
         self.assertTrue(dir_exists and files_exist)
 
-    def test_defaultpath_othername(self):
-        """Files are in sites/default/other
-
-        """
+    def test_directory_defaultpath_othername(self):
+        """sites/default/other."""
         start_path, final_path = self.setup_environment(
                                           files_dir='sites/default/other',
                                           exists=True)
-
-        # Final path shouls exist.
-        dir_exists = os.path.exists(final_path)
-        # Two test files and a .gitignore should exist.
-        files_exist = len(os.listdir(final_path)) == 3
-        # Symlink should exist in old location, pointing to new location.
-        symlink_exists = os.path.islink(start_path) and os.path.realpath(start_path) == final_path
-
+        dir_exists, files_exist, symlink_exists = self.run_checks(start_path,
+                                                                  final_path)
         self.assertTrue(dir_exists and files_exist and symlink_exists)
 
-    def test_otherpath_defaultname(self):
-        """Files are in sites/other/files
-
-        """
+    def test_directory_otherpath_defaultname(self):
+        """sites/other/files."""
         start_path, final_path = self.setup_environment(
                                           files_dir='sites/other/files',
                                           exists=True)
-
-        # Final path shouls exist.
-        dir_exists = os.path.exists(final_path)
-        # Two test files and a .gitignore should exist.
-        files_exist = len(os.listdir(final_path)) == 3
-        # Symlink should exist in old location, pointing to new location.
-        symlink_exists = os.path.islink(start_path) and os.path.realpath(start_path) == final_path
-
+        dir_exists, files_exist, symlink_exists = self.run_checks(start_path,
+                                                                  final_path)
         self.assertTrue(dir_exists and files_exist and symlink_exists)
 
+    def test_directory_otherpath_othertname(self):
+        """sites/other/other."""
+        start_path, final_path = self.setup_environment(
+                                          files_dir='sites/other/other',
+                                          exists=True)
+        dir_exists, files_exist, symlink_exists = self.run_checks(start_path,
+                                                                  final_path)
+        self.assertTrue(dir_exists and files_exist and symlink_exists)
+
+    def test_directory_rootpath(self):
+        """files."""
+        start_path, final_path = self.setup_environment(files_dir='files',
+                                                        exists=True)
+        dir_exists, files_exist, symlink_exists = self.run_checks(start_path,
+                                                                  final_path)
+        self.assertTrue(dir_exists and files_exist and symlink_exists)
+
+    def test_directory_nopath(self):
+        """no path."""
+        start_path, final_path = self.setup_environment(files_dir=None,
+                                                        exists=True)
+        dir_exists, files_exist, symlink_exists = self.run_checks(start_path,
+                                                                  final_path)
+        self.assertTrue(dir_exists and not files_exist)
 
     def setup_environment(self, files_dir, exists, symlink=False,
                                                    name=None,
@@ -97,7 +99,7 @@ class FilePathTestCase(unittest.TestCase):
 
         # Normal path
         if not symlink:
-            if exists:
+            if exists and files_dir is not None:
                 self._makedir(files_dir)
                 self._makefiles(files_dir)
         # Symlink
@@ -109,16 +111,30 @@ class FilePathTestCase(unittest.TestCase):
             self.test_import.setup_files_dir()
 
         # Return (Starting path, Final Path)
-        return (os.path.join(self.working_dir, files_dir),
-                os.path.join(self.working_dir, 'sites/default/files'))
+        if files_dir:
+            start_path = os.path.join(self.working_dir, files_dir)
+        else:
+            start_path = None
+        final_path = os.path.join(self.working_dir, 'sites/default/files')
+        return (start_path, final_path)
 
+    def run_checks(self, start_path, final_path):
+        # Final path shouls exist.
+        dir_exists = os.path.exists(final_path)
+        # Two test files and a .gitignore should exist.
+        files_exist = len(os.listdir(final_path)) == 3
+        # Symlink should exist in old location, pointing to new location.
+        if start_path:
+            symlink_exists = os.path.islink(start_path) and os.path.realpath(start_path) == final_path
+        else:
+            symlink_exists = False
+        return dir_exists, files_exist, symlink_exists
 
     def tearDown(self):
         """Cleanup.
 
         """
-        #shutil.rmtree(self.working_dir)
-        pass
+        pass #shutil.rmtree(self.working_dir)
 
     def _makedir(self, d):
         """Create directory 'd' in working_dir. Acts like "mkdir -P"
@@ -145,7 +161,7 @@ class FilePathTestCase(unittest.TestCase):
 
     class TestImportTools(onramp.ImportTools):
         """Wrapper to make ImportTools test friendly.
- 
+
         """
         def __init__(self, working_dir):
             """Override default importtools init and set only necessary vals.
