@@ -187,10 +187,14 @@ class BuildTools(object):
                           'db_password':db_password,
                           'solr_path': '/%s_%s' % (self.project, env),
                           'memcache_prefix': '%s_%s' % (self.project, env)}
+            
 
             filename = '%s_%s' % (self.project, env)
             if env == 'live':
                 filename = '000_' + filename
+                vhost_dict['robots_settigs'] = ''
+            else:
+                vhost_dict['robots_settigs'] = 'alias /robots.txt /usr/local/share/robots-deny.txt'
 
             self.server.create_vhost(filename, vhost_dict)
             if self.server.distro == 'ubuntu':
