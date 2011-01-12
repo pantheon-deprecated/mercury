@@ -134,7 +134,7 @@ class FilePathTestCase(unittest.TestCase):
         """Cleanup.
 
         """
-        pass #shutil.rmtree(self.working_dir)
+        shutil.rmtree(self.working_dir)
 
     def _makedir(self, d):
         """Create directory 'd' in working_dir. Acts like "mkdir -P"
