@@ -13,11 +13,14 @@ def configure():
     '''configure the Pantheon system.'''
     server = pantheon.PantheonServer()
     _test_for_previous_run()
+
     if pantheon.is_aws_server():
         _configure_ec2(server)
+
     if not pantheon.is_private_server():
         _check_connectivity(server)
-        configure_certificates()
+        _configure_certificates()
+
     _configure_server(server)
     _configure_postfix(server)
     _restart_services(server)
@@ -26,15 +29,14 @@ def configure():
     _mark_incep(server)
     _report()
 
-
 def _test_for_previous_run():
     if os.path.exists("/etc/pantheon/incep"):
         abort("Pantheon config has already run. Exiting.")
 
-
 def _configure_ec2(server):
     #lucid only for now...
-    local('cp /opt/pantheon/bcfg2/TGenshi/mysql/apparmor/template.newtxt.G00_lucid /etc/apparmor.d/usr.sbin.mysqld')
+    local('cp /opt/pantheon/bcfg2/TGenshi/mysql/apparmor/' + \
+          'template.newtxt.G00_lucid /etc/apparmor.d/usr.sbin.mysqld')
     local('mkdir -p /mnt/mysql/tmp')
     local('chown -R root:root /mnt/mysql')
     local('chmod -R 777 /mnt/mysql')
@@ -54,21 +56,9 @@ def _configure_ec2(server):
     local('mv /var/lib/varnish /mnt/varnish/lib')
     local('ln -s /mnt/varnish/lib /var/lib/varnish')
 
-
-def _configure_server(server):
-    server.update_packages()
-    if pantheon.is_aws_server():
-        update.update_pantheon(vps='aws')
-    else:
-        update.update_pantheon()
-    local('cp /etc/pantheon/templates/tuneables /etc/pantheon/server_tuneables')
-    local('chmod 755 /etc/pantheon/server_tuneables')
-    pantheon.hudson_restart()
-
-
-# The Rackspace Cloud occasionally has connectivity issues unless a server gets
-# rebooted after initial provisioning.
 def _check_connectivity(server):
+    # Rackspace occasionally has connectivity issues unless a server gets
+    # rebooted after initial provisioning.
     try:
         urllib2.urlopen('http://pki.getpantheon.com/', timeout=10)
         print 'Connectivity to the PKI server seems to work.'
@@ -76,13 +66,22 @@ def _check_connectivity(server):
         print "Connectivity error: ", e
         # Bail if a connectivity reboot has already been attempted.
         if os.path.exists("/etc/pantheon/connectivity_reboot"):
-            abort("A Pantheon connectivity reboot has already been attempted. Exiting.")
+            abort("A connectivity reboot has already been attempted. Exiting.")
         # Record the running of a connectivity reboot.
         with open('/etc/pantheon/connectivity_reboot', 'w') as f:
             f.write('Dear Rackspace: Fix this issue.')
         local('sudo reboot')
 
-def configure_certificates():
+def _configure_server(server):
+    # Get any new packages.
+    server.update_packages()
+    # Update pantheon code, run bcfg2, restart hudson.
+    update.update_pantheon(first_boot=True)
+    # Create the tunable files.
+    local('cp /etc/pantheon/templates/tuneables /etc/pantheon/server_tuneables')
+    local('chmod 755 /etc/pantheon/server_tuneables')
+
+def _configure_certificates():
     # Just in case we're testing, we need to ensure this path exists.
     local('mkdir -p /etc/pantheon')
 

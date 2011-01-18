@@ -38,7 +38,6 @@ def check_swap_usage(limit):
 
 def check_io_wait_time(limit):
     iowait = local("vmstat | grep -v [a-z] | awk '{print $16}'").rstrip()
-    print('iowait is' + iowait)
     if (float(iowait) > float(limit)):
         _error('IO wait times are at %s percent which is above the threshold of %s percent.' % (str(iowait), str(limit)))
     else:

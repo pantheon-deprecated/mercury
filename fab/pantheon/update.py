@@ -1,6 +1,7 @@
 import os
 import tempfile
 
+import dbtools
 import pantheon
 import project
 
@@ -96,8 +97,8 @@ class Updater(project.BuildTools):
 
     def data_update(self, source_env):
         tempdir = tempfile.mkdtemp()
-        export = pantheon.export_data(self.project, source_env, tempdir)
-        pantheon.import_data(self.project, self.project_env, export)
+        export = dbtools.export_data(self.project, source_env, tempdir)
+        dbtools.import_data(self.project, self.project_env, export)
         local('rm -rf %s' % tempdir)
 
     def files_update(self, source_env):
