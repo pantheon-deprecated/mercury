@@ -1,6 +1,14 @@
+from optparse import OptionParser
 import os
 
 from pantheon import postback
+
+def main():
+    usage = "usage: %prog [options]"
+    parser = OptionParser(usage=usage, description="Send information about a Hudson job (and resulting data) back to Atlas.")
+    parser.add_option('-c', '--check_changed_status', dest="check_changed_status", action="store_true", default=False, help='Postback only if the status of the build has changed from the previous run.')
+    (options, args) = parser.parse_args()
+    postback_atlas(options.check_changed_status)
 
 def postback_atlas(check_changed_status=False):
     """ Send information about a Hudson job (and resulting data) back to Atlas.
@@ -27,4 +35,4 @@ def postback_atlas(check_changed_status=False):
         postback.postback(response)
 
 if __name__ == '__main__':
-    postback_atlas()
+    main()
