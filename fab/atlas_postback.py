@@ -33,6 +33,8 @@ def postback_atlas(check_changed_status=False):
 
         # Send response to Atlas.
         postback.postback(response)
+    else:
+        print('Build status has not changed. No postback performed.')
 
 if __name__ == '__main__':
     main()
