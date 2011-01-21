@@ -4,6 +4,7 @@ from fabric.api import local
 
 from pantheon import pantheon
 from pantheon import postback
+from xml.dom.minidom import Document
 
 def clean_workspace():
     """Cleanup data files from build workspace.
@@ -19,44 +20,62 @@ def parse_build_data():
     """Output build messages/warnings/errors to stdout & junit file.
 
     """
+    messages, warnings, errors = _get_build_messages()
+
+    if messages:
+        messages = '\n'.join(messages)
+        print('\nBuild Messages: \n' + '=' * 30)
+        print(messages)
+    if warnings:
+        warnings = '\n'.join(warnings)
+        print('\nBuild Warnings: \n' + '=' * 30)
+        print(warnings)
+    if errors:
+        errors = '\n'.join(errors)
+        print('\nBuild Error: \n' + '=' * 30)
+        print(errors)
+
     # Only need JUNIT file if we are in a Hudson build.
     if _in_hudson():
-        _write_junit_file()
+        write_junit_file({'error': errors,'fail': warnings,'pass': messages})
 
-    messages, warnings, error = _get_build_messages()
-    if messages:
-        print '\nBuild Messages: \n' + '=' * 30
-        print '\n'.join(messages)
-    if warnings:
-        print '\nBuild Warnings: \n' + '=' * 30
-        print '\n'.join(warnings)
-    if error:
-        print '\nBuild Error: \n' + '=' * 30
-        print error
-
-def _write_junit_file():
+def write_junit_file(status, name='Pantheon'):
     """Creates a junit xml file from build warnings and build errors.
-
+        status = A dictionary of messages from pass, fail or error.
+        name = The name to assign to the test suite.
     """
-    messages, warnings, error = _get_build_messages()
-    report_data = dict()
+    doc = Document()
+    testsuites = doc.createElement("testsuites")
+    doc.appendChild(testsuites)
+    testsuite = doc.createElement("testsuite")
+    testsuite.setAttribute("name", name)
+    testsuites.appendChild(testsuite)
+    if 'error' in status:
+        testcase = doc.createElement("testcase")
+        testcase.setAttribute("name", "testError")
+        error = doc.createElement("error")
+        txt = doc.createTextNode(status['error'])
+        error.appendChild(txt)
+        testcase.appendChild(error)
+        testsuite.appendChild(testcase)
+    if 'fail' in status:
+        testcase = doc.createElement("testcase")
+        testcase.setAttribute("name", "testFail")
+        failure = doc.createElement("failure")
+        txt = doc.createTextNode(status['fail'])
+        failure.appendChild(txt)
+        testcase.appendChild(failure)
+        testsuite.appendChild(testcase)
+    if 'pass' in status:
+        testcase = doc.createElement("testcase")
+        testcase.setAttribute("name", "testPass")
+        txt = doc.createTextNode(status['pass'])
+        testcase.appendChild(txt)
+        testsuite.appendChild(testcase)
 
-    if error:
-        report_data['type'] = 'Error'
-        report_data['message'] = '<error>%s</error>' % error
-    elif warnings:
-        report_data['type'] = 'Warning'
-        report_data['message'] = '<error>%s</error>' % '\n'.join(warnings)
-    else:
-        report_data['type'] = 'None'
-        report_data['message'] = ''
-
-    template = pantheon.build_template(
-                        pantheon.get_template('junit.xml'),
-                        report_data)
-
-    with open(os.path.join(postback.get_workspace(),'warnings.xml'), 'w') as f:
-        f.write(template)
+    with open(os.path.join(postback.get_workspace(),'results.xml'), 'w') as f:
+        f.write(doc.toprettyxml(indent="  "))
+        f.close()
 
 def _get_build_messages():
     """Return the build messages/warnings/errors.
