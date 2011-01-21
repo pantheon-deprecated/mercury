@@ -1,16 +1,17 @@
-from optparse import OptionParser
 import os
 
 from pantheon import postback
+from optparse import OptionParser
 
 def main():
     usage = "usage: %prog [options]"
     parser = OptionParser(usage=usage, description="Send information about a Hudson job (and resulting data) back to Atlas.")
     parser.add_option('-c', '--check_changed_status', dest="check_changed_status", action="store_true", default=False, help='Postback only if the status of the build has changed from the previous run.')
+    parser.add_option('-s', '--suppress', dest="suppress", action="store_true", default=False, help='Suppress postback on unstable builds.')
     (options, args) = parser.parse_args()
-    postback_atlas(options.check_changed_status)
+    postback_atlas(options.check_changed_status, options.suppress)
 
-def postback_atlas(check_changed_status=False):
+def postback_atlas(check_changed_status=False, suppress=False):
     """ Send information about a Hudson job (and resulting data) back to Atlas.
     check_changed_status: bool. If we want to only return data if the status of
                                 the build has changed from the previous run.
@@ -32,7 +33,10 @@ def postback_atlas(check_changed_status=False):
         response.update({'build_data': postback.get_build_data()})
 
         # Send response to Atlas.
-        postback.postback(response)
+	if suppress and (response['build_status'] == 'UNSTABLE'):
+	    print('Build status is UNSTABLE. No postback performed.')
+	else:
+            postback.postback(response)
     else:
         print('Build status has not changed. No postback performed.')
 
