@@ -2,6 +2,7 @@ import os
 import tempfile
 
 import drupaltools
+import hudsontools
 import pantheon
 import project
 import postback
@@ -228,8 +229,10 @@ class ImportTools(project.BuildTools):
                 if result.failed:
                     # If importing vanilla drupal, this module wont exist.
                     if module != 'cookie_cache_bypass':
-                        postback.build_warning('Could not enable %s module.' % (
-                                               module))
+                        message = 'Could not enable %s module.' % module
+                        postback.build_warning(message)
+                        hudsontools.junit_failure(message)
+                        print message
                         print '\n%s module could not be enabled. ' % module + \
                               'Error Message:'
                         print '\n%s' % result.stderr
