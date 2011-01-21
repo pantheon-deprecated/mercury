@@ -328,8 +328,10 @@ class ImportTools(project.BuildTools):
         # Unless only one site is found, post error and exit.  
         site_count = len(sites)
         if site_count > 1:
-            postback.build_error('Multiple settings.php files were found:\n' +\
-                                 '\nsites/'.join(sites))
+            message = 'Multiple settings.php files were found:\n' +\
+                                 '\nsites/'.join(sites)
+            hudsontools.junit_failure(message)
+            postback.build_error(message)
         elif site_count == 0:
             postback.build_error('Error: No settings.php files were found.')
         else:
