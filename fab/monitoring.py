@@ -92,7 +92,7 @@ def check_ldap():
         write_junit_file({'pass': 'ldap responded'})
     except:
         write_junit_file({'error': 'Cannot connect to LDAP on localhost.'})
-	raise
+        raise
 
 
 def check_apache(url):
@@ -116,7 +116,7 @@ def check_pound_via_socket(port):
         write_junit_file({'pass': 'pound responded'})
     except:
         write_junit_file({'error': 'Cannot connect to Pound on %s %s.' % ('localhost', str(port))})
-	raise
+        raise
 
 
 def check_memcached(port):
@@ -128,7 +128,7 @@ def check_memcached(port):
         write_junit_file({'pass': 'memcached responded'})
     except:
         write_junit_file({'error': 'Cannot connect to Memcached on %s %s.' % ('localhost', str(port))})
-	raise
+        raise
 
 
 def _test_url(service, url):
