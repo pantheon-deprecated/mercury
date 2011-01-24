@@ -4,7 +4,6 @@ from fabric.api import local
 
 from pantheon import pantheon
 from pantheon import postback
-from xml.dom.minidom import Document
 
 def clean_workspace():
     """Cleanup data files from build workspace.
