@@ -1,5 +1,4 @@
 import os
-import postback
 
 from xml.dom.minidom import Document
 from xml.dom.minidom import parse
@@ -66,7 +65,7 @@ def _base_xml(suitename):
         suitename: Name used for the testsuite.
     """
     try:
-        f = open(os.path.join(postback.get_workspace(), "%s.xml" % 
+        f = open(os.path.join(get_workspace(), "%s.xml" % 
                               suitename), 'r')
     except:
         doc = Document()
@@ -85,8 +84,20 @@ def _write_junit_file(doc, filename='results'):
         doc: The structured xml document to write to a file
         filename: The filename for the junit report
     """
-    with open(os.path.join(postback.get_workspace(), "%s.xml" % 
+    with open(os.path.join(get_workspace(), "%s.xml" % 
                            filename), 'w') as f:
         f.write(doc.toprettyxml(indent="  "))
         f.close()
 
+def get_workspace():
+    """Return the workspace to store build data information.
+
+    If being run from CLI (not hudson) use alternate path (so data can still
+    be sent back to Atlas, regardless of how job is run).
+
+    """
+    workspace = os.environ.get('WORKSPACE')
+    if workspace:
+        return workspace
+    else:
+        return '/etc/pantheon/hudson/workspace'

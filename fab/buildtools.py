@@ -4,6 +4,7 @@ from fabric.api import local
 
 from pantheon import pantheon
 from pantheon import postback
+from pantheon import hudsontools
 
 def clean_workspace():
     """Cleanup data files from build workspace.
@@ -11,7 +12,7 @@ def clean_workspace():
     This should be run before any other processing is done.
 
     """
-    workspace = postback.get_workspace()
+    workspace = hudsontools.get_workspace()
     if os.path.exists(workspace):
         local('rm -f %s' % os.path.join(workspace, '*'))
 
