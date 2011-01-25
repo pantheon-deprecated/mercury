@@ -15,7 +15,13 @@ def install_site(project='pantheon', profile='pantheon', **kw):
     data.update(kw)
 
     handler = _get_profile_handler(**data)
-    handler.build(**data)
+    try:
+        handler.build(**data)
+    except:
+        hudsontools.junit_error(sys.exc_info()[0], 'InstallSite')
+        raise
+    else:
+        hudsontools.junit_pass('', 'InstallSite')
 
 class _PantheonProfile(install.InstallTools):
     """ Default Pantheon Installation Profile.

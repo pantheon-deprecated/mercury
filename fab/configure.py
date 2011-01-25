@@ -12,22 +12,28 @@ from pantheon import pantheon
 def configure():
     '''configure the Pantheon system.'''
     server = pantheon.PantheonServer()
-    _test_for_previous_run()
+    try:
+        _test_for_previous_run()
 
-    if pantheon.is_aws_server():
-        _configure_ec2(server)
+        if pantheon.is_aws_server():
+            _configure_ec2(server)
 
-    if not pantheon.is_private_server():
-        _check_connectivity(server)
-        _configure_certificates()
+        if not pantheon.is_private_server():
+            _check_connectivity(server)
+            _configure_certificates()
 
-    _configure_server(server)
-    _configure_postfix(server)
-    _restart_services(server)
-    _configure_iptables(server)
-    _configure_git_repo()
-    _mark_incep(server)
-    _report()
+        _configure_server(server)
+        _configure_postfix(server)
+        _restart_services(server)
+        _configure_iptables(server)
+        _configure_git_repo()
+        _mark_incep(server)
+        _report()
+    except:
+        hudsontools.junit_error(sys.exc_info()[0], 'Configure')
+        raise
+    else:
+        hudsontools.junit_pass('Configure successful.', 'Configure')
 
 def _test_for_previous_run():
     if os.path.exists("/etc/pantheon/incep"):

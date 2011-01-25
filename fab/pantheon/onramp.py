@@ -15,8 +15,11 @@ def get_drupal_root(base):
     """
     for root, dirs, files in os.walk(base, topdown=True):
         if ('index.php' in files) and ('sites' in dirs):
+            hudsontools.junit_pass('Drupal root found.', 'DrupalRoot')
             return root
-    postback.build_error('Cannot locate drupal install in archive.')
+    err = 'Cannot locate drupal install in archive.'
+    hudsontools.junit_error(err, 'DrupalRoot')
+    postback.build_error(err)
 
 
 class ImportTools(project.BuildTools):
@@ -230,8 +233,10 @@ class ImportTools(project.BuildTools):
                     # If importing vanilla drupal, this module wont exist.
                     if module != 'cookie_cache_bypass':
                         message = 'Could not enable %s module.' % module
+                        hudsontools.junit_failure(message.join('\n%s' % 
+                                                  result.stderr), 
+                                                  'EnableModules', module)
                         postback.build_warning(message)
-                        hudsontools.junit_failure(message)
                         print message
                         print '\n%s module could not be enabled. ' % module + \
                               'Error Message:'
@@ -328,13 +333,16 @@ class ImportTools(project.BuildTools):
         # Unless only one site is found, post error and exit.  
         site_count = len(sites)
         if site_count > 1:
-            message = 'Multiple settings.php files were found:\n' +\
+            err = 'Multiple settings.php files were found:\n' +\
                                  '\nsites/'.join(sites)
-            hudsontools.junit_failure(message)
-            postback.build_error(message)
+            hudsontools.junit_error(err, 'SiteCount')
+            postback.build_error(err)
         elif site_count == 0:
-            postback.build_error('Error: No settings.php files were found.')
+            err = 'Error: No settings.php files were found.'
+            hudsontools.junit_error(err, 'SiteCount')
+            postback.build_error(err)
         else:
+            hudsontools.junit_pass('Site found %s' %s (sites[0]), 'SiteCount')
             return sites[0]
 
     def _get_database_dump(self):
@@ -348,12 +356,16 @@ class ImportTools(project.BuildTools):
                     if os.path.splitext(dump)[1] in ['.sql', '.mysql']]
         count = len(sql_dump)
         if count == 0:
-            postback.build_error('No database dump files were found ' + \
-                                 '(*.mysql or *.sql)')
+            err = 'No database dump files were found (*.mysql or *.sql)'
+            hudsontools.junit_error(err, 'MYSQLCount')
+            postback.build_error(err)
         elif count > 1:
-            postback.build_error('Multiple database dump files were found:\n'+\
-                                 '\n'.join(sql_dump))
+            err = 'Multiple database dump files were found:\n\n'.join(sql_dump)
+            hudsontools.junit_error(err, 'MYSQLCount')
+            postback.build_error(err)
         else:
+            hudsontools.junit_pass('MYSQL Dump found at %s' % 
+                                   (sql_dump[0]), 'MYSQLCount')
             return sql_dump[0]
 
     def _get_drupal_version_info(self):
@@ -378,7 +390,11 @@ class ImportTools(project.BuildTools):
                   "| sed \"s_^.*'\(6\)\.\([0-9]\{1,2\}\).*_\\1-\\2_\"")
                   ).rstrip('\n'))
         if version[0:1] != '6':
-            postback.build_error('Error: This does not appear to be a Drupal 6 site.')
+            err = 'Error: This does not appear to be a Drupal 6 site.'
+            hudsontools.junit_error(err, 'DrupalVersion')
+            postback.build_error(err)
+        hudsontools.junit_pass('Drupal version %s found.' % (version),
+                               'DrupalVersion')
         return version
 
     def _get_pressflow_revision(self):
