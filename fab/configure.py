@@ -9,6 +9,7 @@ import traceback
 from fabric.api import *
 
 from pantheon import pantheon
+from pantheon import hudsontools
 
 def configure():
     '''configure the Pantheon system.'''
