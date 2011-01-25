@@ -170,6 +170,11 @@ class ImportTools(project.BuildTools):
 
         # After moving site to 'default', does 'files' not exist?
         if not os.path.exists(file_dest):
+            # Broken symlink at sites/default/files
+            if os.path.islink(file_dest):
+                local('rm -f %s' % file_dest)
+                postback.build_warning('File path was a broken symlink. ' + \
+                                       'Site files may be missing.')
             local('mkdir -p %s' % file_dest)
 
         # if files are not located in default location, move them there.
