@@ -195,7 +195,6 @@ class BuildTools(object):
             
 
             filename = '%s_%s' % (self.project, env)
-            vhost_template_file = 'vhost.template.%s' % self.distro
             if env == 'live':
                 filename = '000_' + filename
                 vhost_dict['robots_settings'] = ''
@@ -203,7 +202,7 @@ class BuildTools(object):
                 vhost_dict['robots_settings'] = 'alias /robots.txt /usr/local/share/robots-deny.txt'
 
 
-            self.server.create_vhost(filename, vhost_dict, vhost_template_file)
+            self.server.create_vhost(filename, vhost_dict)
             if self.server.distro == 'ubuntu':
                local('a2ensite %s' % filename)
 
@@ -261,7 +260,8 @@ class BuildTools(object):
                       'db_password':db_password}
         
         filename = 'pma_vhost'
-        vhost_template_file = 'pma.vhost.template.%s' % self.distro
+        # Todo: fix hard-coding of .ubuntu here?
+        vhost_template_file = 'pma.vhost.template.ubuntu'
 
         self.server.create_vhost(filename, vhost_dict, vhost_template_file)
 
