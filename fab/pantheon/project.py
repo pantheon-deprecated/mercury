@@ -195,13 +195,15 @@ class BuildTools(object):
             
 
             filename = '%s_%s' % (self.project, env)
+            vhost_template_file = 'vhost.template.%s' % self.distro
             if env == 'live':
                 filename = '000_' + filename
                 vhost_dict['robots_settings'] = ''
             else:
                 vhost_dict['robots_settings'] = 'alias /robots.txt /usr/local/share/robots-deny.txt'
 
-            self.server.create_vhost(filename, vhost_dict)
+
+            self.server.create_vhost(filename, vhost_dict, vhost_template_file)
             if self.server.distro == 'ubuntu':
                local('a2ensite %s' % filename)
 
@@ -249,6 +251,19 @@ class BuildTools(object):
         # Cleanup
         if handler == 'import':
             local('rm -rf %s' % tempdir)
+
+    def setup_phpmyadmin(self, db_password):
+        """ Create apache vhost and config.inc.php config for phpmyadmin.
+        db_password: database password to store as an env var in the vhost file
+
+        """
+        vhost_dict = {'db_username':self.project,
+                      'db_password':db_password}
+        
+        filename = 'pma_vhost'
+        vhost_template_file = 'pma.vhost.template.%s' % self.distro
+
+        self.server.create_vhost(filename, vhost_dict, vhost_template_file)
 
     def push_to_repo(self, tag):
         """ Commit changes in working directory and push to central repo.
