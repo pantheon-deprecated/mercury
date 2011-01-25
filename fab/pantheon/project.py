@@ -264,6 +264,8 @@ class BuildTools(object):
         vhost_template_file = 'pma.vhost.template.ubuntu'
 
         self.server.create_vhost(filename, vhost_dict, vhost_template_file)
+        if self.server.distro == 'ubuntu':
+            local('a2ensite %s' % filename)
 
     def push_to_repo(self, tag):
         """ Commit changes in working directory and push to central repo.
