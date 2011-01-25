@@ -20,7 +20,7 @@ def junit_pass(msg, suitename, casename=None):
     testsuite.appendChild(testcase)
     _write_junit_file(doc, suitename)
 
-def junit_failure(msg, suitename, casename=None):
+def junit_fail(msg, suitename, casename=None):
     """ Create a junit file for a failed test
         msg: The message to add
         suitename: Name used for the testsuite.

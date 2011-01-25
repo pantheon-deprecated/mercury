@@ -233,7 +233,7 @@ class ImportTools(project.BuildTools):
                     # If importing vanilla drupal, this module wont exist.
                     if module != 'cookie_cache_bypass':
                         message = 'Could not enable %s module.' % module
-                        hudsontools.junit_failure(message.join('\n%s' % 
+                        hudsontools.junit_fail(message.join('\n%s' % 
                                                   result.stderr), 
                                                   'EnableModules', module)
                         postback.build_warning(message)
