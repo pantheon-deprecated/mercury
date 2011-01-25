@@ -65,8 +65,7 @@ def _base_xml(suitename):
         suitename: Name used for the testsuite.
     """
     try:
-        f = open(os.path.join(get_workspace(), "%s.xml" % 
-                              suitename), 'r')
+        f = open(os.path.join(get_workspace(), "%s.xml" % suitename), 'r')
     except:
         doc = Document()
         testsuites = doc.createElement("testsuites")
@@ -84,10 +83,8 @@ def _write_junit_file(doc, filename='results'):
         doc: The structured xml document to write to a file
         filename: The filename for the junit report
     """
-    with open(os.path.join(get_workspace(), "%s.xml" % 
-                           filename), 'w') as f:
+    with open(os.path.join(get_workspace(), "%s.xml" % filename), 'w') as f:
         f.write(doc.toprettyxml(indent="  "))
-        f.close()
 
 def get_workspace():
     """Return the workspace to store build data information.
