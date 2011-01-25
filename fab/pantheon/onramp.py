@@ -284,6 +284,9 @@ class ImportTools(project.BuildTools):
     def setup_vhost(self):
         super(ImportTools, self).setup_vhost(self.db_password)
 
+    def setup_phpmyadmin(self):
+        super(InstallTools, self).setup_phpmyadmin(self.db_password)
+
     def setup_environments(self):
         super(ImportTools, self).setup_environments('import', self.working_dir)
 

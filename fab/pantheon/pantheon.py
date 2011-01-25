@@ -254,7 +254,7 @@ class PantheonServer:
         with open(alias_file, 'w') as f:
             f.write(template)
 
-    def create_vhost(self, filename, vhost_dict, vhost_template_file = 'vhost.template.%s' % self.distro):
+    def create_vhost(self, filename, vhost_dict, vhost_template_file = None):
         """
         filename:  vhost filename
         vhost_dict: server_name:
@@ -268,6 +268,8 @@ class PantheonServer:
                     memcache_prefix:
 
         """
+        if (vhost_template_file == None):
+          vhost_template_file = 'vhost.template.%s' % self.distro
         vhost_template = get_template(vhost_template_file)
         template = build_template(vhost_template, vhost_dict)
         vhost = os.path.join(self.vhost_dir, filename)
