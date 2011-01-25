@@ -1,4 +1,4 @@
-import sys
+import traceback
 
 from pantheon import onramp
 from pantheon import pantheon
@@ -24,7 +24,7 @@ def onramp_site(project='pantheon', profile=None, url=None, **kw):
     try:
         handler.build(**data)
     except:
-        hudsontools.junit_error(sys.exc_info()[0], 'OnrampSite')
+        hudsontools.junit_error(traceback.format_exc(), 'OnrampSite')
         raise
     else:
         hudsontools.junit_pass('', 'OnrampSite')

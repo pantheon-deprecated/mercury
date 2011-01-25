@@ -4,6 +4,7 @@ import update
 import time
 import urllib2
 import json
+import traceback
 
 from fabric.api import *
 
@@ -30,7 +31,7 @@ def configure():
         _mark_incep(server)
         _report()
     except:
-        hudsontools.junit_error(sys.exc_info()[0], 'Configure')
+        hudsontools.junit_error(traceback.format_exc(), 'Configure')
         raise
     else:
         hudsontools.junit_pass('Configure successful.', 'Configure')

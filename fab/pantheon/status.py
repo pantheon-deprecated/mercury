@@ -1,4 +1,4 @@
-import sys
+import traceback
 
 import drupaltools
 import gittools
@@ -15,7 +15,7 @@ def git_repo_status(project):
         repo = gittools.GitRepo(project)
         status = repo.get_repo_status()
     except:
-        hudsontools.junit_error(sys.exc_info()[0], 'GitRepoStatus')
+        hudsontools.junit_error(traceback.format_exc(), 'GitRepoStatus')
         raise
     else:
         hudsontools.junit_pass('%s' % status, 'GitRepoStatus')
@@ -28,7 +28,7 @@ def drupal_update_status(project):
     try:
         status = drupaltools.get_drupal_update_status(project)
     except:
-        hudsontools.junit_error(sys.exc_info()[0], 'UpdateStatus')
+        hudsontools.junit_error(traceback.format_exc(), 'UpdateStatus')
         raise
     else:
         hudsontools.junit_pass('%s' % status, 'UpdateStatus')

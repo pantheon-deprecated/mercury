@@ -1,4 +1,4 @@
-import sys
+import traceback
 
 from pantheon import backup
 from pantheon import hudsontools
@@ -15,7 +15,7 @@ def backup_site(archive_name, project='pantheon'):
         archive.move_archive()
         archive.cleanup()
     except:
-        hudsontools.junit_error(sys.exc_info()[0], 'BackupSite')
+        hudsontools.junit_error(traceback.format_exc(), 'BackupSite')
         raise
     else:
         hudsontools.junit_pass('Backup successful.', 'BackupSite')
@@ -24,7 +24,7 @@ def remove_backup(archive):
     try:
         backup.remove(archive)
     except:
-        hudsontools.junit_error(sys.exc_info()[0], 'RemoveBackup')
+        hudsontools.junit_error(traceback.format_exc(), 'RemoveBackup')
         raise
     else:
         hudsontools.junit_pass('Removal successful.', 'RemoveBackup')

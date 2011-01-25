@@ -1,4 +1,7 @@
+import traceback
+
 import update
+
 from pantheon import install
 from pantheon import status
 
@@ -18,7 +21,7 @@ def install_site(project='pantheon', profile='pantheon', **kw):
     try:
         handler.build(**data)
     except:
-        hudsontools.junit_error(sys.exc_info()[0], 'InstallSite')
+        hudsontools.junit_error(traceback.format_exc(), 'InstallSite')
         raise
     else:
         hudsontools.junit_pass('', 'InstallSite')

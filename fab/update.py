@@ -4,7 +4,7 @@ import tempfile
 import time
 import urllib2
 import os
-import sys
+import traceback
 
 from pantheon import hudsontools
 from pantheon import pantheon
@@ -116,7 +116,7 @@ def update_site_core(project='pantheon', keep=None):
         updater.drupal_updatedb()
         updater.permissions_update()
     except:
-        hudsontools.junit_error(sys.exc_info()[0], 'UpdateCore')
+        hudsontools.junit_error(traceback.format_exc(), 'UpdateCore')
         raise
     else:
         hudsontools.junit_pass('Update successful.', 'UpdateCore')
@@ -144,7 +144,7 @@ def update_code(project, environment, tag=None, message=None):
         updater.drupal_updatedb()
         updater.permissions_update()
     except:
-        hudsontools.junit_error(sys.exc_info()[0], 'UpdateCode')
+        hudsontools.junit_error(traceback.format_exc(), 'UpdateCode')
         raise
     else:
         hudsontools.junit_pass('Update successful.', 'UpdateCode')
@@ -162,7 +162,7 @@ def rebuild_environment(project, environment):
         updater.files_update('live')
         updater.data_update('live')
     except:
-        hudsontools.junit_error(sys.exc_info()[0], 'RebuildEnv')
+        hudsontools.junit_error(traceback.format_exc(), 'RebuildEnv')
         raise
     else:
         hudsontools.junit_pass('Rebuild successful.', 'RebuildEnv')
@@ -175,7 +175,7 @@ def update_data(project, environment, source_env):
     try:
         updater.data_update(source_env)
     except:
-        hudsontools.junit_error(sys.exc_info()[0], 'UpdateData')
+        hudsontools.junit_error(traceback.format_exc(), 'UpdateData')
         raise
     else:
         hudsontools.junit_pass('Update successful.', 'UpdateData')
@@ -188,7 +188,7 @@ def update_files(project, environment, source_env):
     try:
         updater.files_update(source_env)
     except:
-        hudsontools.junit_error(sys.exc_info()[0], 'UpdateFiles')
+        hudsontools.junit_error(traceback.format_exc(), 'UpdateFiles')
         raise
     else:
         hudsontools.junit_pass('Update successful.', 'UpdateFiles')
@@ -211,7 +211,7 @@ def git_status(project, environment):
     try:
         updater.run_command('git status')
     except:
-        hudsontools.junit_error(sys.exc_info()[0], 'GitStatus')
+        hudsontools.junit_error(traceback.format_exc(), 'GitStatus')
         raise
     else:
         hudsontools.junit_pass('', 'GitStatus')
