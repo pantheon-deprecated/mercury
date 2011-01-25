@@ -4,6 +4,7 @@ import update
 
 from pantheon import install
 from pantheon import status
+from pantheon import hudsontools
 
 def install_site(project='pantheon', profile='pantheon', **kw):
     """ Create a new Drupal installation.
