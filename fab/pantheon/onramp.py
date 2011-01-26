@@ -373,7 +373,7 @@ class ImportTools(project.BuildTools):
             postback.build_error(err)
         elif count > 1:
             err = 'Multiple database dump files were found:\n' + \
-                  '\n'.join(sqldump)
+                  '\n'.join(sql_dump)
             hudsontools.junit_fail(err, 'MYSQLCount')
             postback.build_error(err)
         else:
