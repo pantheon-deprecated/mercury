@@ -1,0 +1,28 @@
+# phpMyAdmin Apache configuration for Pantheon
+
+<VirtualHost 127.0.0.1:8036>
+  DocumentRoot /usr/share/phpmyadmin
+  SetEnv db_username ${db_username}
+  SetEnv db_password ${db_password}
+
+  <Directory /usr/share/phpmyadmin>
+      Options FollowSymLinks
+      DirectoryIndex index.php
+      AddType application/x-httpd-php .php
+      php_flag magic_quotes_gpc Off
+      php_flag track_vars On
+      php_flag register_globals Off
+      php_value include_path .
+  
+  </Directory>
+    
+  # Disallow web access to directories that don't need it
+  <Directory /usr/share/phpmyadmin/libraries>
+      Order Deny,Allow
+      Deny from All
+  </Directory>
+  <Directory /usr/share/phpmyadmin/setup/lib>
+      Order Deny,Allow
+      Deny from All
+  </Directory>
+</VirtualHost>

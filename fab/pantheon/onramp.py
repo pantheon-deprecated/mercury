@@ -174,6 +174,11 @@ class ImportTools(project.BuildTools):
 
         # After moving site to 'default', does 'files' not exist?
         if not os.path.exists(file_dest):
+            # Broken symlink at sites/default/files
+            if os.path.islink(file_dest):
+                local('rm -f %s' % file_dest)
+                postback.build_warning('File path was a broken symlink. ' + \
+                                       'Site files may be missing.')
             local('mkdir -p %s' % file_dest)
 
         # if files are not located in default location, move them there.
@@ -294,6 +299,9 @@ class ImportTools(project.BuildTools):
 
     def setup_vhost(self):
         super(ImportTools, self).setup_vhost(self.db_password)
+
+    def setup_phpmyadmin(self):
+        super(ImportTools, self).setup_phpmyadmin(self.db_password)
 
     def setup_environments(self):
         super(ImportTools, self).setup_environments('import', self.working_dir)

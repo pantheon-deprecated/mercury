@@ -70,7 +70,21 @@ class FilePathTestCase(unittest.TestCase):
                                                         exists=True)
         dir_exists, files_exist, symlink_exists = self.run_checks(start_path,
                                                                   final_path)
-        self.assertTrue(dir_exists and not files_exist)
+        dir_exists = os.path.exists(final_path)
+        files_exist = len(os.listdir(final_path)) == 1 # just .gitignore
+        self.assertTrue(dir_exists and files_exist)
+
+    def test_symlink_broken_defaultpath(self):
+        """sites/default/files is a broken symlink."""
+        start_path, final_path = self.setup_environment(
+                                          files_dir='sites/default/files',
+                                          exists=False,
+                                          symlink=True,
+                                          name='sites/default/files',
+                                          target='foo')
+        dir_exists = os.path.exists(final_path)
+        files_exist = len(os.listdir(final_path)) == 1 # just .gitignore
+        self.assertTrue(dir_exists and files_exist)
 
     def setup_environment(self, files_dir, exists, symlink=False,
                                                    name=None,
@@ -104,7 +118,13 @@ class FilePathTestCase(unittest.TestCase):
                 self._makefiles(files_dir)
         # Symlink
         else:
-            pass
+            # Create valid target location for symlink
+            if exists:
+                pass
+            else:
+                self._makelink(name=name, target=target)
+                import pdb
+                pdb.set_trace()
 
         # Run import processing, suppress fabric errors (mysql will barf)
         with settings(hide('everything'), warn_only=True):
@@ -146,8 +166,11 @@ class FilePathTestCase(unittest.TestCase):
         """Create a symlink with name --> target in working_dir
 
         """
-        os.symlink(os.path.join(self.working_dir, target),
-                   os.path.join(self.working_dir, name))
+        name = os.path.join(self.working_dir, name)
+        target = os.path.join(self.working_dir, target)
+        if not os.path.isdir(os.path.dirname(name)):
+            os.makedirs(os.path.dirname(name))
+        os.symlink(target,name)
 
     def _makefiles(self, directory):
         """Create files in the files directory.

@@ -80,6 +80,7 @@ class _ImportProfile(onramp.ImportTools):
         # Build non-code site features
         self.setup_solr_index()
         self.setup_vhost()
+        self.setup_phpmyadmin()
         self.setup_drupal_cron()
         self.setup_drush_alias()
 
