@@ -177,8 +177,9 @@ class ImportTools(project.BuildTools):
             # Broken symlink at sites/default/files
             if os.path.islink(file_dest):
                 local('rm -f %s' % file_dest)
-                postback.build_warning('File path was a broken symlink. ' + \
-                                       'Site files may be missing.')
+                msg = 'File path was broken symlink. Site files may be missing'
+                hudsontools.junit_fail(msg, 'SetupFilesDir')
+                postback.build_warning(msg)
             local('mkdir -p %s' % file_dest)
 
         # if files are not located in default location, move them there.
