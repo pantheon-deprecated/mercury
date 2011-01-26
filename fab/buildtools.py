@@ -32,7 +32,6 @@ def parse_build_data():
         print('\nBuild Warnings: \n' + '=' * 30)
         print(warnings)
     if errors:
-        errors = '\n'.join(errors)
         print('\nBuild Error: \n' + '=' * 30)
         print(errors)
 
