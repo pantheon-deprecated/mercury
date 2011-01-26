@@ -18,7 +18,7 @@ def get_drupal_root(base):
             hudsontools.junit_pass('Drupal root found.', 'DrupalRoot')
             return root
     err = 'Cannot locate drupal install in archive.'
-    hudsontools.junit_error(err, 'DrupalRoot')
+    hudsontools.junit_fail(err, 'DrupalRoot')
     postback.build_error(err)
 
 
@@ -241,6 +241,9 @@ class ImportTools(project.BuildTools):
                         print '\n%s module could not be enabled. ' % module + \
                               'Error Message:'
                         print '\n%s' % result.stderr
+                else:
+                    hudsontools.junit_pass('%s enabled.' % module, 
+                                           'EnableModules', module)
 
         # Solr variables
         drupal_vars = {}
@@ -335,14 +338,14 @@ class ImportTools(project.BuildTools):
         if site_count > 1:
             err = 'Multiple settings.php files were found:\n' +\
                                  '\nsites/'.join(sites)
-            hudsontools.junit_error(err, 'SiteCount')
+            hudsontools.junit_fail(err, 'SiteCount')
             postback.build_error(err)
         elif site_count == 0:
             err = 'Error: No settings.php files were found.'
-            hudsontools.junit_error(err, 'SiteCount')
+            hudsontools.junit_fail(err, 'SiteCount')
             postback.build_error(err)
         else:
-            hudsontools.junit_pass('Site found %s' %s (sites[0]), 'SiteCount')
+            hudsontools.junit_pass('Site found.', 'SiteCount')
             return sites[0]
 
     def _get_database_dump(self):
@@ -357,11 +360,11 @@ class ImportTools(project.BuildTools):
         count = len(sql_dump)
         if count == 0:
             err = 'No database dump files were found (*.mysql or *.sql)'
-            hudsontools.junit_error(err, 'MYSQLCount')
+            hudsontools.junit_fail(err, 'MYSQLCount')
             postback.build_error(err)
         elif count > 1:
             err = 'Multiple database dump files were found:\n\n'.join(sql_dump)
-            hudsontools.junit_error(err, 'MYSQLCount')
+            hudsontools.junit_fail(err, 'MYSQLCount')
             postback.build_error(err)
         else:
             hudsontools.junit_pass('MYSQL Dump found at %s' % 
@@ -391,10 +394,11 @@ class ImportTools(project.BuildTools):
                   ).rstrip('\n'))
         if version[0:1] != '6':
             err = 'Error: This does not appear to be a Drupal 6 site.'
-            hudsontools.junit_error(err, 'DrupalVersion')
+            hudsontools.junit_fail(err, 'DrupalVersion')
             postback.build_error(err)
-        hudsontools.junit_pass('Drupal version %s found.' % (version),
-                               'DrupalVersion')
+        else:
+            hudsontools.junit_pass('Drupal version %s found.' % (version),
+                                   'DrupalVersion')
         return version
 
     def _get_pressflow_revision(self):

@@ -407,7 +407,7 @@ class PantheonArchive(object):
             return 'zip'
         else:
             err = 'Error: Not a valid tar/zip archive.'
-            hudsontools.junit_error(err,'ArchiveType')
+            hudsontools.junit_fail(err,'ArchiveType')
             postback.build_error(err)
 
     def _open_archive(self):
