@@ -15,7 +15,7 @@ class BuildTools(object):
     can use these methods directly or override/expand base processes.
 
     """
-    def __init__(self, project):
+    def __init__(self, project, version):
         """ Initialize generic project installation object & helper functions.
         project: the name of the project to be built.
 
@@ -23,6 +23,7 @@ class BuildTools(object):
         self.server = pantheon.PantheonServer()
 
         self.project = project
+        self.version = int(version)
         self.environments = pantheon.get_environments()
         self.project_path = os.path.join(self.server.webroot, project)
 
@@ -55,11 +56,17 @@ class BuildTools(object):
         project_repo = os.path.join('/var/git/projects', self.project)
 
         # Get Pantheon core
-        local('git clone --mirror git://gitorious.org/pantheon/6.git %s' % project_repo)
+        if self.version == 6:
+            local('git clone --mirror git://gitorious.org/pantheon/6.git %s' % project_repo)
+        elif self.version == 7:
+            local('git clone --mirror git://github.com/pressflow/7.git %s' % project_repo)
 
         with cd(project_repo):
             # Drupal Core
-            local('git fetch git://gitorious.org/drupal/6.git master:drupal_core')
+            if self.version == 6:
+                local('git fetch git://gitorious.org/drupal/6.git master:drupal_core')
+            elif self.version == 7:
+                local('git fetch git://github.com/pressflow/7.git master:drupal_core')
             # Repo config
             local('git config core.sharedRepository group')
             # Group write.
@@ -118,12 +125,14 @@ class BuildTools(object):
         working_dir: full path to the temp processing directory.
 
         """
-        module_dir = os.path.join(working_dir, 'sites/all/modules')
-        # SolrPhpClient
-        with cd(os.path.join(module_dir, 'apachesolr')):
-            local('wget http://solr-php-client.googlecode.com/files/SolrPhpClient.r22.2009-11-09.tgz')
-            local('tar xzf SolrPhpClient.r22.2009-11-09.tgz')
-            local('rm -f SolrPhpClient.r22.2009-11-09.tgz')
+        if self.version == 6:
+            module_dir = os.path.join(working_dir, 'sites/all/modules')
+            # SolrPhpClient
+            with cd(os.path.join(module_dir, 'apachesolr')):
+                local('wget http://solr-php-client.googlecode.com/' + \
+                      'files/SolrPhpClient.r22.2009-11-09.tgz')
+                local('tar xzf SolrPhpClient.r22.2009-11-09.tgz')
+                local('rm -f SolrPhpClient.r22.2009-11-09.tgz')
 
     def setup_settings_file(self, site_dir):
         """ Setup pantheon.settings.php and settings.php.
@@ -134,19 +143,26 @@ class BuildTools(object):
         settings_default = os.path.join(site_dir, 'default.settings.php')
         settings_pantheon = os.path.join(site_dir, 'pantheon.settings.php')
 
-        # Make sure default.settings.php exists.
-        if not os.path.isfile(settings_default):
-            pantheon.curl('http://gitorious.org/pantheon/6/blobs/raw/master/' + \
-                       'sites/default/default.settings.php', settings_default)
+        if self.version == 6:
+            # Make sure default.settings.php exists.
+            if not os.path.isfile(settings_default):
+                pantheon.curl('http://gitorious.org/pantheon/6/' + \
+                              'blobs/raw/master/' + \
+                              'sites/default/default.settings.php',
+                                  settings_default)
 
         # Make sure settings.php exists.
         if not os.path.isfile(settings_file):
             local('cp %s %s' % (settings_default, settings_file))
+
         # Comment out $base_url entries.
         local("sed -i 's/^[^#|*]*\$base_url/# $base_url/' %s" % settings_file)
 
         # Create pantheon.settings.php and include it from settings.php
-        pantheon.copy_template('pantheon.settings.php', site_dir)
+        pantheon.copy_template('pantheon%s.settings.php' % self.version,
+                               os.path.join(site_dir,
+                                            'pantheon.settings.php'))
+
         with open(os.path.join(site_dir, 'settings.php'), 'a') as f:
             f.write('\n/* Added by Pantheon */\n')
             f.write("include 'pantheon.settings.php';\n")
@@ -192,7 +208,6 @@ class BuildTools(object):
                           'db_password':db_password,
                           'solr_path': '/%s_%s' % (self.project, env),
                           'memcache_prefix': '%s_%s' % (self.project, env)}
-            
 
             filename = '%s_%s' % (self.project, env)
             if env == 'live':
@@ -258,7 +273,7 @@ class BuildTools(object):
         """
         vhost_dict = {'db_username':self.project,
                       'db_password':db_password}
-        
+
         filename = 'pma_vhost'
         # Todo: fix hard-coding of .ubuntu here?
         vhost_template_file = 'pma.vhost.template.ubuntu'

@@ -24,9 +24,9 @@ def _drush_download(modules, destination):
 
 class InstallTools(project.BuildTools):
 
-    def __init__(self, project, **kw):
+    def __init__(self, project, version, **kw):
         """ Initialize generic installation object & helper functions. """
-        super(InstallTools, self).__init__(project)
+        super(InstallTools, self).__init__(project, version)
         self.working_dir = tempfile.mkdtemp()
         self.destination = os.path.join(self.server.webroot, project)
         self.author = 'Hudson User <hudson@pantheon>'
@@ -42,10 +42,11 @@ class InstallTools(project.BuildTools):
 
     def setup_pantheon_modules(self):
         """ Add required modules to project branch. """
-        modules=['apachesolr','memcache','varnish']
-        module_dir = os.path.join(self.working_dir, 'sites/all/modules')
-        local('mkdir %s' % module_dir)
-        _drush_download(modules, module_dir)
+        if self.version == 6:
+            modules=['apachesolr','memcache','varnish']
+            module_dir = os.path.join(self.working_dir, 'sites/all/modules')
+            local('mkdir %s' % module_dir)
+            _drush_download(modules, module_dir)
 
     def setup_pantheon_libraries(self):
         super(InstallTools, self).setup_pantheon_libraries(self.working_dir)
