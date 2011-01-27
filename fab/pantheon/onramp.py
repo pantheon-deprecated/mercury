@@ -239,9 +239,9 @@ class ImportTools(project.BuildTools):
                     # If importing vanilla drupal, this module wont exist.
                     if module != 'cookie_cache_bypass':
                         message = 'Could not enable %s module.' % module
-                        hudsontools.junit_fail(message.join('\n%s' % 
-                                                  result.stderr), 
-                                                  'EnableModules', module)
+                        hudsontools.junit_fail('%s\n%s' % 
+                                               (message, result.stderr), 
+                                               'EnableModules', module)
                         postback.build_warning(message)
                         print message
                         print '\n%s module could not be enabled. ' % module + \
@@ -345,8 +345,8 @@ class ImportTools(project.BuildTools):
         # Unless only one site is found, post error and exit.  
         site_count = len(sites)
         if site_count > 1:
-            err = 'Multiple settings.php files were found:\n' +\
-                                 '\nsites/'.join(sites)
+            err = 'Multiple settings.php files were found:\n' + \
+                  '\n'.join(sites)
             hudsontools.junit_fail(err, 'SiteCount')
             postback.build_error(err)
         elif site_count == 0:
