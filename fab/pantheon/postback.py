@@ -5,6 +5,7 @@ import os
 import sys
 import urllib2
 import uuid
+import hudsontools
 
 from fabric.api import local
 
@@ -64,7 +65,7 @@ def get_build_data():
     data['build_warnings'] = list()
     data['build_error'] = ''
 
-    build_data_path = os.path.join(get_workspace(), 'build_data.txt')
+    build_data_path = os.path.join(hudsontools.get_workspace(), 'build_data.txt')
     if os.path.isfile(build_data_path):
         with open(build_data_path, 'r') as f:
             while True:
@@ -96,7 +97,7 @@ def write_build_data(response_type, data):
     data: Info to be written to file for later retrieval in Atlas postback.
 
     """
-    build_data_path = os.path.join(get_workspace(), 'build_data.txt')
+    build_data_path = os.path.join(hudsontools.get_workspace(), 'build_data.txt')
 
     with open(build_data_path, 'a') as f:
         cPickle.dump({response_type:data}, f)
@@ -126,19 +127,6 @@ def build_error(message):
     print "\nEncountered a build error. Error message:"
     print message + '\n\n'
     sys.exit(0)
-
-def get_workspace():
-    """Return the workspace to store build data information.
-
-    If being run from CLI (not hudson) use alternate path (so data can still
-    be sent back to Atlas, regardless of how job is run).
-
-    """
-    workspace = os.environ.get('WORKSPACE')
-    if workspace:
-        return workspace
-    else:
-        return '/etc/pantheon/hudson/workspace'
 
 def _status_changed(job_name, data):
     """Returns True if the build status changed from the previous run.

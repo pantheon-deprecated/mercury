@@ -4,8 +4,9 @@ import tempfile
 import time
 import urllib2
 import os
-import sys
+import traceback
 
+from pantheon import hudsontools
 from pantheon import pantheon
 from pantheon import postback
 from pantheon import status
@@ -88,13 +89,16 @@ def post_update_pantheon():
         if 'UPDATE COMPLETED SUCCESSFULLY' in log:
             response['status'] = 'SUCCESS'
             response['msg'] = ''
+            hudsontools.junit_pass('', 'PostUpdate')
         else:
             response['status'] = 'FAILURE'
             response['msg'] = 'Panthoen update did not complete.'
+            hudsontools.junit_fail(response['msg'], 'PostUpdate')
         print log
     else:
         response['status'] = 'FAILURE'
         response['msg'] = 'No Pantheon update log was found.'
+        hudsontools.junit_fail(response['msg'], 'PostUpdate')
         print 'No update log found.'
     postback.write_build_data('update_pantheon', response)
 
@@ -107,9 +111,15 @@ def update_site_core(project='pantheon', keep=None):
              None: Reset to ORIG_HEAD if merge fails.
     """
     updater = update.Updater(project, 'dev')
-    result = updater.core_update(keep)
-    updater.drupal_updatedb()
-    updater.permissions_update()
+    try:
+        result = updater.core_update(keep)
+        updater.drupal_updatedb()
+        updater.permissions_update()
+    except:
+        hudsontools.junit_error(traceback.format_exc(), 'UpdateCore')
+        raise
+    else:
+        hudsontools.junit_pass('Update successful.', 'UpdateCore')
 
     postback.write_build_data('update_site_core', result)
 
@@ -128,10 +138,16 @@ def update_code(project, environment, tag=None, message=None):
         message = 'Tagging as %s for release.' % tag
 
     updater = update.Updater(project, environment)
-    updater.test_tag(tag)
-    updater.code_update(tag, message)
-    updater.drupal_updatedb()
-    updater.permissions_update()
+    try:
+        updater.test_tag(tag)
+        updater.code_update(tag, message)
+        updater.drupal_updatedb()
+        updater.permissions_update()
+    except:
+        hudsontools.junit_error(traceback.format_exc(), 'UpdateCode')
+        raise
+    else:
+        hudsontools.junit_pass('Update successful.', 'UpdateCode')
 
     # Send back repo status and drupal update status
     status.git_repo_status(project)
@@ -142,22 +158,40 @@ def rebuild_environment(project, environment):
 
     """
     updater = update.Updater(project, environment)
-    updater.files_update('live')
-    updater.data_update('live')
+    try:
+        updater.files_update('live')
+        updater.data_update('live')
+    except:
+        hudsontools.junit_error(traceback.format_exc(), 'RebuildEnv')
+        raise
+    else:
+        hudsontools.junit_pass('Rebuild successful.', 'RebuildEnv')
 
 def update_data(project, environment, source_env):
     """Update the data in project/environment using data from source_env.
 
     """
     updater = update.Updater(project, environment)
-    updater.data_update(source_env)
+    try:
+        updater.data_update(source_env)
+    except:
+        hudsontools.junit_error(traceback.format_exc(), 'UpdateData')
+        raise
+    else:
+        hudsontools.junit_pass('Update successful.', 'UpdateData')
 
 def update_files(project, environment, source_env):
     """Update the files in project/environment using files from source_env.
 
     """
     updater = update.Updater(project, environment)
-    updater.files_update(source_env)
+    try:
+        updater.files_update(source_env)
+    except:
+        hudsontools.junit_error(traceback.format_exc(), 'UpdateFiles')
+        raise
+    else:
+        hudsontools.junit_pass('Update successful.', 'UpdateFiles')
 
 def git_diff(project, environment, revision_1, revision_2=None):
     """Return git diff
@@ -174,5 +208,11 @@ def git_status(project, environment):
 
     """
     updater = update.Updater(project, environment)
-    updater.run_command('git status')
+    try:
+        updater.run_command('git status')
+    except:
+        hudsontools.junit_error(traceback.format_exc(), 'GitStatus')
+        raise
+    else:
+        hudsontools.junit_pass('', 'GitStatus')
 

@@ -9,6 +9,7 @@ import urllib2
 import zipfile
 
 import postback
+import hudsontools
 
 from fabric.api import *
 
@@ -401,11 +402,15 @@ class PantheonArchive(object):
 
         """
         if tarfile.is_tarfile(self.path):
+            hudsontools.junit_pass('Tar found.','ArchiveType')
             return 'tar'
         elif zipfile.is_zipfile(self.path):
+            hudsontools.junit_pass('Zip found.','ArchiveType')
             return 'zip'
         else:
-            postback.build_error('Error: Not a valid tar/zip archive.')
+            err = 'Error: Not a valid tar/zip archive.'
+            hudsontools.junit_fail(err,'ArchiveType')
+            postback.build_error(err)
 
     def _open_archive(self):
         """Return an opened archive file object.

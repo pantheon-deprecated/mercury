@@ -1,6 +1,10 @@
+import traceback
+
 import update
+
 from pantheon import install
 from pantheon import status
+from pantheon import hudsontools
 
 def install_site(project='pantheon', profile='pantheon', **kw):
     """ Create a new Drupal installation.
@@ -15,7 +19,13 @@ def install_site(project='pantheon', profile='pantheon', **kw):
     data.update(kw)
 
     handler = _get_profile_handler(**data)
-    handler.build(**data)
+    try:
+        handler.build(**data)
+    except:
+        hudsontools.junit_error(traceback.format_exc(), 'InstallSite')
+        raise
+    else:
+        hudsontools.junit_pass('', 'InstallSite')
 
 class _PantheonProfile(install.InstallTools):
     """ Default Pantheon Installation Profile.

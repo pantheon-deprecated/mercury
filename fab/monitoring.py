@@ -4,26 +4,27 @@ import pdb
 import smtplib
 import socket
 import urllib
+import traceback
 
 from fabric.api import *
-from xml.dom.minidom import Document
+from pantheon import hudsontools
 
 
 def check_load_average(limit):
     loads = os.getloadavg()
     if (float(loads[0]) > float(limit)):
-        _error('Load average is %s which is above the threshold of %s.' % (str(loads[0]), str(limit)))
+        hudsontools.junit_fail('Load average is %s which is above the threshold of %s.' % (str(loads[0]), str(limit)), 'LoadAverage')
     else:
-        _success('Load average is %s which is below the threshold of %s.' % (str(loads[0]), str(limit)))
+        hudsontools.junit_pass('Load average is %s which is below the threshold of %s.' % (str(loads[0]), str(limit)), 'LoadAverage')
 
 
 def check_disk_space(filesystem, limit):
     s = os.statvfs(filesystem)
     usage = (s.f_blocks - s.f_bavail)/float(s.f_blocks) * 100
     if (float(usage) > float(limit)):
-        _error('Disk usage of %s is at %s percent which is above the threshold of %s percent.' % (filesystem, str(usage), str(limit)))
+        hudsontools.junit_fail('Disk usage of %s is at %s percent which is above the threshold of %s percent.' % (filesystem, str(usage), str(limit)), 'DiskSpace') 
     else:
-        _success('Disk usage of %s is at %s percent which is above the threshold of %s percent.' % (filesystem, str(usage), str(limit)))
+        hudsontools.junit_pass('Disk usage of %s is at %s percent which is above the threshold of %s percent.' % (filesystem, str(usage), str(limit)), 'DiskSpace')
 
 
 def check_swap_usage(limit):
@@ -31,17 +32,17 @@ def check_swap_usage(limit):
     swap_used = local("free | grep -i swap | awk '{print $3}'")
     usage = float(swap_used)/float(swap_total) * 100
     if (usage > float(limit)):
-        _error('Swap usage is a %s percent which is above the threshold of %s percent.' % (str(usage), str(limit)))
+        hudsontools.junit_fail('Swap usage is a %s percent which is above the threshold of %s percent.' % (str(usage), str(limit)), 'SwapUsage')
     else:
-        _success('Swap usage is a %s percent which is below the threshold of %s percent.' % (str(usage), str(limit)))
+        hudsontools.junit_pass('Swap usage is a %s percent which is below the threshold of %s percent.' % (str(usage), str(limit)), 'SwapUsage')
 
 
 def check_io_wait_time(limit):
     iowait = local("vmstat | grep -v [a-z] | awk '{print $16}'").rstrip()
     if (float(iowait) > float(limit)):
-        _error('IO wait times are at %s percent which is above the threshold of %s percent.' % (str(iowait), str(limit)))
+        hudsontools.junit_fail('IO wait times are at %s percent which is above the threshold of %s percent.' % (str(iowait), str(limit)), 'IOWaitTime')
     else:
-        _success('IO wait times are at %s percent which is below the threshold of %s percent.' % (str(iowait), str(limit)))
+        hudsontools.junit_pass('IO wait times are at %s percent which is below the threshold of %s percent.' % (str(iowait), str(limit)), 'IOWaitTime')
 
 
 def check_mysql(slow_query_limit, memory_usage, innodb_memory_usage, threads):
@@ -49,7 +50,7 @@ def check_mysql(slow_query_limit, memory_usage, innodb_memory_usage, threads):
         messages = list()
         report = local('mysqlreport')
         if report.failed:
-            _fail('mysql server does not appear to be running: %s' % report)
+            hudsontools.junit_fail('mysql server does not appear to be running: %s' % report, 'MYSQL')
         for line in report.splitlines():
             #check for slow wait times:
             if ('Slow' in line and 'Log' in line):
@@ -68,9 +69,9 @@ def check_mysql(slow_query_limit, memory_usage, innodb_memory_usage, threads):
             #check InnoDB memory usage
             elif ('Usage' in line and 'Used' in line):
                 if (float(line.split()[5]) > float(innodb_memory_usage)):
-                    messages.append('InnoDB memory usage is %s percent which is above the threshold of %s percent.' %(line.split()[5], str(innodb_memory_usage)))
+                    messages.append('InnoDB memory usage is %s percent which is above the threshold of %s percent.' % (line.split()[5], str(innodb_memory_usage)))
                 else:
-                    messages.append('InnoDB memory usage is %s percent which is below the threshold of %s percent.' %(line.split()[5], str(innodb_memory_usage)))
+                    messages.append('InnoDB memory usage is %s percent which is below the threshold of %s percent.' % (line.split()[5], str(innodb_memory_usage)))
 
             #check thread usage
             elif ('Max used' in line):
@@ -81,17 +82,19 @@ def check_mysql(slow_query_limit, memory_usage, innodb_memory_usage, threads):
                
         message = ' '.join(messages)
         if 'above' in message: 
-            _error(message)
+            hudsontools.junit_fail(message, 'MYSQLStatus')
         else:
-            _success(message)
+            hudsontools.junit_pass(message, 'MYSQLStatus')
 
 
 def check_ldap():
     try:
         local('ldapsearch -H ldap://auth.getpantheon.com -x -ZZ')
-        _success('ldap responded')
+        hudsontools.junit_pass('ldap responded', 'LDAPStatus')
     except:
-        _fail('Cannot connect to LDAP on localhost.')
+        hudsontools.junit_error('Cannot connect to LDAP on localhost. \n%s' %
+				(traceback.format_exc()), 'LDAPStatus')
+        raise
 
 
 def check_apache(url):
@@ -112,9 +115,12 @@ def check_pound_via_socket(port):
         port = int(port)
         s.connect(('localhost', port))
         s.shutdown(2)
-        _success('pound responded')
+        hudsontools.junit_pass('pound responded', 'PoundSocket')
     except:
-        _fail('Cannot connect to Pound on %s %s.' % ('localhost', str(port)))
+        hudsontools.junit_error('Cannot connect to Pound on %s at %s. \n%s' % 
+			        ('localhost', str(port), 
+				 traceback.format_exc()), 'PoundSocket')
+        raise
 
 
 def check_memcached(port):
@@ -123,126 +129,21 @@ def check_memcached(port):
         port = int(port)
         s.connect(('localhost', port))
         s.shutdown(2)
-        _success('memcached responded')
+        hudsontools.junit_pass('memcached responded', 'MemcachedStatus')
     except:
-        _fail('Cannot connect to Memcached on %s %s.' % ('localhost', str(port)))
+        hudsontools.junit_error('Cannot connect to Memcached on %s %s. \n%s' % 
+				('localhost', str(port), 
+				 traceback.format_exc()), 'MemcachedStatus')
+        raise
 
 
 def _test_url(service, url):
     connection = urllib.urlopen(url)
     status = connection.getcode()
     if (status >=  400):
-        _error('%s returned an error code of %s.' % (service, status))
+        hudsontools.junit_fail('%s returned an error code of %s.' % (service, status), '%sStatus' % service)
     else:
-        _success('%s returned an error code of %s.' % (service, status))
+        hudsontools.junit_pass('%s returned an error code of %s.' % (service, status), '%sStatus' % service)
 # TODO: figure out what to search for from the following output
 #    print(connection.info())
 #    print(connection.read())
-
-
-def _success(message):
-    f = open(os.environ.get('WORKSPACE') + '/results.xml', 'w')
-
-    doc = Document()
-
-    testsuites = doc.createElement("testsuites")
-    doc.appendChild(testsuites)
-
-    testsuite = doc.createElement("testsuite")
-    testsuite.setAttribute("name", "MyTest")
-    testsuite.setAttribute("file", ".")
-    testsuite.setAttribute("tests", "1")
-    testsuite.setAttribute("assertions", "0")
-    testsuite.setAttribute("failures", "0")
-    testsuite.setAttribute("errors", "0")
-    testsuite.setAttribute("time", "1")
-    testsuites.appendChild(testsuite)   
-
-    testcase = doc.createElement("testcase")
-    testcase.setAttribute("name", "error")
-    testcase.setAttribute("assertions", "0")
-    testcase.setAttribute("time", "1")
-    testsuite.appendChild(testcase)
-
-    etext = doc.createTextNode(message)
-    testcase.appendChild(etext)
-
-    f.write(doc.toprettyxml(indent="  "))
-    f.close()
-
-    #now print so we see it in hudson console output
-    print(message)
-
-
-def _error(message):
-    f = open(os.environ.get('WORKSPACE') + '/results.xml', 'w')
-
-    doc = Document()
-
-    testsuites = doc.createElement("testsuites")
-    doc.appendChild(testsuites)
-
-    testsuite = doc.createElement("testsuite")
-    testsuite.setAttribute("name", "MyTest")
-    testsuite.setAttribute("file", ".")
-    testsuite.setAttribute("tests", "1")
-    testsuite.setAttribute("assertions", "0")
-    testsuite.setAttribute("failures", "0")
-    testsuite.setAttribute("errors", "1")
-    testsuite.setAttribute("time", "1")
-    testsuites.appendChild(testsuite)   
-
-    testcase = doc.createElement("testcase")
-    testcase.setAttribute("name", "error")
-    testcase.setAttribute("assertions", "0")
-    testcase.setAttribute("time", "1")
-    testsuite.appendChild(testcase)
-
-    error = doc.createElement("error")
-    testcase.appendChild(error)
-
-    etext = doc.createTextNode(message)
-    error.appendChild(etext)
-
-    f.write(doc.toprettyxml(indent="  "))
-    f.close()
-
-    #now print so we see it in hudson console output
-    print(message)
-
-
-def _fail(message):
-    f = open(os.environ.get('WORKSPACE') + '/results.xml', 'w')
-
-    doc = Document()
-
-    testsuites = doc.createElement("testsuites")
-    doc.appendChild(testsuites)
-
-    testsuite = doc.createElement("testsuite")
-    testsuite.setAttribute("name", "MyTest")
-    testsuite.setAttribute("file", ".")
-    testsuite.setAttribute("tests", "1")
-    testsuite.setAttribute("assertions", "0")
-    testsuite.setAttribute("failures", "1")
-    testsuite.setAttribute("errors", "0")
-    testsuite.setAttribute("time", "1")
-    testsuites.appendChild(testsuite)   
-
-    testcase = doc.createElement("testcase")
-    testcase.setAttribute("name", "error")
-    testcase.setAttribute("assertions", "0")
-    testcase.setAttribute("time", "1")
-    testsuite.appendChild(testcase)
-
-    failure = doc.createElement("failure")
-    testcase.appendChild(failure)
-
-    etext = doc.createTextNode(message)
-    failure.appendChild(etext)
-
-    f.write(doc.toprettyxml(indent="  "))
-    f.close()
-
-    #now print so we see it in hudson console output
-    print(message)
