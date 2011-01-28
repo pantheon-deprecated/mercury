@@ -43,10 +43,12 @@ class InstallTools(project.BuildTools):
     def setup_pantheon_modules(self):
         """ Add required modules to project branch. """
         if self.version == 6:
-            modules=['apachesolr','memcache','varnish']
-            module_dir = os.path.join(self.working_dir, 'sites/all/modules')
-            local('mkdir %s' % module_dir)
-            _drush_download(modules, module_dir)
+            modules = ['apachesolr','memcache','varnish']
+        if self.version == 7:
+            modules = ['apachesolr-7.x-1.0-beta3']
+        module_dir = os.path.join(self.working_dir, 'sites/all/modules')
+        local('mkdir -p %s' % module_dir)
+        _drush_download(modules, module_dir)
 
     def setup_pantheon_libraries(self):
         super(InstallTools, self).setup_pantheon_libraries(self.working_dir)

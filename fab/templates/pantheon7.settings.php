@@ -1,24 +1,33 @@
 <?php
 
-#$db_url = "mysqli://$_SERVER[db_username]:$_SERVER[db_password]@localhost/$_SERVER[db_name]";
+$databases = array (
+  'default' =>
+  array (
+    'default' =>
+    array (
+      'database' => $_SERVER['db_name'],
+      'username' => $_SERVER['db_username'],
+      'password' =>  $_SERVER['db_password'],
+      'host' => 'localhost',
+      'port' => '',
+      'driver' => 'mysql',
+      'prefix' => '',
+    ),
+  ),
+);
 
-#$conf['pressflow_smart_start'] = TRUE;
+$conf['pressflow_smart_start'] = TRUE;
+
+/* Apache Solr */
+$conf['apachesolr_default_server'] = $_SERVER['db_name'];
+
+/* Memcached */
+include_once(DRUPAL_ROOT . '/includes/cache.inc');
+include_once(DRUPAL_ROOT . '/sites/all/modules/memcache/memcache.inc');
+$conf['cache_default_class'] = 'MemCacheDrupal';
+$conf['memcache_key_prefix'] = $_SERVER['memcache_prefix'];
 
 /* Varnish */
 #$conf['reverse_proxy'] = TRUE;
 #$conf['reverse_proxy_addresses'] = array('127.0.0.1');
-
-/* Apache Solr */
-#$conf['apachesolr_port'] = '8983';
-#$conf['apachesolr_path'] = $_SERVER['solr_path'];
-
-/* Memcached */
-#$conf['cache_inc'] = './sites/all/modules/memcache/memcache.inc';
-#$conf['memcache_servers'] = array(
-#         '127.0.0.1:11211' => 'default',
-#         );
-#$conf['memcache_bins'] = array(
-#          'cache' => 'default',
-#          );
-#$conf['memcache_key_prefix'] = $_SERVER['memcache_prefix'];
 

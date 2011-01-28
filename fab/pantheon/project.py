@@ -59,14 +59,15 @@ class BuildTools(object):
         if self.version == 6:
             local('git clone --mirror git://gitorious.org/pantheon/6.git %s' % project_repo)
         elif self.version == 7:
-            local('git clone --mirror git://github.com/pressflow/7.git %s' % project_repo)
+            local('git clone --mirror git://github.com/pantheon-systems/7.git %s' % project_repo)
 
         with cd(project_repo):
             # Drupal Core
             if self.version == 6:
                 local('git fetch git://gitorious.org/drupal/6.git master:drupal_core')
             elif self.version == 7:
-                local('git fetch git://github.com/pressflow/7.git master:drupal_core')
+                # TODO: change this to actual vanilla drupal repo.
+                local('git fetch git://github.com/pantheon-systems/7.git master:drupal_core')
             # Repo config
             local('git config core.sharedRepository group')
             # Group write.
@@ -125,14 +126,13 @@ class BuildTools(object):
         working_dir: full path to the temp processing directory.
 
         """
-        if self.version == 6:
-            module_dir = os.path.join(working_dir, 'sites/all/modules')
-            # SolrPhpClient
-            with cd(os.path.join(module_dir, 'apachesolr')):
-                local('wget http://solr-php-client.googlecode.com/' + \
-                      'files/SolrPhpClient.r22.2009-11-09.tgz')
-                local('tar xzf SolrPhpClient.r22.2009-11-09.tgz')
-                local('rm -f SolrPhpClient.r22.2009-11-09.tgz')
+        module_dir = os.path.join(working_dir, 'sites/all/modules')
+        # SolrPhpClient
+        with cd(os.path.join(module_dir, 'apachesolr')):
+            local('wget http://solr-php-client.googlecode.com/' + \
+                  'files/SolrPhpClient.r22.2009-11-09.tgz')
+            local('tar xzf SolrPhpClient.r22.2009-11-09.tgz')
+            local('rm -f SolrPhpClient.r22.2009-11-09.tgz')
 
     def setup_settings_file(self, site_dir):
         """ Setup pantheon.settings.php and settings.php.
@@ -185,7 +185,7 @@ class BuildTools(object):
 
         """
         for env in self.environments:
-            self.server.create_solr_index(self.project, env)
+            self.server.create_solr_index(self.project, env, self.version)
 
     def setup_vhost(self, db_password):
         """ Create vhost files for each environment in a project.
