@@ -150,7 +150,7 @@ class BuildTools(object):
         ps_dict = {'project': self.project,
                    'vhost_root': self.server.vhost_dir}
         template = pantheon.build_template(ps_template, ps_dict)
-        with open('%spantheon.settings.php' % site_dir, 'w') as f:
+        with open(settings_pantheon, 'w') as f:
             f.write(template)
         with open(os.path.join(site_dir, 'settings.php'), 'a') as f:
             f.write('\n/* Added by Pantheon */\n')
