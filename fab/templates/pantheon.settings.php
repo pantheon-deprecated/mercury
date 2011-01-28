@@ -1,13 +1,13 @@
 <?php
 
-$vhostdir = '/etc/apache2/sites-available/';
+$vhost_dir = '${vhost_root}';
 
 if ($_SERVER['db_name']) {
     $db_url = "mysqli://$_SERVER[db_username]:$_SERVER[db_password]@localhost/$_SERVER[db_name]";
 }
-elseif (is_file($vhostdir .'000_pantheon_live') ||
-        is_file($vhostdir .'pantheon_dev') ||
-        is_file($vhostdir .'pantheon_test')) {
+elseif (is_file($vhost_dir .'000_${project}_live') ||
+        is_file($vhost_dir .'${project}_dev') ||
+        is_file($vhost_dir .'${project}_test')) {
 
     // Determine wether or not drupal_root was specified as a cli option
     if(drush_get_option('root')) {
@@ -21,14 +21,14 @@ elseif (is_file($vhostdir .'000_pantheon_live') ||
     }
 
     // Get settings.php variables from vhost file.
-    if (preg_match('/pantheon\/live/', $drupal_root)) {
-        $vhost = explode(PHP_EOL, file_get_contents($vhostdir .'000_pantheon_live'));
+    if (preg_match('/${project}\/live/', $drupal_root)) {
+        $vhost = explode(PHP_EOL, file_get_contents($vhost_dir .'000_${project}_live'));
     }
-    elseif (preg_match('/pantheon\/dev/', $drupal_root)) {
-        $vhost = explode(PHP_EOL, file_get_contents($vhostdir .'pantheon_dev'));
+    elseif (preg_match('/${project}\/dev/', $drupal_root)) {
+        $vhost = explode(PHP_EOL, file_get_contents($vhost_dir .'${project}_dev'));
     }
-    elseif (preg_match('/pantheon\/test/', $drupal_root)) {
-        $vhost = explode(PHP_EOL, file_get_contents($vhostdir .'pantheon_test'));
+    elseif (preg_match('/${project}\/test/', $drupal_root)) {
+        $vhost = explode(PHP_EOL, file_get_contents($vhost_dir .'${project}_test'));
     }
     if ($vhost) {
         $vars = array();
