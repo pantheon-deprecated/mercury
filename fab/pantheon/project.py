@@ -148,7 +148,7 @@ class BuildTools(object):
         # Create pantheon.settings.php and include it from settings.php
         ps_template = pantheon.get_template('pantheon.settings.php')
         ps_dict = {'project': self.project,
-                   'vhost_root': self.server.vhost_root}
+                   'vhost_root': self.server.vhost_dir}
         template = pantheon.build_template(ps_template, ps_dict)
         with open('%spantheon.settings.php' % site_dir, 'w') as f:
             f.write(template)
