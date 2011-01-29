@@ -15,7 +15,7 @@ class BuildTools(object):
     can use these methods directly or override/expand base processes.
 
     """
-    def __init__(self, project, version):
+    def __init__(self, project):
         """ Initialize generic project installation object & helper functions.
         project: the name of the project to be built.
 
@@ -23,7 +23,6 @@ class BuildTools(object):
         self.server = pantheon.PantheonServer()
 
         self.project = project
-        self.version = int(version)
         self.environments = pantheon.get_environments()
         self.project_path = os.path.join(self.server.webroot, project)
 

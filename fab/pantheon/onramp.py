@@ -1,4 +1,5 @@
 import os
+import re
 import tempfile
 
 import drupaltools
@@ -71,14 +72,17 @@ class ImportTools(project.BuildTools):
         """
         self.site = self._get_site_name()
         self.db_dump = self._get_database_dump()
+        self.version, self.revision = self._get_drupal_version_info()
 
     def setup_project_branch(self):
-        platform, version, revision = self._get_drupal_version_info()
         # Pressflow branches at 6.6. If on an earlier version, force update.
-        if revision in ['DRUPAL-6-%s' % i for i in range(6)]:
-            revision = 'DRUPAL-6-6'
+        if self.revision in ['DRUPAL-6-%s' % i for i in range(6)]:
+            self.revision = 'DRUPAL-6-6'
             self.force_update = True
-        super(ImportTools, self).setup_project_branch(revision)
+        #TODO: TEMPORARY. Not sure how d.o git repo will be setup. Ignore for now.
+        if self.version == 7:
+            super(ImportTools, self).setup_project_branch()
+        super(ImportTools, self).setup_project_branch(self.revision)
 
     def setup_database(self):
         """ Create a new database and import from dumpfile.
@@ -144,8 +148,12 @@ class ImportTools(project.BuildTools):
 
         # Download modules in temp dir so drush doesn't complain.
         temp_dir = tempfile.mkdtemp()
+        if self.version == 6:
+            modules = ['apachesolr','memcache','varnish']
+        else:
+            modules = ['apachesolr-7.x-1.0-beta3', 'memcache-7.x-1.0-beta3']
         with cd(temp_dir):
-            local("drush dl -y memcache apachesolr varnish")
+            local("drush dl -y %s" % ' '.join(modules))
             local("cp -R * %s" % module_dir)
         local("rm -rf " + temp_dir)
         #TODO: Handle pantheon required modules existing in sites/default/modules.
@@ -366,7 +374,7 @@ class ImportTools(project.BuildTools):
             revision = 'DRUPAL-%s' % version
         elif platform == 'PRESSFLOW':
             revision = self._get_pressflow_revision()
-        return (platform, version, revision)
+            return (version[0:1], revision)
 
     def _get_drupal_platform(self):
         return ((local("awk \"/\'info\' =>/\" " + \
@@ -376,13 +384,27 @@ class ImportTools(project.BuildTools):
                 ).rstrip('\n').upper())
 
     def _get_drupal_version(self):
+        #TODO: This is sloppy. Clean it up.
+
+        # Drupal 6 look in system.module
         version = ((local("awk \"/define\(\'VERSION\'/\" " + \
                   self.working_dir + "/modules/system/system.module" + \
                   "| sed \"s_^.*'\(6\)\.\([0-9]\{1,2\}\).*_\\1-\\2_\"")
                   ).rstrip('\n'))
-        if version[0:1] != '6':
-            postback.build_error('Error: This does not appear to be a Drupal 6 site.')
-        return version
+
+        if not version:
+            # Drupal 7 system.info has version info.
+            pattern = re.compile(r'^version.*([0-9]{1})\.([0-9]{1,2})')
+            for line in open(os.path.join(self.working_dir,
+                                          'modules/system/system.info'), 'r'):
+                match = pattern.search(line)
+                if match:
+                    version = '%s-%s' % (version.group(1), version.group(2))
+
+        if version and version[0:1] in ['6', '7']:
+            return version
+
+        postback.build_error('Error: Invalid or unknown Drupal version.')
 
     def _get_pressflow_revision(self):
         #TODO: Optimize this (restrict search to revisions within Drupal minor version)
