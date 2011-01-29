@@ -374,7 +374,7 @@ class ImportTools(project.BuildTools):
             revision = 'DRUPAL-%s' % version
         elif platform == 'PRESSFLOW':
             revision = self._get_pressflow_revision()
-            return (version[0:1], revision)
+        return (version[0:1], revision)
 
     def _get_drupal_platform(self):
         return ((local("awk \"/\'info\' =>/\" " + \
