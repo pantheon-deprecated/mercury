@@ -83,7 +83,7 @@ def configure_permissions(base_domain = "example.com",
         set_acl_groupwritability(require_group, '/var/www')
         set_acl_groupwritability(require_group, '/var/git/projects')
     except:
-        hudontools.junit_error(traceback.format_exc(), 'ConfigPermissions')
+        hudsontools.junit_error(traceback.format_exc(), 'ConfigPermissions')
         raise
     else:
         hudsontools.junit_pass('Configuration completed.', 'ConfigurePermissions')
