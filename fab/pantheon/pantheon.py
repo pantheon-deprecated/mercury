@@ -243,7 +243,6 @@ class PantheonServer:
         """ Create an alias.drushrc.php file.
         drush_dict: project:
                     environment:
-                    vhost_path: full path to vhost file
                     root: full path to drupal installation
 
         """
