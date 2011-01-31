@@ -391,11 +391,14 @@ class ImportTools(project.BuildTools):
         return (platform, version, revision)
 
     def _get_drupal_platform(self):
-        return ((local("awk \"/\'info\' =>/\" " + \
+        platform = ((local("awk \"/\'info\' =>/\" " + \
                 self.working_dir + \
                 "/modules/system/system.module" + \
                 r' | sed "s_^.*Powered by \([a-zA-Z]*\).*_\1_"')
                 ).rstrip('\n').upper())
+        if platform == 'PANTHEON':
+            platform = 'PRESSFLOW'
+        return platform
 
     def _get_drupal_version(self):
         version = ((local("awk \"/define\(\'VERSION\'/\" " + \
