@@ -55,7 +55,7 @@ def import_db_dump(database_dump, database_name):
     database_name: name of existing database to import into.
 
     """
-    local('mysql -u root %s < %s' % (database_name, database_dump))
+    local('mysql -u root %s < "%s"' % (database_name, database_dump))
 
 def convert_to_innodb(database):
     """Convert all table engines to InnoDB (if possible).
