@@ -176,6 +176,20 @@ def configure_root_certificate(pki_server):
 def hudson_restart():
     local('curl -X POST http://localhost:8090/safeRestart')
 
+def parse_drush_output(drush_output):
+    """ Return drush backend json as a dictionary.
+    drush_output: drush backend json output.
+    """
+    # Create the patern
+    DBOD = 'DRUSH_BACKEND_OUTPUT_START>>>%s<<<DRUSH_BACKEND_OUTPUT_END'
+    p = re.compile(DBOD % '(.*)')
+
+    # Match the patern, returning None if not found.
+    m = p.match(drush_output)
+    if (m == None):
+        return None
+    else:
+        return json.loads(m.group(1))
 
 class PantheonServer:
 
