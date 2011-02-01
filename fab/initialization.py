@@ -132,7 +132,7 @@ def _initialize_drush():
     local('drush dl drush_make')
 
 def _initialize_solr(server=pantheon.PantheonServer()):
-    """Download Solr library and schema/config xml files from drupal module.
+    """Download Apache Solr.
 
     """
     temp_dir = tempfile.mkdtemp()
@@ -141,12 +141,6 @@ def _initialize_solr(server=pantheon.PantheonServer()):
         local('tar xvzf apache-solr-1.4.1.tgz')
         local('mkdir -p /var/solr')
         local('mv apache-solr-1.4.1/dist/apache-solr-1.4.1.war /var/solr/solr.war')
-        local('cp -R apache-solr-1.4.1/example/solr %s' % server.template_dir)
-        local('drush dl apachesolr')
-        local('cp apachesolr/schema.xml %s' % os.path.join(
-                         server.template_dir, 'solr/conf'))
-        local('cp apachesolr/solrconfig.xml %s' %  os.path.join(
-                              server.template_dir, 'solr/conf'))
         local('chown -R ' + server.tomcat_owner + ':root /var/solr/')
     local('rm -rf ' + temp_dir)
 
