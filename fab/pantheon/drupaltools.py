@@ -136,7 +136,7 @@ class DrupalDB(object):
             value = self.cursor.fetchone()
             # Record found, unserialize value.
             if value:
-                result = (True, self._php_unserialize(value[0]))
+                result = (True, _php_unserialize(value[0]))
                 if debug:
                     print value[0]
             # No record found.
@@ -158,7 +158,7 @@ class DrupalDB(object):
         # Check if variable already exists.
         success, result = self.vget(name)
         if success:
-            value = self._php_serialize(value)
+            value = _php_serialize(value)
             # Update if variable exists.
             if result:
                 query = "UPDATE variable SET value='%s' WHERE name='%s'" % \
@@ -201,44 +201,48 @@ class DrupalDB(object):
             print "MySQL Error %d: %s" % (e.args[0], e.args[1])
             sys.exit(1)
 
-    def _php_serialize(self, data):
-        """Convert data into php serialized format.
-        data: data to convert (type sensitive)
+def _php_serialize(data):
+    """Convert data into php serialized format.
+    data: data to convert (type sensitive)
 
-        Does not currently support arrays/objects,
+    """
+    vtype = type(data)
+    # String
+    if vtype is str:
+        return 's:%s:"%s";' % (len(data), data)
+    # Integer
+    elif vtype is int:
+        return 'i:%s;' % data
+    # Float / Long
+    elif vtype is long or vtype is float:
+        return 'd:%f;'
+    # Boolean
+    elif vtype is bool:
+        if data:
+            return 'b:1;'
+        else:
+            return 'b:0;'
+    # None
+    elif vtype is None:
+        return 'N;'
+    # Dict
+    elif vtype is dict:
+        return 'a:%s:{%s}' % (len(data),
+                              ''.join([_php_serialize(k) + \
+                                       _php_serialize(v) \
+                                       for k,v in data.iteritems()]))
 
-        """
-        vtype = type(data)
-        # String
-        if vtype is str:
-            return 's:%s:"%s";' % (len(data), data)
-        # Integer
-        elif vtype is int:
-            return 'i:%s;' % data
-        # Float / Long
-        elif vtype is long or vtype is float:
-            return 'd:%f;'
-        # Boolean
-        elif vtype is bool:
-            if data:
-                return 'b:1;'
-            else:
-                return 'b:0;'
-        # None
-        elif vtype is NoneType:
-            return 'N;'
+def _php_unserialize(data):
+    """Convert data from php serialize format to python data types.
+    data: data to convert (string)
 
-    def _php_unserialize(self, data):
-        """Convert data from php serialize format to python data types.
-        data: data to convert (string)
+    Currently only supports converting serialized strings.
 
-        Currently only supports converting serialized strings.
-
-        """
-        vtype = data[0:1]
-        if vtype == 's':
-            length, value = data[2:].rstrip(';').split(':', 1)
-            return eval(value)
-        elif vtype == 'i':
-            pass
+    """
+    vtype = data[0:1]
+    if vtype == 's':
+        length, value = data[2:].rstrip(';').split(':', 1)
+        return eval(value)
+    elif vtype == 'i':
+        pass
 

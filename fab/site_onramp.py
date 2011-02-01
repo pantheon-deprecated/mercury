@@ -3,7 +3,7 @@ from pantheon import pantheon
 from pantheon import restore
 from pantheon import status
 
-def onramp_site(project='pantheon', profile=None, url=None, **kw):
+def onramp_site(project='pantheon', profile=None, url=None):
     """Create a new Drupal installation.
     project: Installation namespace.
     profile: The installation type (e.g. pantheon/openatrium)
@@ -13,8 +13,6 @@ def onramp_site(project='pantheon', profile=None, url=None, **kw):
     data = {'profile': profile,
             'project': project,
             'url': url}
-
-    data.update(kw)
 
     handler = _get_profile_handler(**data)
     handler.build(**data)

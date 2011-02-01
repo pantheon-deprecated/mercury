@@ -1,5 +1,4 @@
 import os
-import re
 import tempfile
 
 import drupaltools
@@ -79,9 +78,6 @@ class ImportTools(project.BuildTools):
         if self.revision in ['DRUPAL-6-%s' % i for i in range(6)]:
             self.revision = 'DRUPAL-6-6'
             self.force_update = True
-        #TODO: TEMPORARY. Not sure how d.o git repo will be setup. Ignore for now.
-        if self.version == 7:
-            super(ImportTools, self).setup_project_branch()
         super(ImportTools, self).setup_project_branch(self.revision)
 
     def setup_database(self):
@@ -198,26 +194,36 @@ class ImportTools(project.BuildTools):
 
         # Change paths in the files table
         database = '%s_%s' % (self.project, 'dev')
-        local('mysql -u root %s -e "UPDATE files SET filepath = \
-               REPLACE(filepath,\'%s\',\'%s\');"' % (database,
-                                                     file_location,
-                                                     'sites/default/files'))
+
+        if self.version == 6:
+            file_var = 'file_directory_path'
+            file_var_temp = 'file_directory_temp'
+            # Change the base path in files table for Drupal 6
+            local('mysql -u root %s -e "UPDATE files SET filepath = \
+                   REPLACE(filepath,\'%s\',\'%s\');"'% (database,
+                                                        file_location,
+                                                        'sites/default/files'))
+        elif self.version == 7:
+            file_var = 'file_public_path'
+            file_var_temp = 'file_temporary_path'
 
         # Change file_directory_path drupal variable
         file_directory_path = 's:19:\\"sites/default/files\\";'
         local('mysql -u root %s -e "UPDATE variable \
                                     SET value = \'%s\' \
-                                    WHERE name = \'file_directory_path\';"' % (
+                                    WHERE name = \'%s\';"' % (
                                     database,
-                                    file_directory_path))
+                                    file_directory_path,
+                                    file_var))
 
         # Change file_directory_temp drupal variable
         file_directory_temp = 's:4:\\"/tmp\\";'
         local('mysql -u root %s -e "UPDATE variable \
                                     SET value = \'%s\' \
-                                    WHERE name = \'file_directory_temp\';"' % (
+                                    WHERE name = \'%s\';"' % (
                                     database,
-                                    file_directory_temp))
+                                    file_directory_temp,
+                                    file_var_temp))
 
         # Ignore files directory
         with open(os.path.join(file_dest,'.gitignore'), 'a') as f:
@@ -228,12 +234,16 @@ class ImportTools(project.BuildTools):
         """Enable required modules, and set Pantheon variable defaults.
 
         """
-        required_modules = ['apachesolr',
-                            'apachesolr_search',
-                            'cookie_cache_bypass',
-                            'locale',
-                            'syslog',
-                            'varnish']
+        if self.version == 6:
+            required_modules = ['apachesolr',
+                                'apachesolr_search',
+                                'cookie_cache_bypass',
+                                'locale',
+                                'syslog',
+                                'varnish']
+        elif self.version == 7:
+            required_modules = ['apachesolr',
+                                'apachesolr_search']
         # Enable modules.
         with settings(hide('warnings'), warn_only=True):
             for module in required_modules:
@@ -247,18 +257,31 @@ class ImportTools(project.BuildTools):
                               'Error Message:'
                         print '\n%s' % result.stderr
 
-        # Solr variables
-        drupal_vars = {}
-        drupal_vars['apachesolr_search_make_default'] = 1
-        drupal_vars['apachesolr_search_spellcheck'] = 1
+        if self.version == 6:
+            drupal_vars = {
+                'apachesolr_search_make_default': 1,
+                'apachesolr_search_spellcheck': 1,
+                'cache': '3',
+                'block_cache': '1',
+                'page_cache_max_age': '900',
+                'page_compression': '0',
+                'preprocess_js': '1',
+                'preprocess_css': '1'}
 
-        # admin/settings/performance variables
-        drupal_vars['cache'] = '3'
-        drupal_vars['page_cache_max_age'] = '900'
-        drupal_vars['block_cache'] = '1'
-        drupal_vars['page_compression'] = '0'
-        drupal_vars['preprocess_js'] = '1'
-        drupal_vars['preprocess_css'] = '1'
+        elif self.version == 7:
+            drupal_vars = {
+                'cache': 1,
+                'block_cache': 1,
+                'cache_lifetime': "0",
+                'page_cache_maximum_age': "900",
+                'page_compression': 0,
+                'preprocess_css': 1,
+                'preprocess_js': 1,
+                'search_active_modules': {
+                    'apachesolr_search':'apachesolr_search',
+                    'user': 'user',
+                    'node': 0},
+                'search_default_module': 'apachesolr_search'}
 
         # Set variables.
         database = '%s_dev' % self.project
@@ -370,13 +393,20 @@ class ImportTools(project.BuildTools):
     def _get_drupal_version_info(self):
         platform = self._get_drupal_platform()
         version = self._get_drupal_version()
-        if platform == 'DRUPAL':
-            revision = 'DRUPAL-%s' % version
-        elif platform == 'PRESSFLOW':
-            revision = self._get_pressflow_revision()
-        return (version[0:1], revision)
+        major_version = int(version[0:1])
+        if major_version == 6:
+            if platform == 'DRUPAL':
+                revision = 'DRUPAL-%s' % version
+            elif platform == 'PRESSFLOW':
+                revision = self._get_pressflow_revision()
+        elif major_version == 7:
+            #TODO: Temporary until D7 git setup is finalized.
+            revision = None
+
+        return (major_version, revision)
 
     def _get_drupal_platform(self):
+        #TODO: Make sure this is D7 friendly once Pressflow setup is finalized.
         return ((local("awk \"/\'info\' =>/\" " + \
                 self.working_dir + \
                 "/modules/system/system.module" + \
@@ -384,25 +414,20 @@ class ImportTools(project.BuildTools):
                 ).rstrip('\n').upper())
 
     def _get_drupal_version(self):
-        #TODO: This is sloppy. Clean it up.
+        """Return the Drupal version from imported codebase.
 
-        # Drupal 6 look in system.module
-        version = ((local("awk \"/define\(\'VERSION\'/\" " + \
-                  self.working_dir + "/modules/system/system.module" + \
-                  "| sed \"s_^.*'\(6\)\.\([0-9]\{1,2\}\).*_\\1-\\2_\"")
-                  ).rstrip('\n'))
+        """
+        locations = ['modules/system/system.module', # Drupal 6
+                     'includes/bootstrap.inc']       # Drupal 7
 
-        if not version:
-            # Drupal 7 system.info has version info.
-            pattern = re.compile(r'^version.*([0-9]{1})\.([0-9]{1,2})')
-            for line in open(os.path.join(self.working_dir,
-                                          'modules/system/system.info'), 'r'):
-                match = pattern.search(line)
-                if match:
-                    version = '%s-%s' % (version.group(1), version.group(2))
+        for location in locations:
+            version = local("awk \"/define\(\'VERSION\'/\" " + \
+                            os.path.join(self.working_dir, location) +" | "+ \
+                            "sed \"s_^.*'\([6,7]\{1\}\)\.\([0-9]\{1,2\}\).*_\\1-\\2_\""
+                            ).rstrip('\n')
 
-        if version and version[0:1] in ['6', '7']:
-            return version
+            if version and version[0:1] in ['6', '7']:
+                return version
 
         postback.build_error('Error: Invalid or unknown Drupal version.')
 

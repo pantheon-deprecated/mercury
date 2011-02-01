@@ -142,13 +142,16 @@ class BuildTools(object):
         settings_default = os.path.join(site_dir, 'default.settings.php')
         settings_pantheon = os.path.join(site_dir, 'pantheon.settings.php')
 
-        if self.version == 6:
-            # Make sure default.settings.php exists.
-            if not os.path.isfile(settings_default):
-                pantheon.curl('http://gitorious.org/pantheon/6/' + \
-                              'blobs/raw/master/' + \
-                              'sites/default/default.settings.php',
-                                  settings_default)
+        # Make sure default.settings.php exists. If it doesn't GIT may think
+        # default.settings.php was moved to settings.php and cause conflict.
+        if not os.path.isfile(settings_default):
+            if self.version == 6:
+                settings_blob = 'http://gitorious.org/pantheon/6/' + \
+                         'blobs/raw/master/sites/default/default.settings.php'
+            elif self.version == 7:
+                settings_blob = 'https://github.com/pantheon-systems/7/' + \
+                         'raw/master/sites/default/default.settings.php'
+                pantheon.curl(settings_blob, settings_default)
 
         # Make sure settings.php exists.
         if not os.path.isfile(settings_file):
