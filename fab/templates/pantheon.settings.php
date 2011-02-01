@@ -2,7 +2,7 @@
 
 $vhost_dir = '${vhost_root}';
 
-if ($_SERVER['db_name']) {
+if (isset($_SERVER['db_name'])) {
     $db_url = "mysqli://$_SERVER[db_username]:$_SERVER[db_password]@localhost/$_SERVER[db_name]";
 }
 elseif (is_file($vhost_dir .'000_${project}_live') ||
@@ -30,7 +30,7 @@ elseif (is_file($vhost_dir .'000_${project}_live') ||
     elseif (preg_match('/${project}\/test/', $drupal_root)) {
         $vhost = explode(PHP_EOL, file_get_contents($vhost_dir .'${project}_test'));
     }
-    if ($vhost) {
+    if (isset($vhost)) {
         $vars = array();
         foreach ($vhost as $line) {
             $line = trim($line);
