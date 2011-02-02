@@ -182,15 +182,15 @@ def parse_drush_output(drush_output):
     drush_output: drush backend json output.
     """
     # Create the patern
-    DBOD = 'DRUSH_BACKEND_OUTPUT_START>>>%s<<<DRUSH_BACKEND_OUTPUT_END'
-    p = re.compile(DBOD % '(.*)')
+    pattern = re.compile('DRUSH_BACKEND_OUTPUT_START>>>%s<<<DRUSH_BACKEND_OUTPUT_END' % '(.*)')
 
     # Match the patern, returning None if not found.
-    m = p.match(drush_output)
-    if (m == None):
-        return None
-    else:
+    match = pattern.match(drush_output)
+
+    if match:
         return json.loads(m.group(1))
+
+    return None
 
 class PantheonServer:
 
