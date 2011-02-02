@@ -114,7 +114,7 @@ class Updater(project.BuildTools):
         alias = '@%s_%s' % (self.project, self.project_env)
         with settings(warn_only=True):
             result = local('drush %s -by updb' % alias)
-        json_out = parse_drush_output(result)
+        json_out = pantheon.parse_drush_output(result)
         msgs = '\n'.join(['[%s] %s' % (o['type'], o['message'])
                         for o in json_out['log']])
         if (result.failed):
