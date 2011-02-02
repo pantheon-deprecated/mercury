@@ -432,6 +432,7 @@ class ImportTools(project.BuildTools):
         postback.build_error('Error: Invalid or unknown Drupal version.')
 
     def _get_pressflow_revision(self):
+        #TODO: Make sure this is D7 friendly once Pressflow setup is finalized.
         #TODO: Optimize this (restrict search to revisions within Drupal minor version)
         temporary_directory = tempfile.mkdtemp()
         local("git clone git://gitorious.org/pantheon/6.git " + temporary_directory)
