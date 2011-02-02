@@ -8,6 +8,7 @@ import time
 import urllib2
 import zipfile
 import json
+import re
 
 import postback
 import hudsontools
@@ -188,7 +189,7 @@ def parse_drush_output(drush_output):
     match = pattern.match(drush_output)
 
     if match:
-        return json.loads(m.group(1))
+        return json.loads(match.group(1))
 
     return None
 
