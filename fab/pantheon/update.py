@@ -87,6 +87,7 @@ class Updater(project.BuildTools):
             with cd(os.path.join(self.project_path, 'test')):
                 tag = local('git describe --tags').rstrip('\n')
             self._fetch_and_reset(tag)
+        local("apache2ctl -k graceful", capture=False)
 
     def code_commit(self, message):
         with cd(os.path.join(self.project_path, 'dev')):
@@ -120,6 +121,7 @@ class Updater(project.BuildTools):
         if (result.failed):
             hudsontools.junit_fail(msgs, 'UpdateDB')
             postback.build_warning("Warning: UpdateDB encountered an error.")
+            print("\n=== UpdateDB Debug Output ===\n%s\n" % msgs)
         else:
             hudsontools.junit_pass(msgs, 'UpdateDB')
 
