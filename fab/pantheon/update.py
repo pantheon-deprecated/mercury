@@ -4,6 +4,8 @@ import tempfile
 import dbtools
 import pantheon
 import project
+import hudsontools
+import postback
 
 from fabric.api import *
 
@@ -85,6 +87,7 @@ class Updater(project.BuildTools):
             with cd(os.path.join(self.project_path, 'test')):
                 tag = local('git describe --tags').rstrip('\n')
             self._fetch_and_reset(tag)
+        local("apache2ctl -k graceful", capture=False)
 
     def code_commit(self, message):
         with cd(os.path.join(self.project_path, 'dev')):
@@ -111,7 +114,16 @@ class Updater(project.BuildTools):
     def drupal_updatedb(self):
         alias = '@%s_%s' % (self.project, self.project_env)
         with settings(warn_only=True):
-            local('drush %s -y updatedb' % alias)
+            result = local('drush %s -by updb' % alias)
+        json_out = pantheon.parse_drush_output(result)
+        msgs = '\n'.join(['[%s] %s' % (o['type'], o['message'])
+                        for o in json_out['log']])
+        if (result.failed):
+            hudsontools.junit_fail(msgs, 'UpdateDB')
+            postback.build_warning("Warning: UpdateDB encountered an error.")
+            print("\n=== UpdateDB Debug Output ===\n%s\n" % msgs)
+        else:
+            hudsontools.junit_pass(msgs, 'UpdateDB')
 
     def permissions_update(self):
         self.setup_permissions('update', self.project_env)

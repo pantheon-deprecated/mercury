@@ -7,6 +7,8 @@ import tempfile
 import time
 import urllib2
 import zipfile
+import json
+import re
 
 import postback
 import hudsontools
@@ -176,6 +178,20 @@ def configure_root_certificate(pki_server):
 def hudson_restart():
     local('curl -X POST http://localhost:8090/safeRestart')
 
+def parse_drush_output(drush_output):
+    """ Return drush backend json as a dictionary.
+    drush_output: drush backend json output.
+    """
+    # Create the patern
+    pattern = re.compile('DRUSH_BACKEND_OUTPUT_START>>>%s<<<DRUSH_BACKEND_OUTPUT_END' % '(.*)')
+
+    # Match the patern, returning None if not found.
+    match = pattern.match(drush_output)
+
+    if match:
+        return json.loads(match.group(1))
+
+    return None
 
 class PantheonServer:
 
