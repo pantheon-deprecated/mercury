@@ -113,13 +113,13 @@ class Updater(project.BuildTools):
     def drupal_updatedb(self):
         alias = '@%s_%s' % (self.project, self.project_env)
         with settings(warn_only=True):
-            result = parse_drush_output(local('drush %s -by updb' % alias))
+            result = local('drush %s -by updb' % alias)
         json_out = parse_drush_output(result)
         msgs = '\n'.join(['[%s] %s' % (o['type'], o['message'])
                         for o in json_out['log']])
         if (result.failed):
             hudsontools.junit_fail(msgs, 'UpdateDB')
-            postback.build_warning(msgs)
+            postback.build_warning("Warning: UpdateDB encountered an error.")
         else:
             hudsontools.junit_pass(msgs, 'UpdateDB')
 
