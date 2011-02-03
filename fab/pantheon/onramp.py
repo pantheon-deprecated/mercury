@@ -391,66 +391,50 @@ class ImportTools(project.BuildTools):
             return sql_dump[0]
 
     def _get_drupal_version_info(self):
-        platform = self._get_drupal_platform()
-        version = self._get_drupal_version()
+        """Determine the platform, version, and revision of the imported site.
+        Returns tuple of major_version (6 or 7) and the nearest git revision.
+
+        """
+        version = drupaltools.get_drupal_version(self.working_dir)
+        if not version:
+            postback.build_error('Error: Invalid or unknown Drupal version.')
+        platform = drupaltools.get_drupal_platform(self.working_dir)
+
         major_version = int(version[0:1])
         if major_version == 6:
             if platform == 'DRUPAL':
                 revision = 'DRUPAL-%s' % version
-            elif platform == 'PRESSFLOW':
-                revision = self._get_pressflow_revision()
+            elif platform == 'PRESSFLOW' or platform == 'PANTHEON':
+                revision = self._get_pressflow_revision(6)
         elif major_version == 7:
             #TODO: Temporary until D7 git setup is finalized.
-            revision = None
-
+            if platform == 'DRUPAL':
+                revision = None
+            elif platform == 'PRESSFLOW' or platform == 'PANTHEON':
+                revision = self._get_pressflow_revision(7)
         return (major_version, revision)
 
-    def _get_drupal_platform(self):
+    def _get_pressflow_revision(self, version=6):
         #TODO: Make sure this is D7 friendly once Pressflow setup is finalized.
-        return ((local("awk \"/\'info\' =>/\" " + \
-                self.working_dir + \
-                "/modules/system/system.module" + \
-                r' | sed "s_^.*Powered by \([a-zA-Z]*\).*_\1_"')
-                ).rstrip('\n').upper())
-
-    def _get_drupal_version(self):
-        """Return the Drupal version from imported codebase.
-
-        """
-        locations = ['modules/system/system.module', # Drupal 6
-                     'includes/bootstrap.inc']       # Drupal 7
-
-        for location in locations:
-            version = local("awk \"/define\(\'VERSION\'/\" " + \
-                            os.path.join(self.working_dir, location) +" | "+ \
-                            "sed \"s_^.*'\([6,7]\{1\}\)\.\([0-9]\{1,2\}\).*_\\1-\\2_\""
-                            ).rstrip('\n')
-
-            if version and version[0:1] in ['6', '7']:
-                return version
-
-        postback.build_error('Error: Invalid or unknown Drupal version.')
-
-    def _get_pressflow_revision(self):
-        #TODO: Make sure this is D7 friendly once Pressflow setup is finalized.
-        #TODO: Optimize this (restrict search to revisions within Drupal minor version)
-        temporary_directory = tempfile.mkdtemp()
-        local("git clone git://gitorious.org/pantheon/6.git " + temporary_directory)
-        with cd(temporary_directory):
-            match = {'difference': None, 'commit': None}
-            commits = local("git log | grep '^commit' | sed 's/^commit //'").split('\n')
-            print "\nPlease Wait. Determining closest Pantheon revision.\n" + \
-                  "This could take a few minutes.\n"
-            for commit in commits:
-                if len(commit) > 1:
-                    with hide('running'):
-                        local("git reset --hard " + commit)
-                        difference = int(local("diff -rup " + self.working_dir + " ./ | wc -l"))
-                        # print("Commit " + commit + " shows difference of " + str(difference))
-                        if match['commit'] == None or difference < match['difference']:
-                            match['difference'] = difference
-                            match['commit'] = commit
-        local('rm -rf %s' % temporary_directory)
+        print "\nPlease Wait. Determining closest Pantheon revision.\n"
+        temp_dir = tempfile.mkdtemp()
+        if version == 6:
+            repo = 'git://gitorious.org/pantheon/6.git'
+        elif version == 7:
+            repo = 'git://github.com/pantheon-systems/7.git'
+        local('git clone %s %s' % (repo, temp_dir))
+        with cd(temp_dir):
+            match = {'diff': None, 'commit': None}
+            commits = local('git log --pretty=format:%H').split('\n')
+            with hide('running'):
+                for commit in commits:
+                    local("git reset --hard " + commit)
+                    diff = int(local("diff -rup %s ./ | wc -l" % + \
+                                                   self.working_dir))
+                    if match['commit'] == None or diff < match['diff']:
+                        match['diff'] = diff
+                        match['commit'] = commit
+        local('rm -rf %s' % temp_dir)
         return match['commit']
 
     def _get_files_dir(self, env='dev'):

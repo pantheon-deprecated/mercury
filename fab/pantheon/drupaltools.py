@@ -18,31 +18,19 @@ def get_drupal_update_status(project):
     status = dict()
 
     with cd(repo_path):
-        # Update master.
+        # Get upstream updates.
         local('git fetch origin')
-        # Get system module contents in master branch.
-        contents = local('git cat-file blob refs/heads/master:' + \
-                              'modules/system/system.module')
-        temp_file = tempfile.mkstemp()[1]
-        with open(temp_file, 'w') as f:
-            f.write(contents)
-        # Get latest Drupal version from system.module.
-        latest_drupal_version = _get_drupal_version(temp_file)
-        local('rm -f %s' % temp_file)
+        # Determine latest upstream version.
+        latest_drupal_version = _get_latest_drupal_version()
 
     for env in environments:
         env_path = os.path.join(project_path, env)
-        system_module = os.path.join(env_path, 'modules/system/system.module')
 
         with cd(env_path):
-            # Update metadata.
             local('git fetch origin')
 
-            # Get platform
-            platform = _get_drupal_platform(system_module)
-
-            # Get drupal update status
-            drupal_version = _get_drupal_version(system_module)
+            platform = get_drupal_platform(env_path)
+            drupal_version = get_drupal_version(env_path)
 
             # python -> json -> php boolean disagreements. Just use int.
             drupal_update = int(latest_drupal_version != drupal_version)
@@ -56,8 +44,9 @@ def get_drupal_update_status(project):
             else:
                 pantheon_log = 'Upgrade to Pressflow/Pantheon'
 
-            # NOTE: Removed reporting back with log entries, could use some
-            # other git plumbing to check for updates.
+            # NOTE: Removed reporting back with log entries, so using logs
+            # to determine if there is an update is a little silly. However,
+            # we may want to send back logs someday, so leaving for now.
 
             # If log is impty, no updates.
             pantheon_update = int(bool(pantheon_log))
@@ -69,23 +58,57 @@ def get_drupal_update_status(project):
                            'available': {'drupal_version': latest_drupal_version,}}
     return status
 
-def _get_drupal_platform(system_module):
-    """Return DRUPAL or PRESSFLOW. Checks based on system.module.
-    system_module: full path to the system.module
-
-    """
-    return ((local("awk \"/\'info\' =>/\" " + system_module + \
-            r' | sed "s_^.*Powered by \([a-zA-Z]*\).*_\1_"')
+def get_drupal_platform(drupal_root):
+    #TODO: Make sure this is D7 friendly once Pressflow setup is finalized.
+    return ((local("awk \"/\'info\' =>/\" " + \
+            os.path.join(drupal_root, 'modules/system/system.module') + \
+            r' | grep "Powered" | sed "s_^.*Powered by \([a-zA-Z]*\).*_\1_"')
             ).rstrip('\n').upper())
 
-def _get_drupal_version(system_module):
-    """Return the drupal version in 6.X notation.
-    system_module: full path to the system.module
+def get_drupal_version(drupal_root):
+    """Return the current drupal version.
 
     """
-    return ((local("awk \"/define\(\'VERSION\'/\" " + system_module + \
-            "| sed \"s_^.*'\(6\)\.\([0-9]\{1,2\}\)'.*_\\1.\\2_\"")
-            ).rstrip('\n'))
+    # Drupal 6 uses system.module, drupal 7 uses bootstrap.inc
+    locations = [os.path.join(drupal_root, 'modules/system/system.module'),
+                 os.path.join(drupal_root, 'includes/bootstrap.inc')]
+
+    version = None
+    for location in locations:
+        version = _parse_drupal_version(location)
+        if version:
+            break
+    return version
+
+def _get_latest_drupal_version():
+    """Check master (upstream) files to determine newest drupal version.
+
+    """
+    locations = ['modules/system/system.module',
+                 'includes/bootstrap.inc']
+    version = None
+    for location in locations:
+        contents = local('git cat-file blob refs/heads/master:%s' % location)
+        temp_file = tempfile.mkstemp()[1]
+        with open(temp_file, 'w') as f:
+            f.write(contents)
+        version = _parse_drupal_version(temp_file)
+        local('rm -f %s' % temp_file)
+        if version:
+            break
+    return version
+
+def _parse_drupal_version(location):
+    """Parse file at location to determine the Drupal version.
+    location: full path to file to parse.
+
+    """
+    version = local("awk \"/define\(\'VERSION\'/\" " + location + \
+                 " | sed \"s_^.*'\([6,7]\{1\}\)\.\([0-9]\{1,2\}\).*_\\1-\\2_\""
+                 ).rstrip('\n')
+    if len(version) > 1 and version[0:1] in ['6', '7']:
+        return version
+    return None
 
 def _parse_changelog(changelog):
     """Parse a diff file and return a string of any lines added.
