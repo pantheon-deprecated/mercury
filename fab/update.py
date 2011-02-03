@@ -167,13 +167,19 @@ def rebuild_environment(project, environment):
     else:
         hudsontools.junit_pass('Rebuild successful.', 'RebuildEnv')
 
-def update_data(project, environment, source_env):
+def update_data(project, environment, source_env, updatedb='True'):
     """Update the data in project/environment using data from source_env.
 
     """
     updater = update.Updater(project, environment)
     try:
         updater.data_update(source_env)
+        # updatedb is passed in as a string so we have to evaluate it
+        if eval(string.capitalize(updatedb)):
+            updater.drupal_updatedb()
+        # The server has a 2min delay before updates to the index are processed
+        local("drush @%s_%s solr-reindex" % (project, environment))
+        local("drush @%s_%s cron" % (project, environment))
     except:
         hudsontools.junit_error(traceback.format_exc(), 'UpdateData')
         raise
