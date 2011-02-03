@@ -176,7 +176,7 @@ def update_data(project, environment, source_env, updatedb=True):
         updater.data_update(source_env)
         if updatedb:
             updater.drupal_updatedb()
-        # The server has a 2 min delay before updates are processed.
+        # The server has a 2min delay before updates to the index are processed
         local("drush @%s_%s solr-reindex" % (project, environment))
         local("drush @%s_%s cron" % (project, environment))
     except:
