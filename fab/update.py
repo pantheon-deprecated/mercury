@@ -176,6 +176,9 @@ def update_data(project, environment, source_env, updatedb=True):
         updater.data_update(source_env)
         if updatedb:
             updater.drupal_updatedb()
+        # The server has a 2 min delay before updates are processed.
+        localhost("drush @%s_%s solr-reindex" % (project, environment))
+        localhost("drush @%s_%s cron" % (project, environment))
     except:
         hudsontools.junit_error(traceback.format_exc(), 'UpdateData')
         raise
