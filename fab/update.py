@@ -167,13 +167,15 @@ def rebuild_environment(project, environment):
     else:
         hudsontools.junit_pass('Rebuild successful.', 'RebuildEnv')
 
-def update_data(project, environment, source_env):
+def update_data(project, environment, source_env, updatedb=True):
     """Update the data in project/environment using data from source_env.
 
     """
     updater = update.Updater(project, environment)
     try:
         updater.data_update(source_env)
+        if updatedb:
+            updater.drupal_updatedb()
     except:
         hudsontools.junit_error(traceback.format_exc(), 'UpdateData')
         raise
