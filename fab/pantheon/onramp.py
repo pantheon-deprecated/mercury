@@ -1,6 +1,7 @@
 import os
 import tempfile
 
+import dbtools
 import drupaltools
 import pantheon
 import project
@@ -231,7 +232,7 @@ class ImportTools(project.BuildTools):
             f.write('!.gitignore\n')
 
     def enable_pantheon_settings(self):
-        """Enable required modules, and set Pantheon variable defaults.
+        """Enable required modules, and set Pantheon defaults.
 
         """
         if self.version == 6:
@@ -285,11 +286,20 @@ class ImportTools(project.BuildTools):
 
         # Set variables.
         database = '%s_dev' % self.project
-        db = drupaltools.DrupalDB(database=database,
-                                  username = self.project,
-                                  password = self.db_password)
+        db = dbtools.MySQLConn(database=database,
+                               username = self.project,
+                               password = self.db_password)
         for key, value in drupal_vars.iteritems():
             db.vset(key, value)
+
+        # apachesolr module for drupal 7 stores config in db.
+        if self.version == 7:
+            db.execute('TRUNCATE apachesolr_server')
+            for env in self.environments:
+                db.execute('INSERT INTO apachesolr_server ' + \
+                           '(server_id, name, path) VALUES ' + \
+                           '("pantheon_%s", "Pantheon %s", "/pantheon_%s")' % \
+                           (env, env, env))
         db.close()
 
        # Remove temporary working_dir drush alias.
@@ -409,7 +419,8 @@ class ImportTools(project.BuildTools):
         elif major_version == 7:
             #TODO: Temporary until D7 git setup is finalized.
             if platform == 'DRUPAL':
-                revision = None
+                # TODO: replace - with . in tags once git repo is finalized.
+                revision = version.replace('-','.') # temp hack
             elif platform == 'PRESSFLOW' or platform == 'PANTHEON':
                 revision = self._get_pressflow_revision(7)
         return (major_version, revision)
@@ -421,7 +432,7 @@ class ImportTools(project.BuildTools):
         if version == 6:
             repo = 'git://gitorious.org/pantheon/6.git'
         elif version == 7:
-            repo = 'git://github.com/pantheon-systems/7.git'
+            repo = 'git://github.com/pantheon-systems/p7.git'
         local('git clone %s %s' % (repo, temp_dir))
         with cd(temp_dir):
             match = {'diff': None, 'commit': None}
