@@ -480,7 +480,7 @@ class ImportTools(project.BuildTools):
                         match['diff'] = diff
                         match['commit'] = commit
         local('rm -rf %s' % temp_dir)
-       return match['commit']
+        return match['commit']
 
     def _get_files_dir(self, env='dev'):
         database = '%s_%s' % (self.project, env)

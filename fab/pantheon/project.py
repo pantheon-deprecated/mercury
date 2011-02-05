@@ -163,7 +163,7 @@ class BuildTools(object):
         local("sed -i 's/^[^#|*]*\$base_url/# $base_url/' %s" % settings_file)
 
         # Create pantheon.settings.php and include it from settings.php
-        ps_template = pantheon.get_template('%spantheon.settings.php' % \
+        ps_template = pantheon.get_template('pantheon%s.settings.php' % \
                                             self.version)
         ps_dict = {'project': self.project,
                    'vhost_root': self.server.vhost_dir}
