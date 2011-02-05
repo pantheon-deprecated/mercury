@@ -245,6 +245,7 @@ class ImportTools(project.BuildTools):
         elif self.version == 7:
             required_modules = ['apachesolr',
                                 'apachesolr_search']
+
         # Enable modules.
         with settings(hide('warnings'), warn_only=True):
             for module in required_modules:
@@ -297,10 +298,15 @@ class ImportTools(project.BuildTools):
             db.execute('TRUNCATE apachesolr_server')
             for env in self.environments:
                 db.execute('INSERT INTO apachesolr_server ' + \
-                           '(server_id, name, path) VALUES ' + \
-                           '("pantheon_%s", "Pantheon %s", "/pantheon_%s")' % \
-                           (env, env, env))
+                    '(host, port, server_id, name, path) VALUES ' + \
+                    '("localhost", "8983", ' + \
+                      '"pantheon_%s", "Pantheon %s", "/pantheon_%s")' %\
+                      (env, env, env))
         db.close()
+
+        # D7: apachesolr config link will not display until cache cleared?
+        with settings(warn_only=True):
+            local('drush @working_dir -y cc all')
 
        # Remove temporary working_dir drush alias.
         alias_file = '/opt/drush/aliases/working_dir.alias.drushrc.php'

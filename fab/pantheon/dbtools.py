@@ -103,7 +103,7 @@ class MySQLConn(object):
         self.connection = self._mysql_connect(database, username, password)
         self.cursor = self.connection.cursor(cursor)
 
-    def execute(self, query, warn_only=False):
+    def execute(self, query, fetchall=True, warn_only=False):
         """Execute a command on the connection.
         query: SQL statement.
 
@@ -118,27 +118,28 @@ class MySQLConn(object):
                 raise
         except MySQLdb.Warning, w:
             print "MySQL Warning: %s" % (w)
-        return self.cursor.fetchall()
+        if fetchall:
+            return self.cursor.fetchall()
+        else:
+            return self.cursor.fetchone()
 
-    def vget(self, name, debug=False):
+    def vget(self, name):
         """Return the value of a Drupal variable.
         name: The variable name.
-        debug: bool. Prints the raw (serialized) data.
 
         """
         query = "SELECT value FROM variable WHERE name = '%s'" % name
         try:
-            value = self.execute(query)
+            value = self.execute(query=query, fetchall=False)
             # Record found, unserialize value.
-            if value:
-                result = (True, _php_unserialize(value[0]))
-                if debug:
-                    print value[0]
+            if value is not None:
+                result = _php_unserialize(value[0])
             # No record found.
             else:
-                result = (True, value)
+                result = None
         except:
-            result = (False, 'Unable to get variable.')
+            print "ERROR: Unable to query for variable '%s'" % name
+            result = False
         finally:
             # Use rollback in case values have changed elsewhere.
             self.connection.rollback()
@@ -150,27 +151,20 @@ class MySQLConn(object):
         value: The value to set (type sensitive).
 
         """
-        # Check if variable already exists.
-        success, result = self.vget(name)
-        if success:
+        result = self.vget(name)
+        # If result is False, we couldn't query the DB.
+        if result is not False:
             value = _php_serialize(value)
             # Update if variable exists.
-            if result:
+            if result is not None:
                 query = "UPDATE variable SET value='%s' WHERE name='%s'" % \
                         (value, name)
             # Insert if variable does not exist.
             else:
                 query = "INSERT INTO variable (name, value) " + \
                         "VALUES ('%s','%s')" % (name, value)
-            # Use transaction to make change. Rollback if failed.
-            try:
-                self.execute(query)
-            except:
-                return (False, 'Unable to set variable.')
-
-            return (True, 'Variable [%s] set to: %s' % (name, value))
-        else:
-            return (False, 'Unable to determine if variable exists.')
+            self.execute(query=query, fetchall=False)
+            #print 'Variable [%s] set to: %s' % (name, value)
 
     def close(self):
         """Close database connection.
@@ -239,7 +233,19 @@ def _php_unserialize(data):
     vtype = data[0:1]
     if vtype == 's':
         length, value = data[2:].rstrip(';').split(':', 1)
-        return eval(value)
+        return str(value)
     elif vtype == 'i':
-        pass
+        return int(data[2:-1])
+    elif vtype == 'd':
+        return float(data[2:-1])
+    elif vtype == 'b':
+        return bool(data[2:-1])
+    elif vtype == 'N':
+        return None
+    elif vtype == 'a':
+        #TODO fake it till you make it.
+        return 'Array'
+    else:
+        return False
+
 
