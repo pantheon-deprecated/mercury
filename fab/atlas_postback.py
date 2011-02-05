@@ -1,7 +1,7 @@
-from optparse import OptionParser
 import os
 
 from pantheon import postback
+from optparse import OptionParser
 
 def main():
     usage = "usage: %prog [options]"

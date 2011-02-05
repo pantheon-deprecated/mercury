@@ -7,8 +7,11 @@ import tempfile
 import time
 import urllib2
 import zipfile
+import json
+import re
 
 import postback
+import hudsontools
 
 from fabric.api import *
 
@@ -175,6 +178,20 @@ def configure_root_certificate(pki_server):
 def hudson_restart():
     local('curl -X POST http://localhost:8090/safeRestart')
 
+def parse_drush_output(drush_output):
+    """ Return drush backend json as a dictionary.
+    drush_output: drush backend json output.
+    """
+    # Create the patern
+    pattern = re.compile('DRUSH_BACKEND_OUTPUT_START>>>%s<<<DRUSH_BACKEND_OUTPUT_END' % '(.*)')
+
+    # Match the patern, returning None if not found.
+    match = pattern.match(drush_output)
+
+    if match:
+        return json.loads(match.group(1))
+
+    return None
 
 class PantheonServer:
 
@@ -242,7 +259,6 @@ class PantheonServer:
         """ Create an alias.drushrc.php file.
         drush_dict: project:
                     environment:
-                    vhost_path: full path to vhost file
                     root: full path to drupal installation
 
         """
@@ -403,11 +419,15 @@ class PantheonArchive(object):
 
         """
         if tarfile.is_tarfile(self.path):
+            hudsontools.junit_pass('Tar found.','ArchiveType')
             return 'tar'
         elif zipfile.is_zipfile(self.path):
+            hudsontools.junit_pass('Zip found.','ArchiveType')
             return 'zip'
         else:
-            postback.build_error('Error: Not a valid tar/zip archive.')
+            err = 'Error: Not a valid tar/zip archive.'
+            hudsontools.junit_fail(err,'ArchiveType')
+            postback.build_error(err)
 
     def _open_archive(self):
         """Return an opened archive file object.

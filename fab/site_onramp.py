@@ -1,7 +1,10 @@
+import traceback
+
 from pantheon import onramp
 from pantheon import pantheon
 from pantheon import restore
 from pantheon import status
+from pantheon import hudsontools
 
 def onramp_site(project='pantheon', profile=None, url=None):
     """Create a new Drupal installation.
@@ -10,12 +13,20 @@ def onramp_site(project='pantheon', profile=None, url=None):
     **kw: Optional dictionary of values to process on installation.
 
     """
+    
     data = {'profile': profile,
             'project': project,
             'url': url}
 
     handler = _get_profile_handler(**data)
-    handler.build(**data)
+    try:
+        handler.build(**data)
+    except:
+        hudsontools.junit_error(traceback.format_exc(), 'OnrampSite')
+        raise
+    else:
+        hudsontools.junit_pass('', 'OnrampSite')
+        
 
 def _get_profile_handler(profile, **kw):
     """Return instantiated profile object.
