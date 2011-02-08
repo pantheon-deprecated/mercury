@@ -28,6 +28,7 @@ $conf['cache_default_class'] = 'MemCacheDrupal';
 $conf['memcache_key_prefix'] = $_SERVER['memcache_prefix'];
 
 /* Varnish */
-#$conf['reverse_proxy'] = TRUE;
-#$conf['reverse_proxy_addresses'] = array('127.0.0.1');
+$conf['reverse_proxy'] = TRUE;
+$conf['reverse_proxy_addresses'] = array('127.0.0.1');
+$conf['page_cache_invoke_hooks'] = FALSE;
 
