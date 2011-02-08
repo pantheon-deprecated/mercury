@@ -4,6 +4,7 @@ from pantheon import postback
 from optparse import OptionParser
 
 def main():
+    print "DEBUG: atlas_postback.main"
     usage = "usage: %prog [options]"
     parser = OptionParser(usage=usage, description="Send information about a Hudson job (and resulting data) back to Atlas.")
     parser.add_option('-c', '--check_changed_status', dest="check_changed_status", action="store_true", default=False, help='Postback only if the status of the build has changed from the previous run.')
@@ -18,6 +19,7 @@ def postback_atlas(check_changed_status=False):
     This should only be called from within a Hudson Post-Build Action.
 
     """
+    print "DEBUG: atlas_postback.postback_atlas"
     # Get job_name and build_number.
     job_name, build_number = postback.get_job_and_id()
 
@@ -36,5 +38,7 @@ def postback_atlas(check_changed_status=False):
     else:
         print('Build status has not changed. No postback performed.')
 
+
 if __name__ == '__main__':
     main()
+

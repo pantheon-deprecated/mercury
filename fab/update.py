@@ -38,8 +38,9 @@ def update_pantheon(first_boot=False):
     # Update from repo
     with cd('/opt/pantheon'):
         local('git pull origin master', capture=False)
-    # Update from BCFG2
-    local('/usr/sbin/bcfg2 -vqed', capture=False)
+    # Update from BCFG2, but don't stall if that fails for some reason.
+    with settings(warn_only=True):
+        local('/usr/sbin/bcfg2 -vqed', capture=False)
     # Restart Hudson
     local('curl -X POST http://localhost:8090/safeRestart', capture=False)
 
