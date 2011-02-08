@@ -18,6 +18,7 @@ def postback(cargo, command='atlas'):
     command: Prometheus command.
 
     """
+    print "DEBUG: postback.postback"
     try:
         task_id = cargo.get('build_parameters').get('task_id')
     except Exception:
@@ -34,6 +35,7 @@ def get_job_and_id():
     These are set (and retrieved) as environmental variables during Hudson jobs.
 
     """
+    print "DEBUG: postback.get_job_and_id"
     return (os.environ.get('JOB_NAME'), os.environ.get('BUILD_NUMBER'))
 
 def get_build_info(job_name, build_number, check_previous):
@@ -44,6 +46,7 @@ def get_build_info(job_name, build_number, check_previous):
                           build status.
 
     """
+    print "DEBUG: postback.get_build_info"
     data = _get_hudson_data(job_name, build_number)
 
     # If we care, determine if status changed from previous run.
@@ -135,6 +138,7 @@ def _status_changed(job_name, data):
     data: dict from hudsons python api for the current build.
 
     """
+    print "DEBUG: postback._status_changed"
     prev_build_number = int(data.get('number')) - 1
     # Valid previous build exists.
     if prev_build_number > 0:
@@ -149,6 +153,7 @@ def _get_build_parameters(data):
     """Return the build parameters from Hudson build API data.
 
     """
+    print "DEBUG: postback._get_build_parameters"
     ret = dict()
     parameters = data.get('actions')[0].get('parameters')
     try:
@@ -163,6 +168,7 @@ def _get_hudson_data(job, build_id):
     """Return API data for a Hudson build.
 
     """
+    print "DEBUG: postback._get_hudson_data"
     try:
         req = urllib2.Request('http://localhost:8090/job/%s/%s/api/python' % (
                                                                job, build_id))
@@ -175,6 +181,7 @@ def _send_response(responsedict):
     responsedict: fully formed dict of response data.
 
     """
+    print "DEBUG: postback._send_response"
     host = 'jobs.getpantheon.com'
     certificate = '/etc/pantheon/system.pem'
     celery = 'atlas.notify'
