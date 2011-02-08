@@ -66,9 +66,7 @@ class BuildTools(object):
                 local('git fetch git://gitorious.org/drupal/6.git master:drupal_core')
             elif self.version == 7:
                 #TODO: Use actual vanilla drupal repo once there is official git repo.
-                #local('git fetch git://github.com/pantheon-systems/p7.git master:drupal_core')
-                #local('git fetch git://github.com/drupal/drupal.git CVS:drupal_core')
-                local(' git fetch http://git-dev.drupalcode.org/project/drupal.git master:drupal_core')
+                local('git fetch git://github.com/pantheon-systems/d7.git master:drupal_core')
             # Repo config
             local('git config core.sharedRepository group')
             # Group write.
