@@ -78,7 +78,7 @@ class Updater(project.BuildTools):
 
         # Update code in 'test' (commit & tag in 'dev', fetch in 'test')
         elif self.project_env == 'test':
-            self.code_commit(message)
+            #self.code_commit(message)
             self._tag_code(tag, message)
             self._fetch_and_reset(tag)
 
