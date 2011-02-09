@@ -45,7 +45,7 @@ def update_pantheon(first_boot=False):
         with settings(warn_only=True):
             local('/usr/sbin/bcfg2 -vqed', capture=False)
     except:
-        hudsontools.junit_error(traceback.format_exc(),'UpdatePantheon')
+        print(traceback.format_exc())
         raise
     finally:
         # Restart Hudson
