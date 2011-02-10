@@ -1,6 +1,5 @@
 import os
 import sys
-import tempfile
 
 import pantheon
 import project
@@ -10,26 +9,19 @@ from fabric.api import cd
 
 class RestoreTools(project.BuildTools):
 
-    def __init__(self, project, **kw):
+    def __init__(self, project):
         """ Initialize Restore object. Inherits base methods from BuildTools.
 
         """
         super(RestoreTools, self).__init__(project)
         self.destination = os.path.join(self.server.webroot, project)
         self.db_password = pantheon.random_string(10)
-        self.working_dir = tempfile.mkdtemp()
 
-    def extract(self, tarball):
-        """ Extract the tarball to the working_dir.
-
-        """
-        #TODO: Write a more universal extractor and put in BuildTools.
-        local('tar xzf %s -C %s' % (tarball, self.working_dir))
-
-    def parse_backup(self):
+    def parse_backup(self, location):
         """ Get project name from extracted backup.
 
         """
+        self.working_dir = location
         self.backup_project = os.listdir(self.working_dir)[0]
 
     def setup_database(self):

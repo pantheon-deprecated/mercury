@@ -22,10 +22,48 @@ def get_drupal_root(base):
     hudsontools.junit_fail(err, 'DrupalRoot')
     postback.build_error(err)
 
+def download(url):
+    if url.startswith('file:///'):
+        # Local file - return path
+        return url[7:]
+    else:
+        # Download remote file into temp location with known prefix.
+        return pantheon.download(url, 'tmp_dl_')
+
+def extract(tarball):
+    """ tarball: full path to archive to extract."""
+
+    # Extract the archive
+    archive = pantheon.PantheonArchive(tarball)
+    extract_location = archive.extract()
+    archive.close()
+
+    # In the case of very large sites, people will manually upload the
+    # tarball to the machine. In these cases, we don't want to remove this
+    # file. However if the import script downloaded the file from a remote
+    # location, go ahead and remove it at the end of processing.
+    archive_location = os.path.dirname(tarball)
+    # Downloaded by import script (known location), remove after extract.
+    if archive_location.startswith('/tmp/tmp_dl_'):
+        local('rm -rf %s' % archive_location)
+
+    return extract_location
+
+def get_onramp_profile(base):
+    """Determine what onramp profile to use (import or restore)
+
+    """
+    for root, dirs, files in os.walk(base, topdown=True):
+        if ('pantheon.backup' in files) and ('live' in dirs):
+            # Restore if a backup config file and a live folder exists.
+            return 'restore'
+    # Otherwise run the import profile.
+    return 'import'
+
 
 class ImportTools(project.BuildTools):
 
-    def __init__(self, project, **kw):
+    def __init__(self, project):
         """Inherit install.InstallTools and initialize. Create addtional
         processing directory for import process.
 
@@ -37,31 +75,15 @@ class ImportTools(project.BuildTools):
         self.db_password = pantheon.random_string(10)
         self.force_update = False
 
-    def download(self, url):
-        if url.startswith('file:///'):
-            # Local file - return path
-            return url[7:]
-        else:
-            # Download remote file into temp location with known prefix.
-            return pantheon.download(url, 'tmp_dl_')
+    def parse_archive(self, extract_location):
+        """Get the site name and database dump file from archive to be imported.
 
-    def extract(self, tarball):
-        """ tarball: full path to archive to extract."""
-
-        # Extract the archive
-        archive = pantheon.PantheonArchive(tarball)
-        extract_location = archive.extract()
-        archive.close()
-
-        #TODO: We could remove the tarball at this point to save on disk space,
-        # which may be an issue for very large sites. However, this also makes
-        # troubleshooting bad imports more difficult (No tarball to test).
-
+        """
         # Find the Drupal installation and set it as the working_dir
         self.working_dir = get_drupal_root(extract_location)
 
         # Remove existing VCS files.
-        with cd(self.working_dir):
+        with cd(working_dir):
             with settings(hide('warnings'), warn_only=True):
                 local("rm -r ./.bzr")
                 local("rm -r ./.git")
@@ -70,10 +92,6 @@ class ImportTools(project.BuildTools):
                 local("find . -depth -name .svn -exec rm -fr {} \;")
                 local("find . -depth -name CVS -exec rm -fr {} \;")
 
-    def parse_archive(self):
-        """Get the site name and database dump file from archive to be imported.
-
-        """
         self.site = self._get_site_name()
         self.db_dump = self._get_database_dump()
         self.version, self.revision = self._get_drupal_version_info()
@@ -360,23 +378,11 @@ class ImportTools(project.BuildTools):
     def push_to_repo(self):
         super(ImportTools, self).push_to_repo('import')
 
-    def cleanup(self, tarball):
+    def cleanup(self):
         """ Remove leftover temporary import files..
 
         """
         local('rm -rf %s' % self.working_dir)
-
-        # In the case of very large sites, people will manually upload the
-        # tarball to the machine. In these cases, we don't want to remove this
-        # file. However if the import script downloaded the file from a remote
-        # location, go ahead and remove it at the end of processing.
-
-        archive_location = os.path.dirname(tarball)
-
-        # Downloaded by import script (known location), remove after extract.
-        if archive_location.startswith('/tmp/tmp_dl_'):
-            local('rm -rf %s' % archive_location)
-
 
     def _get_site_name(self):
         """Return the name of the site to be imported.
