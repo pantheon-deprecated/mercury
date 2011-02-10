@@ -1,6 +1,7 @@
 import os
 import sys
 
+import drupaltools
 import pantheon
 import project
 
@@ -23,6 +24,10 @@ class RestoreTools(project.BuildTools):
         """
         self.working_dir = location
         self.backup_project = os.listdir(self.working_dir)[0]
+        self.version = drupaltools.get_drupal_version(os.path.join(
+                                                          self.working_dir,
+                                                          self.backup_project,
+                                                          'dev'))[0]
 
     def setup_database(self):
         """ Restore databases from backup.

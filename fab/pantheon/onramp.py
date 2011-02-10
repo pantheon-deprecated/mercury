@@ -53,6 +53,7 @@ def get_onramp_profile(base):
     """Determine what onramp profile to use (import or restore)
 
     """
+    #TODO: make this more efficient. Could walk through a huge import.
     for root, dirs, files in os.walk(base, topdown=True):
         if ('pantheon.backup' in files) and ('live' in dirs):
             # Restore if a backup config file and a live folder exists.
@@ -83,7 +84,7 @@ class ImportTools(project.BuildTools):
         self.working_dir = get_drupal_root(extract_location)
 
         # Remove existing VCS files.
-        with cd(working_dir):
+        with cd(self.working_dir):
             with settings(hide('warnings'), warn_only=True):
                 local("rm -r ./.bzr")
                 local("rm -r ./.git")
