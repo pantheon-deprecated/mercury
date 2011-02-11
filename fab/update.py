@@ -45,9 +45,8 @@ def update_pantheon(first_boot=False):
             local('git fetch --prune origin', capture=False)
             local('git checkout --force %s' % branch, capture=False)
             local('git reset --hard origin/%s' % branch, capture=False)
-        # Update from BCFG2, but don't stall if that fails for some reason.
-        with settings(warn_only=True):
-            local('/usr/sbin/bcfg2 -vqed', capture=False)
+        # Update from BCFG2
+        local('/usr/sbin/bcfg2 -vqed', capture=False)
     except:
         print(traceback.format_exc())
         raise
