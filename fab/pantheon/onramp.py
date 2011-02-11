@@ -471,9 +471,9 @@ class ImportTools(project.BuildTools):
         print "\nPlease Wait. Determining closest Pantheon revision.\n"
         temp_dir = tempfile.mkdtemp()
         if version == 6:
-            repo = 'git://gitorious.org/pantheon/6.git'
+            repo = 'git://git.getpantheon.com/pantheon/6.git'
         elif version == 7:
-            repo = 'git://github.com/pantheon-systems/p7.git'
+            repo = 'git://git.getpantheon.com/pantheon/7.git'
         local('git clone %s %s' % (repo, temp_dir))
         with cd(temp_dir):
             match = {'diff': None, 'commit': None}

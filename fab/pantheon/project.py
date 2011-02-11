@@ -55,18 +55,15 @@ class BuildTools(object):
         project_repo = os.path.join('/var/git/projects', self.project)
 
         # Get Pantheon core
-        if self.version == 6:
-            local('git clone --mirror git://gitorious.org/pantheon/6.git %s' % project_repo)
-        elif self.version == 7:
-            local('git clone --mirror git://github.com/pantheon-systems/p7.git %s' % project_repo)
+        local('git clone --mirror ' + \
+              'git://git.getpantheon.com/pantheon/%s.git %s' % (self.version,
+                                                                project_repo))
 
         with cd(project_repo):
             # Drupal Core
-            if self.version == 6:
-                local('git fetch git://gitorious.org/drupal/6.git master:drupal_core')
-            elif self.version == 7:
-                #TODO: Use actual vanilla drupal repo once there is official git repo.
-                local('git fetch git://github.com/pantheon-systems/d7.git master:drupal_core')
+            #TODO: Use official Drupal git repo once available.
+            local('git fetch git://git.getpantheon.com/drupal/' + \
+                  '%s.git master:drupal_core' % (self.version))
             # Repo config
             local('git config core.sharedRepository group')
             # Group write.
@@ -142,16 +139,14 @@ class BuildTools(object):
         settings_default = os.path.join(site_dir, 'default.settings.php')
         settings_pantheon = os.path.join(site_dir, 'pantheon.settings.php')
 
-        # Make sure default.settings.php exists. If it doesn't GIT may think
-        # default.settings.php was moved to settings.php and cause conflict.
+        # Make sure default.settings.php exists. If it has been removed,
+        # git may think that it was moved to settings.php and cause conflict.
         if not os.path.isfile(settings_default):
-            if self.version == 6:
-                settings_blob = 'http://gitorious.org/pantheon/6/' + \
-                         'blobs/raw/master/sites/default/default.settings.php'
-            elif self.version == 7:
-                settings_blob = 'https://github.com/pantheon-systems/7/' + \
-                         'raw/master/sites/default/default.settings.php'
-                pantheon.curl(settings_blob, settings_default)
+            settings_contents = local(
+                'git cat-file --git-dir=/var/git/projects/%s' % self.project +\
+                'blob refs/heads/master:sites/default/default.settings.php')
+            with open(settings_default, 'w') as f:
+                f.write(settings_contents)
 
         # Make sure settings.php exists.
         if not os.path.isfile(settings_file):

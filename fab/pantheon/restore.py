@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 
 import drupaltools
@@ -69,6 +70,21 @@ class RestoreTools(project.BuildTools):
             local('rm -rf %s' % project_repo)
         local('rsync -avz %s/ %s/' % (backup_repo, project_repo))
         local('chmod -R g+w %s' % project_repo)
+
+        # Enforce a specific origin remote
+        with cd(project_repo):
+            # Get version from existing origin. 
+            # TODO: One day we can remove this, but this ensures restored sites
+            #       will point to the correct origin.
+            pattern = re.compile('^origin.*([6,7])\.git.*')
+            remotes = local('git remote -v').split('\n')
+            for remote in remotes:
+                match = pattern.search(remote)
+                if match and match.group(1) in ['6', '7']:
+                    local('git remote rm origin')
+                    local('git remote add --mirror origin ' + \
+                          'git://git.getpantheon.com/pantheon/%s.git' % match.group(1))
+                    break
 
     def setup_vhost(self):
         """ Create vhost file using db_password.
