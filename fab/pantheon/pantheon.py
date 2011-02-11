@@ -11,7 +11,7 @@ import json
 import re
 
 import postback
-import hudsontools
+import jenkinstools
 
 from fabric.api import *
 
@@ -130,8 +130,8 @@ def curl(url, destination):
     """
     local('curl "%s" -o "%s"' % (url, destination))
 
-def hudson_running():
-    """Check if hudson is running. Returns True if http code == 200.
+def jenkins_running():
+    """Check if jenkins is running. Returns True if http code == 200.
 
     """
     try:
@@ -140,8 +140,8 @@ def hudson_running():
         return False
     return result == 200
 
-def hudson_queued():
-    """Returns number of jobs Hudson currently has in its queue. -1 if unknown.
+def jenkins_queued():
+    """Returns number of jobs Jenkins currently has in its queue. -1 if unknown.
 
     """
     try:
@@ -175,7 +175,7 @@ def configure_root_certificate(pki_server):
     #local('cat /etc/ca-certificates.conf | sort | uniq | sudo tee /etc/ca-certificates.conf') # Remove duplicates.
     local('sudo update-ca-certificates')
 
-def hudson_restart():
+def jenkins_restart():
     local('curl -X POST http://localhost:8090/safeRestart')
 
 def parse_drush_output(drush_output):
@@ -202,7 +202,7 @@ class PantheonServer:
             self.mysql = 'mysql'
             self.owner = 'root'
             self.web_group = 'www-data'
-            self.hudson_group = 'nogroup'
+            self.jenkins_group = 'nogroup'
             self.tomcat_owner = 'tomcat6'
             self.tomcat_version = '6'
             self.webroot = '/var/www/'
@@ -214,7 +214,7 @@ class PantheonServer:
             self.mysql = 'mysqld'
             self.owner = 'root'
             self.web_group = 'apache'
-            self.hudson_group = 'hudson'
+            self.jenkins_group = 'jenkins'
             self.tomcat_owner = 'tomcat'
             self.tomcat_version = '5'
             self.webroot = '/var/www/html/'
@@ -335,25 +335,25 @@ class PantheonServer:
 
 
     def create_drupal_cron(self, project, environment):
-        """ Create Hudson drupal cron job.
+        """ Create Jenkins drupal cron job.
         project: project name
         environment: development environment
 
         """
         # Create job directory
-        jobdir = '/var/lib/hudson/jobs/cron_%s_%s/' % (project, environment)
+        jobdir = '/var/lib/jenkins/jobs/cron_%s_%s/' % (project, environment)
         if not os.path.exists(jobdir):
             local('mkdir -p ' + jobdir)
 
         # Create job from template
         values = {'drush_alias':'@%s_%s' % (project, environment)}
-        cron_template = get_template('hudson.drupal.cron')
+        cron_template = get_template('jenkins.drupal.cron')
         template = build_template(cron_template, values)
         with open(jobdir + 'config.xml', 'w') as f:
             f.write(template)
 
         # Set Perms
-        local('chown -R %s:%s %s' % ('hudson', self.hudson_group, jobdir))
+        local('chown -R %s:%s %s' % ('jenkins', self.jenkins_group, jobdir))
 
 
     def get_vhost_file(self, project, environment):
@@ -417,14 +417,14 @@ class PantheonArchive(object):
 
         """
         if tarfile.is_tarfile(self.path):
-            hudsontools.junit_pass('Tar found.','ArchiveType')
+            jenkinstools.junit_pass('Tar found.','ArchiveType')
             return 'tar'
         elif zipfile.is_zipfile(self.path):
-            hudsontools.junit_pass('Zip found.','ArchiveType')
+            jenkinstools.junit_pass('Zip found.','ArchiveType')
             return 'zip'
         else:
             err = 'Error: Not a valid tar/zip archive.'
-            hudsontools.junit_fail(err,'ArchiveType')
+            jenkinstools.junit_fail(err,'ArchiveType')
             postback.build_error(err)
 
     def _open_archive(self):

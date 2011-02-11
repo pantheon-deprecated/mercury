@@ -3,7 +3,7 @@ import traceback
 import drupaltools
 import gittools
 import postback
-import hudsontools
+import jenkinstools
 
 from fabric.api import *
 
@@ -15,10 +15,10 @@ def git_repo_status(project):
         repo = gittools.GitRepo(project)
         status = repo.get_repo_status()
     except:
-        hudsontools.junit_error(traceback.format_exc(), 'GitRepoStatus')
+        jenkinstools.junit_error(traceback.format_exc(), 'GitRepoStatus')
         raise
     else:
-        hudsontools.junit_pass('%s' % status, 'GitRepoStatus')
+        jenkinstools.junit_pass('%s' % status, 'GitRepoStatus')
         postback.write_build_data('git_repo_status', {'status': status})
 
 def drupal_update_status(project):
@@ -28,10 +28,10 @@ def drupal_update_status(project):
     try:
         status = drupaltools.get_drupal_update_status(project)
     except:
-        hudsontools.junit_error(traceback.format_exc(), 'UpdateStatus')
+        jenkinstools.junit_error(traceback.format_exc(), 'UpdateStatus')
         raise
     else:
-        hudsontools.junit_pass('%s' % status, 'UpdateStatus')
+        jenkinstools.junit_pass('%s' % status, 'UpdateStatus')
         postback.write_build_data('drupal_core_status', {'status': status})
 
 

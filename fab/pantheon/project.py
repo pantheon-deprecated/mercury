@@ -40,7 +40,7 @@ class BuildTools(object):
         # TODO: We also need to remove the following:
         # Solr Index
         # Apache vhost
-        # Hudson cron
+        # Jenkins cron
         # Drush alias
         # Databases
 
@@ -210,7 +210,7 @@ class BuildTools(object):
                local('a2ensite %s' % filename)
 
     def setup_drupal_cron(self):
-        """ Create drupal cron jobs in hudson for each environment.
+        """ Create drupal cron jobs in jenkins for each environment.
 
         """
         for env in self.environments:

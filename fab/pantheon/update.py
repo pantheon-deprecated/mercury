@@ -4,7 +4,7 @@ import tempfile
 import dbtools
 import pantheon
 import project
-import hudsontools
+import jenkinstools
 import postback
 
 from fabric.api import *
@@ -15,7 +15,7 @@ class Updater(project.BuildTools):
         super(Updater, self).__init__(project)
 
         self.project_env = environment
-        self.author = 'Hudson User <hudson@pantheon>'
+        self.author = 'Jenkins User <jenkins@pantheon>'
         self.env_path = os.path.join(self.project_path, environment)
 
 
@@ -119,11 +119,11 @@ class Updater(project.BuildTools):
         msgs = '\n'.join(['[%s] %s' % (o['type'], o['message'])
                         for o in json_out['log']])
         if (result.failed):
-            hudsontools.junit_fail(msgs, 'UpdateDB')
+            jenkinstools.junit_fail(msgs, 'UpdateDB')
             postback.build_warning("Warning: UpdateDB encountered an error.")
             print("\n=== UpdateDB Debug Output ===\n%s\n" % msgs)
         else:
-            hudsontools.junit_pass(msgs, 'UpdateDB')
+            jenkinstools.junit_pass(msgs, 'UpdateDB')
 
     def permissions_update(self):
         self.setup_permissions('update', self.project_env)

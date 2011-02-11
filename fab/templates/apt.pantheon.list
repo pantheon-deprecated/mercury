@@ -11,6 +11,6 @@ deb http://archive.ubuntu.com/ubuntu/ karmic-updates main restricted universe mu
 deb-src http://archive.ubuntu.com/ubuntu/ karmic-updates main restricted universe multiverse
 deb http://security.ubuntu.com/ubuntu karmic-security main restricted universe multiverse
 deb-src http://security.ubuntu.com/ubuntu karmic-security main restricted universe multiverse
-deb http://pkg.hudson-labs.org/debian binary/
+deb http://pkg.jenkins-ci.org/debian binary/
 deb http://ppa.launchpad.net/sfire/ssh-lpk/ubuntu lucid main
 

@@ -7,7 +7,7 @@ import os
 import traceback
 import string
 
-from pantheon import hudsontools
+from pantheon import jenkinstools
 from pantheon import pantheon
 from pantheon import postback
 from pantheon import status
@@ -19,22 +19,22 @@ def update_pantheon(first_boot=False):
     """Update pantheon code and server configurations.
 
     first_boot: bool. If this is being called from the configure job. If it
-    is the first boot, we don't need to wait for hudson or send back update
+    is the first boot, we don't need to wait for jenkins or send back update
     data.
 
     Otherwise:
 
-    This script is run from a cron job because it may update Hudson (and
-    therefor cannot be run inside hudson.)
+    This script is run from a cron job because it may update Jenkins (and
+    therefor cannot be run inside jenkins.)
 
     If the script is successful, a known message will be printed to
-    stdout which will be redirected to a log file. The hudson job
+    stdout which will be redirected to a log file. The jenkins job
     post_update_pantheon will check this log file for the message to
     determine if it was successful.
 
     """
     try:
-        # Put hudson into quietDown mode so no more jobs are started.
+        # Put jenkins into quietDown mode so no more jobs are started.
         urllib2.urlopen('http://localhost:8090/quietDown')
         # Update from repo
         with cd('/opt/pantheon'):
@@ -48,37 +48,37 @@ def update_pantheon(first_boot=False):
         print(traceback.format_exc())
         raise
     finally:
-        # Restart Hudson
+        # Restart Jenkins
         local('curl -X POST http://localhost:8090/safeRestart', capture=False)
 
     # If this is not the first boot, send back update data.
     if not first_boot:
         """
-        We have to check for both queued jobs then the hudson restart.
+        We have to check for both queued jobs then the jenkins restart.
         This is because jobs could have been queued before the update
-        was started, and a check on 'hudson_running' would return True
+        was started, and a check on 'jenkins_running' would return True
         because the restart hasn't occured yet (safeRestart). This way,
-        we first make sure the queue is 0 or hudson is unreachable, then
+        we first make sure the queue is 0 or jenkins is unreachable, then
         wait until it is back up.
 
         """
 
         # wait for any jobs that were queued to finish.
         while True:
-            queued = pantheon.hudson_queued()
+            queued = pantheon.jenkins_queued()
             if queued == 0:
-                # No more jobs, give hudson a few seconds to begin restart.
+                # No more jobs, give jenkins a few seconds to begin restart.
                 time.sleep(5)
                 break
-            # Hudson is unreachable (already in restart process)
+            # Jenkins is unreachable (already in restart process)
             elif queued == -1:
                 break
             else:
                 time.sleep(5)
-        # wait for hudson to restart.
-        while not pantheon.hudson_running():
+        # wait for jenkins to restart.
+        while not pantheon.jenkins_running():
             time.sleep(5)
-        # Run post_pantheon_update hudson job
+        # Run post_pantheon_update jenkins job
         try:
             urllib2.urlopen('http://localhost:8090/job/post_update_pantheon/build')
         except Exception as detail:
@@ -98,16 +98,16 @@ def post_update_pantheon():
         if 'UPDATE COMPLETED SUCCESSFULLY' in log:
             response['status'] = 'SUCCESS'
             response['msg'] = ''
-            hudsontools.junit_pass('', 'PostUpdate')
+            jenkinstools.junit_pass('', 'PostUpdate')
         else:
             response['status'] = 'FAILURE'
             response['msg'] = 'Panthoen update did not complete.'
-            hudsontools.junit_fail(response['msg'], 'PostUpdate')
+            jenkinstools.junit_fail(response['msg'], 'PostUpdate')
         print log
     else:
         response['status'] = 'FAILURE'
         response['msg'] = 'No Pantheon update log was found.'
-        hudsontools.junit_fail(response['msg'], 'PostUpdate')
+        jenkinstools.junit_fail(response['msg'], 'PostUpdate')
         print 'No update log found.'
     postback.write_build_data('update_pantheon', response)
 
@@ -125,10 +125,10 @@ def update_site_core(project='pantheon', keep=None):
         updater.drupal_updatedb()
         updater.permissions_update()
     except:
-        hudsontools.junit_error(traceback.format_exc(), 'UpdateCore')
+        jenkinstools.junit_error(traceback.format_exc(), 'UpdateCore')
         raise
     else:
-        hudsontools.junit_pass('Update successful.', 'UpdateCore')
+        jenkinstools.junit_pass('Update successful.', 'UpdateCore')
 
     postback.write_build_data('update_site_core', result)
 
@@ -153,10 +153,10 @@ def update_code(project, environment, tag=None, message=None):
         updater.drupal_updatedb()
         updater.permissions_update()
     except:
-        hudsontools.junit_error(traceback.format_exc(), 'UpdateCode')
+        jenkinstools.junit_error(traceback.format_exc(), 'UpdateCode')
         raise
     else:
-        hudsontools.junit_pass('Update successful.', 'UpdateCode')
+        jenkinstools.junit_pass('Update successful.', 'UpdateCode')
 
     # Send back repo status and drupal update status
     status.git_repo_status(project)
@@ -171,10 +171,10 @@ def rebuild_environment(project, environment):
         updater.files_update('live')
         updater.data_update('live')
     except:
-        hudsontools.junit_error(traceback.format_exc(), 'RebuildEnv')
+        jenkinstools.junit_error(traceback.format_exc(), 'RebuildEnv')
         raise
     else:
-        hudsontools.junit_pass('Rebuild successful.', 'RebuildEnv')
+        jenkinstools.junit_pass('Rebuild successful.', 'RebuildEnv')
 
 def update_data(project, environment, source_env, updatedb='True'):
     """Update the data in project/environment using data from source_env.
@@ -190,10 +190,10 @@ def update_data(project, environment, source_env, updatedb='True'):
         local("drush @%s_%s solr-reindex" % (project, environment))
         local("drush @%s_%s cron" % (project, environment))
     except:
-        hudsontools.junit_error(traceback.format_exc(), 'UpdateData')
+        jenkinstools.junit_error(traceback.format_exc(), 'UpdateData')
         raise
     else:
-        hudsontools.junit_pass('Update successful.', 'UpdateData')
+        jenkinstools.junit_pass('Update successful.', 'UpdateData')
 
 def update_files(project, environment, source_env):
     """Update the files in project/environment using files from source_env.
@@ -203,10 +203,10 @@ def update_files(project, environment, source_env):
     try:
         updater.files_update(source_env)
     except:
-        hudsontools.junit_error(traceback.format_exc(), 'UpdateFiles')
+        jenkinstools.junit_error(traceback.format_exc(), 'UpdateFiles')
         raise
     else:
-        hudsontools.junit_pass('Update successful.', 'UpdateFiles')
+        jenkinstools.junit_pass('Update successful.', 'UpdateFiles')
 
 def git_diff(project, environment, revision_1, revision_2=None):
     """Return git diff
@@ -226,10 +226,10 @@ def git_status(project, environment):
     try:
         updater.run_command('git status')
     except:
-        hudsontools.junit_error(traceback.format_exc(), 'GitStatus')
+        jenkinstools.junit_error(traceback.format_exc(), 'GitStatus')
         raise
     else:
-        hudsontools.junit_pass('', 'GitStatus')
+        jenkinstools.junit_pass('', 'GitStatus')
 
 if __name__ == '__main__':
     update_pantheon()

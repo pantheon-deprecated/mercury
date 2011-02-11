@@ -9,7 +9,7 @@ import traceback
 from fabric.api import *
 
 from pantheon import pantheon
-from pantheon import hudsontools
+from pantheon import jenkinstools
 
 def configure():
     '''configure the Pantheon system.'''
@@ -32,10 +32,10 @@ def configure():
         _mark_incep(server)
         _report()
     except:
-        hudsontools.junit_error(traceback.format_exc(), 'Configure')
+        jenkinstools.junit_error(traceback.format_exc(), 'Configure')
         raise
     else:
-        hudsontools.junit_pass('Configure successful.', 'Configure')
+        jenkinstools.junit_pass('Configure successful.', 'Configure')
 
 def _test_for_previous_run():
     if os.path.exists("/etc/pantheon/incep"):
@@ -83,7 +83,7 @@ def _check_connectivity(server):
 def _configure_server(server):
     # Get any new packages.
     server.update_packages()
-    # Update pantheon code, run bcfg2, restart hudson.
+    # Update pantheon code, run bcfg2, restart jenkins.
     update.update_pantheon(first_boot=True)
     # Create the tunable files.
     local('cp /etc/pantheon/templates/tuneables /etc/pantheon/server_tuneables')

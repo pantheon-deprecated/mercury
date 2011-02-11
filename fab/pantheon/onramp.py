@@ -2,7 +2,7 @@ import os
 import tempfile
 
 import drupaltools
-import hudsontools
+import jenkinstools
 import pantheon
 import project
 import postback
@@ -15,10 +15,10 @@ def get_drupal_root(base):
     """
     for root, dirs, files in os.walk(base, topdown=True):
         if ('index.php' in files) and ('sites' in dirs):
-            hudsontools.junit_pass('Drupal root found.', 'DrupalRoot')
+            jenkinstools.junit_pass('Drupal root found.', 'DrupalRoot')
             return root
     err = 'Cannot locate drupal install in archive.'
-    hudsontools.junit_fail(err, 'DrupalRoot')
+    jenkinstools.junit_fail(err, 'DrupalRoot')
     postback.build_error(err)
 
 
@@ -32,7 +32,7 @@ class ImportTools(project.BuildTools):
         super(ImportTools, self).__init__(project)
 
         self.destination = os.path.join(self.server.webroot, project)
-        self.author = 'Hudson User <hudson@pantheon>'
+        self.author = 'Jenkins User <jenkins@pantheon>'
         self.db_password = pantheon.random_string(10)
         self.force_update = False
 
@@ -178,7 +178,7 @@ class ImportTools(project.BuildTools):
             if os.path.islink(file_dest):
                 local('rm -f %s' % file_dest)
                 msg = 'File path was broken symlink. Site files may be missing'
-                hudsontools.junit_fail(msg, 'SetupFilesDir')
+                jenkinstools.junit_fail(msg, 'SetupFilesDir')
                 postback.build_warning(msg)
             local('mkdir -p %s' % file_dest)
 
@@ -239,7 +239,7 @@ class ImportTools(project.BuildTools):
                     # If importing vanilla drupal, this module wont exist.
                     if module != 'cookie_cache_bypass':
                         message = 'Could not enable %s module.' % module
-                        hudsontools.junit_fail('%s\n%s' % 
+                        jenkinstools.junit_fail('%s\n%s' % 
                                                (message, result.stderr), 
                                                'EnableModules', module)
                         postback.build_warning(message)
@@ -248,7 +248,7 @@ class ImportTools(project.BuildTools):
                               'Error Message:'
                         print '\n%s' % result.stderr
                 else:
-                    hudsontools.junit_pass('%s enabled.' % module, 
+                    jenkinstools.junit_pass('%s enabled.' % module, 
                                            'EnableModules', module)
 
         # Solr variables
@@ -347,14 +347,14 @@ class ImportTools(project.BuildTools):
         if site_count > 1:
             err = 'Multiple settings.php files were found:\n' + \
                   '\n'.join(sites)
-            hudsontools.junit_fail(err, 'SiteCount')
+            jenkinstools.junit_fail(err, 'SiteCount')
             postback.build_error(err)
         elif site_count == 0:
             err = 'Error: No settings.php files were found.'
-            hudsontools.junit_fail(err, 'SiteCount')
+            jenkinstools.junit_fail(err, 'SiteCount')
             postback.build_error(err)
         else:
-            hudsontools.junit_pass('Site found.', 'SiteCount')
+            jenkinstools.junit_pass('Site found.', 'SiteCount')
             return sites[0]
 
     def _get_database_dump(self):
@@ -369,15 +369,15 @@ class ImportTools(project.BuildTools):
         count = len(sql_dump)
         if count == 0:
             err = 'No database dump files were found (*.mysql or *.sql)'
-            hudsontools.junit_fail(err, 'MYSQLCount')
+            jenkinstools.junit_fail(err, 'MYSQLCount')
             postback.build_error(err)
         elif count > 1:
             err = 'Multiple database dump files were found:\n' + \
                   '\n'.join(sql_dump)
-            hudsontools.junit_fail(err, 'MYSQLCount')
+            jenkinstools.junit_fail(err, 'MYSQLCount')
             postback.build_error(err)
         else:
-            hudsontools.junit_pass('MYSQL Dump found at %s' % 
+            jenkinstools.junit_pass('MYSQL Dump found at %s' % 
                                    (sql_dump[0]), 'MYSQLCount')
             return sql_dump[0]
 
@@ -407,10 +407,10 @@ class ImportTools(project.BuildTools):
                   ).rstrip('\n'))
         if version[0:1] != '6':
             err = 'Error: This does not appear to be a Drupal 6 site.'
-            hudsontools.junit_fail(err, 'DrupalVersion')
+            jenkinstools.junit_fail(err, 'DrupalVersion')
             postback.build_error(err)
         else:
-            hudsontools.junit_pass('Drupal version %s found.' % (version),
+            jenkinstools.junit_pass('Drupal version %s found.' % (version),
                                    'DrupalVersion')
         return version
 

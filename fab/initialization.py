@@ -20,7 +20,7 @@ def initialize(vps=None):
     _initialize_drush()
     _initialize_solr(server)
     _initialize_sudoers(server)
-    _initialize_hudson(server)
+    _initialize_jenkins(server)
     _initialize_apache(server)
     _initialize_acl(server)
 
@@ -42,8 +42,8 @@ def _initialize_fabric():
     """Make symlink of /usr/local/bin/fab -> /usr/bin/fab.
 
     This is because using pip to install fabric will install it to
-    /usr/local/bin but we want to maintaing compatibility with existing
-    servers and hudson jobs.
+    /usr/local/bin but we want to maintain compatibility with existing
+    servers and jenkins jobs.
 
     """
     if not os.path.exists('/usr/bin/fab'):
@@ -74,9 +74,8 @@ def _initialize_package_manager(server):
               '5/x86_64/ius-release-1.0-6.ius.el5.noarch.rpm')
         local('rpm -Uvh http://yum.fourkitchens.com/pub/centos/' + \
               '5/noarch/fourkitchens-release-5-6.noarch.rpm')
-        local('rpm --import http://hudson-ci.org/redhat/hudson-ci.org.key')
-        local('wget http://hudson-ci.org/redhat/hudson.repo -O ' + \
-              '/etc/yum.repos.d/hudson.repo')
+        local('rpm --import http://pkg.jenkins-ci.org/redhat/jenkins-ci.org.key')
+        local('wget -O /etc/yum.repos.d/jenkins.repo http://pkg.jenkins-ci.org/redhat/jenkins.repo')
         local('yum -y install git17 --enablerepo=ius-testing')
         arch = local('uname -m').rstrip('\n')
         if (arch == "x86_64"):
@@ -157,12 +156,12 @@ def _initialize_sudoers(server):
     local('touch /etc/sudoers.d/003_pantheon_extra')
     local('chmod 0440 /etc/sudoers.d/003_pantheon_extra')
 
-def _initialize_hudson(server):
-    """Add hudson to ssl-cert group and restart hudson.
+def _initialize_jenkins(server):
+    """Add jenkins to ssl-cert group and restart jenkins.
 
     """
-    local('usermod -aG ssl-cert hudson')
-    local('/etc/init.d/hudson restart')
+    local('usermod -aG ssl-cert jenkins')
+    local('/etc/init.d/jenkins restart')
 
 def _initialize_apache(server):
     """Remove the default vhost and clear /var/www.

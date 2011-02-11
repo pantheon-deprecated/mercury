@@ -38,7 +38,7 @@ def post_receive_hook(params):
                     print "\nDevelopment environment updated.\n"
 
         with hide('running'):
-            # If not inside a hudson job, send back data about repo and drupal.
+            # If not inside a jenkins job, send back data about repo and drupal.
             # Otherwise, we assume the job we are inside of will do this.
             if not os.environ.get('BUILD_TAG'):
                 local('curl http://127.0.0.1:8090/job/post_hook_status/' + \
