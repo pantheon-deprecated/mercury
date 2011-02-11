@@ -470,10 +470,7 @@ class ImportTools(project.BuildTools):
         #TODO: Make sure this is D7 friendly once Pressflow setup is finalized.
         print "\nPlease Wait. Determining closest Pantheon revision.\n"
         temp_dir = tempfile.mkdtemp()
-        if version == 6:
-            repo = 'git://git.getpantheon.com/pantheon/6.git'
-        elif version == 7:
-            repo = 'git://git.getpantheon.com/pantheon/7.git'
+        repo = 'git://git.getpantheon.com/pantheon/%s.git' % version
         local('git clone %s %s' % (repo, temp_dir))
         with cd(temp_dir):
             match = {'diff': None, 'commit': None}
