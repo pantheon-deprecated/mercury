@@ -481,7 +481,7 @@ class ImportTools(project.BuildTools):
             with hide('running'):
                 for commit in commits:
                     local("git reset --hard " + commit)
-                    diff = int(local("diff -rup %s ./ | wc -l" % + \
+                    diff = int(local("diff -rup %s ./ | wc -l" % \
                                                    self.working_dir))
                     if match['commit'] == None or diff < match['diff']:
                         match['diff'] = diff
