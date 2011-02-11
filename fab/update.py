@@ -33,16 +33,23 @@ def update_pantheon(first_boot=False):
     determine if it was successful.
 
     """
-    # Put hudson into quietDown mode so no more jobs are started.
-    urllib2.urlopen('http://localhost:8090/quietDown')
-    # Update from repo
-    with cd('/opt/pantheon'):
-        local('git pull origin master', capture=False)
-    # Update from BCFG2, but don't stall if that fails for some reason.
-    with settings(warn_only=True):
-        local('/usr/sbin/bcfg2 -vqed', capture=False)
-    # Restart Hudson
-    local('curl -X POST http://localhost:8090/safeRestart', capture=False)
+    try:
+        # Put hudson into quietDown mode so no more jobs are started.
+        urllib2.urlopen('http://localhost:8090/quietDown')
+        # Update from repo
+        with cd('/opt/pantheon'):
+            local('git fetch --prune origin', capture=False)
+            local('git checkout --force master', capture=False)
+            local('git reset --hard origin/master', capture=False)
+        # Update from BCFG2, but don't stall if that fails for some reason.
+        with settings(warn_only=True):
+            local('/usr/sbin/bcfg2 -vqed', capture=False)
+    except:
+        print(traceback.format_exc())
+        raise
+    finally:
+        # Restart Hudson
+        local('curl -X POST http://localhost:8090/safeRestart', capture=False)
 
     # If this is not the first boot, send back update data.
     if not first_boot:
@@ -224,3 +231,5 @@ def git_status(project, environment):
     else:
         hudsontools.junit_pass('', 'GitStatus')
 
+if __name__ == '__main__':
+    update_pantheon()
