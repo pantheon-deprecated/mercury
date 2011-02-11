@@ -83,11 +83,11 @@ class RestoreTools(project.BuildTools):
             remotes = local('git remote -v').split('\n')
             for remote in remotes:
                 match = pattern.search(remote)
-                    if match and match.group(1) in ['6', '7']:
-                        local('git remote rm origin')
-                        local('git remote add --mirror origin ' + \
-                              'git://git.getpantheon.com/pantheon/%s.git' % match.group(1))
-                        break
+                if match and match.group(1) in ['6', '7']:
+                    local('git remote rm origin')
+                    local('git remote add --mirror origin ' + \
+                          'git://git.getpantheon.com/pantheon/%s.git' % match.group(1))
+                    break
 
     def setup_vhost(self):
         """ Create vhost file using db_password.
