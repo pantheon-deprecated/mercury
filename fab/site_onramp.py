@@ -6,7 +6,7 @@ from pantheon import restore
 from pantheon import status
 from pantheon import hudsontools
 
-def onramp_site(project='pantheon', url=None, profile=None):
+def onramp_site(project='pantheon', url=None, profile=None, **kw):
     """Create a new Drupal installation.
     project: Installation namespace.
     profile: The installation type (e.g. pantheon/openatrium)

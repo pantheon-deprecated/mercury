@@ -6,7 +6,7 @@ from pantheon import install
 from pantheon import status
 from pantheon import hudsontools
 
-def install_site(project='pantheon', profile='pantheon', version=6):
+def install_site(project='pantheon', profile='pantheon', version=6, **kw):
     """ Create a new Drupal installation.
     project: Installation namespace.
     profile: The installation type (e.g. pantheon/openatrium)
