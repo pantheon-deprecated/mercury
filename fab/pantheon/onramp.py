@@ -417,7 +417,7 @@ class ImportTools(project.BuildTools):
     def _get_pressflow_revision(self):
         #TODO: Optimize this (restrict search to revisions within Drupal minor version)
         temporary_directory = tempfile.mkdtemp()
-        local("git clone git://gitorious.org/pantheon/6.git " + temporary_directory)
+        local("git clone git://git.getpantheon.com/pantheon/6.git " + temporary_directory)
         with cd(temporary_directory):
             match = {'difference': None, 'commit': None}
             commits = local("git log | grep '^commit' | sed 's/^commit //'").split('\n')

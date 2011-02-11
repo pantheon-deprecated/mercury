@@ -55,11 +55,11 @@ class BuildTools(object):
         project_repo = os.path.join('/var/git/projects', self.project)
 
         # Get Pantheon core
-        local('git clone --mirror git://gitorious.org/pantheon/6.git %s' % project_repo)
+        local('git clone --mirror git://git.getpantheon.com/pantheon/6.git %s' % project_repo)
 
         with cd(project_repo):
             # Drupal Core
-            local('git fetch git://gitorious.org/drupal/6.git master:drupal_core')
+            local('git fetch git://git.getpantheon.com/drupal/6.git master:drupal_core')
             # Repo config
             local('git config core.sharedRepository group')
             # Group write.
@@ -134,10 +134,14 @@ class BuildTools(object):
         settings_default = os.path.join(site_dir, 'default.settings.php')
         settings_pantheon = os.path.join(site_dir, 'pantheon.settings.php')
 
-        # Make sure default.settings.php exists.
+        # Make sure default.settings.php exists. If it has been removed,
+        # git may think that it was moved to settings.php and cause conflict.
         if not os.path.isfile(settings_default):
-            pantheon.curl('http://gitorious.org/pantheon/6/blobs/raw/master/' + \
-                       'sites/default/default.settings.php', settings_default)
+            settings_contents = local(
+                'git cat-file --git-dir=/var/git/projects/%s' % self.project +\
+                'blob refs/heads/master:sites/default/default.settings.php')
+            with open(settings_default, 'w') as f:
+                f.write(settings_contents)
 
         # Make sure settings.php exists.
         if not os.path.isfile(settings_file):
