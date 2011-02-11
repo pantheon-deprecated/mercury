@@ -38,7 +38,7 @@ def _get_handler(profile, project, location):
     profiles = {'import': _ImportProfile,
                 'restore': _RestoreProfile}
 
-    if profile is None:
+    if profile not in profiles.keys():
         profile = onramp.get_onramp_profile(location)
 
     return profiles[profile](project)
