@@ -1,7 +1,0 @@
-Package: openssh-client
-Pin-Priority: 991
-Pin: version 1:5.3p1-3ubuntu3lpk0
-
-Package: openssh-server
-Pin-Priority: 991
-Pin: version 1:5.3p1-3ubuntu3lpk0
