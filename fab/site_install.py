@@ -6,17 +6,16 @@ from pantheon import install
 from pantheon import status
 from pantheon import hudsontools
 
-def install_site(project='pantheon', profile='pantheon', **kw):
+def install_site(project='pantheon', profile='pantheon', version=6, **kw):
     """ Create a new Drupal installation.
     project: Installation namespace.
     profile: The installation type (e.g. pantheon/openatrium)
-    **kw: Optional dictionary of values to process on installation.
+    version: Major drupal version.
 
     """
-    data = {'profile':profile,
-            'project':project}
-
-    data.update(kw)
+    data = {'profile': profile,
+            'project': project,
+            'version': version}
 
     handler = _get_profile_handler(**data)
     try:

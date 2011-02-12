@@ -55,11 +55,15 @@ class BuildTools(object):
         project_repo = os.path.join('/var/git/projects', self.project)
 
         # Get Pantheon core
-        local('git clone --mirror git://gitorious.org/pantheon/6.git %s' % project_repo)
+        local('git clone --mirror ' + \
+              'git://git.getpantheon.com/pantheon/%s.git %s' % (self.version,
+                                                                project_repo))
 
         with cd(project_repo):
             # Drupal Core
-            local('git fetch git://gitorious.org/drupal/6.git master:drupal_core')
+            #TODO: Use official Drupal git repo once available.
+            local('git fetch git://git.getpantheon.com/drupal/' + \
+                  '%s.git master:drupal_core' % (self.version))
             # Repo config
             local('git config core.sharedRepository group')
             # Group write.
@@ -121,7 +125,8 @@ class BuildTools(object):
         module_dir = os.path.join(working_dir, 'sites/all/modules')
         # SolrPhpClient
         with cd(os.path.join(module_dir, 'apachesolr')):
-            local('wget http://solr-php-client.googlecode.com/files/SolrPhpClient.r22.2009-11-09.tgz')
+            local('wget http://solr-php-client.googlecode.com/' + \
+                  'files/SolrPhpClient.r22.2009-11-09.tgz')
             local('tar xzf SolrPhpClient.r22.2009-11-09.tgz')
             local('rm -f SolrPhpClient.r22.2009-11-09.tgz')
 
@@ -134,24 +139,31 @@ class BuildTools(object):
         settings_default = os.path.join(site_dir, 'default.settings.php')
         settings_pantheon = os.path.join(site_dir, 'pantheon.settings.php')
 
-        # Make sure default.settings.php exists.
+        # Make sure default.settings.php exists. If it has been removed,
+        # git may think that it was moved to settings.php and cause conflict.
         if not os.path.isfile(settings_default):
-            pantheon.curl('http://gitorious.org/pantheon/6/blobs/raw/master/' + \
-                       'sites/default/default.settings.php', settings_default)
+            settings_contents = local(
+                'git cat-file --git-dir=/var/git/projects/%s' % self.project +\
+                'blob refs/heads/master:sites/default/default.settings.php')
+            with open(settings_default, 'w') as f:
+                f.write(settings_contents)
 
         # Make sure settings.php exists.
         if not os.path.isfile(settings_file):
             local('cp %s %s' % (settings_default, settings_file))
+
         # Comment out $base_url entries.
         local("sed -i 's/^[^#|*]*\$base_url/# $base_url/' %s" % settings_file)
 
         # Create pantheon.settings.php and include it from settings.php
-        ps_template = pantheon.get_template('pantheon.settings.php')
+        ps_template = pantheon.get_template('pantheon%s.settings.php' % \
+                                            self.version)
         ps_dict = {'project': self.project,
                    'vhost_root': self.server.vhost_dir}
         template = pantheon.build_template(ps_template, ps_dict)
         with open(settings_pantheon, 'w') as f:
             f.write(template)
+
         with open(os.path.join(site_dir, 'settings.php'), 'a') as f:
             f.write('\n/* Added by Pantheon */\n')
             f.write("include 'pantheon.settings.php';\n")
@@ -172,7 +184,7 @@ class BuildTools(object):
 
         """
         for env in self.environments:
-            self.server.create_solr_index(self.project, env)
+            self.server.create_solr_index(self.project, env, self.version)
 
     def setup_vhost(self, db_password):
         """ Create vhost files for each environment in a project.
@@ -195,7 +207,6 @@ class BuildTools(object):
                           'db_password':db_password,
                           'solr_path': '/%s_%s' % (self.project, env),
                           'memcache_prefix': '%s_%s' % (self.project, env)}
-            
 
             filename = '%s_%s' % (self.project, env)
             if env == 'live':
@@ -261,7 +272,7 @@ class BuildTools(object):
         """
         vhost_dict = {'db_username':self.project,
                       'db_password':db_password}
-        
+
         filename = 'pma_vhost'
         # Todo: fix hard-coding of .ubuntu here?
         vhost_template_file = 'pma.vhost.template.ubuntu'

@@ -36,14 +36,17 @@ def update_pantheon(first_boot=False):
     try:
         # Put hudson into quietDown mode so no more jobs are started.
         urllib2.urlopen('http://localhost:8090/quietDown')
+        # Find out if this server is using a testing branch.
+        branch = 'master'
+        if os.path.exists('/opt/branch.txt'):
+            branch = open('/opt/branch.txt').read().strip() or 'master'
         # Update from repo
         with cd('/opt/pantheon'):
             local('git fetch --prune origin', capture=False)
-            local('git checkout --force master', capture=False)
-            local('git reset --hard origin/master', capture=False)
-        # Update from BCFG2, but don't stall if that fails for some reason.
-        with settings(warn_only=True):
-            local('/usr/sbin/bcfg2 -vqed', capture=False)
+            local('git checkout --force %s' % branch, capture=False)
+            local('git reset --hard origin/%s' % branch, capture=False)
+        # Update from BCFG2
+        local('/usr/sbin/bcfg2 -vqed', capture=False)
     except:
         print(traceback.format_exc())
         raise

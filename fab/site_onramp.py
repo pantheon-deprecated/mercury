@@ -6,31 +6,27 @@ from pantheon import restore
 from pantheon import status
 from pantheon import hudsontools
 
-def onramp_site(project='pantheon', profile=None, url=None, **kw):
+def onramp_site(project='pantheon', url=None, profile=None, **kw):
     """Create a new Drupal installation.
     project: Installation namespace.
     profile: The installation type (e.g. pantheon/openatrium)
     **kw: Optional dictionary of values to process on installation.
 
     """
-    
-    data = {'profile': profile,
-            'project': project,
-            'url': url}
 
-    data.update(kw)
+    archive = onramp.download(url)
+    location = onramp.extract(archive)
+    handler = _get_handler(profile, project, location)
 
-    handler = _get_profile_handler(**data)
     try:
-        handler.build(**data)
+        handler.build(location)
     except:
         hudsontools.junit_error(traceback.format_exc(), 'OnrampSite')
         raise
     else:
         hudsontools.junit_pass('', 'OnrampSite')
-        
 
-def _get_profile_handler(profile, **kw):
+def _get_handler(profile, project, location):
     """Return instantiated profile object.
     profile: name of the installation profile.
 
@@ -42,22 +38,20 @@ def _get_profile_handler(profile, **kw):
     profiles = {'import': _ImportProfile,
                 'restore': _RestoreProfile}
 
-    # If profile doesn't exist, use 'import'
-    return profiles.has_key(profile) and \
-           profiles[profile](**kw) or \
-           profiles['import'](**kw)
+    if profile not in profiles.keys():
+        profile = onramp.get_onramp_profile(location)
+
+    return profiles[profile](project)
 
 
 class _ImportProfile(onramp.ImportTools):
     """Generic Pantheon Import Profile.
 
     """
-    def build(self, url, **kw):
+    def build(self, location):
 
-        # Download, extract, and parse the tarball.
-        tarball = self.download(url)
-        self.extract(tarball)
-        self.parse_archive()
+        # Parse the extracted archive.
+        self.parse_archive(location)
 
         # Remove existing project.
         self.remove_project()
@@ -94,7 +88,7 @@ class _ImportProfile(onramp.ImportTools):
         self.setup_permissions()
 
         # Cleanup and restart services.
-        self.cleanup(tarball)
+        self.cleanup()
         self.server.restart_services()
 
         # Send version and repo status.
@@ -106,12 +100,10 @@ class _RestoreProfile(restore.RestoreTools):
     """Generic Pantheon Restore Profile.
 
     """
-    def build(self, url, **kw):
+    def build(self, location):
 
-        #Download, extract, and parse the backup.
-        backup = pantheon.download(url)
-        self.extract(backup)
-        self.parse_backup()
+        # Parse the backup.
+        self.parse_backup(location)
 
         self.setup_database()
         self.restore_site_files()
