@@ -18,31 +18,19 @@ def get_drupal_update_status(project):
     status = dict()
 
     with cd(repo_path):
-        # Update master.
+        # Get upstream updates.
         local('git fetch origin')
-        # Get system module contents in master branch.
-        contents = local('git cat-file blob refs/heads/master:' + \
-                              'modules/system/system.module')
-        temp_file = tempfile.mkstemp()[1]
-        with open(temp_file, 'w') as f:
-            f.write(contents)
-        # Get latest Drupal version from system.module.
-        latest_drupal_version = _get_drupal_version(temp_file)
-        local('rm -f %s' % temp_file)
+        # Determine latest upstream version.
+        latest_drupal_version = _get_latest_drupal_version()
 
     for env in environments:
         env_path = os.path.join(project_path, env)
-        system_module = os.path.join(env_path, 'modules/system/system.module')
 
         with cd(env_path):
-            # Update metadata.
             local('git fetch origin')
 
-            # Get platform
-            platform = _get_drupal_platform(system_module)
-
-            # Get drupal update status
-            drupal_version = _get_drupal_version(system_module)
+            platform = get_drupal_platform(env_path)
+            drupal_version = get_drupal_version(env_path)
 
             # python -> json -> php boolean disagreements. Just use int.
             drupal_update = int(latest_drupal_version != drupal_version)
@@ -56,8 +44,9 @@ def get_drupal_update_status(project):
             else:
                 pantheon_log = 'Upgrade to Pressflow/Pantheon'
 
-            # NOTE: Removed reporting back with log entries, could use some
-            # other git plumbing to check for updates.
+            # NOTE: Removed reporting back with log entries, so using logs
+            # to determine if there is an update is a little silly. However,
+            # we may want to send back logs someday, so leaving for now.
 
             # If log is impty, no updates.
             pantheon_update = int(bool(pantheon_log))
@@ -69,23 +58,57 @@ def get_drupal_update_status(project):
                            'available': {'drupal_version': latest_drupal_version,}}
     return status
 
-def _get_drupal_platform(system_module):
-    """Return DRUPAL or PRESSFLOW. Checks based on system.module.
-    system_module: full path to the system.module
-
-    """
-    return ((local("awk \"/\'info\' =>/\" " + system_module + \
-            r' | sed "s_^.*Powered by \([a-zA-Z]*\).*_\1_"')
+def get_drupal_platform(drupal_root):
+    #TODO: Make sure this is D7 friendly once Pressflow setup is finalized.
+    return ((local("awk \"/\'info\' =>/\" " + \
+            os.path.join(drupal_root, 'modules/system/system.module') + \
+            r' | grep "Powered" | sed "s_^.*Powered by \([a-zA-Z]*\).*_\1_"')
             ).rstrip('\n').upper())
 
-def _get_drupal_version(system_module):
-    """Return the drupal version in 6.X notation.
-    system_module: full path to the system.module
+def get_drupal_version(drupal_root):
+    """Return the current drupal version.
 
     """
-    return ((local("awk \"/define\(\'VERSION\'/\" " + system_module + \
-            "| sed \"s_^.*'\(6\)\.\([0-9]\{1,2\}\)'.*_\\1.\\2_\"")
-            ).rstrip('\n'))
+    # Drupal 6 uses system.module, drupal 7 uses bootstrap.inc
+    locations = [os.path.join(drupal_root, 'modules/system/system.module'),
+                 os.path.join(drupal_root, 'includes/bootstrap.inc')]
+
+    version = None
+    for location in locations:
+        version = _parse_drupal_version(location)
+        if version:
+            break
+    return version
+
+def _get_latest_drupal_version():
+    """Check master (upstream) files to determine newest drupal version.
+
+    """
+    locations = ['modules/system/system.module',
+                 'includes/bootstrap.inc']
+    version = None
+    for location in locations:
+        contents = local('git cat-file blob refs/heads/master:%s' % location)
+        temp_file = tempfile.mkstemp()[1]
+        with open(temp_file, 'w') as f:
+            f.write(contents)
+        version = _parse_drupal_version(temp_file)
+        local('rm -f %s' % temp_file)
+        if version:
+            break
+    return version
+
+def _parse_drupal_version(location):
+    """Parse file at location to determine the Drupal version.
+    location: full path to file to parse.
+
+    """
+    version = local("awk \"/define\(\'VERSION\'/\" " + location + \
+                 " | sed \"s_^.*'\([6,7]\{1\}\)\.\([0-9]\{1,2\}\).*_\\1-\\2_\""
+                 ).rstrip('\n')
+    if len(version) > 1 and version[0:1] in ['6', '7']:
+        return version
+    return None
 
 def _parse_changelog(changelog):
     """Parse a diff file and return a string of any lines added.
@@ -110,135 +133,4 @@ def _parse_changelog(changelog):
         if not remove:
             ret.append(line)
     return '\n'.join(ret)
-
-
-class DrupalDB(object):
-
-    def __init__(self, database, username='root', password=''):
-        """Initialize database connection and cursor.
-        database: database name
-        user: username
-        password: password
-
-        """
-        self.connection = self._db_connect(database, username, password)
-        self.cursor = self.connection.cursor()
-
-    def vget(self, name, debug=False):
-        """Return the value of a Drupal variable.
-        name: The variable name.
-        debug: bool. Prints the raw (serialized) data.
-
-        """
-        query = "SELECT value FROM variable WHERE name = '%s'" % name
-        try:
-            self.cursor.execute(query)
-            value = self.cursor.fetchone()
-            # Record found, unserialize value.
-            if value:
-                result = (True, self._php_unserialize(value[0]))
-                if debug:
-                    print value[0]
-            # No record found.
-            else:
-                result = (True, value)
-        except:
-            result = (False, 'Unable to get variable.')
-        finally:
-            # Use rollback in case values have changed elsewhere.
-            self.connection.rollback()
-            return result
-
-    def vset(self, name, value):
-        """Set the value of a Drupal variable.
-        name: variable name to change
-        value: The value to set (type sensitive).
-
-        """
-        # Check if variable already exists.
-        success, result = self.vget(name)
-        if success:
-            value = self._php_serialize(value)
-            # Update if variable exists.
-            if result:
-                query = "UPDATE variable SET value='%s' WHERE name='%s'" % \
-                        (value, name)
-            # Insert if variable does not exist.
-            else:
-                query = "INSERT INTO variable (name, value) " + \
-                        "VALUES ('%s','%s')" % (name, value)
-            # Use transaction to make change. Rollback if failed.
-            try:
-                self.cursor.execute(query)
-                self.connection.commit()
-            except:
-                self.connection.rollback()
-                return (False, 'Unable to set variable.')
-
-            return (True, 'Variable [%s] set to: %s' % (name, value))
-        else:
-            return (False, 'Unable to determine if variable exists.')
-
-    def close(self):
-        """Close database connection.
-
-        """
-        self.connection.close()
-
-    def _db_connect(self, database, username, password):
-        """Return a MySQL database connection object.
-        database: database name
-        user: username
-        password: password
-
-        """
-        try:
-            return MySQLdb.connect(host='localhost',
-                                   user=username,
-                                   passwd=password,
-                                   db=database)
-        except MySQLdb.Error, e:
-            print "MySQL Error %d: %s" % (e.args[0], e.args[1])
-            sys.exit(1)
-
-    def _php_serialize(self, data):
-        """Convert data into php serialized format.
-        data: data to convert (type sensitive)
-
-        Does not currently support arrays/objects,
-
-        """
-        vtype = type(data)
-        # String
-        if vtype is str:
-            return 's:%s:"%s";' % (len(data), data)
-        # Integer
-        elif vtype is int:
-            return 'i:%s;' % data
-        # Float / Long
-        elif vtype is long or vtype is float:
-            return 'd:%f;'
-        # Boolean
-        elif vtype is bool:
-            if data:
-                return 'b:1;'
-            else:
-                return 'b:0;'
-        # None
-        elif vtype is NoneType:
-            return 'N;'
-
-    def _php_unserialize(self, data):
-        """Convert data from php serialize format to python data types.
-        data: data to convert (string)
-
-        Currently only supports converting serialized strings.
-
-        """
-        vtype = data[0:1]
-        if vtype == 's':
-            length, value = data[2:].rstrip(';').split(':', 1)
-            return eval(value)
-        elif vtype == 'i':
-            pass
 

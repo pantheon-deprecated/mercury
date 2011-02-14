@@ -294,10 +294,11 @@ class PantheonServer:
         local('chown root:%s %s' % (self.web_group, vhost))
         local('chmod 640 %s' % vhost)
 
-    def create_solr_index(self, project, environment):
+    def create_solr_index(self, project, environment, version):
         """ Create solr index in: /var/solr/project/environment.
         project: project name
         environment: development environment
+        version: major drupal version
 
         """
 
@@ -313,7 +314,8 @@ class PantheonServer:
         data_dir = os.path.join(project_dir, environment)
         if os.path.exists(data_dir):
             local('rm -rf ' + data_dir)
-        data_dir_template = os.path.join(get_template_dir(), 'solr')
+        data_dir_template = os.path.join(get_template_dir(),
+                                         'solr%s' % version)
         local('cp -R %s %s' % (data_dir_template, data_dir))
         local('chown -R %s:%s %s' % (self.tomcat_owner,
                                      self.tomcat_owner,

@@ -31,7 +31,7 @@ class Updater(project.BuildTools):
         """
         # Update pantheon core master branch
         with cd('/var/git/projects/%s' % self.project):
-            local('git fetch git://gitorious.org/pantheon/6.git master')
+            local('git fetch origin master')
 
         # Commit all changes in dev working-tree.
         self.code_commit('Core Update: Automated Commit.')

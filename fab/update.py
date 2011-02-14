@@ -36,14 +36,17 @@ def update_pantheon(first_boot=False):
     try:
         # Put jenkins into quietDown mode so no more jobs are started.
         urllib2.urlopen('http://localhost:8090/quietDown')
+        # Find out if this server is using a testing branch.
+        branch = 'master'
+        if os.path.exists('/opt/branch.txt'):
+            branch = open('/opt/branch.txt').read().strip() or 'master'
         # Update from repo
         with cd('/opt/pantheon'):
             local('git fetch --prune origin', capture=False)
-            local('git checkout --force master', capture=False)
-            local('git reset --hard origin/master', capture=False)
-        # Update from BCFG2, but don't stall if that fails for some reason.
-        with settings(warn_only=True):
-            local('/usr/sbin/bcfg2 -vqed', capture=False)
+            local('git checkout --force %s' % branch, capture=False)
+            local('git reset --hard origin/%s' % branch, capture=False)
+        # Update from BCFG2
+        local('/usr/sbin/bcfg2 -vqed', capture=False)
     except:
         print(traceback.format_exc())
         raise
@@ -186,14 +189,16 @@ def update_data(project, environment, source_env, updatedb='True'):
         # updatedb is passed in as a string so we have to evaluate it
         if eval(string.capitalize(updatedb)):
             updater.drupal_updatedb()
-        # The server has a 2min delay before updates to the index are processed
-        local("drush @%s_%s solr-reindex" % (project, environment))
-        local("drush @%s_%s cron" % (project, environment))
     except:
         jenkinstools.junit_error(traceback.format_exc(), 'UpdateData')
         raise
     else:
         jenkinstools.junit_pass('Update successful.', 'UpdateData')
+
+    # The server has a 2min delay before updates to the index are processed
+    with settings(warn_only=True):
+        local("drush @%s_%s solr-reindex" % (project, environment))
+        local("drush @%s_%s cron" % (project, environment))
 
 def update_files(project, environment, source_env):
     """Update the files in project/environment using files from source_env.
