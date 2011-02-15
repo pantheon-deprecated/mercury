@@ -143,7 +143,7 @@ class BuildTools(object):
         # git may think that it was moved to settings.php and cause conflict.
         if not os.path.isfile(settings_default):
             settings_contents = local(
-               'git cat-file --git-dir=/var/git/projects/%s ' % self.project +\
+               'git --git-dir=/var/git/projects/%s cat-file ' % self.project +\
                'blob refs/heads/master:sites/default/default.settings.php')
             with open(settings_default, 'w') as f:
                 f.write(settings_contents)
