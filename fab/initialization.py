@@ -62,7 +62,9 @@ def _initialize_package_manager(server):
     if server.distro == 'ubuntu':
         with cd(server.template_dir):
             local('cp apt.pantheon.list /etc/apt/sources.list.d/pantheon.list')
-            # TODO: Unpin OpenSSH for non-pantheon.com servers
+            # No need for ldap patched ssh for non-getpantheon servers.
+            if not pantheon.is_private_server():
+                local('cp apt.openssh.pin /etc/apt/preferences.d/openssh')
             local('apt-key add apt.ppakeys.txt')
         local('echo \'APT::Install-Recommends "0";\' >>  /etc/apt/apt.conf')
 
