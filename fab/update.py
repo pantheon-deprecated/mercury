@@ -34,85 +34,93 @@ def update_pantheon(first_boot=False):
 
     """
     try:
-        # Put jenkins into quietDown mode so no more jobs are started.
-        urllib2.urlopen('http://localhost:8090/quietDown')
-        # Find out if this server is using a testing branch.
-        branch = 'master'
-        if os.path.exists('/opt/branch.txt'):
-            branch = open('/opt/branch.txt').read().strip() or 'master'
-        # Update from repo
-        with cd('/opt/pantheon'):
-            local('git fetch --prune origin', capture=False)
-            local('git checkout --force %s' % branch, capture=False)
-            local('git reset --hard origin/%s' % branch, capture=False)
-        # Update from BCFG2
-        local('/usr/sbin/bcfg2 -vqed', capture=False)
+        try:
+            # Put jenkins into quietDown mode so no more jobs are started.
+            urllib2.urlopen('http://localhost:8090/quietDown')
+            # Find out if this server is using a testing branch.
+            branch = 'master'
+            if os.path.exists('/opt/branch.txt'):
+                branch = open('/opt/branch.txt').read().strip() or 'master'
+            # Update from repo
+            with cd('/opt/pantheon'):
+                local('git fetch --prune origin', capture=False)
+                local('git checkout --force %s' % branch, capture=False)
+                local('git reset --hard origin/%s' % branch, capture=False)
+            # Update from BCFG2
+            local('/usr/sbin/bcfg2 -vqed', capture=False)
+        except:
+            print(traceback.format_exc())
+            raise
+        finally:
+            # wait a min for jenkins to respond.
+            for x in range(12):
+                if pantheon.jenkins_running():
+                    break
+                else:
+                    time.sleep(10)
+            else:
+                raise Exception("ABORTING: Jenkins not ready after 2 minutes.")
+                print("Jenkins not ready after 2 minutes.")
+            # Restart Jenkins
+            local('curl -X POST http://localhost:8090/safeRestart', capture=False)
+
+        # If this is not the first boot, send back update data.
+        if not first_boot:
+            """
+            We have to check for both queued jobs then the jenkins restart.
+            This is because jobs could have been queued before the update
+            was started, and a check on 'jenkins_running' would return True
+            because the restart hasn't occured yet (safeRestart). This way,
+            we first make sure the queue is 0 or jenkins is unreachable, then
+            wait until it is back up.
+
+            """
+
+            # wait for any jobs that were queued to finish.
+            while True:
+                queued = pantheon.jenkins_queued()
+                if queued == 0:
+                    # No more jobs, give jenkins a few seconds to begin restart.
+                    time.sleep(5)
+                    break
+                # Jenkins is unreachable (already in restart process)
+                elif queued == -1:
+                    break
+                else:
+                    time.sleep(5)
+            # wait for jenkins to restart.
+            for x in range(30):
+                if pantheon.jenkins_running():
+                    break
+                else:
+                    time.sleep(10)
+            else:
+                raise Exception("ABORTING: Jenkins did not restart after 5 minutes.")
+            # stdout is redirected in cron, so this will go to log file.
+            print "UPDATE COMPLETED SUCCESSFULLY"
     except:
         print(traceback.format_exc())
         raise
-    finally:
-        # Restart Jenkins
-        local('curl -X POST http://localhost:8090/safeRestart', capture=False)
-
-    # If this is not the first boot, send back update data.
-    if not first_boot:
-        """
-        We have to check for both queued jobs then the jenkins restart.
-        This is because jobs could have been queued before the update
-        was started, and a check on 'jenkins_running' would return True
-        because the restart hasn't occured yet (safeRestart). This way,
-        we first make sure the queue is 0 or jenkins is unreachable, then
-        wait until it is back up.
-
-        """
-
-        # wait for any jobs that were queued to finish.
-        while True:
-            queued = pantheon.jenkins_queued()
-            if queued == 0:
-                # No more jobs, give jenkins a few seconds to begin restart.
-                time.sleep(5)
-                break
-            # Jenkins is unreachable (already in restart process)
-            elif queued == -1:
-                break
-            else:
-                time.sleep(5)
-        # wait for jenkins to restart.
-        while not pantheon.jenkins_running():
-            time.sleep(5)
-        # Run post_pantheon_update jenkins job
-        try:
-            urllib2.urlopen('http://localhost:8090/job/post_update_pantheon/build')
-        except Exception as detail:
-            print "Warning: Could not run post_update_pantheon job:\n%s" % detail
-        # stdout is redirected in cron, so this will go to log file.
-        print "UPDATE COMPLETED SUCCESSFULLY"
 
 def post_update_pantheon():
-    """Determine if cron run of panthoen_update was successful.
+    """Determine if cron run of pantheon_update was successful.
 
     """
-    response = dict()
-    log_path = '/tmp/pantheon_update.log'
+    response = {'update_pantheon': dict()}
+    log_path = '/var/log/pantheon/update_pantheon.log'
     if os.path.isfile(log_path):
         log = local('cat %s' % log_path)
-        local('rm -f %s' % log_path)
         if 'UPDATE COMPLETED SUCCESSFULLY' in log:
-            response['status'] = 'SUCCESS'
-            response['msg'] = ''
-            jenkinstools.junit_pass('', 'PostUpdate')
+            response['update_pantheon']['status'] = 'SUCCESS'
+            response['update_pantheon']['msg'] = ''
         else:
-            response['status'] = 'FAILURE'
-            response['msg'] = 'Panthoen update did not complete.'
-            jenkinstools.junit_fail(response['msg'], 'PostUpdate')
-        print log
+            response['update_pantheon']['status'] = 'FAILURE'
+            response['update_pantheon']['msg'] = 'Panthoen update did not complete.'
     else:
-        response['status'] = 'FAILURE'
-        response['msg'] = 'No Pantheon update log was found.'
-        jenkinstools.junit_fail(response['msg'], 'PostUpdate')
+        response['update_pantheon']['status'] = 'FAILURE'
+        response['update_pantheon']['msg'] = 'No Pantheon update log was found.'
         print 'No update log found.'
-    postback.write_build_data('update_pantheon', response)
+    postback.postback(response)
 
 def update_site_core(project='pantheon', keep=None):
     """Update Drupal core (from Drupal or Pressflow, to latest Pressflow).
