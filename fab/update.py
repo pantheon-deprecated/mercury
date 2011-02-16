@@ -12,8 +12,19 @@ from pantheon import pantheon
 from pantheon import postback
 from pantheon import status
 from pantheon import update
+from optparse import OptionParser
 
 from fabric.api import *
+
+def main():
+    usage = "usage: %prog [options]"
+    parser = OptionParser(usage=usage, description="Send information back to Atlas.")
+    parser.add_option('-p', '--postback', dest="postback", action="store_true", default=False, help='Postback to atlas.')
+    (options, args) = parser.parse_args()
+
+    update_pantheon()
+    if options.postback:
+        post_update_pantheon()
 
 def update_pantheon(first_boot=False):
     """Update pantheon code and server configurations.
@@ -59,8 +70,8 @@ def update_pantheon(first_boot=False):
                 else:
                     time.sleep(10)
             else:
-                raise Exception("ABORTING: Jenkins not ready after 2 minutes.")
                 print("Jenkins not ready after 2 minutes.")
+                raise Exception("ABORTING: Jenkins not ready after 2 minutes.")
             # Restart Jenkins
             local('curl -X POST http://localhost:8090/safeRestart', capture=False)
 
@@ -244,5 +255,4 @@ def git_status(project, environment):
         jenkinstools.junit_pass('', 'GitStatus')
 
 if __name__ == '__main__':
-    update_pantheon()
-    post_update_pantheon()
+    main()
