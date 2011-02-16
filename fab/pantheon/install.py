@@ -30,7 +30,7 @@ class InstallTools(project.BuildTools):
         self.working_dir = tempfile.mkdtemp()
         self.destination = os.path.join(self.server.webroot, project)
         self.author = 'Hudson User <hudson@pantheon>'
-        self.db_password = pantheon.random_string(10)
+        self.db_password = pantheon.get_db_password()
         self.version = int(version)
 
     def setup_working_dir(self):
