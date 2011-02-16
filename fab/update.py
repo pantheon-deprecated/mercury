@@ -18,7 +18,7 @@ from fabric.api import *
 
 def main():
     usage = "usage: %prog [options]"
-    parser = OptionParser(usage=usage, description="Send information back to Atlas.")
+    parser = OptionParser(usage=usage, description="Update pantheon code and server configurations.")
     parser.add_option('-p', '--postback', dest="postback", action="store_true", default=False, help='Postback to atlas.')
     (options, args) = parser.parse_args()
 
@@ -125,7 +125,7 @@ def post_update_pantheon():
             response['update_pantheon']['msg'] = ''
         else:
             response['update_pantheon']['status'] = 'FAILURE'
-            response['update_pantheon']['msg'] = 'Panthoen update did not complete.'
+            response['update_pantheon']['msg'] = 'Pantheon update did not complete.'
     else:
         response['update_pantheon']['status'] = 'FAILURE'
         response['update_pantheon']['msg'] = 'No Pantheon update log was found.'
