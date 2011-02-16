@@ -246,3 +246,4 @@ def git_status(project, environment):
 
 if __name__ == '__main__':
     update_pantheon()
+    post_update_pantheon()
