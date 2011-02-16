@@ -109,7 +109,6 @@ def post_update_pantheon():
     response = {'update_pantheon': dict()}
     log_path = '/var/log/pantheon/update_pantheon.log'
     if os.path.isfile(log_path):
-        log = local('cat %s' % log_path)
         if 'UPDATE COMPLETED SUCCESSFULLY' in log:
             response['update_pantheon']['status'] = 'SUCCESS'
             response['update_pantheon']['msg'] = ''
