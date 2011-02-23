@@ -168,7 +168,7 @@ def check_memcached(port):
         s.connect(('localhost', port))
         s.shutdown(2)
     except:
-        syslog.syslog(syslog.LOG_ERRA, 'Cannot connect to Memcached on %s ' \
+        syslog.syslog(syslog.LOG_ERR, 'Cannot connect to Memcached on %s ' \
                                        '%s.' % ('localhost', str(port)))
         print(traceback.format_exc())
         raise
