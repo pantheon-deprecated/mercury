@@ -1,48 +1,48 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
 import httplib
 import json
-import random
-import re
-import ssl
-import string
-import sys
-import urllib2
-from urlparse import urlparse
 
-def request(method = "GET", data = None, url = 'https://api.getpantheon.com:8443/sites/self/configuration'):
-    """Utility function for communicating with the configrepo.
+host = 'api.getpantheon.com'
+port = 8443
+path = '/sites/self/configuration'
+certificate = '/etc/pantheon/system.pem'
+
+def get_config():
+    """Return a dictionary of configuration data."""
+    return _config_request('GET')
+
+def update_config(data):
+    """Push updates to the config repo.
+    data: dict of data to update on the config repo.
 
     """
-    certificate = '/etc/pantheon/system.pem'
-    parsed = urlparse(url)
-    port = parsed.port
-    if parsed.port is None:
-       port = 8443
+    return _config_request('PUT', data)
 
-    try:
-        connection = httplib.HTTPSConnection(
-            parsed.netloc.partition(':')[0],
-            port,
-            key_file = certificate,
-            cert_file = certificate
-        )
+def _config_request(method, data = None):
+    """Make GET or PUT request to config server.
+    Returns dict of response data.
 
-        connection.request(method, parsed.path, data)
-        complete_response = connection.getresponse()
-        if (complete_response.status == 404):
-            return None
-        if (complete_response.status == 403):
-            return False
-        response = complete_response.read()
+    """
+    headers = {}
+
+    if method == 'PUT':
+        headers = {'Content-Type': 'application/json'}
+        data = json.dumps(data)
+
+    connection = httplib.HTTPSConnection(host,
+                                         port,
+                                         key_file = certificate,
+                                         cert_file = certificate)
+
+    connection.request(method, path, data, headers)
+    response = connection.getresponse()
 
     except httplib.HTTPException as detail:
         raise 'HTTP Error: %s' % detail
 
-    except ssl.SSLError as detail:
-        if detail.errno == 8:
-            # Error number 8 should be "EOF occurred in violation of protocol" meaning networking
-            raise 'SSL EOF: %s' % detail
-        else:
-            raise 'Unexpected SSL Error: %s' % detail
+    if response.status == 404:
+        return None
+    if response.status == 403:
+        return False
 
-    return response
+    return json.loads(complete_response.read())
+
