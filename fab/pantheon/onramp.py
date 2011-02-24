@@ -73,7 +73,7 @@ class ImportTools(project.BuildTools):
 
         self.destination = os.path.join(self.server.webroot, project)
         self.author = 'Hudson User <hudson@pantheon>'
-        self.db_password = pantheon.random_string(10)
+        self.db_password = self.generate_db_password()
         self.force_update = False
 
     def parse_archive(self, extract_location):

@@ -2,10 +2,12 @@ import os
 import sys
 import tempfile
 
-import pantheon
 import dbtools
+import configrepo
+import pantheon
 
 from fabric.api import *
+
 
 class BuildTools(object):
     """ Generic Pantheon project installation helper functions.
@@ -189,9 +191,9 @@ class BuildTools(object):
     def setup_vhost(self, db_password):
         """ Create vhost files for each environment in a project.
         db_password: mysql password to store as an env var in the vhost.
-        
-        This is now depricated on Pantheon infrastructure. Virtualhosts are 
-        created via BCFG. The only time this will run is if the site is a 
+
+        This is now depricated on Pantheon infrastructure. Virtualhosts are
+        created via BCFG. The only time this will run is if the site is a
         DIY open-source system.
 
         """
@@ -270,13 +272,13 @@ class BuildTools(object):
         """ Create apache vhost and config.inc.php config for phpmyadmin.
         db_password: database password to store as an env var in the vhost file
 
-        This is now depricated on Pantheon infrastructure. Virtualhosts are 
-        created via BCFG. The only time this will run is if the site is a 
+        This is now depricated on Pantheon infrastructure. Virtualhosts are
+        created via BCFG. The only time this will run is if the site is a
         DIY open-source system.
         """
         if pantheon.is_gp_server():
              return True
-             
+
         vhost_dict = {'db_username':self.project,
                       'db_password':db_password}
 
@@ -420,4 +422,17 @@ class BuildTools(object):
                 local('chown %s:%s pantheon.settings.php' % (owner,
                                                              settings_group))
 
+    def generate_db_password(self):
+        """ Generate a random new db password. If on pantheon infrastructure
+        this also posts the updated password into the configrepo.
+
+        """
+        new_pass = pantheon.random_string(10)
+        if is_gp_server():
+            update = {'environments': {}}
+            for env in self.environments:
+                update['environments'][env] = {'mysql': {
+                                                   'db_password': new_pass}}
+            configrepo.update_config(update)
+        return new_pass
 

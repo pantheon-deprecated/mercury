@@ -86,24 +86,6 @@ def random_string(length):
     return ''.join(['%s' % random.choice (string.ascii_letters + \
                                           string.digits) \
                                           for i in range(length)])
-
-def get_db_password():
-    """ Generate a random new db password. If on pantheon infrastructure
-    this also posts the updated password into the configrepo.
-
-    """
-    new_pass = random_string(10)
-    
-    if is_gp_server():
-        data = json.loads(configrepo.request())
-        update = {'environments': {}}
-        for env in data['environments']:
-            update['environments'][env] = {'mysql': {'db_password': new_pass}}
-        
-        configrepo.request("PUT", json.dumps(update))
-    
-    return new_pass
-
 def parse_vhost(path):
     """Helper method that returns environment variables from a vhost file.
     path: full path to vhost file.
