@@ -36,9 +36,6 @@ def _config_request(method, data = None):
     connection.request(method, path, data, headers)
     response = connection.getresponse()
 
-    except httplib.HTTPException as detail:
-        raise 'HTTP Error: %s' % detail
-
     if response.status == 404:
         return None
     if response.status == 403:
