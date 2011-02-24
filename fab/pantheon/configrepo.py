@@ -9,7 +9,7 @@ import sys
 import urllib2
 from urlparse import urlparse
 
-def config_request(method = "GET", data = None, url = 'https://configrepo.getpantheon.com:8443/sites/self'):
+def request(method = "GET", data = None, url = 'https://api.getpantheon.com:8443/sites/self/configuration'):
     """Utility function for communicating with the configrepo.
 
     """

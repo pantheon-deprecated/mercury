@@ -88,15 +88,19 @@ def random_string(length):
                                           for i in range(length)])
 
 def get_db_password():
-     """ Generate a random new db password. If on pantheon infrastructure
-     this also posts the updated password into the configrepo.
+    """ Generate a random new db password. If on pantheon infrastructure
+    this also posts the updated password into the configrepo.
 
     """
     new_pass = random_string(10)
+    
     if is_gp_server():
-        configuration = {} 
-        data = json.dumps(configuration) # JSON Payload
-        config_request("POST", data)
+        data = json.loads(configrepo.request())
+        update = {'environments': {}}
+        for env in data['environments']:
+            update['environments'][env] = {'mysql': {'db_password': new_pass}}
+        
+        configrepo.request("PUT", json.dumps(update))
     
     return new_pass
 
