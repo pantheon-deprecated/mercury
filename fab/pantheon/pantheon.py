@@ -1,4 +1,5 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
+import M2Crypto
 import os
 import random
 import string
@@ -12,6 +13,7 @@ import re
 
 import postback
 import hudsontools
+import configrepo
 
 from fabric.api import *
 
@@ -65,9 +67,16 @@ def is_ebs_server():
     # Check if ebs.server file was created during configure.
     return os.path.isfile('/etc/pantheon/ebs.server')
 
-def is_private_server():
-    # Check if private.server file was created during configure.
-    return os.path.isfile('/etc/pantheon/private.server')
+def is_gp_server():
+    # Check if a valid system.pem exists
+    try:
+        cert = M2Crypto.X509.load_cert('/etc/pantheon/system.pem')
+        if re.search('pki.getpantheon.com', cert.get_issuer().as_text()) != None:
+            return True
+    except:
+        pass
+
+    return False
 
 def random_string(length):
     """ Create random string of ascii letters & digits.
@@ -77,6 +86,19 @@ def random_string(length):
     return ''.join(['%s' % random.choice (string.ascii_letters + \
                                           string.digits) \
                                           for i in range(length)])
+
+def get_db_password():
+     """ Generate a random new db password. If on pantheon infrastructure
+     this also posts the updated password into the configrepo.
+
+    """
+    new_pass = random_string(10)
+    if is_gp_server():
+        configuration = {} 
+        data = json.dumps(configuration) # JSON Payload
+        config_request("POST", data)
+    
+    return new_pass
 
 def parse_vhost(path):
     """Helper method that returns environment variables from a vhost file.

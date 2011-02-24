@@ -20,9 +20,8 @@ def configure():
         if pantheon.is_aws_server():
             _configure_ec2(server)
 
-        if not pantheon.is_private_server():
-            _check_connectivity(server)
-            _configure_certificates()
+        _check_connectivity(server)
+        _configure_certificates()
 
         _configure_server(server)
         _configure_postfix(server)
@@ -99,10 +98,14 @@ def _configure_certificates():
     pki_server = 'https://pki.getpantheon.com'
 
     # Ask Helios about what to put into the certificate request.
-    host_info = json.loads(urllib2.urlopen('%s/info' % pki_server).read())
-    ou = host_info['ou']
-    cn = host_info['cn']
-    subject = '/C=US/ST=California/L=San Francisco/O=Pantheon Systems, Inc./OU=%s/CN=%s/emailAddress=hostmaster@%s/' % (ou, cn, cn)
+    try:
+        host_info = json.loads(urllib2.urlopen('%s/info' % pki_server).read())
+        ou = host_info['ou']
+        cn = host_info['cn']
+        subject = '/C=US/ST=California/L=San Francisco/O=Pantheon Systems, Inc./OU=%s/CN=%s/emailAddress=hostmaster@%s/' % (ou, cn, cn)
+    except ValueError:
+        # This fails if Helios says "Could not find corresponding LDAP entry."
+        return False
 
     # Generate a local key and certificate-signing request.
     local('openssl genrsa 4096 > /etc/pantheon/system.key')
