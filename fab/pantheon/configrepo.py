@@ -41,5 +41,8 @@ def _config_request(method, data = None):
     if response.status == 403:
         return False
 
+    if method == 'PUT':
+        return True
+
     return json.loads(complete_response.read())
 
