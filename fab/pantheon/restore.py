@@ -15,9 +15,8 @@ class RestoreTools(project.BuildTools):
         """ Initialize Restore object. Inherits base methods from BuildTools.
 
         """
-        super(RestoreTools, self).__init__(project)
-        self.destination = os.path.join(self.server.webroot, project)
-        self.db_password = pantheon.random_string(10)
+        super(RestoreTools, self).__init__()
+        self.destination = os.path.join(self.server.webroot, self.project)
 
     def parse_backup(self, location):
         """ Get project name from extracted backup.

@@ -2,10 +2,12 @@ import os
 import sys
 import tempfile
 
-import pantheon
 import dbtools
+import configrepo
+import pantheon
 
 from fabric.api import *
+
 
 class BuildTools(object):
     """ Generic Pantheon project installation helper functions.
@@ -15,16 +17,22 @@ class BuildTools(object):
     can use these methods directly or override/expand base processes.
 
     """
-    def __init__(self, project):
+    def __init__(self):
         """ Initialize generic project installation object & helper functions.
         project: the name of the project to be built.
 
         """
+        self.config = configrepo.get_config()
         self.server = pantheon.PantheonServer()
 
-        self.project = project
-        self.environments = pantheon.get_environments()
-        self.project_path = os.path.join(self.server.webroot, project)
+        self.project = self.config.keys()[0]
+        self.environments = set(self.config[self.project]['environments'].keys())
+        self.project_path = os.path.join(self.server.webroot, self.project)
+        self.db_password = self.config[self.project]\
+                ['environments']['live']['mysql']['db_password']
+
+    def bcfg2_project(self):
+        local('bcfg2 -vqedb projects', capture=False)
 
     def remove_project(self):
         """ Remove a project and all related files/configs from the server.
@@ -87,7 +95,6 @@ class BuildTools(object):
             else:
                 local('git branch %s' % self.project)
 
-
     def setup_working_dir(self, working_dir):
         """ Clone a project to a working directory for processing.
         working_dir: temp directory for project processing (import/restore)
@@ -96,7 +103,6 @@ class BuildTools(object):
         local('git clone -l /var/git/projects/%s -b %s %s' % (self.project,
                                                               self.project,
                                                               working_dir))
-
 
     def setup_database(self, environment, password, db_dump=None, onramp=False):
         """ Create a new database based on project_environment, using password.
@@ -188,16 +194,17 @@ class BuildTools(object):
 
     def setup_vhost(self, db_password):
         """ Create vhost files for each environment in a project.
-        db_password: database password to store as an env var in the vhost file
+        db_password: mysql password to store as an env var in the vhost.
+
+        This is now depricated on Pantheon infrastructure. Virtualhosts are
+        created via BCFG. The only time this will run is if the site is a
+        DIY open-source system.
 
         """
+        if pantheon.is_gp_server():
+             return True
         for env in self.environments:
-
-            if pantheon.is_private_server():
-                server_alias = '%s.*' % env
-            else:
-                server_alias = '%s.*.gotpantheon.com' % env
-
+            server_alias = '%s.*' % env
             vhost_dict = {'server_name': env,
                           'server_alias': server_alias,
                           'project': self.project,
@@ -269,7 +276,13 @@ class BuildTools(object):
         """ Create apache vhost and config.inc.php config for phpmyadmin.
         db_password: database password to store as an env var in the vhost file
 
+        This is now depricated on Pantheon infrastructure. Virtualhosts are
+        created via BCFG. The only time this will run is if the site is a
+        DIY open-source system.
         """
+        if pantheon.is_gp_server():
+             return True
+
         vhost_dict = {'db_username':self.project,
                       'db_password':db_password}
 
@@ -412,5 +425,4 @@ class BuildTools(object):
                 local('chmod 440 pantheon.settings.php')
                 local('chown %s:%s pantheon.settings.php' % (owner,
                                                              settings_group))
-
 

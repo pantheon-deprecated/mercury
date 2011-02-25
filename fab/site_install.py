@@ -40,6 +40,9 @@ class _PantheonProfile(install.InstallTools):
         self.setup_project_branch()
         self.setup_working_dir()
 
+        # Run bcfg2 project bundle.
+        self.bcfg2_project()
+
         # Setup project
         self.setup_database()
         self.setup_files_dir()
@@ -52,8 +55,8 @@ class _PantheonProfile(install.InstallTools):
 
         # Build non-code site features.
         self.setup_solr_index()
-        self.setup_vhost()
-        self.setup_phpmyadmin()
+        #self.setup_vhost()
+        #self.setup_phpmyadmin()
         self.setup_drupal_cron()
         self.setup_drush_alias()
 

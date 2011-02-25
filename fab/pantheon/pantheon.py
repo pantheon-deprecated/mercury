@@ -1,4 +1,5 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
+import M2Crypto
 import os
 import random
 import string
@@ -65,9 +66,16 @@ def is_ebs_server():
     # Check if ebs.server file was created during configure.
     return os.path.isfile('/etc/pantheon/ebs.server')
 
-def is_private_server():
-    # Check if private.server file was created during configure.
-    return os.path.isfile('/etc/pantheon/private.server')
+def is_gp_server():
+    # Check if a valid system.pem exists
+    try:
+        cert = M2Crypto.X509.load_cert('/etc/pantheon/system.pem')
+        if re.search('pki.getpantheon.com', cert.get_issuer().as_text()) != None:
+            return True
+    except:
+        pass
+
+    return False
 
 def random_string(length):
     """ Create random string of ascii letters & digits.
@@ -77,7 +85,6 @@ def random_string(length):
     return ''.join(['%s' % random.choice (string.ascii_letters + \
                                           string.digits) \
                                           for i in range(length)])
-
 def parse_vhost(path):
     """Helper method that returns environment variables from a vhost file.
     path: full path to vhost file.
@@ -100,7 +107,7 @@ def is_drupal_installed(project, environment):
        environment: environment name.
 
     """
-    #TODO: Find better way of determining this than hitting the db.
+    #TODO: Hit config server directly for this information.
     (username, password, db_name) = get_database_vars(project, environment)
     with hide('running'):
         status = local("mysql -u %s -p%s %s -e 'show tables;' | \

@@ -64,7 +64,7 @@ def _initialize_package_manager(server):
             local('cp apt.pantheon.list /etc/apt/sources.list.d/pantheon.list')
             local('cp apt.php.pin /etc/apt/preferences.d/php')
             # No need for ldap patched ssh for non-getpantheon servers.
-            if not pantheon.is_private_server():
+            if pantheon.is_gp_server():
                 local('cp apt.openssh.pin /etc/apt/preferences.d/openssh')
             local('apt-key add apt.ppakeys.txt')
         local('echo \'APT::Install-Recommends "0";\' >>  /etc/apt/apt.conf')

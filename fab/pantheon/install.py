@@ -26,11 +26,10 @@ class InstallTools(project.BuildTools):
 
     def __init__(self, project, version, **kw):
         """ Initialize generic installation object & helper functions. """
-        super(InstallTools, self).__init__(project)
+        super(InstallTools, self).__init__()
         self.working_dir = tempfile.mkdtemp()
-        self.destination = os.path.join(self.server.webroot, project)
+        self.destination = os.path.join(self.server.webroot, self.project)
         self.author = 'Hudson User <hudson@pantheon>'
-        self.db_password = pantheon.random_string(10)
         self.version = int(version)
 
     def setup_working_dir(self):
