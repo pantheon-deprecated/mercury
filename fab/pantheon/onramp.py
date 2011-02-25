@@ -69,11 +69,10 @@ class ImportTools(project.BuildTools):
         processing directory for import process.
 
         """
-        super(ImportTools, self).__init__(project)
+        super(ImportTools, self).__init__()
 
-        self.destination = os.path.join(self.server.webroot, project)
+        self.destination = os.path.join(self.server.webroot, self.project)
         self.author = 'Hudson User <hudson@pantheon>'
-        self.db_password = self.generate_db_password()
         self.force_update = False
 
     def parse_archive(self, extract_location):

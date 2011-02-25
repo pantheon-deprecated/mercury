@@ -13,7 +13,6 @@ import re
 
 import postback
 import hudsontools
-import configrepo
 
 from fabric.api import *
 
@@ -108,7 +107,7 @@ def is_drupal_installed(project, environment):
        environment: environment name.
 
     """
-    #TODO: Find better way of determining this than hitting the db.
+    #TODO: Hit config server directly for this information.
     (username, password, db_name) = get_database_vars(project, environment)
     with hide('running'):
         status = local("mysql -u %s -p%s %s -e 'show tables;' | \
