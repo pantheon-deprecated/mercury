@@ -26,7 +26,7 @@ class BuildTools(object):
         self.server = pantheon.PantheonServer()
 
         self.project = self.config.keys()[0]
-        self.environments = set(self.config[environments].keys())
+        self.environments = set(self.config[self.project]['environments'].keys())
         self.project_path = os.path.join(self.server.webroot, self.project)
         self.db_password = self.config[self.project]\
                 ['environments']['live']['mysql']['db_password']
