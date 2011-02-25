@@ -21,5 +21,6 @@ def get_config():
     if response.status == 403:
         return False
 
-    return json.loads(response.read())
+    config = json.loads(response.read())
+    return config or raise("No configuration data exists")
 
