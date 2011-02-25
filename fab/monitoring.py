@@ -4,37 +4,38 @@ import pdb
 import smtplib
 import socket
 import urllib
-import traceback
 import logging
-import logging.handlers
+import json
+from pantheon import configrepo
 
 from fabric.api import *
 
+LOG_FILENAME = '/var/log/site_health'
+FORMAT = '%(asctime)s [%(levelname)s] %(funcName)s: %(message)s'
+DATEFORMAT='%a, %d %b %Y %H:%M:%S'
+logging.basicConfig(level = logging.DEBUG,
+                    filename = LOG_FILENAME,
+                    format = FORMAT,
+                    datefmt = DATEFORMAT)
 logger = logging.getLogger('health')
 
-LOG_FILENAME = '/var/log/health.log'
-fh = logging.FileHandler(LOG_FILENAME)
-fh.setLevel(logging.INFO)
-basefmt = logging.Formatter('[%(levelname)s] %(funcName)s %(message)s')
-fh.setFormatter(basefmt)
-logger.addHandler(fh)
-
-''' Log warnings or higher to syslog
-sh = logging.handlers.SysLogHandler('/dev/log')
-sh.setLevel(logging.WARNING)
-sysfmt = logging.Formatter("%(name)s: %(message)s")
-sh.setFormatter(sysfmt)
-logger.addHandler(sh)
-'''
+def service_request(service='', method = "GET", status = None):
+    if status is not None:
+        status = json.dumps(status)
+    url='https://api.getpantheon.com:8443/sites/self/services/%s' % service
+    configrepo.request(method, status, url)
 
 def check_load_average(limit):
     loads = os.getloadavg()
     if (float(loads[0]) > float(limit)):
         logger.warning('Load average is %s which is above the threshold of ' \
                        '%s.' % (str(loads[0]), str(limit)))
+        status = {'status': 'WARN'}
     else:
         logger.info('Load average is %s which is below the threshold of %s.' % 
                     (str(loads[0]), str(limit)))
+        status = {'status': 'OK'}
+    service_request('load_average', 'PUT', status)
 
 def check_disk_space(filesystem, limit):
     s = os.statvfs(filesystem)
@@ -43,10 +44,13 @@ def check_disk_space(filesystem, limit):
         logger.warning('Disk usage of %s is at %s percent which is above ' \
                        'the threshold of %s percent.' % 
                        (filesystem, str(usage), str(limit)))
+        status = {'status': 'WARN'}
     else:
         logger.info('Disk usage of %s is at %s percent which is above the ' \
                     'threshold of %s percent.' % 
                     (filesystem, str(usage), str(limit)))
+        status = {'status': 'OK'}
+    service_request('disk_space', 'PUT', status)
 
 def check_swap_usage(limit):
     swap_total = local("free | grep -i swap | awk '{print $2}'")
@@ -55,18 +59,24 @@ def check_swap_usage(limit):
     if (usage > float(limit)):
         logger.warning('Swap usage is a %s percent which is above the ' \
                        'threshold of %s percent.' % (str(usage), str(limit)))
+        status = {'status': 'WARN'}
     else:
         logger.info('Swap usage is a %s percent which is below the ' \
                     'threshold of %s percent.' % (str(usage), str(limit)))
+        status = {'status': 'OK'}
+    service_request('swap_usage', 'PUT', status)
 
 def check_io_wait_time(limit):
     iowait = local("vmstat | grep -v [a-z] | awk '{print $16}'").rstrip()
     if (float(iowait) > float(limit)):
         logger.warning('IO wait times are at %s percent which is above the ' \
                        'threshold of %s percent.' % (str(iowait), str(limit)))
+        status = {'status': 'WARN'}
     else:
         logger.info('IO wait times are at %s percent which is below the ' \
                     'threshold of %s percent.' % (str(iowait), str(limit)))
+        status = {'status': 'OK'}
+    service_request('io_wait_time', 'PUT', status)
 
 def check_mysql(slow_query_limit, memory_usage, innodb_memory_usage, threads):
     with settings(warn_only=True):
@@ -75,6 +85,7 @@ def check_mysql(slow_query_limit, memory_usage, innodb_memory_usage, threads):
         if report.failed:
             logger.warning('mysql server does not appear to be running: %s' % 
                            report)
+            status = {'status': 'ERR'}
         else:
           for line in report.splitlines():
               #check for slow wait times:
@@ -132,27 +143,31 @@ def check_mysql(slow_query_limit, memory_usage, innodb_memory_usage, threads):
           message = ' '.join(messages)
           if 'above' in message: 
               logger.warning(message)
+              status = {'status': 'WARN'}
           else:
               logger.info(message)
+              status = {'status': 'OK'}
+    service_request('mysql', 'PUT', status)
 
 def check_ldap():
     try:
         local('ldapsearch -H ldap://auth.getpantheon.com -x -ZZ')
     except:
-        logger.warning('Cannot connect to LDAP on localhost.')
-        print(traceback.format_exc())
-        raise
+        logger.exception('Cannot connect to LDAP on localhost.')
+        status = {'status': 'ERR'}
     else:
         logger.info('ldap responded')
+        status = {'status': 'OK'}
+    service_request('ldap', 'PUT', status)
 
 def check_apache(url):
-    _test_url('Apache',url)
+    _test_url('apache',url)
 
 def check_varnish(url):
-    _test_url('Varnish',url)
+    _test_url('varnish',url)
 
 def check_pound_via_apache(url):
-    _test_url('Pound',url)
+    _test_url('pound',url)
 
 def check_pound_via_socket(port):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -161,11 +176,14 @@ def check_pound_via_socket(port):
         s.connect(('localhost', port))
         s.shutdown(2)
     except:
-        logger.warning('Cannot connect to Pound on %s at %s.' % 
-                       ('localhost', str(port), traceback.format_exc()))
-        raise
+        logger.exception('Cannot connect to Pound on %s at %s.' % 
+                         ('localhost', str(port)))
+        status = {'status': 'ERR'}
+        service_request('pound_socket', 'PUT', status)
     else:
         logger.info('pound responded')
+        status = {'status': 'OK'}
+        service_request('pound_socket', 'PUT', status)
 
 def check_memcached(port):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -174,18 +192,24 @@ def check_memcached(port):
         s.connect(('localhost', port))
         s.shutdown(2)
     except:
-        logger.warning('Cannot connect to Memcached on %s %s. \n%s' % 
-                       ('localhost', str(port), traceback.format_exc()))
-        raise
+        logger.exception('Cannot connect to Memcached on %s %s.' % 
+                         ('localhost', str(port)))
+        status = {'status': 'ERR'}
+        service_request('memcached', 'PUT', status)
     else:
         logger.info('memcached responded')
+        status = {'status': 'OK'}
+        service_request('memcached', 'PUT', status)
 
 def _test_url(service, url):
-    status = urllib.urlopen(url).code
-    if (status >=  400):
-        logger.warning('%s returned an error code of %s.' % (service, status))
+    code = urllib.urlopen(url).code
+    if (code >=  400):
+        logger.warning('%s returned an error code of %s.' % (service, code))
+        status = {'status': 'ERR'}
     else:
-        logger.info('%s returned an error code of %s.' % (service, status))
+        logger.info('%s returned an error code of %s.' % (service, code))
+        status = {'status': 'OK'}
+    service_request(service, 'PUT', status)
 # TODO: figure out what to search for from the following output
 #    print(connection.info())
 #    print(connection.read())
