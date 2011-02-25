@@ -22,5 +22,8 @@ def get_config():
         return False
 
     config = json.loads(response.read())
-    return config or raise("No configuration data exists")
+    if not config:
+        raise("No project configuration data exits")
+
+    return config
 
