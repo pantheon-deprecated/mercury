@@ -1,12 +1,9 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 import os
-import pdb
-import smtplib
 import socket
 import urllib
 import logging
 import logging.config
-import json
 from pantheon import ygg
 
 from fabric.api import *
@@ -15,36 +12,11 @@ from fabric.api import *
 logging.config.fileConfig("logging.conf")
 logger = logging.getLogger('site_health')
 
-def get_service(service = '', server = 'self'):
-    ''' Get service information.
-    service: string. Service to query. An empty string returns all services.
-    server: string. The UUID of the server to query.
-    
-    return: json response from api
-
-    '''
-    url='https://api.getpantheon.com:8443/sites/%s/services/%s' % 
-        (server, service)
-    return _api_request('GET', url)
-
-def set_service(service, data, server = 'self'):
-    ''' Update service indicator.
-    service: string. Service to query. An empty string returns all services.
-    status: dict. Contains data to store
-    server: string. The UUID of the server to query.
-    
-    return: json response from api
-
-    '''
-    url='https://api.getpantheon.com:8443/sites/%s/services/%s' % 
-        (server, service)
-    return _api_request('PUT', url, data)
-
 def check_load_average(limit):
-    ''' Check system load average.
+    """ Check system load average.
     limit: int. Threshold
 
-    '''
+    """
     loads = os.getloadavg()
     if (float(loads[0]) > float(limit)):
         logger.warning('Load average is %s which is above the threshold of ' \
@@ -57,11 +29,11 @@ def check_load_average(limit):
     ygg.set_service('load_average', status)
 
 def check_disk_space(filesystem, limit):
-    ''' Check system disk usage.
+    """ Check system disk usage.
     filesystem: str. Path to check against
     limit: int. Threshold as percentage.
 
-    '''
+    """
     s = os.statvfs(filesystem)
     usage = (s.f_blocks - s.f_bavail)/float(s.f_blocks) * 100
     if (float(usage) > float(limit)):
@@ -77,10 +49,10 @@ def check_disk_space(filesystem, limit):
     ygg.set_service('disk_space', status)
 
 def check_swap_usage(limit):
-    ''' Check system swap usage.
+    """ Check system swap usage.
     limit: int. Threshold as percentage.
 
-    '''
+    """
     swap_total = local("free | grep -i swap | awk '{print $2}'")
     swap_used = local("free | grep -i swap | awk '{print $3}'")
     usage = float(swap_used)/float(swap_total) * 100
@@ -95,10 +67,10 @@ def check_swap_usage(limit):
     ygg.set_service('swap_usage', status)
 
 def check_io_wait_time(limit):
-    ''' Check system io wait time.
+    """ Check system io wait time.
     limit: int. Threshold as percentage.
 
-    '''
+    """
     iowait = local("vmstat | grep -v [a-z] | awk '{print $16}'").rstrip()
     if (float(iowait) > float(limit)):
         logger.warning('IO wait times are at %s percent which is above the ' \
@@ -111,13 +83,13 @@ def check_io_wait_time(limit):
     ygg.set_service('io_wait_time', status)
 
 def check_mysql(slow_query_limit, memory_usage, innodb_memory_usage, threads):
-    ''' Check mysql status.
+    """ Check mysql status.
     sloq_query_limit: int. Threshold as percentage.
     memory_usage: int. Threshold as percentage.
     innodb_memory_usage: int. Threshold as percentage.
     thread: int. Threshold as percentage.
 
-    '''
+    """
     with settings(warn_only=True):
         messages = list()
         report = local('mysqlreport')
@@ -189,9 +161,9 @@ def check_mysql(slow_query_limit, memory_usage, innodb_memory_usage, threads):
     ygg.set_service('mysql', status)
 
 def check_ldap():
-    ''' Check ldap status.
+    """ Check ldap status.
 
-    '''
+    """
     try:
         local('ldapsearch -H ldap://auth.getpantheon.com -x -ZZ')
     except:
@@ -203,31 +175,31 @@ def check_ldap():
     ygg.set_service('ldap', status)
 
 def check_apache(url):
-    ''' Check apache status.
+    """ Check apache status.
     url: str. Url to test
 
-    '''
+    """
     _test_url('apache',url)
 
 def check_varnish(url):
-    ''' Check varnish status.
+    """ Check varnish status.
     url: str. Url to test
 
-    '''
+    """
     _test_url('varnish',url)
 
 def check_pound_via_apache(url):
-    ''' Check pound status.
+    """ Check pound status.
     url: str. Url to test
 
-    '''
+    """
     _test_url('pound',url)
 
 def check_pound_via_socket(port):
-    ''' Check pound status.
+    """ Check pound status.
     port: str. Port to test
 
-    '''
+    """
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         port = int(port)
@@ -244,10 +216,10 @@ def check_pound_via_socket(port):
         ygg.set_service('pound_socket', status)
 
 def check_memcached(port):
-    ''' Check memcached status.
+    """ Check memcached status.
     port: str. Port to test
 
-    '''
+    """
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         port = int(port)
@@ -264,11 +236,11 @@ def check_memcached(port):
         ygg.set_service('memcached', status)
 
 def _test_url(service, url):
-    ''' Test url response code.
+    """ Test url response code.
     service: str. Name of service under test
     url: str. Url to test
 
-    '''
+    """
     code = urllib.urlopen(url).code
     if (code >=  400):
         logger.warning('%s returned an error code of %s.' % (service, code))
