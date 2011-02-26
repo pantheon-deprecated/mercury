@@ -232,23 +232,13 @@ class ImportTools(project.BuildTools):
             file_var = 'file_public_path'
             file_var_temp = 'file_temporary_path'
 
-        # Change file_directory_path drupal variable
-        file_directory_path = 's:19:\\"sites/default/files\\";'
-        local('mysql -u root %s -e "UPDATE variable \
-                                    SET value = \'%s\' \
-                                    WHERE name = \'%s\';"' % (
-                                    database,
-                                    file_directory_path,
-                                    file_var))
-
-        # Change file_directory_temp drupal variable
-        file_directory_temp = 's:4:\\"/tmp\\";'
-        local('mysql -u root %s -e "UPDATE variable \
-                                    SET value = \'%s\' \
-                                    WHERE name = \'%s\';"' % (
-                                    database,
-                                    file_directory_temp,
-                                    file_var_temp))
+        # Change file path drupal variables
+        db = dbtools.MySQLConn(database=database,
+                               username = self.project,
+                               password = self.db_password)
+        db.vset(file_var, 'sites/default/files')
+        db.vset(file_var_temp, '/tmp')
+        db.close()
 
         # Ignore files directory
         with open(os.path.join(file_dest,'.gitignore'), 'a') as f:
