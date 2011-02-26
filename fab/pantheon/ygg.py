@@ -19,7 +19,7 @@ def get_service(service='', site='self'):
 def set_service(service, data, site='self'):
     """ Update service indicator.
     service: string. Service to query. An empty string returns all services.
-    status: dict. Contains data to store
+    data: dict. Contains data to store
     site: string. The UUID of the site to query. Self by default
     
     return: json response from api
