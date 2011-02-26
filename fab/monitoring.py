@@ -7,7 +7,7 @@ import urllib
 import logging
 import logging.config
 import json
-from pantheon import configrepo
+from pantheon import ygg
 
 from fabric.api import *
 
@@ -15,21 +15,30 @@ from fabric.api import *
 logging.config.fileConfig("logging.conf")
 logger = logging.getLogger('site_health')
 
-def service_request(service='', status = None, method = 'PUT'):
-    ''' Update service indicator.
+def get_service(service = '', server = 'self'):
+    ''' Get service information.
     service: string. Service to query. An empty string returns all services.
-    status: dict. Contains data to store
-    method: string. Request method may be "GET" or "PUT"
+    server: string. The UUID of the server to query.
     
     return: json response from api
 
     '''
-    url='https://api.getpantheon.com:8443/sites/self/services/%s' % service
-    if method == "GET":
-        status = None
-        return configrepo.request(method, status, url)
-    status = json.dumps(status)
-    return configrepo.request(method, status, url)
+    url='https://api.getpantheon.com:8443/sites/%s/services/%s' % 
+        (server, service)
+    return _api_request('GET', url)
+
+def set_service(service, data, server = 'self'):
+    ''' Update service indicator.
+    service: string. Service to query. An empty string returns all services.
+    status: dict. Contains data to store
+    server: string. The UUID of the server to query.
+    
+    return: json response from api
+
+    '''
+    url='https://api.getpantheon.com:8443/sites/%s/services/%s' % 
+        (server, service)
+    return _api_request('PUT', url, data)
 
 def check_load_average(limit):
     ''' Check system load average.
@@ -45,7 +54,7 @@ def check_load_average(limit):
         logger.info('Load average is %s which is below the threshold of %s.' % 
                     (str(loads[0]), str(limit)))
         status = {'status': 'OK'}
-    service_request('load_average', status)
+    ygg.set_service('load_average', status)
 
 def check_disk_space(filesystem, limit):
     ''' Check system disk usage.
@@ -65,7 +74,7 @@ def check_disk_space(filesystem, limit):
                     'threshold of %s percent.' % 
                     (filesystem, str(usage), str(limit)))
         status = {'status': 'OK'}
-    service_request('disk_space', status)
+    ygg.set_service('disk_space', status)
 
 def check_swap_usage(limit):
     ''' Check system swap usage.
@@ -83,7 +92,7 @@ def check_swap_usage(limit):
         logger.info('Swap usage is a %s percent which is below the ' \
                     'threshold of %s percent.' % (str(usage), str(limit)))
         status = {'status': 'OK'}
-    service_request('swap_usage', status)
+    ygg.set_service('swap_usage', status)
 
 def check_io_wait_time(limit):
     ''' Check system io wait time.
@@ -99,7 +108,7 @@ def check_io_wait_time(limit):
         logger.info('IO wait times are at %s percent which is below the ' \
                     'threshold of %s percent.' % (str(iowait), str(limit)))
         status = {'status': 'OK'}
-    service_request('io_wait_time', status)
+    ygg.set_service('io_wait_time', status)
 
 def check_mysql(slow_query_limit, memory_usage, innodb_memory_usage, threads):
     ''' Check mysql status.
@@ -177,7 +186,7 @@ def check_mysql(slow_query_limit, memory_usage, innodb_memory_usage, threads):
           else:
               logger.info(message)
               status = {'status': 'OK'}
-    service_request('mysql', status)
+    ygg.set_service('mysql', status)
 
 def check_ldap():
     ''' Check ldap status.
@@ -191,7 +200,7 @@ def check_ldap():
     else:
         logger.info('ldap responded')
         status = {'status': 'OK'}
-    service_request('ldap', status)
+    ygg.set_service('ldap', status)
 
 def check_apache(url):
     ''' Check apache status.
@@ -228,11 +237,11 @@ def check_pound_via_socket(port):
         logger.exception('Cannot connect to Pound on %s at %s.' % 
                          ('localhost', str(port)))
         status = {'status': 'ERR'}
-        service_request('pound_socket', status)
+        ygg.set_service('pound_socket', status)
     else:
         logger.info('pound responded')
         status = {'status': 'OK'}
-        service_request('pound_socket', status)
+        ygg.set_service('pound_socket', status)
 
 def check_memcached(port):
     ''' Check memcached status.
@@ -248,11 +257,11 @@ def check_memcached(port):
         logger.exception('Cannot connect to Memcached on %s %s.' % 
                          ('localhost', str(port)))
         status = {'status': 'ERR'}
-        service_request('memcached', status)
+        ygg.set_service('memcached', status)
     else:
         logger.info('memcached responded')
         status = {'status': 'OK'}
-        service_request('memcached', status)
+        ygg.set_service('memcached', status)
 
 def _test_url(service, url):
     ''' Test url response code.
@@ -267,7 +276,7 @@ def _test_url(service, url):
     else:
         logger.info('%s returned an error code of %s.' % (service, code))
         status = {'status': 'OK'}
-    service_request(service, status)
+    ygg.set_service(service, status)
 
 # TODO: figure out what to search for from the following output
 #    print(connection.info())
