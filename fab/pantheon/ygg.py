@@ -5,6 +5,16 @@ host = 'api.getpantheon.com'
 port = 8443
 certificate = '/etc/pantheon/system.pem'
 
+def get_config(site='self'):
+    """Return a dictionary of configuration data.
+    site: string. The UUID of the site to query. Self by default
+
+    return: json response from api
+
+    """
+    path='/sites/%s/configuration' % (site)
+    return _api_request('GET', path)
+
 def get_service(service='', site='self'):
     """ Get service information.
     service: string. Service to query. An empty string returns all services.
