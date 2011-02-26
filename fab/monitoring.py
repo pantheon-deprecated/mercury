@@ -5,19 +5,15 @@ import smtplib
 import socket
 import urllib
 import logging
+import logging.config
 import json
 from pantheon import configrepo
 
 from fabric.api import *
 
-LOG_FILENAME = '/var/log/site_health'
-FORMAT = '%(asctime)s [%(levelname)s] %(funcName)s: %(message)s'
-DATEFORMAT='%a, %d %b %Y %H:%M:%S'
-logging.basicConfig(level = logging.DEBUG,
-                    filename = LOG_FILENAME,
-                    format = FORMAT,
-                    datefmt = DATEFORMAT)
-logger = logging.getLogger('health')
+# Get our own logger
+logging.config.fileConfig("logging.conf")
+logger = logging.getLogger('site_health')
 
 def service_request(service='', status = None, method = 'PUT'):
     ''' Update service indicator.
