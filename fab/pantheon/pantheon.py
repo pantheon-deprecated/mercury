@@ -146,11 +146,10 @@ def get_database_vars(project, environment):
     returns: Tuple: (username, password, db_name)
 
     """
-    vhost = PantheonServer().get_vhost_file(project, environment)
-    env_vars = parse_vhost(vhost)
-    return (env_vars.get('db_username'),
-            env_vars.get('db_password'),
-            env_vars.get('db_name'))
+    config = PantheonServer().config[environment]['mysql']
+    return (config['db_username'],
+            config['db_password'],
+            config['db_name'])
 
 def configure_root_certificate(pki_server):
     """Helper function that connects to pki.getpantheon.com and configures the

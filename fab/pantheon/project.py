@@ -3,8 +3,8 @@ import sys
 import tempfile
 
 import dbtools
-import configrepo
 import pantheon
+import ygg
 
 from fabric.api import *
 
@@ -22,7 +22,7 @@ class BuildTools(object):
         project: the name of the project to be built.
 
         """
-        self.config = configrepo.get_config()
+        self.config = ygg.get_config()
         self.server = pantheon.PantheonServer()
 
         self.project = self.config.keys()[0]
