@@ -3,8 +3,8 @@ import sys
 import tempfile
 
 import dbtools
-import configrepo
 import pantheon
+import ygg
 
 from fabric.api import *
 
@@ -22,7 +22,7 @@ class BuildTools(object):
         project: the name of the project to be built.
 
         """
-        self.config = configrepo.get_config()
+        self.config = ygg.get_config()
         self.server = pantheon.PantheonServer()
 
         self.project = self.config.keys()[0]
@@ -192,41 +192,6 @@ class BuildTools(object):
         for env in self.environments:
             self.server.create_solr_index(self.project, env, self.version)
 
-    def setup_vhost(self, db_password):
-        """ Create vhost files for each environment in a project.
-        db_password: mysql password to store as an env var in the vhost.
-
-        This is now depricated on Pantheon infrastructure. Virtualhosts are
-        created via BCFG. The only time this will run is if the site is a
-        DIY open-source system.
-
-        """
-        if pantheon.is_gp_server():
-             return True
-        for env in self.environments:
-            server_alias = '%s.*' % env
-            vhost_dict = {'server_name': env,
-                          'server_alias': server_alias,
-                          'project': self.project,
-                          'environment': env,
-                          'db_name': '%s_%s' % (self.project, env),
-                          'db_username':self.project,
-                          'db_password':db_password,
-                          'solr_path': '/%s_%s' % (self.project, env),
-                          'memcache_prefix': '%s_%s' % (self.project, env)}
-
-            filename = '%s_%s' % (self.project, env)
-            if env == 'live':
-                filename = '000_' + filename
-                vhost_dict['robots_settings'] = ''
-            else:
-                vhost_dict['robots_settings'] = 'alias /robots.txt /usr/local/share/robots-deny.txt'
-
-
-            self.server.create_vhost(filename, vhost_dict)
-            if self.server.distro == 'ubuntu':
-               local('a2ensite %s' % filename)
-
     def setup_drupal_cron(self):
         """ Create drupal cron jobs in hudson for each environment.
 
@@ -248,7 +213,7 @@ class BuildTools(object):
         # Once complete, we import this 'final' database into each environment.
         if handler == 'import':
             tempdir = tempfile.mkdtemp()
-            dump_file = dbtools.export_data(self.project, 'dev', tempdir)
+            dump_file = dbtools.export_data(self, 'dev', tempdir)
 
         for env in self.environments:
             # Code
@@ -271,28 +236,6 @@ class BuildTools(object):
         # Cleanup
         if handler == 'import':
             local('rm -rf %s' % tempdir)
-
-    def setup_phpmyadmin(self, db_password):
-        """ Create apache vhost and config.inc.php config for phpmyadmin.
-        db_password: database password to store as an env var in the vhost file
-
-        This is now depricated on Pantheon infrastructure. Virtualhosts are
-        created via BCFG. The only time this will run is if the site is a
-        DIY open-source system.
-        """
-        if pantheon.is_gp_server():
-             return True
-
-        vhost_dict = {'db_username':self.project,
-                      'db_password':db_password}
-
-        filename = 'pma_vhost'
-        # Todo: fix hard-coding of .ubuntu here?
-        vhost_template_file = 'pma.vhost.template.ubuntu'
-
-        self.server.create_vhost(filename, vhost_dict, vhost_template_file)
-        if self.server.distro == 'ubuntu':
-            local('a2ensite %s' % filename)
 
     def push_to_repo(self, tag):
         """ Commit changes in working directory and push to central repo.
@@ -404,7 +347,7 @@ class BuildTools(object):
         #TODO: We could split this up based on handler, but changing perms on
         # two files is fast. Ignoring for now, and treating all the same.
         for env in environments:
-            if pantheon.is_drupal_installed(self.project, env):
+            if pantheon.is_drupal_installed(self, env):
                 # Drupal installed, Apache does not need to own settings.php
                 settings_perms = '440'
                 settings_owner = owner
