@@ -10,7 +10,6 @@ from pantheon import pantheon
 def initialize(vps=None):
     '''Initialize the Pantheon system.'''
     server = pantheon.PantheonServer()
-    _initialize_server_type(vps)
 
     _initialize_fabric()
     _initialize_certificate()
@@ -27,16 +26,6 @@ def initialize(vps=None):
 def init():
     '''Alias of "initialize"'''
     initialize()
-
-def _initialize_server_type(vps):
-    """Create a server type file if setting up a private server.
-
-    """
-    local('mkdir /etc/pantheon')
-    if vps in ['aws', 'ebs', 'default']:
-        server_type = '%s.server' % vps
-        with open(os.path.join('/etc/pantheon', server_type), 'w') as f:
-            f.write('Server type: %s' % server_type)
 
 def _initialize_fabric():
     """Make symlink of /usr/local/bin/fab -> /usr/bin/fab.
