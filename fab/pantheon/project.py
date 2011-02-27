@@ -237,28 +237,6 @@ class BuildTools(object):
         if handler == 'import':
             local('rm -rf %s' % tempdir)
 
-    def setup_phpmyadmin(self, db_password):
-        """ Create apache vhost and config.inc.php config for phpmyadmin.
-        db_password: database password to store as an env var in the vhost file
-
-        This is now depricated on Pantheon infrastructure. Virtualhosts are
-        created via BCFG. The only time this will run is if the site is a
-        DIY open-source system.
-        """
-        if pantheon.is_gp_server():
-             return True
-
-        vhost_dict = {'db_username':self.project,
-                      'db_password':db_password}
-
-        filename = 'pma_vhost'
-        # Todo: fix hard-coding of .ubuntu here?
-        vhost_template_file = 'pma.vhost.template.ubuntu'
-
-        self.server.create_vhost(filename, vhost_dict, vhost_template_file)
-        if self.server.distro == 'ubuntu':
-            local('a2ensite %s' % filename)
-
     def push_to_repo(self, tag):
         """ Commit changes in working directory and push to central repo.
 
