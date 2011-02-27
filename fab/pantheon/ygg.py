@@ -65,4 +65,4 @@ def _api_request(method, path, data = None):
     if method == 'PUT':
         return True
 
-    return json.loads(complete_response.read())
+    return json.loads(response.read())
