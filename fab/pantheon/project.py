@@ -22,13 +22,14 @@ class BuildTools(object):
         project: the name of the project to be built.
 
         """
-        self.config = ygg.get_config()
+        config = ygg.get_config()
         self.server = pantheon.PantheonServer()
 
-        self.project = self.config.keys()[0]
-        self.environments = set(self.config[self.project]['environments'].keys())
+        self.project = config.keys()[0]
+        self.config = config[self.project]
+        self.environments = set(self.config['environments'].keys())
         self.project_path = os.path.join(self.server.webroot, self.project)
-        self.db_password = self.config[self.project]\
+        self.db_password = self.config\
                 ['environments']['live']['mysql']['db_password']
 
     def bcfg2_project(self):

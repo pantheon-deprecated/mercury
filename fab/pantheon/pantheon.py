@@ -145,8 +145,7 @@ def get_database_vars(self, env):
     returns: Tuple: (username, password, db_name)
 
     """
-    project = self.config.keys()[0]
-    config = self.config[project]['environments'][env]['mysql']
+    config = self.config['environments'][env]['mysql']
     return (config['db_username'],
             config['db_password'],
             config['db_name'])
