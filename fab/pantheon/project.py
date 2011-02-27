@@ -213,7 +213,7 @@ class BuildTools(object):
         # Once complete, we import this 'final' database into each environment.
         if handler == 'import':
             tempdir = tempfile.mkdtemp()
-            dump_file = dbtools.export_data(self.project, 'dev', tempdir)
+            dump_file = dbtools.export_data(self, 'dev', tempdir)
 
         for env in self.environments:
             # Code
@@ -347,7 +347,7 @@ class BuildTools(object):
         #TODO: We could split this up based on handler, but changing perms on
         # two files is fast. Ignoring for now, and treating all the same.
         for env in environments:
-            if pantheon.is_drupal_installed(self.project, env):
+            if pantheon.is_drupal_installed(self, env):
                 # Drupal installed, Apache does not need to own settings.php
                 settings_perms = '440'
                 settings_owner = owner

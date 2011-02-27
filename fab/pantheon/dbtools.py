@@ -1,16 +1,16 @@
-import os
-
 import MySQLdb
+import os
 import pantheon
 from fabric.api import local
 
-def export_data(project, environment, destination):
+def export_data(self, environment, destination):
     """Export the database for a particular project/environment to destination.
 
     Exported database will have a name in the form of:
         /destination/project_environment.sql
 
     """
+    project = self.config.keys()[0]
     filepath = os.path.join(destination, '%s_%s.sql' % (project, environment))
     username, password, db_name = pantheon.get_database_vars(project, environment)
     local("mysqldump --single-transaction --user='%s' \

@@ -100,7 +100,7 @@ class Updater(project.BuildTools):
 
     def data_update(self, source_env):
         tempdir = tempfile.mkdtemp()
-        export = dbtools.export_data(self.project, source_env, tempdir)
+        export = dbtools.export_data(self, source_env, tempdir)
         dbtools.import_data(self.project, self.project_env, export)
         local('rm -rf %s' % tempdir)
 
