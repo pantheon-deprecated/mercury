@@ -12,7 +12,7 @@ def export_data(self, environment, destination):
     """
     project = self.config.keys()[0]
     filepath = os.path.join(destination, '%s_%s.sql' % (project, environment))
-    username, password, db_name = pantheon.get_database_vars(project, environment)
+    username, password, db_name = pantheon.get_database_vars(self, environment)
     local("mysqldump --single-transaction --user='%s' \
                                           --password='%s' \
                                             %s > %s" % (username,
