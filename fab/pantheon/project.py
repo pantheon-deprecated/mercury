@@ -192,41 +192,6 @@ class BuildTools(object):
         for env in self.environments:
             self.server.create_solr_index(self.project, env, self.version)
 
-    def setup_vhost(self, db_password):
-        """ Create vhost files for each environment in a project.
-        db_password: mysql password to store as an env var in the vhost.
-
-        This is now depricated on Pantheon infrastructure. Virtualhosts are
-        created via BCFG. The only time this will run is if the site is a
-        DIY open-source system.
-
-        """
-        if pantheon.is_gp_server():
-             return True
-        for env in self.environments:
-            server_alias = '%s.*' % env
-            vhost_dict = {'server_name': env,
-                          'server_alias': server_alias,
-                          'project': self.project,
-                          'environment': env,
-                          'db_name': '%s_%s' % (self.project, env),
-                          'db_username':self.project,
-                          'db_password':db_password,
-                          'solr_path': '/%s_%s' % (self.project, env),
-                          'memcache_prefix': '%s_%s' % (self.project, env)}
-
-            filename = '%s_%s' % (self.project, env)
-            if env == 'live':
-                filename = '000_' + filename
-                vhost_dict['robots_settings'] = ''
-            else:
-                vhost_dict['robots_settings'] = 'alias /robots.txt /usr/local/share/robots-deny.txt'
-
-
-            self.server.create_vhost(filename, vhost_dict)
-            if self.server.distro == 'ubuntu':
-               local('a2ensite %s' % filename)
-
     def setup_drupal_cron(self):
         """ Create drupal cron jobs in hudson for each environment.
 

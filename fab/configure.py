@@ -16,13 +16,8 @@ def configure():
     server = pantheon.PantheonServer()
     try:
         _test_for_previous_run()
-
-        if pantheon.is_aws_server():
-            _configure_ec2(server)
-
         _check_connectivity(server)
         _configure_certificates()
-
         _configure_server(server)
         _configure_postfix(server)
         _restart_services(server)
