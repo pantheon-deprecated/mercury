@@ -1,5 +1,4 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
-import M2Crypto
 import os
 import random
 import string
@@ -57,25 +56,6 @@ def build_template(template_file, values):
     template = string.Template(contents)
     template = template.safe_substitute(values)
     return template
-
-def is_aws_server():
-    # Check if aws.server file was created during configure.
-    return os.path.isfile('/etc/pantheon/aws.server')
-
-def is_ebs_server():
-    # Check if ebs.server file was created during configure.
-    return os.path.isfile('/etc/pantheon/ebs.server')
-
-def is_gp_server():
-    # Check if a valid system.pem exists
-    try:
-        cert = M2Crypto.X509.load_cert('/etc/pantheon/system.pem')
-        if re.search('pki.getpantheon.com', cert.get_issuer().as_text()) != None:
-            return True
-    except:
-        pass
-
-    return False
 
 def random_string(length):
     """ Create random string of ascii letters & digits.
