@@ -6,6 +6,7 @@ def deploy():
     """
     packages = ['python-configobj',
                 'python-dev',
+                'python-m2crypto',
                 'python-mysqldb',
                 'python-paramiko',
                 'python-pip',

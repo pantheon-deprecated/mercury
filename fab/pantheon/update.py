@@ -12,7 +12,7 @@ from fabric.api import *
 class Updater(project.BuildTools):
 
     def __init__(self, project, environment):
-        super(Updater, self).__init__(project)
+        super(Updater, self).__init__()
 
         self.project_env = environment
         self.author = 'Jenkins User <jenkins@pantheon>'
@@ -100,7 +100,7 @@ class Updater(project.BuildTools):
 
     def data_update(self, source_env):
         tempdir = tempfile.mkdtemp()
-        export = dbtools.export_data(self.project, source_env, tempdir)
+        export = dbtools.export_data(self, source_env, tempdir)
         dbtools.import_data(self.project, self.project_env, export)
         local('rm -rf %s' % tempdir)
 

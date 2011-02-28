@@ -57,18 +57,6 @@ def build_template(template_file, values):
     template = template.safe_substitute(values)
     return template
 
-def is_aws_server():
-    # Check if aws.server file was created during configure.
-    return os.path.isfile('/etc/pantheon/aws.server')
-
-def is_ebs_server():
-    # Check if ebs.server file was created during configure.
-    return os.path.isfile('/etc/pantheon/ebs.server')
-
-def is_private_server():
-    # Check if private.server file was created during configure.
-    return os.path.isfile('/etc/pantheon/private.server')
-
 def random_string(length):
     """ Create random string of ascii letters & digits.
     length: Int. Character length of string to return.
@@ -77,7 +65,6 @@ def random_string(length):
     return ''.join(['%s' % random.choice (string.ascii_letters + \
                                           string.digits) \
                                           for i in range(length)])
-
 def parse_vhost(path):
     """Helper method that returns environment variables from a vhost file.
     path: full path to vhost file.
@@ -94,14 +81,13 @@ def parse_vhost(path):
             env_vars[var[1]] = var[2]
     return env_vars
 
-def is_drupal_installed(project, environment):
+def is_drupal_installed(self, environment):
     """Return True if the Drupal installation process has been completed.
        project: project name
        environment: environment name.
 
     """
-    #TODO: Find better way of determining this than hitting the db.
-    (username, password, db_name) = get_database_vars(project, environment)
+    (username, password, db_name) = get_database_vars(self, environment)
     with hide('running'):
         status = local("mysql -u %s -p%s %s -e 'show tables;' | \
                         awk '/system/'" % (username, password, db_name))
@@ -152,18 +138,17 @@ def jenkins_queued():
         return -1
     return len(eval(result.read()).get('items'))
 
-def get_database_vars(project, environment):
+def get_database_vars(self, env):
     """Helper method that returns database variables for a project/environment.
     project: project name
     environment: environment name.
     returns: Tuple: (username, password, db_name)
 
     """
-    vhost = PantheonServer().get_vhost_file(project, environment)
-    env_vars = parse_vhost(vhost)
-    return (env_vars.get('db_username'),
-            env_vars.get('db_password'),
-            env_vars.get('db_name'))
+    config = self.config['environments'][env]['mysql']
+    return (config['db_username'],
+            config['db_password'],
+            config['db_name'])
 
 def configure_root_certificate(pki_server):
     """Helper function that connects to pki.getpantheon.com and configures the
@@ -224,10 +209,7 @@ class PantheonServer:
         self.template_dir = get_template_dir()
 
     def get_hostname(self):
-        if os.path.exists("/usr/local/bin/ec2-metadata"):
-            return local('/usr/local/bin/ec2-metadata -p | sed "s/public-hostname: //"').rstrip('\n')
-        else:
-            return local('hostname').rstrip('\n')
+        return local('hostname').rstrip('\n')
 
     def update_packages(self):
         if (self.distro == "centos"):
@@ -269,30 +251,6 @@ class PantheonServer:
         template = build_template(alias_template, drush_dict)
         with open(alias_file, 'w') as f:
             f.write(template)
-
-    def create_vhost(self, filename, vhost_dict, vhost_template_file = None):
-        """
-        filename:  vhost filename
-        vhost_dict: server_name:
-                    server_alias:
-                    project:
-                    environment:
-                    db_name:
-                    db_username:
-                    db_password:
-                    db_solr_path:
-                    memcache_prefix:
-
-        """
-        if (vhost_template_file == None):
-          vhost_template_file = 'vhost.template.%s' % self.distro
-        vhost_template = get_template(vhost_template_file)
-        template = build_template(vhost_template, vhost_dict)
-        vhost = os.path.join(self.vhost_dir, filename)
-        with open(vhost, 'w') as f:
-            f.write(template)
-        local('chown root:%s %s' % (self.web_group, vhost))
-        local('chmod 640 %s' % vhost)
 
     def create_solr_index(self, project, environment, version):
         """ Create solr index in: /var/solr/project/environment.

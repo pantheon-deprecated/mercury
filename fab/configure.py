@@ -16,14 +16,8 @@ def configure():
     server = pantheon.PantheonServer()
     try:
         _test_for_previous_run()
-
-        if pantheon.is_aws_server():
-            _configure_ec2(server)
-
-        if not pantheon.is_private_server():
-            _check_connectivity(server)
-            _configure_certificates()
-
+        _check_connectivity(server)
+        _configure_certificates()
         _configure_server(server)
         _configure_postfix(server)
         _restart_services(server)
@@ -40,29 +34,6 @@ def configure():
 def _test_for_previous_run():
     if os.path.exists("/etc/pantheon/incep"):
         abort("Pantheon config has already run. Exiting.")
-
-def _configure_ec2(server):
-    #lucid only for now...
-    local('cp /opt/pantheon/bcfg2/TGenshi/mysql/apparmor/' + \
-          'template.newtxt.G00_lucid /etc/apparmor.d/usr.sbin.mysqld')
-    local('mkdir -p /mnt/mysql/tmp')
-    local('chown -R root:root /mnt/mysql')
-    local('chmod -R 777 /mnt/mysql')
-    local('chown -R mysql:mysql /mnt/mysql/tmp')
-    local('chmod -R 1777 /mnt/mysql/tmp')
-    local('/etc/init.d/mysql stop')
-    if(server.distro == 'centos'):
-        local('mv /var/log/mysqld.log /mnt/mysql/')
-        local('ln -s /mnt/mysql/mysqld.log /var/log/mysqld.log')
-    else:
-        local('mv /var/log/mysql /mnt/mysql/log')
-        local('ln -s /mnt/mysql/log /var/log/mysql')
-    local('mv /var/lib/mysql /mnt/mysql/lib')
-    local('ln -s /mnt/mysql/lib /var/lib/mysql')
-    local('/etc/init.d/varnish stop')
-    local('mkdir /mnt/varnish')
-    local('mv /var/lib/varnish /mnt/varnish/lib')
-    local('ln -s /mnt/varnish/lib /var/lib/varnish')
 
 def _check_connectivity(server):
     # Rackspace occasionally has connectivity issues unless a server gets
@@ -99,10 +70,14 @@ def _configure_certificates():
     pki_server = 'https://pki.getpantheon.com'
 
     # Ask Helios about what to put into the certificate request.
-    host_info = json.loads(urllib2.urlopen('%s/info' % pki_server).read())
-    ou = host_info['ou']
-    cn = host_info['cn']
-    subject = '/C=US/ST=California/L=San Francisco/O=Pantheon Systems, Inc./OU=%s/CN=%s/emailAddress=hostmaster@%s/' % (ou, cn, cn)
+    try:
+        host_info = json.loads(urllib2.urlopen('%s/info' % pki_server).read())
+        ou = host_info['ou']
+        cn = host_info['cn']
+        subject = '/C=US/ST=California/L=San Francisco/O=Pantheon Systems, Inc./OU=%s/CN=%s/emailAddress=hostmaster@%s/' % (ou, cn, cn)
+    except ValueError:
+        # This fails if Helios says "Could not find corresponding LDAP entry."
+        return False
 
     # Generate a local key and certificate-signing request.
     local('openssl genrsa 4096 > /etc/pantheon/system.key')

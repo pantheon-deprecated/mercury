@@ -15,9 +15,8 @@ class RestoreTools(project.BuildTools):
         """ Initialize Restore object. Inherits base methods from BuildTools.
 
         """
-        super(RestoreTools, self).__init__(project)
-        self.destination = os.path.join(self.server.webroot, project)
-        self.db_password = pantheon.random_string(10)
+        super(RestoreTools, self).__init__()
+        self.destination = os.path.join(self.server.webroot, self.project)
 
     def parse_backup(self, location):
         """ Get project name from extracted backup.
@@ -85,12 +84,6 @@ class RestoreTools(project.BuildTools):
                     local('git remote add --mirror origin ' + \
                           'git://git.getpantheon.com/pantheon/%s.git' % match.group(1))
                     break
-
-    def setup_vhost(self):
-        """ Create vhost file using db_password.
-
-        """
-        super(RestoreTools, self).setup_vhost(self.db_password)
 
     def setup_permissions(self):
         """ Set permissions on project, and repo using the 'restore' handler.
