@@ -34,6 +34,9 @@ def configure():
 
 def _test_for_previous_run():
     if os.path.exists("/etc/pantheon/incep"):
+        # If the server has a certificate, send an event.
+        if os.path.exists("/etc/pantheon/system.pem"):
+            ygg.send_event('Restart', 'This site\'s server was restarted, but it is already configured.')
         abort("Pantheon config has already run. Exiting.")
 
 def _check_connectivity(server):
