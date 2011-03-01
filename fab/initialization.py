@@ -150,8 +150,9 @@ def _initialize_jenkins(server):
     """Add a Jenkins user and grant it access to the directory that will contain the certificate.
 
     """
-    # Create the user:
-    local('adduser --system --home /var/lib/jenkins --no-create-home --ingroup nogroup --disabled-password --shell /bin/bash jenkins')
+    # Create the user if it doesn't exist:
+    with settings(warn_only=True):
+        local('adduser --system --home /var/lib/jenkins --no-create-home --ingroup nogroup --disabled-password --shell /bin/bash jenkins')
 
     # Grant it access:
     local('setfacl --recursive --no-mask --modify user:jenkins:r /etc/pantheon')
