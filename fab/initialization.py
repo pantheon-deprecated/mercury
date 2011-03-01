@@ -159,12 +159,15 @@ def _initialize_jenkins(server):
     with settings(warn_only=True):
         local('adduser --system --home /var/lib/jenkins --no-create-home --ingroup nogroup --disabled-password --shell /bin/bash jenkins')
 
+    local('usermod -aG ssl-cert jenkins')
+    local('apt-get install -y jenkins')
+
     # Grant it access:
-    local('setfacl --recursive --no-mask --modify user:jenkins:rx /etc/pantheon')
-    local('setfacl --recursive --modify default:user:jenkins:rx /etc/pantheon')
+    #local('setfacl --recursive --no-mask --modify user:jenkins:rx /etc/pantheon')
+    #local('setfacl --recursive --modify default:user:jenkins:rx /etc/pantheon')
 
     # Review the permissions:
-    local('getfacl /etc/pantheon', capture=False)
+    #local('getfacl /etc/pantheon', capture=False)
 
 def _initialize_apache(server):
     """Remove the default vhost and clear /var/www.
