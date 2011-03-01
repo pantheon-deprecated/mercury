@@ -148,10 +148,8 @@ class BuildTools(object):
         # Stomp on changes to default.settings.php - no need to conflict here.
         settings_contents = local(
            'git --git-dir=/var/git/projects/%s cat-file ' % self.project + \
-           'blob refs/heads/master:sites/default/default.settings.php')
-        with open(settings_default, 'w') as f:
-            f.write(settings_contents)
-
+           'blob refs/heads/master:sites/default/default.settings.php > ' % (
+                                                           settings_default))
         # Make sure settings.php exists.
         if not os.path.isfile(settings_file):
             local('cp %s %s' % (settings_default, settings_file))
