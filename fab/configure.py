@@ -5,7 +5,7 @@ import time
 import urllib2
 import json
 import traceback
-import ygg
+from pantheon import ygg
 
 from fabric.api import *
 
