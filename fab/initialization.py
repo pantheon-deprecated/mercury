@@ -19,9 +19,9 @@ def initialize(vps=None):
     _initialize_drush()
     _initialize_solr(server)
     _initialize_sudoers(server)
+    _initialize_acl(server)
     _initialize_jenkins(server)
     _initialize_apache(server)
-    _initialize_acl(server)
 
 def init():
     '''Alias of "initialize"'''
@@ -138,22 +138,6 @@ def _initialize_sudoers(server):
     local('touch /etc/sudoers.d/003_pantheon_extra')
     local('chmod 0440 /etc/sudoers.d/003_pantheon_extra')
 
-def _initialize_jenkins(server):
-    """Add jenkins to ssl-cert group and restart jenkins.
-
-    """
-    local('usermod -aG ssl-cert jenkins')
-    local('/etc/init.d/jenkins restart')
-
-def _initialize_apache(server):
-    """Remove the default vhost and clear /var/www.
-
-    """
-    if server.distro == 'ubuntu':
-        local('a2dissite default')
-        local('rm -f /etc/apache2/sites-available/default*')
-        local('rm -f /var/www/*')
-
 def _initialize_acl(server):
     """Allow the use of ACLs and ensure they remain after reboot.
 
@@ -163,3 +147,18 @@ def _initialize_acl(server):
     # For after restarts
     local('sudo sed -i "s/noatime /noatime,acl /g" /etc/fstab')
 
+def _initialize_jenkins(server):
+    """Grant Jenkins access to the system SSL certificate.
+
+    """
+    local('setfacl -m u:jenkins:r /etc/pantheon/system.pem')
+    local('/etc/init.d/jenkins restart') # TODO: Can we remove now with ACLs?
+
+def _initialize_apache(server):
+    """Remove the default vhost and clear /var/www.
+
+    """
+    if server.distro == 'ubuntu':
+        local('a2dissite default')
+        local('rm -f /etc/apache2/sites-available/default*')
+        local('rm -f /var/www/*')
