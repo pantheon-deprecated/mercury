@@ -10,7 +10,6 @@ from pantheon import pantheon
 def initialize(vps=None):
     '''Initialize the Pantheon system.'''
     server = pantheon.PantheonServer()
-    _initialize_server_type(vps)
 
     _initialize_fabric()
     _initialize_certificate()
@@ -27,16 +26,6 @@ def initialize(vps=None):
 def init():
     '''Alias of "initialize"'''
     initialize()
-
-def _initialize_server_type(vps):
-    """Create a server type file if setting up a private server.
-
-    """
-    local('mkdir /etc/pantheon')
-    if vps in ['aws', 'ebs', 'default']:
-        server_type = '%s.server' % vps
-        with open(os.path.join('/etc/pantheon', server_type), 'w') as f:
-            f.write('Server type: %s' % server_type)
 
 def _initialize_fabric():
     """Make symlink of /usr/local/bin/fab -> /usr/bin/fab.
@@ -63,9 +52,7 @@ def _initialize_package_manager(server):
         with cd(server.template_dir):
             local('cp apt.pantheon.list /etc/apt/sources.list.d/pantheon.list')
             local('cp apt.php.pin /etc/apt/preferences.d/php')
-            # No need for ldap patched ssh for non-getpantheon servers.
-            if pantheon.is_gp_server():
-                local('cp apt.openssh.pin /etc/apt/preferences.d/openssh')
+            local('cp apt.openssh.pin /etc/apt/preferences.d/openssh')
             local('apt-key add apt.ppakeys.txt')
         local('echo \'APT::Install-Recommends "0";\' >>  /etc/apt/apt.conf')
 

@@ -85,12 +85,6 @@ class RestoreTools(project.BuildTools):
                           'git://git.getpantheon.com/pantheon/%s.git' % match.group(1))
                     break
 
-    def setup_vhost(self):
-        """ Create vhost file using db_password.
-
-        """
-        super(RestoreTools, self).setup_vhost(self.db_password)
-
     def setup_permissions(self):
         """ Set permissions on project, and repo using the 'restore' handler.
 

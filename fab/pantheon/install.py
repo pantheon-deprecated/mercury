@@ -53,12 +53,6 @@ class InstallTools(project.BuildTools):
     def setup_pantheon_libraries(self):
         super(InstallTools, self).setup_pantheon_libraries(self.working_dir)
 
-    def setup_vhost(self):
-        super(InstallTools, self).setup_vhost(self.db_password)
-
-    def setup_phpmyadmin(self):
-        super(InstallTools, self).setup_phpmyadmin(self.db_password)
-
     def setup_files_dir(self):
         """ Creates Drupal files directory and sets gitignore for all sub-files
 

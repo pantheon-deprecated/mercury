@@ -135,7 +135,7 @@ class ImportTools(project.BuildTools):
                                                               temp_dir))
         # Put the .git metadata on top of imported site.
         with cd(temp_dir):
-            local('git checkout pantheon')
+            local('git checkout %s' % self.project)
             local('cp -R .git %s' % self.working_dir)
         with cd(self.working_dir):
             local('rm -f PRESSFLOW.txt')
@@ -317,11 +317,14 @@ class ImportTools(project.BuildTools):
         if self.version == 7:
             db.execute('TRUNCATE apachesolr_server')
             for env in self.environments:
+                config = self.config['environments']['env']['solr'];
                 db.execute('INSERT INTO apachesolr_server ' + \
                     '(host, port, server_id, name, path) VALUES ' + \
-                    '("localhost", "8983", ' + \
-                      '"pantheon_%s", "Pantheon %s", "/pantheon_%s")' %\
-                      (env, env, env))
+                    '("%s", "%s", ' + \
+                      '"%s", "Pantheon %s", "/%s")' % \
+                      (config['solr_host'], config['solr_port'], \
+                      config['apachesolr_default_server'], env, \
+                      config['solr_path']))
         db.close()
 
         # D7: apachesolr config link will not display until cache cleared?
@@ -352,12 +355,6 @@ class ImportTools(project.BuildTools):
         with open('/opt/drush/aliases/working_dir.alias.drushrc.php', 'w') as f:
             for line in lines:
                 f.write(line + '\n')
-
-    def setup_vhost(self):
-        super(ImportTools, self).setup_vhost(self.db_password)
-
-    def setup_phpmyadmin(self):
-        super(ImportTools, self).setup_phpmyadmin(self.db_password)
 
     def setup_environments(self):
         super(ImportTools, self).setup_environments('import', self.working_dir)
