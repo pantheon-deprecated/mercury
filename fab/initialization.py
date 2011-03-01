@@ -155,8 +155,8 @@ def _initialize_jenkins(server):
         local('adduser --system --home /var/lib/jenkins --no-create-home --ingroup nogroup --disabled-password --shell /bin/bash jenkins')
 
     # Grant it access:
-    local('setfacl --recursive --no-mask --modify user:jenkins:r /etc/pantheon')
-    local('setfacl --recursive --modify default:user:jenkins:r /etc/pantheon')
+    local('setfacl --recursive --no-mask --modify user:jenkins:rx /etc/pantheon')
+    local('setfacl --recursive --modify default:user:jenkins:rx /etc/pantheon')
 
     # Review the permissions:
     local('getfacl /etc/pantheon', capture=False)
