@@ -5,6 +5,23 @@ host = 'api.getpantheon.com'
 port = 8443
 certificate = '/etc/pantheon/system.pem'
 
+def send_event(thread, details, labels=[], site='self'):
+    """ Send event.
+    thread: string. Aggregates events from the same site together.
+    details: dict. Contains data to send
+    labels: list. Additional labels for listing the thread the event is in.
+    site: string. The UUID of the site to query. Self by default
+
+    return: json response from api
+
+    """
+    path='/sites/%s/events/' % (site)
+
+    request = {'thread': thread,
+               'details': details,
+               'labels': labels}
+    return _api_request('POST', path, request)
+
 def get_config(site='self'):
     """Return a dictionary of configuration data.
     site: string. The UUID of the site to query. Self by default
@@ -19,7 +36,7 @@ def get_service(service='', site='self'):
     """ Get service information.
     service: string. Service to query. An empty string returns all services.
     site: string. The UUID of the site to query. Self by default
-    
+
     return: json response from api
 
     """
@@ -31,7 +48,7 @@ def set_service(service, data, site='self'):
     service: string. Service to query. An empty string returns all services.
     data: dict. Contains data to store
     site: string. The UUID of the site to query. Self by default
-    
+
     return: json response from api
 
     """
@@ -45,7 +62,7 @@ def _api_request(method, path, data = None):
     """
     headers = {}
 
-    if method == 'PUT':
+    if method == 'PUT' or method == 'POST':
         headers = {'Content-Type': 'application/json'}
         data = json.dumps(data)
 
@@ -62,7 +79,7 @@ def _api_request(method, path, data = None):
     if response.status == 403:
         return False
 
-    if method == 'PUT':
+    if method == 'PUT' or method == 'POST':
         return True
 
     return json.loads(response.read())
