@@ -7,9 +7,10 @@ from fabric.api import *
 import update
 from pantheon import pantheon
 
-def initialize(vps=None):
+def initialize(vps=None, bcfg2_host='config.getpantheon.com'):
     '''Initialize the Pantheon system.'''
     server = pantheon.PantheonServer()
+    server.bcfg2_host = bcfg2_host
 
     _initialize_fabric()
     _initialize_certificate()
@@ -84,7 +85,11 @@ def _initialize_bcfg2(server):
     elif server.distro == 'centos':
         local('yum -y install bcfg2 gamin gamin-python python-genshi ' + \
               'python-ssl python-lxml libxslt')
-    pantheon.copy_template('bcfg2.conf', '/etc/')
+    template = pantheon.get_template('bcfg2.conf')
+    bcfg2_conf = pantheon.build_template(template, {"bcfg2_host": server.bcfg2_host})
+    with open('/etc/bcfg2.conf', 'w') as f:
+        f.write(bcfg2_conf)
+
     # We use our own key/certs.
     local('rm -f /etc/bcfg2.key bcfg2.crt')
     # Run bcfg2
