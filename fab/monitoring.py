@@ -246,7 +246,7 @@ def _test_url(service, url):
         logger.warning('%s returned an error code of %s.' % (service, code))
         status = {'status': 'ERR'}
     else:
-        logger.info('%s returned an error code of %s.' % (service, code))
+        logger.info('%s returned a status code of %s.' % (service, code))
         status = {'status': 'OK'}
     ygg.set_service(service, status)
 
