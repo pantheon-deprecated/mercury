@@ -13,7 +13,7 @@ def initialize(vps=None, bcfg2_host='config.getpantheon.com'):
     server.bcfg2_host = bcfg2_host
 
     _initialize_fabric()
-    _initialize_certificate()
+    _initialize_root_certificate()
     _initialize_package_manager(server)
     _initialize_bcfg2(server)
     _initialize_iptables(server)
@@ -29,7 +29,7 @@ def init():
     initialize()
 
 def _initialize_fabric():
-    """Make symlink of /usr/local/bin/fab -> /usr/bin/fab.
+    """Make symlink of /usr/bin/fab -> /usr/local/bin/fab.
 
     This is because using pip to install fabric will install it to
     /usr/local/bin but we want to maintain compatibility with existing
@@ -39,7 +39,7 @@ def _initialize_fabric():
     if not os.path.exists('/usr/bin/fab'):
         local('ln -s /usr/local/bin/fab /usr/bin/fab')
 
-def _initialize_certificate():
+def _initialize_root_certificate():
     """Install the Pantheon root certificate.
 
     """
@@ -152,11 +152,19 @@ def _initialize_acl(server):
     local('sudo sed -i "s/noatime /noatime,acl /g" /etc/fstab')
 
 def _initialize_jenkins(server):
-    """Grant Jenkins access to the system SSL certificate.
+    """Add a Jenkins user and grant it access to the directory that will contain the certificate.
 
     """
-    local('setfacl -m u:jenkins:r /etc/pantheon/system.pem')
-    local('/etc/init.d/jenkins restart') # TODO: Can we remove now with ACLs?
+    # Create the user if it doesn't exist:
+    with settings(warn_only=True):
+        local('adduser --system --home /var/lib/jenkins --no-create-home --ingroup nogroup --disabled-password --shell /bin/bash jenkins')
+
+    # Grant it access:
+    local('setfacl --recursive --no-mask --modify user:jenkins:rx /etc/pantheon')
+    local('setfacl --recursive --modify default:user:jenkins:rx /etc/pantheon')
+
+    # Review the permissions:
+    local('getfacl /etc/pantheon', capture=False)
 
 def _initialize_apache(server):
     """Remove the default vhost and clear /var/www.
