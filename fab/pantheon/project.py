@@ -146,15 +146,11 @@ class BuildTools(object):
         settings_default = os.path.join(site_dir, 'default.settings.php')
         settings_pantheon = os.path.join(site_dir, 'pantheon.settings.php')
 
-        # Make sure default.settings.php exists. If it has been removed,
-        # git may think that it was moved to settings.php and cause conflict.
-        if not os.path.isfile(settings_default):
-            settings_contents = local(
-               'git --git-dir=/var/git/projects/%s cat-file ' % self.project +\
-               'blob refs/heads/master:sites/default/default.settings.php')
-            with open(settings_default, 'w') as f:
-                f.write(settings_contents)
-
+        # Stomp on changes to default.settings.php - no need to conflict here.
+        settings_contents = local(
+           'git --git-dir=/var/git/projects/%s cat-file ' % self.project + \
+           'blob refs/heads/master:sites/default/default.settings.php > %s' % (
+                                                             settings_default))
         # Make sure settings.php exists.
         if not os.path.isfile(settings_file):
             local('cp %s %s' % (settings_default, settings_file))
