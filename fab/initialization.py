@@ -28,7 +28,7 @@ def init():
     initialize()
 
 def _initialize_fabric():
-    """Make symlink of /usr/local/bin/fab -> /usr/bin/fab.
+    """Make symlink of /usr/bin/fab -> /usr/local/bin/fab.
 
     This is because using pip to install fabric will install it to
     /usr/local/bin but we want to maintain compatibility with existing
