@@ -5,6 +5,7 @@ import time
 import urllib2
 import json
 import traceback
+import ygg
 
 from fabric.api import *
 
@@ -51,14 +52,6 @@ def _check_connectivity(server):
             f.write('Dear Rackspace: Fix this issue.')
         local('sudo reboot')
 
-def _configure_server(server):
-    # Get any new packages.
-    server.update_packages()
-    # Update pantheon code, run bcfg2, restart jenkins.
-    update.update_pantheon(first_boot=True)
-    # Create the tunable files.
-    local('cp /etc/pantheon/templates/tuneables /etc/pantheon/server_tuneables')
-    local('chmod 755 /etc/pantheon/server_tuneables')
 
 def _configure_certificates():
     # Just in case we're testing, we need to ensure this path exists.
@@ -101,10 +94,25 @@ def _configure_certificates():
     # Wait 20 seconds so
     print 'Waiting briefly so slight clock skew does not affect certificate verification.'
     time.sleep(20)
-    print local('openssl verify -verbose /etc/pantheon/system.crt')
+    verification = local('openssl verify -verbose /etc/pantheon/system.crt')
+    print verification
 
+    ygg.send_event('Authorization', 'Certificate issued. Verification result:\n' + verification)
+
+def _configure_server(server):
+    ygg.send_event('Software updates', 'Package updates have started.')
+    # Get any new packages.
+    server.update_packages()
+    # Update pantheon code, run bcfg2, restart jenkins.
+    update.update_pantheon(first_boot=True)
+    # Create the tunable files.
+    local('cp /etc/pantheon/templates/tuneables /etc/pantheon/server_tuneables')
+    local('chmod 755 /etc/pantheon/server_tuneables')
+    ygg.send_event('Software updates', 'Package updates have finished.')
 
 def _configure_postfix(server):
+    ygg.send_event('Email delivery configuration', 'Postfix is now being configured.')
+
     hostname = server.get_hostname()
     with open('/etc/mailname', 'w') as f:
         f.write(hostname)
@@ -113,25 +121,32 @@ def _configure_postfix(server):
     local('/usr/sbin/postconf -e "mydestination = %s"' % hostname)
     local('/etc/init.d/postfix restart')
 
+    ygg.send_event('Email delivery configuration', 'Postfix is now online.')
 
 def _restart_services(server):
     server.restart_services()
 
 
 def _configure_iptables(server):
+    ygg.send_event('Firewall configuration', 'The kernel\'s iptables module is now being configured.')
+
     if server.distro == 'centos':
         local('sed -i "s/#-A/-A/g" /etc/sysconfig/iptables')
         local('/sbin/iptables-restore < /etc/sysconfig/iptables')
     else:
         local('sed -i "s/#-A/-A/g" /etc/iptables.rules')
-        local('/sbin/iptables-restore </etc/iptables.rules')
+        local('/sbin/iptables-restore < /etc/iptables.rules')
 
+    rules = open('/etc/iptables.rules').read()
+    ygg.send_event('Firewall configuration', 'The kernel\'s iptables module is now blocking unauthorized traffic. Rules:\n' + rules)
 
 def _configure_git_repo():
+    ygg.send_event('Deployment configuration', 'The git version control tool is now being configured.')
     if os.path.exists('/var/git/projects'):
         local('rm -rf /var/git/projects')
     local('mkdir -p /var/git/projects')
     local("chmod g+s /var/git/projects")
+    ygg.send_event('Deployment configuration', 'The git version control tool is now managing testing and deployments for this site.')
 
 def _mark_incep(server):
     '''Mark incep date. This prevents us from ever running again.'''
@@ -153,3 +168,5 @@ def _report():
     print('##############################')
 
     local('echo "DEAR SYSADMIN: PANTHEON IS READY FOR YOU NOW.  Do not forget the README.txt, CHANGELOG.txt and docs!" | wall')
+
+    ygg.send_event('System configuration', 'The Pantheon system is successfully running for this site.')
