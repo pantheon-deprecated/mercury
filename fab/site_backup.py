@@ -1,7 +1,7 @@
 import traceback
 
 from pantheon import backup
-from pantheon import hudsontools
+from pantheon import jenkinstools
 
 def backup_site(archive_name, project='pantheon'):
     archive = backup.PantheonBackup(archive_name, project)
@@ -15,17 +15,17 @@ def backup_site(archive_name, project='pantheon'):
         archive.move_archive()
         archive.cleanup()
     except:
-        hudsontools.junit_error(traceback.format_exc(), 'BackupSite')
+        jenkinstools.junit_error(traceback.format_exc(), 'BackupSite')
         raise
     else:
-        hudsontools.junit_pass('Backup successful.', 'BackupSite')
+        jenkinstools.junit_pass('Backup successful.', 'BackupSite')
 
 def remove_backup(archive):
     try:
         backup.remove(archive)
     except:
-        hudsontools.junit_error(traceback.format_exc(), 'RemoveBackup')
+        jenkinstools.junit_error(traceback.format_exc(), 'RemoveBackup')
         raise
     else:
-        hudsontools.junit_pass('Removal successful.', 'RemoveBackup')
+        jenkinstools.junit_pass('Removal successful.', 'RemoveBackup')
 

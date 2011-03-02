@@ -89,7 +89,7 @@ def _write_junit_file(doc, filename='results'):
 def get_workspace():
     """Return the workspace to store build data information.
 
-    If being run from CLI (not hudson) use alternate path (so data can still
+    If being run from CLI (not jenkins) use alternate path (so data can still
     be sent back to Atlas, regardless of how job is run).
 
     """
@@ -97,4 +97,4 @@ def get_workspace():
     if workspace:
         return workspace
     else:
-        return '/etc/pantheon/hudson/workspace'
+        return '/etc/pantheon/jenkins/workspace'

@@ -3,7 +3,7 @@ import tempfile
 
 import dbtools
 import drupaltools
-import hudsontools
+import jenkinstools
 import pantheon
 import project
 import postback
@@ -16,10 +16,10 @@ def get_drupal_root(base):
     """
     for root, dirs, files in os.walk(base, topdown=True):
         if ('index.php' in files) and ('sites' in dirs):
-            hudsontools.junit_pass('Drupal root found.', 'DrupalRoot')
+            jenkinstools.junit_pass('Drupal root found.', 'DrupalRoot')
             return root
     err = 'Cannot locate drupal install in archive.'
-    hudsontools.junit_fail(err, 'DrupalRoot')
+    jenkinstools.junit_fail(err, 'DrupalRoot')
     postback.build_error(err)
 
 def download(url):
@@ -69,11 +69,10 @@ class ImportTools(project.BuildTools):
         processing directory for import process.
 
         """
-        super(ImportTools, self).__init__(project)
+        super(ImportTools, self).__init__()
 
-        self.destination = os.path.join(self.server.webroot, project)
-        self.author = 'Hudson User <hudson@pantheon>'
-        self.db_password = pantheon.random_string(10)
+        self.author = 'Jenkins User <jenkins@pantheon>'
+        self.destination = os.path.join(self.server.webroot, self.project)
         self.force_update = False
 
     def parse_archive(self, extract_location):
@@ -136,7 +135,7 @@ class ImportTools(project.BuildTools):
                                                               temp_dir))
         # Put the .git metadata on top of imported site.
         with cd(temp_dir):
-            local('git checkout pantheon')
+            local('git checkout %s' % self.project)
             local('cp -R .git %s' % self.working_dir)
         with cd(self.working_dir):
             local('rm -f PRESSFLOW.txt')
@@ -202,7 +201,7 @@ class ImportTools(project.BuildTools):
             if os.path.islink(file_dest):
                 local('rm -f %s' % file_dest)
                 msg = 'File path was broken symlink. Site files may be missing'
-                hudsontools.junit_fail(msg, 'SetupFilesDir')
+                jenkinstools.junit_fail(msg, 'SetupFilesDir')
                 postback.build_warning(msg)
             local('mkdir -p %s' % file_dest)
 
@@ -268,7 +267,7 @@ class ImportTools(project.BuildTools):
                     # If importing vanilla drupal, this module wont exist.
                     if module != 'cookie_cache_bypass':
                         message = 'Could not enable %s module.' % module
-                        hudsontools.junit_fail('%s\n%s' % 
+                        jenkinstools.junit_fail('%s\n%s' % 
                                                (message, result.stderr), 
                                                'EnableModules', module)
                         postback.build_warning(message)
@@ -277,7 +276,7 @@ class ImportTools(project.BuildTools):
                               'Error Message:'
                         print '\n%s' % result.stderr
                 else:
-                    hudsontools.junit_pass('%s enabled.' % module, 
+                    jenkinstools.junit_pass('%s enabled.' % module, 
                                            'EnableModules', module)
 
         if self.version == 6:
@@ -318,11 +317,14 @@ class ImportTools(project.BuildTools):
         if self.version == 7:
             db.execute('TRUNCATE apachesolr_server')
             for env in self.environments:
+                config = self.config['environments']['env']['solr'];
                 db.execute('INSERT INTO apachesolr_server ' + \
                     '(host, port, server_id, name, path) VALUES ' + \
-                    '("localhost", "8983", ' + \
-                      '"pantheon_%s", "Pantheon %s", "/pantheon_%s")' %\
-                      (env, env, env))
+                    '("%s", "%s", ' + \
+                      '"%s", "Pantheon %s", "/%s")' % \
+                      (config['solr_host'], config['solr_port'], \
+                      config['apachesolr_default_server'], env, \
+                      config['solr_path']))
         db.close()
 
         # D7: apachesolr config link will not display until cache cleared?
@@ -353,12 +355,6 @@ class ImportTools(project.BuildTools):
         with open('/opt/drush/aliases/working_dir.alias.drushrc.php', 'w') as f:
             for line in lines:
                 f.write(line + '\n')
-
-    def setup_vhost(self):
-        super(ImportTools, self).setup_vhost(self.db_password)
-
-    def setup_phpmyadmin(self):
-        super(ImportTools, self).setup_phpmyadmin(self.db_password)
 
     def setup_environments(self):
         super(ImportTools, self).setup_environments('import', self.working_dir)
@@ -391,14 +387,14 @@ class ImportTools(project.BuildTools):
         if site_count > 1:
             err = 'Multiple settings.php files were found:\n' + \
                   '\n'.join(sites)
-            hudsontools.junit_fail(err, 'SiteCount')
+            jenkinstools.junit_fail(err, 'SiteCount')
             postback.build_error(err)
         elif site_count == 0:
             err = 'Error: No settings.php files were found.'
-            hudsontools.junit_fail(err, 'SiteCount')
+            jenkinstools.junit_fail(err, 'SiteCount')
             postback.build_error(err)
         else:
-            hudsontools.junit_pass('Site found.', 'SiteCount')
+            jenkinstools.junit_pass('Site found.', 'SiteCount')
             return sites[0]
 
     def _get_database_dump(self):
@@ -413,15 +409,15 @@ class ImportTools(project.BuildTools):
         count = len(sql_dump)
         if count == 0:
             err = 'No database dump files were found (*.mysql or *.sql)'
-            hudsontools.junit_fail(err, 'MYSQLCount')
+            jenkinstools.junit_fail(err, 'MYSQLCount')
             postback.build_error(err)
         elif count > 1:
             err = 'Multiple database dump files were found:\n' + \
                   '\n'.join(sql_dump)
-            hudsontools.junit_fail(err, 'MYSQLCount')
+            jenkinstools.junit_fail(err, 'MYSQLCount')
             postback.build_error(err)
         else:
-            hudsontools.junit_pass('MYSQL Dump found at %s' %
+            jenkinstools.junit_pass('MYSQL Dump found at %s' % 
                                    (sql_dump[0]), 'MYSQLCount')
             return sql_dump[0]
 
@@ -433,10 +429,10 @@ class ImportTools(project.BuildTools):
         version = drupaltools.get_drupal_version(self.working_dir)
         if not version:
             err = 'Error: This does not appear to be a Drupal 6 site.'
-            hudsontools.junit_fail(err, 'DrupalVersion')
+            jenkinstools.junit_fail(err, 'DrupalVersion')
             postback.build_error(err)
         else:
-            hudsontools.junit_pass('Drupal version %s found.' % (version),
+            jenkinstools.junit_pass('Drupal version %s found.' % (version),
                                    'DrupalVersion')
 
         platform = drupaltools.get_drupal_platform(self.working_dir)

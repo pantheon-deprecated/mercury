@@ -6,7 +6,7 @@ import traceback
 
 from fabric.api import *
 from pantheon import pantheon
-from pantheon import hudsontools
+from pantheon import jenkinstools
 
 def configure_permissions(base_domain = "example.com",
                       require_group = None,
@@ -83,10 +83,10 @@ def configure_permissions(base_domain = "example.com",
         set_acl_groupwritability(require_group, '/var/www')
         set_acl_groupwritability(require_group, '/var/git/projects')
     except:
-        hudsontools.junit_error(traceback.format_exc(), 'ConfigPermissions')
+        jenkinstools.junit_error(traceback.format_exc(), 'ConfigPermissions')
         raise
     else:
-        hudsontools.junit_pass('Configuration completed.', 'ConfigurePermissions')
+        jenkinstools.junit_pass('Configuration completed.', 'ConfigurePermissions')
 
 def _ldap_domain_to_ldap(domain):
     return ','.join(['dc=%s' % part.lower() for part in domain.split('.')])

@@ -2,10 +2,12 @@ import os
 import sys
 import tempfile
 
-import pantheon
 import dbtools
+import pantheon
+import ygg
 
 from fabric.api import *
+
 
 class BuildTools(object):
     """ Generic Pantheon project installation helper functions.
@@ -15,16 +17,23 @@ class BuildTools(object):
     can use these methods directly or override/expand base processes.
 
     """
-    def __init__(self, project):
+    def __init__(self):
         """ Initialize generic project installation object & helper functions.
         project: the name of the project to be built.
 
         """
+        config = ygg.get_config()
         self.server = pantheon.PantheonServer()
 
-        self.project = project
-        self.environments = pantheon.get_environments()
-        self.project_path = os.path.join(self.server.webroot, project)
+        self.project = config.keys()[0]
+        self.config = config[self.project]
+        self.environments = set(self.config['environments'].keys())
+        self.project_path = os.path.join(self.server.webroot, self.project)
+        self.db_password = self.config\
+                ['environments']['live']['mysql']['db_password']
+
+    def bcfg2_project(self):
+        local('bcfg2 -vqedb projects', capture=False)
 
     def remove_project(self):
         """ Remove a project and all related files/configs from the server.
@@ -40,7 +49,7 @@ class BuildTools(object):
         # TODO: We also need to remove the following:
         # Solr Index
         # Apache vhost
-        # Hudson cron
+        # Jenkins cron
         # Drush alias
         # Databases
 
@@ -87,7 +96,6 @@ class BuildTools(object):
             else:
                 local('git branch %s' % self.project)
 
-
     def setup_working_dir(self, working_dir):
         """ Clone a project to a working directory for processing.
         working_dir: temp directory for project processing (import/restore)
@@ -96,7 +104,6 @@ class BuildTools(object):
         local('git clone -l /var/git/projects/%s -b %s %s' % (self.project,
                                                               self.project,
                                                               working_dir))
-
 
     def setup_database(self, environment, password, db_dump=None, onramp=False):
         """ Create a new database based on project_environment, using password.
@@ -139,15 +146,11 @@ class BuildTools(object):
         settings_default = os.path.join(site_dir, 'default.settings.php')
         settings_pantheon = os.path.join(site_dir, 'pantheon.settings.php')
 
-        # Make sure default.settings.php exists. If it has been removed,
-        # git may think that it was moved to settings.php and cause conflict.
-        if not os.path.isfile(settings_default):
-            settings_contents = local(
-               'git --git-dir=/var/git/projects/%s cat-file ' % self.project +\
-               'blob refs/heads/master:sites/default/default.settings.php')
-            with open(settings_default, 'w') as f:
-                f.write(settings_contents)
-
+        # Stomp on changes to default.settings.php - no need to conflict here.
+        settings_contents = local(
+           'git --git-dir=/var/git/projects/%s cat-file ' % self.project + \
+           'blob refs/heads/master:sites/default/default.settings.php > %s' % (
+                                                             settings_default))
         # Make sure settings.php exists.
         if not os.path.isfile(settings_file):
             local('cp %s %s' % (settings_default, settings_file))
@@ -186,42 +189,8 @@ class BuildTools(object):
         for env in self.environments:
             self.server.create_solr_index(self.project, env, self.version)
 
-    def setup_vhost(self, db_password):
-        """ Create vhost files for each environment in a project.
-        db_password: database password to store as an env var in the vhost file
-
-        """
-        for env in self.environments:
-
-            if pantheon.is_private_server():
-                server_alias = '%s.*' % env
-            else:
-                server_alias = '%s.*.gotpantheon.com' % env
-
-            vhost_dict = {'server_name': env,
-                          'server_alias': server_alias,
-                          'project': self.project,
-                          'environment': env,
-                          'db_name': '%s_%s' % (self.project, env),
-                          'db_username':self.project,
-                          'db_password':db_password,
-                          'solr_path': '/%s_%s' % (self.project, env),
-                          'memcache_prefix': '%s_%s' % (self.project, env)}
-
-            filename = '%s_%s' % (self.project, env)
-            if env == 'live':
-                filename = '000_' + filename
-                vhost_dict['robots_settings'] = ''
-            else:
-                vhost_dict['robots_settings'] = 'alias /robots.txt /usr/local/share/robots-deny.txt'
-
-
-            self.server.create_vhost(filename, vhost_dict)
-            if self.server.distro == 'ubuntu':
-               local('a2ensite %s' % filename)
-
     def setup_drupal_cron(self):
-        """ Create drupal cron jobs in hudson for each environment.
+        """ Create drupal cron jobs in jenkins for each environment.
 
         """
         for env in self.environments:
@@ -241,7 +210,7 @@ class BuildTools(object):
         # Once complete, we import this 'final' database into each environment.
         if handler == 'import':
             tempdir = tempfile.mkdtemp()
-            dump_file = dbtools.export_data(self.project, 'dev', tempdir)
+            dump_file = dbtools.export_data(self, 'dev', tempdir)
 
         for env in self.environments:
             # Code
@@ -264,22 +233,6 @@ class BuildTools(object):
         # Cleanup
         if handler == 'import':
             local('rm -rf %s' % tempdir)
-
-    def setup_phpmyadmin(self, db_password):
-        """ Create apache vhost and config.inc.php config for phpmyadmin.
-        db_password: database password to store as an env var in the vhost file
-
-        """
-        vhost_dict = {'db_username':self.project,
-                      'db_password':db_password}
-
-        filename = 'pma_vhost'
-        # Todo: fix hard-coding of .ubuntu here?
-        vhost_template_file = 'pma.vhost.template.ubuntu'
-
-        self.server.create_vhost(filename, vhost_dict, vhost_template_file)
-        if self.server.distro == 'ubuntu':
-            local('a2ensite %s' % filename)
 
     def push_to_repo(self, tag):
         """ Commit changes in working directory and push to central repo.
@@ -391,7 +344,7 @@ class BuildTools(object):
         #TODO: We could split this up based on handler, but changing perms on
         # two files is fast. Ignoring for now, and treating all the same.
         for env in environments:
-            if pantheon.is_drupal_installed(self.project, env):
+            if pantheon.is_drupal_installed(self, env):
                 # Drupal installed, Apache does not need to own settings.php
                 settings_perms = '440'
                 settings_owner = owner
@@ -412,5 +365,4 @@ class BuildTools(object):
                 local('chmod 440 pantheon.settings.php')
                 local('chown %s:%s pantheon.settings.php' % (owner,
                                                              settings_group))
-
 

@@ -4,7 +4,7 @@ import update
 
 from pantheon import install
 from pantheon import status
-from pantheon import hudsontools
+from pantheon import jenkinstools
 
 def install_site(project='pantheon', profile='pantheon', version=6, **kw):
     """ Create a new Drupal installation.
@@ -21,10 +21,10 @@ def install_site(project='pantheon', profile='pantheon', version=6, **kw):
     try:
         handler.build(**data)
     except:
-        hudsontools.junit_error(traceback.format_exc(), 'InstallSite')
+        jenkinstools.junit_error(traceback.format_exc(), 'InstallSite')
         raise
     else:
-        hudsontools.junit_pass('', 'InstallSite')
+        jenkinstools.junit_pass('', 'InstallSite')
 
 class _PantheonProfile(install.InstallTools):
     """ Default Pantheon Installation Profile.
@@ -40,6 +40,9 @@ class _PantheonProfile(install.InstallTools):
         self.setup_project_branch()
         self.setup_working_dir()
 
+        # Run bcfg2 project bundle.
+        self.bcfg2_project()
+
         # Setup project
         self.setup_database()
         self.setup_files_dir()
@@ -52,8 +55,6 @@ class _PantheonProfile(install.InstallTools):
 
         # Build non-code site features.
         self.setup_solr_index()
-        self.setup_vhost()
-        self.setup_phpmyadmin()
         self.setup_drupal_cron()
         self.setup_drush_alias()
 

@@ -5,25 +5,20 @@ import time
 import urllib2
 import json
 import traceback
+from pantheon import ygg
 
 from fabric.api import *
 
 from pantheon import pantheon
-from pantheon import hudsontools
+from pantheon import jenkinstools
 
 def configure():
     '''configure the Pantheon system.'''
     server = pantheon.PantheonServer()
     try:
         _test_for_previous_run()
-
-        if pantheon.is_aws_server():
-            _configure_ec2(server)
-
-        if not pantheon.is_private_server():
-            _check_connectivity(server)
-            _configure_certificates()
-
+        _check_connectivity(server)
+        _configure_certificates()
         _configure_server(server)
         _configure_postfix(server)
         _restart_services(server)
@@ -32,37 +27,17 @@ def configure():
         _mark_incep(server)
         _report()
     except:
-        hudsontools.junit_error(traceback.format_exc(), 'Configure')
+        jenkinstools.junit_error(traceback.format_exc(), 'Configure')
         raise
     else:
-        hudsontools.junit_pass('Configure successful.', 'Configure')
+        jenkinstools.junit_pass('Configure successful.', 'Configure')
 
 def _test_for_previous_run():
     if os.path.exists("/etc/pantheon/incep"):
+        # If the server has a certificate, send an event.
+        if os.path.exists("/etc/pantheon/system.pem"):
+            ygg.send_event('Restart', 'This site\'s server was restarted, but it is already configured.')
         abort("Pantheon config has already run. Exiting.")
-
-def _configure_ec2(server):
-    #lucid only for now...
-    local('cp /opt/pantheon/bcfg2/TGenshi/mysql/apparmor/' + \
-          'template.newtxt.G00_lucid /etc/apparmor.d/usr.sbin.mysqld')
-    local('mkdir -p /mnt/mysql/tmp')
-    local('chown -R root:root /mnt/mysql')
-    local('chmod -R 777 /mnt/mysql')
-    local('chown -R mysql:mysql /mnt/mysql/tmp')
-    local('chmod -R 1777 /mnt/mysql/tmp')
-    local('/etc/init.d/mysql stop')
-    if(server.distro == 'centos'):
-        local('mv /var/log/mysqld.log /mnt/mysql/')
-        local('ln -s /mnt/mysql/mysqld.log /var/log/mysqld.log')
-    else:
-        local('mv /var/log/mysql /mnt/mysql/log')
-        local('ln -s /mnt/mysql/log /var/log/mysql')
-    local('mv /var/lib/mysql /mnt/mysql/lib')
-    local('ln -s /mnt/mysql/lib /var/lib/mysql')
-    local('/etc/init.d/varnish stop')
-    local('mkdir /mnt/varnish')
-    local('mv /var/lib/varnish /mnt/varnish/lib')
-    local('ln -s /mnt/varnish/lib /var/lib/varnish')
 
 def _check_connectivity(server):
     # Rackspace occasionally has connectivity issues unless a server gets
@@ -80,14 +55,6 @@ def _check_connectivity(server):
             f.write('Dear Rackspace: Fix this issue.')
         local('sudo reboot')
 
-def _configure_server(server):
-    # Get any new packages.
-    server.update_packages()
-    # Update pantheon code, run bcfg2, restart hudson.
-    update.update_pantheon(first_boot=True)
-    # Create the tunable files.
-    local('cp /etc/pantheon/templates/tuneables /etc/pantheon/server_tuneables')
-    local('chmod 755 /etc/pantheon/server_tuneables')
 
 def _configure_certificates():
     # Just in case we're testing, we need to ensure this path exists.
@@ -99,10 +66,14 @@ def _configure_certificates():
     pki_server = 'https://pki.getpantheon.com'
 
     # Ask Helios about what to put into the certificate request.
-    host_info = json.loads(urllib2.urlopen('%s/info' % pki_server).read())
-    ou = host_info['ou']
-    cn = host_info['cn']
-    subject = '/C=US/ST=California/L=San Francisco/O=Pantheon Systems, Inc./OU=%s/CN=%s/emailAddress=hostmaster@%s/' % (ou, cn, cn)
+    try:
+        host_info = json.loads(urllib2.urlopen('%s/info' % pki_server).read())
+        ou = host_info['ou']
+        cn = host_info['cn']
+        subject = '/C=US/ST=California/L=San Francisco/O=Pantheon Systems, Inc./OU=%s/CN=%s/emailAddress=hostmaster@%s/' % (ou, cn, cn)
+    except ValueError:
+        # This fails if Helios says "Could not find corresponding LDAP entry."
+        return False
 
     # Generate a local key and certificate-signing request.
     local('openssl genrsa 4096 > /etc/pantheon/system.key')
@@ -126,10 +97,25 @@ def _configure_certificates():
     # Wait 20 seconds so
     print 'Waiting briefly so slight clock skew does not affect certificate verification.'
     time.sleep(20)
-    print local('openssl verify -verbose /etc/pantheon/system.crt')
+    verification = local('openssl verify -verbose /etc/pantheon/system.crt')
+    print verification
 
+    ygg.send_event('Authorization', 'Certificate issued. Verification result:\n' + verification)
+
+def _configure_server(server):
+    ygg.send_event('Software updates', 'Package updates have started.')
+    # Get any new packages.
+    server.update_packages()
+    # Update pantheon code, run bcfg2, restart jenkins.
+    update.update_pantheon(first_boot=True)
+    # Create the tunable files.
+    local('cp /etc/pantheon/templates/tuneables /etc/pantheon/server_tuneables')
+    local('chmod 755 /etc/pantheon/server_tuneables')
+    ygg.send_event('Software updates', 'Package updates have finished.')
 
 def _configure_postfix(server):
+    ygg.send_event('Email delivery configuration', 'Postfix is now being configured.')
+
     hostname = server.get_hostname()
     with open('/etc/mailname', 'w') as f:
         f.write(hostname)
@@ -138,25 +124,32 @@ def _configure_postfix(server):
     local('/usr/sbin/postconf -e "mydestination = %s"' % hostname)
     local('/etc/init.d/postfix restart')
 
+    ygg.send_event('Email delivery configuration', 'Postfix is now online.')
 
 def _restart_services(server):
     server.restart_services()
 
 
 def _configure_iptables(server):
+    ygg.send_event('Firewall configuration', 'The kernel\'s iptables module is now being configured.')
+
     if server.distro == 'centos':
         local('sed -i "s/#-A/-A/g" /etc/sysconfig/iptables')
         local('/sbin/iptables-restore < /etc/sysconfig/iptables')
     else:
         local('sed -i "s/#-A/-A/g" /etc/iptables.rules')
-        local('/sbin/iptables-restore </etc/iptables.rules')
+        local('/sbin/iptables-restore < /etc/iptables.rules')
 
+    rules = open('/etc/iptables.rules').read()
+    ygg.send_event('Firewall configuration', 'The kernel\'s iptables module is now blocking unauthorized traffic. Rules:\n' + rules)
 
 def _configure_git_repo():
+    ygg.send_event('Deployment configuration', 'The git version control tool is now being configured.')
     if os.path.exists('/var/git/projects'):
         local('rm -rf /var/git/projects')
     local('mkdir -p /var/git/projects')
     local("chmod g+s /var/git/projects")
+    ygg.send_event('Deployment configuration', 'The git version control tool is now managing testing and deployments for this site.')
 
 def _mark_incep(server):
     '''Mark incep date. This prevents us from ever running again.'''
@@ -178,3 +171,5 @@ def _report():
     print('##############################')
 
     local('echo "DEAR SYSADMIN: PANTHEON IS READY FOR YOU NOW.  Do not forget the README.txt, CHANGELOG.txt and docs!" | wall')
+
+    ygg.send_event('System configuration', 'The Pantheon system is successfully running for this site.')

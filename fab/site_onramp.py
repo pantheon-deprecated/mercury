@@ -4,7 +4,7 @@ from pantheon import onramp
 from pantheon import pantheon
 from pantheon import restore
 from pantheon import status
-from pantheon import hudsontools
+from pantheon import jenkinstools
 
 def onramp_site(project='pantheon', url=None, profile=None, **kw):
     """Create a new Drupal installation.
@@ -21,10 +21,10 @@ def onramp_site(project='pantheon', url=None, profile=None, **kw):
     try:
         handler.build(location)
     except:
-        hudsontools.junit_error(traceback.format_exc(), 'OnrampSite')
+        jenkinstools.junit_error(traceback.format_exc(), 'OnrampSite')
         raise
     else:
-        hudsontools.junit_pass('', 'OnrampSite')
+        jenkinstools.junit_pass('', 'OnrampSite')
 
 def _get_handler(profile, project, location):
     """Return instantiated profile object.
@@ -60,7 +60,10 @@ class _ImportProfile(onramp.ImportTools):
         self.setup_project_repo()
         self.setup_project_branch()
 
-        # Import existing site into the project.
+        # Run bcfg2 project bundle.
+        self.bcfg2_project()
+
+         # Import existing site into the project.
         self.setup_database()
         self.import_site_files()
         self.setup_files_dir()
@@ -73,8 +76,6 @@ class _ImportProfile(onramp.ImportTools):
 
         # Build non-code site features
         self.setup_solr_index()
-        self.setup_vhost()
-        self.setup_phpmyadmin()
         self.setup_drupal_cron()
         self.setup_drush_alias()
 
@@ -105,13 +106,15 @@ class _RestoreProfile(restore.RestoreTools):
         # Parse the backup.
         self.parse_backup(location)
 
+        # Run bcfg2 project bundle.
+        self.bcfg2_project()
+
         self.setup_database()
         self.restore_site_files()
         self.restore_repository()
 
         # Build non-code site features
         self.setup_solr_index()
-        self.setup_vhost()
         self.setup_drupal_cron()
         self.setup_drush_alias()
 

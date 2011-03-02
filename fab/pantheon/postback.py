@@ -5,7 +5,7 @@ import os
 import sys
 import urllib2
 import uuid
-import hudsontools
+import jenkinstools
 
 from fabric.api import local
 
@@ -32,22 +32,22 @@ def postback(cargo, command='atlas'):
 
 def get_job_and_id():
     """Return the job name and build number.
-    These are set (and retrieved) as environmental variables during Hudson jobs.
+    These are set (and retrieved) as environmental variables during Jenkins jobs.
 
     """
     print "DEBUG: postback.get_job_and_id"
     return (os.environ.get('JOB_NAME'), os.environ.get('BUILD_NUMBER'))
 
 def get_build_info(job_name, build_number, check_previous):
-    """Return a dictionary of Hudson build information.
-    job_name: hudson job name.
-    build_number: hudson build number.
+    """Return a dictionary of Jenkins build information.
+    job_name: jenkins job name.
+    build_number: jenkins build number.
     check_previous: bool. If we should return data only if there is a change in
                           build status.
 
     """
     print "DEBUG: postback.get_build_info"
-    data = _get_hudson_data(job_name, build_number)
+    data = _get_jenkins_data(job_name, build_number)
 
     # If we care, determine if status changed from previous run.
     if check_previous and not _status_changed(job_name, data):
@@ -68,7 +68,7 @@ def get_build_data():
     data['build_warnings'] = list()
     data['build_error'] = ''
 
-    build_data_path = os.path.join(hudsontools.get_workspace(), 'build_data.txt')
+    build_data_path = os.path.join(jenkinstools.get_workspace(), 'build_data.txt')
     if os.path.isfile(build_data_path):
         with open(build_data_path, 'r') as f:
             while True:
@@ -93,14 +93,14 @@ def get_build_data():
     return data
 
 def write_build_data(response_type, data):
-    """ Write pickled data to workspace for hudson job_name.
+    """ Write pickled data to workspace for jenkins job_name.
 
     response_type: The type of response data (generally a job name). May not
-               be the same as the initiating hudson job (multiple responses).
+               be the same as the initiating jenkins job (multiple responses).
     data: Info to be written to file for later retrieval in Atlas postback.
 
     """
-    build_data_path = os.path.join(hudsontools.get_workspace(), 'build_data.txt')
+    build_data_path = os.path.join(jenkinstools.get_workspace(), 'build_data.txt')
 
     with open(build_data_path, 'a') as f:
         cPickle.dump({response_type:data}, f)
@@ -116,7 +116,7 @@ def build_warning(message):
     """Writes warning to file that will be parsed at the end of a build.
     data: string. Warning message to be written to build_data file.
 
-    Warnings will cause the Hudson build to be marked as unstable.
+    Warnings will cause the Jenkins build to be marked as unstable.
 
     """
     write_build_data('build_warning', message)
@@ -134,8 +134,8 @@ def build_error(message):
 def _status_changed(job_name, data):
     """Returns True if the build status changed from the previous run.
     Will also return true if there is no previous status.
-    job_name: hudson job name.
-    data: dict from hudsons python api for the current build.
+    job_name: jenkins job name.
+    data: dict from jenkinss python api for the current build.
 
     """
     print "DEBUG: postback._status_changed"
@@ -143,14 +143,14 @@ def _status_changed(job_name, data):
     # Valid previous build exists.
     if prev_build_number > 0:
         result = data.get('result')
-        prev_result = _get_hudson_data(job_name, prev_build_number).get('result')
+        prev_result = _get_jenkins_data(job_name, prev_build_number).get('result')
         return result != prev_result
     else:
         # First run, status has changed from "none" to something.
         return True
 
 def _get_build_parameters(data):
-    """Return the build parameters from Hudson build API data.
+    """Return the build parameters from Jenkins build API data.
 
     """
     print "DEBUG: postback._get_build_parameters"
@@ -164,11 +164,11 @@ def _get_build_parameters(data):
 
     return ret
 
-def _get_hudson_data(job, build_id):
-    """Return API data for a Hudson build.
+def _get_jenkins_data(job, build_id):
+    """Return API data for a Jenkins build.
 
     """
-    print "DEBUG: postback._get_hudson_data"
+    print "DEBUG: postback._get_jenkins_data"
     try:
         req = urllib2.Request('http://localhost:8090/job/%s/%s/api/python' % (
                                                                job, build_id))

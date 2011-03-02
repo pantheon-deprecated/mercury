@@ -26,11 +26,10 @@ class InstallTools(project.BuildTools):
 
     def __init__(self, project, version, **kw):
         """ Initialize generic installation object & helper functions. """
-        super(InstallTools, self).__init__(project)
+        super(InstallTools, self).__init__()
         self.working_dir = tempfile.mkdtemp()
-        self.destination = os.path.join(self.server.webroot, project)
-        self.author = 'Hudson User <hudson@pantheon>'
-        self.db_password = pantheon.random_string(10)
+        self.author = 'Jenkins User <jenkins@pantheon>'
+        self.destination = os.path.join(self.server.webroot, self.project)
         self.version = int(version)
 
     def setup_working_dir(self):
@@ -53,12 +52,6 @@ class InstallTools(project.BuildTools):
 
     def setup_pantheon_libraries(self):
         super(InstallTools, self).setup_pantheon_libraries(self.working_dir)
-
-    def setup_vhost(self):
-        super(InstallTools, self).setup_vhost(self.db_password)
-
-    def setup_phpmyadmin(self):
-        super(InstallTools, self).setup_phpmyadmin(self.db_password)
 
     def setup_files_dir(self):
         """ Creates Drupal files directory and sets gitignore for all sub-files

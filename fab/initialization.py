@@ -7,49 +7,39 @@ from fabric.api import *
 import update
 from pantheon import pantheon
 
-def initialize(vps=None):
+def initialize(vps=None, bcfg2_host='config.getpantheon.com'):
     '''Initialize the Pantheon system.'''
     server = pantheon.PantheonServer()
-    _initialize_server_type(vps)
+    server.bcfg2_host = bcfg2_host
 
     _initialize_fabric()
-    _initialize_certificate()
+    _initialize_root_certificate()
     _initialize_package_manager(server)
     _initialize_bcfg2(server)
     _initialize_iptables(server)
     _initialize_drush()
     _initialize_solr(server)
     _initialize_sudoers(server)
-    _initialize_hudson(server)
-    _initialize_apache(server)
     _initialize_acl(server)
+    _initialize_jenkins(server)
+    _initialize_apache(server)
 
 def init():
     '''Alias of "initialize"'''
     initialize()
 
-def _initialize_server_type(vps):
-    """Create a server type file if setting up a private server.
-
-    """
-    local('mkdir /etc/pantheon')
-    if vps in ['aws', 'ebs', 'default']:
-        server_type = '%s.server' % vps
-        with open(os.path.join('/etc/pantheon', server_type), 'w') as f:
-            f.write('Server type: %s' % server_type)
-
 def _initialize_fabric():
-    """Make symlink of /usr/local/bin/fab -> /usr/bin/fab.
+    """Make symlink of /usr/bin/fab -> /usr/local/bin/fab.
 
     This is because using pip to install fabric will install it to
-    /usr/local/bin but we want to maintaing compatibility with existing
-    servers and hudson jobs.
+    /usr/local/bin but we want to maintain compatibility with existing
+    servers and jenkins jobs.
 
     """
     if not os.path.exists('/usr/bin/fab'):
         local('ln -s /usr/local/bin/fab /usr/bin/fab')
 
-def _initialize_certificate():
+def _initialize_root_certificate():
     """Install the Pantheon root certificate.
 
     """
@@ -62,10 +52,8 @@ def _initialize_package_manager(server):
     if server.distro == 'ubuntu':
         with cd(server.template_dir):
             local('cp apt.pantheon.list /etc/apt/sources.list.d/pantheon.list')
-            local('cp apt.php.pin /etc/apt/preferences.d/php')
-            # No need for ldap patched ssh for non-getpantheon servers.
-            if not pantheon.is_private_server():
-                local('cp apt.openssh.pin /etc/apt/preferences.d/openssh')
+
+            local('cp apt.openssh.pin /etc/apt/preferences.d/openssh')
             local('apt-key add apt.ppakeys.txt')
         local('echo \'APT::Install-Recommends "0";\' >>  /etc/apt/apt.conf')
 
@@ -74,9 +62,8 @@ def _initialize_package_manager(server):
               '5/x86_64/ius-release-1.0-6.ius.el5.noarch.rpm')
         local('rpm -Uvh http://yum.fourkitchens.com/pub/centos/' + \
               '5/noarch/fourkitchens-release-5-6.noarch.rpm')
-        local('rpm --import http://hudson-ci.org/redhat/hudson-ci.org.key')
-        local('wget http://hudson-ci.org/redhat/hudson.repo -O ' + \
-              '/etc/yum.repos.d/hudson.repo')
+        local('rpm --import http://pkg.jenkins-ci.org/redhat/jenkins-ci.org.key')
+        local('wget -O /etc/yum.repos.d/jenkins.repo http://pkg.jenkins-ci.org/redhat/jenkins.repo')
         local('yum -y install git17 --enablerepo=ius-testing')
         arch = local('uname -m').rstrip('\n')
         if (arch == "x86_64"):
@@ -98,7 +85,11 @@ def _initialize_bcfg2(server):
     elif server.distro == 'centos':
         local('yum -y install bcfg2 gamin gamin-python python-genshi ' + \
               'python-ssl python-lxml libxslt')
-    pantheon.copy_template('bcfg2.conf', '/etc/')
+    template = pantheon.get_template('bcfg2.conf')
+    bcfg2_conf = pantheon.build_template(template, {"bcfg2_host": server.bcfg2_host})
+    with open('/etc/bcfg2.conf', 'w') as f:
+        f.write(bcfg2_conf)
+
     # We use our own key/certs.
     local('rm -f /etc/bcfg2.key bcfg2.crt')
     # Run bcfg2
@@ -151,22 +142,6 @@ def _initialize_sudoers(server):
     local('touch /etc/sudoers.d/003_pantheon_extra')
     local('chmod 0440 /etc/sudoers.d/003_pantheon_extra')
 
-def _initialize_hudson(server):
-    """Add hudson to ssl-cert group and restart hudson.
-
-    """
-    local('usermod -aG ssl-cert hudson')
-    local('/etc/init.d/hudson restart')
-
-def _initialize_apache(server):
-    """Remove the default vhost and clear /var/www.
-
-    """
-    if server.distro == 'ubuntu':
-        local('a2dissite default')
-        local('rm -f /etc/apache2/sites-available/default*')
-        local('rm -f /var/www/*')
-
 def _initialize_acl(server):
     """Allow the use of ACLs and ensure they remain after reboot.
 
@@ -176,3 +151,29 @@ def _initialize_acl(server):
     # For after restarts
     local('sudo sed -i "s/noatime /noatime,acl /g" /etc/fstab')
 
+def _initialize_jenkins(server):
+    """Add a Jenkins user and grant it access to the directory that will contain the certificate.
+
+    """
+    # Create the user if it doesn't exist:
+    with settings(warn_only=True):
+        local('adduser --system --home /var/lib/jenkins --no-create-home --ingroup nogroup --disabled-password --shell /bin/bash jenkins')
+
+    local('usermod -aG ssl-cert jenkins')
+    local('apt-get install -y jenkins')
+
+    # Grant it access:
+    #local('setfacl --recursive --no-mask --modify user:jenkins:rx /etc/pantheon')
+    #local('setfacl --recursive --modify default:user:jenkins:rx /etc/pantheon')
+
+    # Review the permissions:
+    #local('getfacl /etc/pantheon', capture=False)
+
+def _initialize_apache(server):
+    """Remove the default vhost and clear /var/www.
+
+    """
+    if server.distro == 'ubuntu':
+        local('a2dissite default')
+        local('rm -f /etc/apache2/sites-available/default*')
+        local('rm -f /var/www/*')

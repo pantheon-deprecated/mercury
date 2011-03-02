@@ -1,16 +1,14 @@
 deb-src http://archive.ubuntu.com/ubuntu/ lucid main restricted universe multiverse
 deb-src http://archive.ubuntu.com/ubuntu/ lucid-updates main restricted universe multiverse
 deb-src http://security.ubuntu.com/ubuntu lucid-security main restricted universe multiverse
-deb http://ppa.launchpad.net/bzr/ppa/ubuntu lucid main
-deb-src http://ppa.launchpad.net/bzr/ppa/ubuntu lucid main
-deb http://ppa.launchpad.net/bcfg2/lucidtesting/ubuntu lucid main
-deb-src http://ppa.launchpad.net/bcfg2/lucidtesting/ubuntu lucid main
+deb http://ppa.launchpad.net/bcfg2/ppa/ubuntu lucid main
+deb-src http://ppa.launchpad.net/bcfg2/ppa/ubuntu lucid main
 deb http://archive.ubuntu.com/ubuntu/ karmic main restricted universe multiverse
 deb-src http://archive.ubuntu.com/ubuntu/ karmic main restricted universe multiverse 
 deb http://archive.ubuntu.com/ubuntu/ karmic-updates main restricted universe multiverse
 deb-src http://archive.ubuntu.com/ubuntu/ karmic-updates main restricted universe multiverse
 deb http://security.ubuntu.com/ubuntu karmic-security main restricted universe multiverse
 deb-src http://security.ubuntu.com/ubuntu karmic-security main restricted universe multiverse
-deb http://pkg.hudson-labs.org/debian binary/
+deb http://pkg.jenkins-ci.org/debian binary/
 deb http://ppa.launchpad.net/sfire/ssh-lpk/ubuntu lucid main
 
