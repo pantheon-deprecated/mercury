@@ -5,6 +5,8 @@ host = 'api.getpantheon.com'
 port = 8443
 certificate = '/etc/pantheon/system.pem'
 
+# Note: Same call structure as in the Prometheus httprequest module.
+# TODO: Unify
 def send_event(thread, details, labels=[], site='self'):
     """ Send event.
     thread: string. Aggregates events from the same site together.
