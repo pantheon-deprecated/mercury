@@ -2,7 +2,6 @@
 import os
 import socket
 import urllib
-import logging
 
 from pantheon import ygg
 from pantheon import logger
@@ -10,7 +9,7 @@ from pantheon import logger
 from fabric.api import *
 
 # Get our own logger
-log = logging.getLogger('site_health')
+log = logger.logging.getLogger('site_health')
 
 def check_load_average(limit):
     """ Check system load average.

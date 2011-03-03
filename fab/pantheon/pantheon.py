@@ -9,7 +9,6 @@ import urllib2
 import zipfile
 import json
 import re
-import logging
 import logger
 
 import postback
@@ -187,7 +186,7 @@ def log_drush_backend(data):
     pattern = re.compile('Found command: %s \(commandfile' % '(.*)')
     cmd = [pattern.match(entry['message']).group(1) for entry in data 
            if pattern.match(entry['message'])]
-    log = logging.getLogger('drush.%s' % cmd[0])
+    log = logger.logging.getLogger('drush.%s' % cmd[0])
 
     for entry in data:
         if entry['type'] in ('error', 'critical', 'failure'):
