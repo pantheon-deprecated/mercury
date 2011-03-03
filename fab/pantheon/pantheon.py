@@ -9,6 +9,8 @@ import urllib2
 import zipfile
 import json
 import re
+import logging
+import logging.config
 
 import postback
 import jenkinstools
@@ -17,6 +19,8 @@ from fabric.api import *
 
 ENVIRONMENTS = set(['dev','test','live'])
 TEMPLATE_DIR = '/opt/pantheon/fab/templates'
+
+logging.config.fileConfig("logging.conf")
 
 def get_environments():
     """ Return list of development environments.
@@ -163,20 +167,38 @@ def configure_root_certificate(pki_server):
 def jenkins_restart():
     local('curl -X POST http://localhost:8090/safeRestart')
 
-def parse_drush_output(drush_output):
+def parse_drush_backend(drush_backend):
     """ Return drush backend json as a dictionary.
-    drush_output: drush backend json output.
+    drush_backend: drush backend json output.
     """
     # Create the patern
     pattern = re.compile('DRUSH_BACKEND_OUTPUT_START>>>%s<<<DRUSH_BACKEND_OUTPUT_END' % '(.*)')
 
     # Match the patern, returning None if not found.
-    match = pattern.match(drush_output)
+    match = pattern.match(drush_backend)
 
     if match:
         return json.loads(match.group(1))
 
     return None
+
+def log_drush_backend(data):
+    """ Iterate through the log messages and handle them appropriately
+    data: dictionary of log messages from drush backend
+    """
+    pattern = re.compile('Found command: %s (commandfile' % '(.*)')
+    cmd = [pattern.match(entry['message']).group(1) for entry in data if pattern.match(entry['message'])]
+    log = logging.getLogger('drush.%s' % cmd)
+
+    for entry in data:
+        if entry['type'] in ('error', 'critical', 'failure'):
+            log.error(entry['message'])
+        elif entry['type'] in ('warning'):
+            log.warning(entry['message'])
+        elif entry['type'] in ('ok', 'success'):
+            log.info(entry['message'])
+        else:
+            log.debug(entry['message'])
 
 class PantheonServer:
 
