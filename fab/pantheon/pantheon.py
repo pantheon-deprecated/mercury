@@ -10,7 +10,7 @@ import zipfile
 import json
 import re
 import logging
-import logging.config
+import logger
 
 import postback
 import jenkinstools
@@ -19,8 +19,6 @@ from fabric.api import *
 
 ENVIRONMENTS = set(['dev','test','live'])
 TEMPLATE_DIR = '/opt/pantheon/fab/templates'
-
-logging.config.fileConfig("logging.conf")
 
 def get_environments():
     """ Return list of development environments.
@@ -186,9 +184,10 @@ def log_drush_backend(data):
     """ Iterate through the log messages and handle them appropriately
     data: dictionary of log messages from drush backend
     """
-    pattern = re.compile('Found command: %s (commandfile' % '(.*)')
-    cmd = [pattern.match(entry['message']).group(1) for entry in data if pattern.match(entry['message'])]
-    log = logging.getLogger('drush.%s' % cmd)
+    pattern = re.compile('Found command: %s \(commandfile' % '(.*)')
+    cmd = [pattern.match(entry['message']).group(1) for entry in data 
+           if pattern.match(entry['message'])]
+    log = logging.getLogger('drush.%s' % cmd[0])
 
     for entry in data:
         if entry['type'] in ('error', 'critical', 'failure'):

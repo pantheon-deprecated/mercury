@@ -3,14 +3,14 @@ import os
 import socket
 import urllib
 import logging
-import logging.config
+
 from pantheon import ygg
+from pantheon import logger
 
 from fabric.api import *
 
 # Get our own logger
-logging.config.fileConfig("logging.conf")
-logger = logging.getLogger('site_health')
+log = logging.getLogger('site_health')
 
 def check_load_average(limit):
     """ Check system load average.
@@ -19,11 +19,11 @@ def check_load_average(limit):
     """
     loads = os.getloadavg()
     if (float(loads[0]) > float(limit)):
-        logger.warning('Load average is %s which is above the threshold of ' \
+        log.warning('Load average is %s which is above the threshold of ' \
                        '%s.' % (str(loads[0]), str(limit)))
         status = {'status': 'WARN'}
     else:
-        logger.info('Load average is %s which is below the threshold of %s.' % 
+        log.info('Load average is %s which is below the threshold of %s.' % 
                     (str(loads[0]), str(limit)))
         status = {'status': 'OK'}
     ygg.set_service('load_average', status)
@@ -37,12 +37,12 @@ def check_disk_space(filesystem, limit):
     s = os.statvfs(filesystem)
     usage = (s.f_blocks - s.f_bavail)/float(s.f_blocks) * 100
     if (float(usage) > float(limit)):
-        logger.warning('Disk usage of %s is at %s percent which is above ' \
+        log.warning('Disk usage of %s is at %s percent which is above ' \
                        'the threshold of %s percent.' % 
                        (filesystem, str(usage), str(limit)))
         status = {'status': 'WARN'}
     else:
-        logger.info('Disk usage of %s is at %s percent which is above the ' \
+        log.info('Disk usage of %s is at %s percent which is above the ' \
                     'threshold of %s percent.' % 
                     (filesystem, str(usage), str(limit)))
         status = {'status': 'OK'}
@@ -57,11 +57,11 @@ def check_swap_usage(limit):
     swap_used = local("free | grep -i swap | awk '{print $3}'")
     usage = float(swap_used)/float(swap_total) * 100
     if (usage > float(limit)):
-        logger.warning('Swap usage is a %s percent which is above the ' \
+        log.warning('Swap usage is a %s percent which is above the ' \
                        'threshold of %s percent.' % (str(usage), str(limit)))
         status = {'status': 'WARN'}
     else:
-        logger.info('Swap usage is a %s percent which is below the ' \
+        log.info('Swap usage is a %s percent which is below the ' \
                     'threshold of %s percent.' % (str(usage), str(limit)))
         status = {'status': 'OK'}
     ygg.set_service('swap_usage', status)
@@ -73,11 +73,11 @@ def check_io_wait_time(limit):
     """
     iowait = local("vmstat | grep -v [a-z] | awk '{print $16}'").rstrip()
     if (float(iowait) > float(limit)):
-        logger.warning('IO wait times are at %s percent which is above the ' \
+        log.warning('IO wait times are at %s percent which is above the ' \
                        'threshold of %s percent.' % (str(iowait), str(limit)))
         status = {'status': 'WARN'}
     else:
-        logger.info('IO wait times are at %s percent which is below the ' \
+        log.info('IO wait times are at %s percent which is below the ' \
                     'threshold of %s percent.' % (str(iowait), str(limit)))
         status = {'status': 'OK'}
     ygg.set_service('io_wait_time', status)
@@ -94,7 +94,7 @@ def check_mysql(slow_query_limit, memory_usage, innodb_memory_usage, threads):
         messages = list()
         report = local('mysqlreport')
         if report.failed:
-            logger.warning('mysql server does not appear to be running: %s' % 
+            log.warning('mysql server does not appear to be running: %s' % 
                            report)
             status = {'status': 'ERR'}
         else:
@@ -153,10 +153,10 @@ def check_mysql(slow_query_limit, memory_usage, innodb_memory_usage, threads):
                  
           message = ' '.join(messages)
           if 'above' in message: 
-              logger.warning(message)
+              log.warning(message)
               status = {'status': 'WARN'}
           else:
-              logger.info(message)
+              log.info(message)
               status = {'status': 'OK'}
     ygg.set_service('mysql', status)
 
@@ -167,10 +167,10 @@ def check_ldap():
     try:
         local('ldapsearch -H ldap://auth.getpantheon.com -x -ZZ')
     except:
-        logger.exception('Cannot connect to LDAP on localhost.')
+        log.exception('Cannot connect to LDAP on localhost.')
         status = {'status': 'ERR'}
     else:
-        logger.info('ldap responded')
+        log.info('ldap responded')
         status = {'status': 'OK'}
     ygg.set_service('ldap', status)
 
@@ -206,12 +206,12 @@ def check_pound_via_socket(port):
         s.connect(('localhost', port))
         s.shutdown(2)
     except:
-        logger.exception('Cannot connect to Pound on %s at %s.' % 
+        log.exception('Cannot connect to Pound on %s at %s.' % 
                          ('localhost', str(port)))
         status = {'status': 'ERR'}
         ygg.set_service('pound_socket', status)
     else:
-        logger.info('pound responded')
+        log.info('pound responded')
         status = {'status': 'OK'}
         ygg.set_service('pound_socket', status)
 
@@ -226,12 +226,12 @@ def check_memcached(port):
         s.connect(('localhost', port))
         s.shutdown(2)
     except:
-        logger.exception('Cannot connect to Memcached on %s %s.' % 
+        log.exception('Cannot connect to Memcached on %s %s.' % 
                          ('localhost', str(port)))
         status = {'status': 'ERR'}
         ygg.set_service('memcached', status)
     else:
-        logger.info('memcached responded')
+        log.info('memcached responded')
         status = {'status': 'OK'}
         ygg.set_service('memcached', status)
 
@@ -243,10 +243,10 @@ def _test_url(service, url):
     """
     code = urllib.urlopen(url).code
     if (code >=  400):
-        logger.warning('%s returned an error code of %s.' % (service, code))
+        log.warning('%s returned an error code of %s.' % (service, code))
         status = {'status': 'ERR'}
     else:
-        logger.info('%s returned a status code of %s.' % (service, code))
+        log.info('%s returned a status code of %s.' % (service, code))
         status = {'status': 'OK'}
     ygg.set_service(service, status)
 
