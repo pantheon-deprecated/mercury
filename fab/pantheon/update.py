@@ -116,10 +116,10 @@ class Updater(project.BuildTools):
         with settings(warn_only=True):
             result = local('drush %s -by updb' % alias)
         # Parse backend output and convert to python dict
-        result = pantheon.parse_drush_backend(result)
-        pantheon.log_drush_backend(result['log'])
+        drush_out = pantheon.parse_drush_backend(result)
+        pantheon.log_drush_backend(drush_out['log'])
         msgs = '\n'.join(['[%s] %s' % (o['type'], o['message'])
-                        for o in result['log']])
+                        for o in drush_out['log']])
         if (result.failed):
             jenkinstools.junit_fail(msgs, 'UpdateDB')
             postback.build_warning("Warning: UpdateDB encountered an error.")
