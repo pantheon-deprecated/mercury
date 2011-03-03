@@ -189,14 +189,14 @@ def log_drush_backend(data):
     log = logger.logging.getLogger('drush.%s' % cmd[0])
 
     for entry in data:
-        if entry['type'] in ('error', 'critical', 'failure'):
-            log.error(entry['message'])
+        if entry['type'] in ('error', 'critical', 'failure', 'fatal'):
+            log.error('[%s] %s' % (entry['type'], entry['message']))
         elif entry['type'] in ('warning'):
-            log.warning(entry['message'])
+            log.warning('[%s] %s' % (entry['type'], entry['message']))
         elif entry['type'] in ('ok', 'success'):
-            log.info(entry['message'])
+            log.info('[%s] %s' % (entry['type'], entry['message']))
         else:
-            log.debug(entry['message'])
+            log.debug('[%s] %s' % (entry['type'], entry['message']))
 
 class PantheonServer:
 
