@@ -73,7 +73,7 @@ class PantheonBackup():
         config['project'] = self.project
         config.write()
 
-    def finalize():
+    def finalize(self):
         """ Create archive, move to destination, remove working dir.
 
         """

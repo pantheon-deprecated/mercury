@@ -10,7 +10,11 @@ def create_dev_archive(name, project, user):
     archive.environments = ['dev']
     archive.backup_files()
     archive.backup_data(dest='dev_database.sql')
-    create_remote_drushrc(project, user, '%s.aliases.drushrc.php' % project)
+
+    # Create a drushrc aliases file.
+    destination = os.path.join(archive.backup_dir,'%s.aliases.drushrc.php' % project)
+    create_remote_drushrc(project, user, destination)
+
     archive.finalize()
 
 def create_remote_drushrc(project, user, destination):
