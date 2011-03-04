@@ -26,27 +26,32 @@ class PantheonBackup():
         """
         self.server = pantheon.PantheonServer()
         self.project =  project
+        self.environments = pantheon.get_environments()
         self.working_dir = tempfile.mkdtemp()
         self.backup_dir = os.path.join(self.working_dir, self.project)
         self.name = name + '.tar.gz'
 
-    def backup_files(self, environments=pantheon.get_environments()):
-        """Backup files for all environments (dev, test, live) of a project.
+    def backup_files(self):
+        """Backup files for environments of a project.
 
         """
-        for env in environments:
+        for env in self.environments:
             source = os.path.join(self.server.webroot, self.project, env)
             local('mkdir -p %s' % self.backup_dir)
             local('rsync -avz %s %s' % (source, self.backup_dir))
 
-    def backup_data(self, environments=pantheon.get_environments()):
-        """Backup databases for all environments (dev, test, live) of a project.
+    def backup_data(self, dest=None):
+        """Backup databases for environments of a project.
 
         """
-        for env in environments:
+        for env in self.environments:
             drupal_vars = pantheon.parse_vhost(self.server.get_vhost_file(
                                                self.project, env))
-            dest = os.path.join(self.backup_dir, env, 'database.sql')
+            # Allow the destination to be manually set inside backup_dir.
+            if not dest:
+                dest = os.path.join(self.backup_dir, env, 'database.sql')
+            else:
+                dest = os.path.join(self.backup_dir, dest)
             self._dump_data(dest, drupal_vars)
 
     def backup_repo(self):
@@ -68,6 +73,14 @@ class PantheonBackup():
         config['project'] = self.project
         config.write()
 
+    def finalize():
+        """ Create archive, move to destination, remove working dir.
+
+        """
+        self.make_archive()
+        self.move_archive()
+        self.cleanup()
+
     def make_archive(self):
         """Tar/gzip the files to be backed up.
 
@@ -85,6 +98,7 @@ class PantheonBackup():
     def cleanup(self):
         """ Remove working_dir """
         local('rm -rf %s' % self.working_dir)
+
 
     def _dump_data(self, destination, db_dict):
         """Dump a database to a .sql file.
