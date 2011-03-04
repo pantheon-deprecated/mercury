@@ -126,8 +126,6 @@ class Updater(project.BuildTools):
             print("\n=== UpdateDB Debug Output ===\n%s\n" % msgs)
         else:
             jenkinstools.junit_pass(msgs, 'UpdateDB')
-        print(type(result))
-        print(type(drush_out))
         pantheon.log_drush_backend(result)
 
     def permissions_update(self):
