@@ -218,11 +218,9 @@ def update_data(project, environment, source_env, updatedb='True'):
     # The server has a 2min delay before updates to the index are processed
     with settings(warn_only=True):
         result = local("drush @%s_%s -b solr-reindex" % (project, environment))
-        result = pantheon.parse_drush_backend(result)
-        pantheon.log_drush_backend(result['log'])
+        pantheon.log_drush_backend(result)
         result = local("drush @%s_%s -b cron" % (project, environment))
-        result = pantheon.parse_drush_backend(result)
-        pantheon.log_drush_backend(result['log'])
+        pantheon.log_drush_backend(result)
 
 def update_files(project, environment, source_env):
     """Update the files in project/environment using files from source_env.

@@ -10,6 +10,7 @@ import zipfile
 import json
 import re
 import logger
+import ygg
 
 import postback
 import jenkinstools
@@ -181,22 +182,31 @@ def parse_drush_backend(drush_backend):
 
 def log_drush_backend(data):
     """ Iterate through the log messages and handle them appropriately
-    data: dictionary of log messages from drush backend
+    data: drush backend json output.
     """
+    data = parse_drush_backend(data)
     pattern = re.compile('Found command: %s \(commandfile' % '(.*)')
-    cmd = [pattern.match(entry['message']).group(1) for entry in data 
+    cmd = [pattern.match(entry['message']).group(1) for entry in data['log'] 
            if pattern.match(entry['message'])]
     log = logger.logging.getLogger('drush.%s' % cmd[0])
 
-    for entry in data:
-        if entry['type'] in ('error', 'critical', 'failure', 'fatal'):
-            log.error('[%s] %s' % (entry['type'], entry['message']))
-        elif entry['type'] in ('warning'):
-            log.warning('[%s] %s' % (entry['type'], entry['message']))
-        elif entry['type'] in ('ok', 'success'):
-            log.info('[%s] %s' % (entry['type'], entry['message']))
+    for entry in data['log']:
+        msg = entry['message']
+        lvl = entry['type']
+        entry['command'] = cmd[0]
+
+        # message is already used by a records namespace
+        entry['drush_message'] = msg
+        del entry['message']
+
+        if lvl in ('error', 'critical', 'failure', 'fatal'):
+            log.error('[%s] %s' % (lvl, msg), extra=entry)
+        elif lvl in ('warning'):
+            log.warning('[%s] %s' % (lvl, msg), extra=entry)
+        elif lvl in ('ok', 'success'):
+            log.info('[%s] %s' % (lvl, msg), extra=entry)
         else:
-            log.debug('[%s] %s' % (entry['type'], entry['message']))
+            log.debug('[%s] %s' % (lvl, msg), extra=entry)
 
 class PantheonServer:
 
