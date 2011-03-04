@@ -314,17 +314,21 @@ class ImportTools(project.BuildTools):
             db.vset(key, value)
 
         # apachesolr module for drupal 7 stores config in db.
+        # TODO: use drush/drupal api to do this work.
         if self.version == 7:
             db.execute('TRUNCATE apachesolr_server')
             for env in self.environments:
-                config = self.config['environments']['env']['solr'];
+                config = self.config['environments'][env]['solr']
+                host = config['solr_host']
+                port = config['solr_port']
+                sid = config['apachesolr_default_server']
+                name = '%s %s' % (self.project, env)
+                path = config['solr_path']
+
                 db.execute('INSERT INTO apachesolr_server ' + \
                     '(host, port, server_id, name, path) VALUES ' + \
-                    '("%s", "%s", ' + \
-                      '"%s", "Pantheon %s", "/%s")' % \
-                      (config['solr_host'], config['solr_port'], \
-                      config['apachesolr_default_server'], env, \
-                      config['solr_path']))
+                    '("%s", "%s", "%s", "%s", "%s")' % \
+                           (host, port, sid, name, path))
         db.close()
 
         # D7: apachesolr config link will not display until cache cleared?
