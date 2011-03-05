@@ -158,17 +158,11 @@ class BuildTools(object):
         # Comment out $base_url entries.
         local("sed -i 's/^[^#|*]*\$base_url/# $base_url/' %s" % settings_file)
 
-        # Create pantheon.settings.php and include it from settings.php
+        # Create pantheon.settings.php
         pantheon.copy_template('pantheon%s.settings.php' % self.version,
                                settings_pantheon)
-        #ps_template = pantheon.get_template('pantheon%s.settings.php' % \
-        #                                    self.version)
-        #ps_dict = {'project': self.project,
-        #           'vhost_root': self.server.vhost_dir}
-        #template = pantheon.build_template(ps_template, ps_dict)
-        #with open(settings_pantheon, 'w') as f:
-        #    f.write(template)
 
+        # Include pantheon.settings.php at the end of settings.php
         with open(os.path.join(site_dir, 'settings.php'), 'a') as f:
             f.write('\n/* Added by Pantheon */\n')
             f.write("include 'pantheon.settings.php';\n")

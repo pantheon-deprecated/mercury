@@ -32,7 +32,7 @@ if (defined('DRUPAL_ROOT')) {
   }
 }
 
-// $_SERVER should now be populted from a Apache request or parsed from vhost for Drush request.
+// $_SERVER should now be populated from a Apache request or parsed from vhost for Drush request.
 if (isset($_SERVER['db_name'])) {
   $db_url = 'mysqli://' .$_SERVER['db_username']. ':' .$_SERVER['db_password']. '@localhost/' .$_SERVER['db_name'];
 }
@@ -56,4 +56,12 @@ $conf['memcache_bins'] = array(
           'cache' => 'default',
           );
 $conf['memcache_key_prefix'] = $_SERVER['memcache_prefix'];
+
+/* Set SSL status so securepages.module will work. */
+if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) == 'https') {
+  $_SERVER['HTTPS'] = 'on';
+}
+else {
+  $_SERVER['HTTPS'] = '';
+}
 
