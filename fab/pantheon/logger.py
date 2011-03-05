@@ -22,13 +22,14 @@ class DrushHandler(logging.Handler):
 
 class ServiceHandler(logging.Handler):
     def emit(self, record):
+        conf_file = '/etc/pantheon/monitoring.conf'
         try:
             cfg = ConfigParser.ConfigParser()
-            cfg.readfp(open('/opt/pantheon/fab/monitoring.conf'))
+            cfg.readfp(open(conf_file))
         except IOError:
             log.exception('Configuration file could not be loaded.')
         except:
-            log.exception('FATAL: Uncaught exception')
+            log.exception('FATAL: Unhandled exception')
             raise
 
         service = record.name.split('.')[-1]
@@ -43,9 +44,9 @@ class ServiceHandler(logging.Handler):
         if record.levelname in ['INFO']:
             status = 'OK'
             cfg.set(service, 'status', status)
-        cfg.set(service, 'last_message', record.message)
-        # Writing our configuration file to 'example.cfg'
-        with open('/opt/pantheon/fab/monitoring.conf', 'wb') as cf:
+
+        # Writing our configuration file to 'monitoring.conf'
+        with open(conf_file, 'wb') as cf:
             cfg.write(cf)
 
         if saved_status != status:
@@ -53,7 +54,6 @@ class ServiceHandler(logging.Handler):
                     "message": record.message,
                     "type" : record.levelname}
             ygg.set_service(service, send)
-            print('Sent message')
 
 class EventHandler(logging.Handler):
     def emit(self, record):
@@ -70,6 +70,7 @@ class EventHandler(logging.Handler):
 logging.handlers.DrushHandler = DrushHandler
 logging.handlers.ServiceHandler = ServiceHandler
 logging.handlers.EventHandler = EventHandler
+logging.handlers.NullHandler = NullHandler
 
 with open('/opt/pantheon/fab/pantheon/logging.conf', 'r') as f:
     logging.config.fileConfig(f)

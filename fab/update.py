@@ -2,7 +2,6 @@
 import datetime
 import tempfile
 import time
-import urllib2
 import os
 import traceback
 import string
@@ -17,15 +16,15 @@ from optparse import OptionParser
 
 from fabric.api import *
 
+log = logger.logging.getLogger('update')
+
 def main():
     usage = "usage: %prog [options]"
     parser = OptionParser(usage=usage, description="Update pantheon code and server configurations.")
     parser.add_option('-p', '--postback', dest="postback", action="store_true", default=False, help='Postback to atlas.')
     (options, args) = parser.parse_args()
 
-    update_pantheon()
-    if options.postback:
-        post_update_pantheon()
+    update_pantheon(options.postback)
 
 def update_pantheon(first_boot=False):
     """Update pantheon code and server configurations.
@@ -39,42 +38,38 @@ def update_pantheon(first_boot=False):
     This script is run from a cron job because it may update Jenkins (and
     therefor cannot be run inside jenkins.)
 
-    If the script is successful, a known message will be printed to
-    stdout which will be redirected to a log file. The jenkins job
-    post_update_pantheon will check this log file for the message to
-    determine if it was successful.
-
     """
+    log = logger.logging.getLogger('update.pantheon')
     try:
         try:
-            # Put jenkins into quietDown mode so no more jobs are started.
-            urllib2.urlopen('http://localhost:8090/quietDown')
-            # Find out if this server is using a testing branch.
+            log.debug('Putting jenkins into quietDown mode.')
+            pantheon.jenkins_quiet()
+            log.debug('Checking which branch to use.')
             branch = 'master'
             if os.path.exists('/opt/branch.txt'):
                 branch = open('/opt/branch.txt').read().strip() or 'master'
-            # Update from repo
+            log.debug('Using branch %s.' %s branch)
+            log.debug('Updating from repo.')
             with cd('/opt/pantheon'):
                 local('git fetch --prune origin', capture=False)
                 local('git checkout --force %s' % branch, capture=False)
                 local('git reset --hard origin/%s' % branch, capture=False)
-            # Update from BCFG2
+            log.debug('Updating bcfg2.')
             local('/usr/sbin/bcfg2 -vqed', capture=False)
         except:
-            print(traceback.format_exc())
-            raise
+            log.exception('FATAL: Unhandled exception')
         finally:
-            # wait a min for jenkins to respond.
+            log.debug('Waiting for jenkins to respond.')
             for x in range(12):
                 if pantheon.jenkins_running():
                     break
                 else:
                     time.sleep(10)
             else:
-                print("Jenkins not ready after 2 minutes.")
-                raise Exception("ABORTING: Jenkins not ready after 2 minutes.")
-            # Restart Jenkins
-            local('curl -X POST http://localhost:8090/safeRestart', capture=False)
+                log.error("ABORTING: Jenkins hasn't responded after 2 minutes.")
+                raise Exception("ABORTING: Jenkins not responding.")
+            log.debug('Restarting jenkins.')
+            pantheon.jenkins_restart()
 
         # If this is not the first boot, send back update data.
         if not first_boot:
@@ -87,8 +82,8 @@ def update_pantheon(first_boot=False):
             wait until it is back up.
 
             """
-
-            # wait for any jobs that were queued to finish.
+            log.debug('Not first boot, recording update data.')
+            log.debug('Waiting for queued jobs to finish.')
             while True:
                 queued = pantheon.jenkins_queued()
                 if queued == 0:
@@ -101,38 +96,19 @@ def update_pantheon(first_boot=False):
                 else:
                     time.sleep(5)
             # wait for jenkins to restart.
+            log.debug('Waiting for jenkins to respond.')
             for x in range(30):
                 if pantheon.jenkins_running():
                     break
                 else:
                     time.sleep(10)
             else:
-                raise Exception("ABORTING: Jenkins did not restart after 5 minutes.")
-            # stdout is redirected in cron, so this will go to log file.
-            print "UPDATE COMPLETED SUCCESSFULLY"
+                log.error("ABORTING: Jenkins hasn't responded after 5 minutes.")
+                raise Exception("ABORTING: Jenkins not responding.")
+            log.info('Update completed successfully.')
     except:
-        print(traceback.format_exc())
+        log.exception('Update encountered unrecoverable errors.')
         raise
-
-def post_update_pantheon():
-    """Determine if cron run of pantheon_update was successful.
-
-    """
-    response = {'update_pantheon': dict()}
-    log_path = '/var/log/pantheon/update_pantheon.log'
-    if os.path.isfile(log_path):
-        with open(log_path, 'r') as log:
-            if 'UPDATE COMPLETED SUCCESSFULLY' in log:
-                response['update_pantheon']['status'] = 'SUCCESS'
-                response['update_pantheon']['msg'] = ''
-            else:
-                response['update_pantheon']['status'] = 'FAILURE'
-                response['update_pantheon']['msg'] = 'Pantheon update did not complete.'
-    else:
-        response['update_pantheon']['status'] = 'FAILURE'
-        response['update_pantheon']['msg'] = 'No Pantheon update log was found.'
-        print 'No update log found.'
-    postback.postback(response)
 
 def update_site_core(project='pantheon', keep=None):
     """Update Drupal core (from Drupal or Pressflow, to latest Pressflow).

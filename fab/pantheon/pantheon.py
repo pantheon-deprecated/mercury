@@ -165,6 +165,9 @@ def configure_root_certificate(pki_server):
 def jenkins_restart():
     local('curl -X POST http://localhost:8090/safeRestart')
 
+def jenkins_quiet():
+    urllib2.urlopen('http://localhost:8090/quietDown')
+
 def parse_drush_backend(drush_backend):
     """ Return drush backend json as a dictionary.
     drush_backend: drush backend json output.

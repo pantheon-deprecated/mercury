@@ -11,11 +11,15 @@ from fabric.api import *
 # Get our own logger
 log = logger.logging.getLogger('site_health')
 
+conf_file = '/etc/pantheon/monitoring.conf'
 try:
     cfg = ConfigParser.ConfigParser()
-    cfg.readfp(open('monitoring.conf'))
-except:
+    cfg.readfp(open(conf_file))
+except IOError:
     log.exception('There was an error while loading the configuration file.')
+except:
+    log.exception('FATAL: Unhandled exception')
+    raise
 
 def check_load_average(limit=None):
     """ Check system load average.
