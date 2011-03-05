@@ -2,6 +2,7 @@ import logging
 import logging.handlers
 import logging.config
 import ygg
+import ConfigParser
 
 class NullHandler(logging.Handler):
     def emit(self, record):
@@ -17,10 +18,54 @@ class DrushHandler(logging.Handler):
                           "error": record.error},
                 "source": 'drush',
                 "command": record.command}
-        r = ygg.send_event(record.name, send, ['source-drush', 'inbox', 'all'])
+        ygg.send_event(record.name, send, ['source-drush', 'inbox', 'all'])
 
-# register our custom handler so it can be used by the config file
+class ServiceHandler(logging.Handler):
+    def emit(self, record):
+        try:
+            cfg = ConfigParser.ConfigParser()
+            cfg.readfp(open('monitoring.conf'))
+        except IOError:
+            log.exception('Configuration file could not be loaded.')
+        except:
+            log.exception('FATAL: Uncaught exception')
+            raise
+
+        service = record.name.split('.')[-1]
+        saved_status = cfg.get(service, 'status')
+
+        if record.levelname in ['ERROR']:
+            status = 'ERR'
+            cfg.set(service, 'status', status)
+        if record.levelname in ['WARNING']:
+            status = 'WARN'
+            cfg.set(service, 'status', status)
+        if record.levelname in ['INFO']:
+            status = 'OK'
+            cfg.set(service, 'status', status)
+        cfg.set(service, 'last_message', record.message)
+
+        if saved_status != status:
+            send = {"status": status,
+                    "message": record.message,
+                    "type" : record.levelname}
+            ygg.set_service(service, send)
+
+class EventHandler(logging.Handler):
+    def emit(self, record):
+        source = record.name.split('.')[0]
+        send = {source: {"message": record.message,
+                         "type" : record.levelname,
+                         "created": record.created,
+                         "asctime": record.asctime},
+                "source": source}
+        labels = ['source-%s' % record.source, 'inbox', 'all']
+        ygg.send_event(record.name, send, labels)
+
+# register our custom handlers so they can be used by the config file
 logging.handlers.DrushHandler = DrushHandler
+logging.handlers.ServiceHandler = ServiceHandler
+logging.handlers.EventHandler = EventHandler
 
 with open('/opt/pantheon/fab/pantheon/logging.conf', 'r') as f:
     logging.config.fileConfig(f)
