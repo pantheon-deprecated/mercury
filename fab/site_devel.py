@@ -39,7 +39,7 @@ def create_remote_drushrc(project, user, destination):
     with open(destination, 'w') as f:
         f.write('<?php\n%s\n' % env_aliases)
 
-def _get_server_alias():
+def _get_env_alias():
     return """
 $aliases['${project}_${env}'] = array(
   'remote-host' => '${host}',

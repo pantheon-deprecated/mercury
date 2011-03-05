@@ -15,12 +15,12 @@ function get_vhost_file($project, $environment) {
   }
 }
 
-$request = get_request_type();
-// If DRUPAL_ROOT is set at this point, the request is coming from Drush.
-if (isset(DRUPAL_ROOT)) {
+if (defined('DRUPAL_ROOT')) {
+  // If DRUPAL_ROOT is set at this point, the request is coming from Drush.
   list($project, $environment) = get_project_and_environment();
   $vhost_file = get_vhost_file($project, $environment);
   $vhost = explode(PHP_EOL, file_get_contents($vhost_file));
+
   // Populate $_SERVER with values from vhost file.
   $vars = array();
   foreach ($vhost as $line) {
@@ -32,9 +32,9 @@ if (isset(DRUPAL_ROOT)) {
   }
 }
 
-// $_SERVER should now be populted from a Apache request, or parsed from vhost for Drush request.
+// $_SERVER should now be populted from a Apache request or parsed from vhost for Drush request.
 if (isset($_SERVER['db_name'])) {
-  $db_url = "mysqli://$_SERVER['db_username']:$_SERVER['db_password']@localhost/$_SERVER['db_name']";
+  $db_url = 'mysqli://' .$_SERVER['db_username']. ':' .$_SERVER['db_password']. '@localhost/' .$_SERVER['db_name'];
 }
 
 $conf['pressflow_smart_start'] = TRUE;
