@@ -24,7 +24,7 @@ class ServiceHandler(logging.Handler):
     def emit(self, record):
         try:
             cfg = ConfigParser.ConfigParser()
-            cfg.readfp(open('monitoring.conf'))
+            cfg.readfp(open('/opt/pantheon/fab/monitoring.conf'))
         except IOError:
             log.exception('Configuration file could not be loaded.')
         except:
@@ -44,12 +44,16 @@ class ServiceHandler(logging.Handler):
             status = 'OK'
             cfg.set(service, 'status', status)
         cfg.set(service, 'last_message', record.message)
+        # Writing our configuration file to 'example.cfg'
+        with open('/opt/pantheon/fab/monitoring.conf', 'wb') as cf:
+            cfg.write(cf)
 
         if saved_status != status:
             send = {"status": status,
                     "message": record.message,
                     "type" : record.levelname}
             ygg.set_service(service, send)
+            print('Sent message')
 
 class EventHandler(logging.Handler):
     def emit(self, record):

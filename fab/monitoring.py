@@ -44,7 +44,7 @@ def check_disk_space(filesystem=None, limit=None):
     section = 'disk_space'
     if not limit:
         limit=cfg.getfloat(section, 'limit')
-    if not filesytem:
+    if not filesystem:
         filesystem=cfg.get(section, 'filesystem')
     log = logger.logging.getLogger('site_health.%s' % section)
 
@@ -194,9 +194,9 @@ def check_apache(url=None):
 
     code = _test_url(url)
     if (code >=  400):
-        log.warning('%s returned an error code of %s.' % (service, code))
+        log.warning('%s returned an error code of %s.' % (section, code))
     else:
-        log.info('%s returned a status code of %s.' % (service, code))
+        log.info('%s returned a status code of %s.' % (section, code))
 
 def check_varnish(url=None):
     """ Check varnish status.
@@ -210,9 +210,9 @@ def check_varnish(url=None):
 
     code = _test_url(url)
     if (code >=  400):
-        log.warning('%s returned an error code of %s.' % (service, code))
+        log.warning('%s returned an error code of %s.' % (section, code))
     else:
-        log.info('%s returned a status code of %s.' % (service, code))
+        log.info('%s returned a status code of %s.' % (section, code))
 
 def check_pound_via_apache(url=None):
     """ Check pound status.
@@ -226,11 +226,11 @@ def check_pound_via_apache(url=None):
 
     code = _test_url(url)
     if (code >=  400):
-        log.warning('%s returned an error code of %s.' % (service, code))
+        log.warning('%s returned an error code of %s.' % (section, code))
     else:
-        log.info('%s returned a status code of %s.' % (service, code))
+        log.info('%s returned a status code of %s.' % (section, code))
 
-def check_pound_via_socket(port):
+def check_pound_via_socket(port=None):
     """ Check pound status.
     port: str. Port to test
 
@@ -238,7 +238,7 @@ def check_pound_via_socket(port):
     section = 'pound'
     if not port:
         port=cfg.getint(section, 'port')
-    log = logger.logging.getLogger('site_health.%s_port' % section)
+    log = logger.logging.getLogger('site_health.%s' % section)
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
@@ -251,7 +251,7 @@ def check_pound_via_socket(port):
     else:
         log.info('pound responded')
 
-def check_memcached(port):
+def check_memcached(port=None):
     """ Check memcached status.
     port: str. Port to test
 
@@ -259,7 +259,7 @@ def check_memcached(port):
     section = 'memcached'
     if not port:
         port=cfg.getint(section, 'port')
-    log = logger.logging.getLogger('site_health.%s_port' % section)
+    log = logger.logging.getLogger('site_health.%s' % section)
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
@@ -274,7 +274,6 @@ def check_memcached(port):
 
 def _test_url(url):
     """ Test url response code.
-    service: str. Name of service under test
     url: str. Url to test
 
     """
