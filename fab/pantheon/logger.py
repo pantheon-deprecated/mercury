@@ -28,32 +28,25 @@ class ServiceHandler(logging.Handler):
         except IOError:
             log.exception('Configuration file could not be loaded.')
         except:
-            log.exception('FATAL: Uncaught exception')
-            raise
+            log.exception('FATAL: Uncaught exception in logging handler')
 
         service = record.name.split('.')[-1]
         saved_status = cfg.get(service, 'status')
 
-        if record.levelname in ['ERROR']:
-            status = 'ERR'
-            cfg.set(service, 'status', status)
-        if record.levelname in ['WARNING']:
-            status = 'WARN'
-            cfg.set(service, 'status', status)
-        if record.levelname in ['INFO']:
-            status = 'OK'
-            cfg.set(service, 'status', status)
-        cfg.set(service, 'last_message', record.message)
-        # Writing our configuration file to 'example.cfg'
-        with open('/opt/pantheon/fab/monitoring.conf', 'wb') as cf:
-            cfg.write(cf)
+        status = 'ERR' if record.levelname in ['ERROR'] else saved_status
+        status = 'WARN' if record.levelname in ['WARNING'] else saved_status
+        status = 'OK' if record.levelname in ['INFO'] else saved_status
 
-        if saved_status != status:
+        if status != saved_status:
+            cfg.set(service, 'status', status)
+            # Write our configuration to file if the status has changed
+            with open('/opt/pantheon/fab/monitoring.conf', 'wb') as cf:
+                cfg.write(cf)
             send = {"status": status,
                     "message": record.message,
                     "type" : record.levelname}
+            # Set service status in ygg 
             ygg.set_service(service, send)
-            print('Sent message')
 
 class EventHandler(logging.Handler):
     def emit(self, record):
@@ -70,6 +63,7 @@ class EventHandler(logging.Handler):
 logging.handlers.DrushHandler = DrushHandler
 logging.handlers.ServiceHandler = ServiceHandler
 logging.handlers.EventHandler = EventHandler
+logging.handlers.NullHandler = NullHandler
 
 with open('/opt/pantheon/fab/pantheon/logging.conf', 'r') as f:
     logging.config.fileConfig(f)
