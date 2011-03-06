@@ -57,6 +57,8 @@ class EventHandler(logging.Handler):
                          "asctime": record.asctime},
                 "source": source}
         labels = ['source-%s' % record.source, 'inbox', 'all']
+        if hasattr(record, 'labels'):
+            labels = list(set(labels).union(set(record.labels)))
         ygg.send_event(record.name, send, labels)
 
 # register our custom handlers so they can be used by the config file
