@@ -48,7 +48,7 @@ def update_pantheon(first_boot=False):
             branch = 'master'
             if os.path.exists('/opt/branch.txt'):
                 branch = open('/opt/branch.txt').read().strip() or 'master'
-            log.debug('Using branch %s.' %s branch)
+            log.debug('Using branch %s.' % branch)
             log.debug('Updating from repo.')
             with cd('/opt/pantheon'):
                 local('git fetch --prune origin', capture=False)
