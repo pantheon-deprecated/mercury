@@ -26,7 +26,7 @@ def main():
 
     update_pantheon(options.postback)
 
-def update_pantheon(first_boot=False):
+def update_pantheon(postback=True):
     """Update pantheon code and server configurations.
 
     first_boot: bool. If this is being called from the configure job. If it
@@ -76,7 +76,7 @@ def update_pantheon(first_boot=False):
             pantheon.jenkins_restart()
 
         # If this is not the first boot, send back update data.
-        if not first_boot:
+        if postback:
             """
             We have to check for both queued jobs then the jenkins restart.
             This is because jobs could have been queued before the update
