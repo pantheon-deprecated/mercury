@@ -29,7 +29,7 @@ def main():
 def update_pantheon(postback=True):
     """Update pantheon code and server configurations.
 
-    first_boot: bool. If this is being called from the configure job. If it
+    postback: bool. If this is being called from the configure job, then it
     is the first boot, we don't need to wait for jenkins or send back update
     data.
 
