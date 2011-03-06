@@ -28,40 +28,38 @@ def check_load_average(limit=None):
     """
     section = 'load_average'
     if not limit:
-        limit=cfg.getfloat(section, 'limit')
+        limit = cfg.getfloat(section, 'limit')
     log = logger.logging.getLogger('site_health.%s' % section)
 
     loads = os.getloadavg()
     if (float(loads[0]) > float(limit)):
-        log.warning('Load average is %s which is above the threshold of ' \
-                       '%s.' % (str(loads[0]), str(limit)))
+        log.warning('Load average is %s which is above the threshold of %s.' % 
+                    (str(loads[0]), str(limit)))
     else:
         log.info('Load average is %s which is below the threshold of %s.' % 
-                    (str(loads[0]), str(limit)))
+                 (str(loads[0]), str(limit)))
 
-def check_disk_space(filesystem=None, limit=None):
+def check_disk_space(path=None, limit=None):
     """ Check system disk usage.
-    filesystem: str. Path to check against
+    path: str. Path to check against
     limit: int. Threshold as percentage.
 
     """
     section = 'disk_space'
     if not limit:
-        limit=cfg.getfloat(section, 'limit')
-    if not filesystem:
-        filesystem=cfg.get(section, 'filesystem')
+        limit = cfg.getfloat(section, 'limit')
+    if not path:
+        path = cfg.get(section, 'path')
     log = logger.logging.getLogger('site_health.%s' % section)
 
-    s = os.statvfs(filesystem)
+    s = os.statvfs(path)
     usage = (s.f_blocks - s.f_bavail)/float(s.f_blocks) * 100
     if (float(usage) > float(limit)):
-        log.warning('Disk usage of %s is at %s percent which is above ' \
-                       'the threshold of %s percent.' % 
-                       (filesystem, str(usage), str(limit)))
+        log.warning('Disk usage of %s is at %s percent which is above the ' \
+                    'threshold of %s percent.' % (path, str(usage), str(limit)))
     else:
         log.info('Disk usage of %s is at %s percent which is above the ' \
-                    'threshold of %s percent.' % 
-                    (filesystem, str(usage), str(limit)))
+                 'threshold of %s percent.' % (path, str(usage), str(limit)))
 
 def check_swap_usage(limit=None):
     """ Check system swap usage.
@@ -70,7 +68,7 @@ def check_swap_usage(limit=None):
     """
     section = 'swap_usage'
     if not limit:
-        limit=cfg.getfloat(section, 'limit')
+        limit = cfg.getfloat(section, 'limit')
     log = logger.logging.getLogger('site_health.%s' % section)
 
     swap_total = local("free | grep -i swap | awk '{print $2}'")
@@ -78,10 +76,10 @@ def check_swap_usage(limit=None):
     usage = float(swap_used)/float(swap_total) * 100
     if (usage > float(limit)):
         log.warning('Swap usage is a %s percent which is above the ' \
-                       'threshold of %s percent.' % (str(usage), str(limit)))
+                    'threshold of %s percent.' % (str(usage), str(limit)))
     else:
         log.info('Swap usage is a %s percent which is below the ' \
-                    'threshold of %s percent.' % (str(usage), str(limit)))
+                 'threshold of %s percent.' % (str(usage), str(limit)))
 
 def check_io_wait_time(limit=None):
     """ Check system io wait time.
@@ -90,16 +88,16 @@ def check_io_wait_time(limit=None):
     """
     section = 'io_wait_time'
     if not limit:
-        limit=cfg.getfloat(section, 'limit')
+        limit = cfg.getfloat(section, 'limit')
     log = logger.logging.getLogger('site_health.%s' % section)
 
     iowait = local("vmstat | grep -v [a-z] | awk '{print $16}'").rstrip()
     if (float(iowait) > float(limit)):
         log.warning('IO wait times are at %s percent which is above the ' \
-                       'threshold of %s percent.' % (str(iowait), str(limit)))
+                    'threshold of %s percent.' % (str(iowait), str(limit)))
     else:
         log.info('IO wait times are at %s percent which is below the ' \
-                    'threshold of %s percent.' % (str(iowait), str(limit)))
+                 'threshold of %s percent.' % (str(iowait), str(limit)))
 
 def check_mysql(slow_query_limit=None, memory_usage=None, innodb_memory_usage=None, threads=None):
     """ Check mysql status.
@@ -111,13 +109,13 @@ def check_mysql(slow_query_limit=None, memory_usage=None, innodb_memory_usage=No
     """
     section = 'mysql'
     if not slow_query_limit:
-        slow_query_limit=cfg.getfloat(section, 'slow_query_limit')
+        slow_query_limit = cfg.getfloat(section, 'slow_query_limit')
     if not memory_usage:
-        memory_usage=cfg.getfloat(section, 'memory_usage')
+        memory_usage = cfg.getfloat(section, 'memory_usage')
     if not innodb_memory_usage:
-        innodb_memory_usage=cfg.getfloat(section, 'innodb_memory_usage')
+        innodb_memory_usage = cfg.getfloat(section, 'innodb_memory_usage')
     if not threads:
-        threads=cfg.getfloat(section, 'threads')
+        threads = cfg.getfloat(section, 'threads')
     log = logger.logging.getLogger('site_health.%s' % section)
 
     with settings(warn_only=True):
@@ -193,7 +191,7 @@ def check_apache(url=None):
     """
     section = 'apache'
     if not url:
-        url=cfg.get(section, 'url')
+        url = cfg.get(section, 'url')
     log = logger.logging.getLogger('site_health.%s' % section)
 
     code = _test_url(url)
@@ -209,7 +207,7 @@ def check_varnish(url=None):
     """
     section = 'varnish'
     if not url:
-        url=cfg.get(section, 'url')
+        url = cfg.get(section, 'url')
     log = logger.logging.getLogger('site_health.%s' % section)
 
     code = _test_url(url)
@@ -225,7 +223,7 @@ def check_pound_via_apache(url=None):
     """
     section = 'pound'
     if not url:
-        url=cfg.get(section, 'url')
+        url = cfg.get(section, 'url')
     log = logger.logging.getLogger('site_health.%s' % section)
 
     code = _test_url(url)
@@ -241,7 +239,7 @@ def check_pound_via_socket(port=None):
     """
     section = 'pound'
     if not port:
-        port=cfg.getint(section, 'port')
+        port = cfg.getint(section, 'port')
     log = logger.logging.getLogger('site_health.%s' % section)
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -251,7 +249,7 @@ def check_pound_via_socket(port=None):
         s.shutdown(2)
     except:
         log.exception('Cannot connect to Pound on %s at %s.' % 
-                         ('localhost', str(port)))
+                      ('localhost', str(port)))
     else:
         log.info('pound responded')
 
@@ -262,7 +260,7 @@ def check_memcached(port=None):
     """
     section = 'memcached'
     if not port:
-        port=cfg.getint(section, 'port')
+        port = cfg.getint(section, 'port')
     log = logger.logging.getLogger('site_health.%s' % section)
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -272,7 +270,7 @@ def check_memcached(port=None):
         s.shutdown(2)
     except:
         log.exception('Cannot connect to Memcached on %s %s.' % 
-                         ('localhost', str(port)))
+                      ('localhost', str(port)))
     else:
         log.info('memcached responded')
 

@@ -29,30 +29,24 @@ class ServiceHandler(logging.Handler):
         except IOError:
             log.exception('Configuration file could not be loaded.')
         except:
-            log.exception('FATAL: Unhandled exception')
-            raise
+            log.exception('FATAL: Uncaught exception in logging handler')
 
         service = record.name.split('.')[-1]
         saved_status = cfg.get(service, 'status')
 
-        if record.levelname in ['ERROR']:
-            status = 'ERR'
-            cfg.set(service, 'status', status)
-        if record.levelname in ['WARNING']:
-            status = 'WARN'
-            cfg.set(service, 'status', status)
-        if record.levelname in ['INFO']:
-            status = 'OK'
-            cfg.set(service, 'status', status)
+        status = 'ERR' if record.levelname in ['ERROR'] else saved_status
+        status = 'WARN' if record.levelname in ['WARNING'] else saved_status
+        status = 'OK' if record.levelname in ['INFO'] else saved_status
 
-        # Writing our configuration file to 'monitoring.conf'
-        with open(conf_file, 'wb') as cf:
-            cfg.write(cf)
-
-        if saved_status != status:
+        if status != saved_status:
+            cfg.set(service, 'status', status)
+            # Write our configuration to file if the status has changed
+            with open('/opt/pantheon/fab/monitoring.conf', 'wb') as cf:
+                cfg.write(cf)
             send = {"status": status,
                     "message": record.message,
                     "type" : record.levelname}
+            # Set service status in ygg 
             ygg.set_service(service, send)
 
 class EventHandler(logging.Handler):
@@ -64,6 +58,8 @@ class EventHandler(logging.Handler):
                          "asctime": record.asctime},
                 "source": source}
         labels = ['source-%s' % record.source, 'inbox', 'all']
+        if hasattr(record, 'labels'):
+            labels = list(set(labels).union(set(record.labels)))
         ygg.send_event(record.name, send, labels)
 
 # register our custom handlers so they can be used by the config file

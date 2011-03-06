@@ -10,7 +10,6 @@ import zipfile
 import json
 import re
 import logger
-import ygg
 
 import postback
 import jenkinstools
