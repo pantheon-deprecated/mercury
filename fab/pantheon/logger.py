@@ -60,7 +60,7 @@ class EventHandler(logging.Handler):
                          "created": record.created,
                          "asctime": record.asctime},
                 "source": source}
-        labels = ['source-%s' % record.source, 'inbox', 'all']
+        labels = ['source-%s' % source, 'inbox', 'all']
         if hasattr(record, 'labels'):
             labels = list(set(labels).union(set(record.labels)))
         ygg.send_event(record.name, send, labels)
