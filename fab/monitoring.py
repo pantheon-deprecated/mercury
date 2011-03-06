@@ -35,29 +35,27 @@ def check_load_average(limit=None):
         log.info('Load average is %s which is below the threshold of %s.' % 
                  (str(loads[0]), str(limit)))
 
-def check_disk_space(filesystem=None, limit=None):
+def check_disk_space(path=None, limit=None):
     """ Check system disk usage.
-    filesystem: str. Path to check against
+    path: str. Path to check against
     limit: int. Threshold as percentage.
 
     """
     section = 'disk_space'
     if not limit:
         limit = cfg.getfloat(section, 'limit')
-    if not filesystem:
-        filesystem = cfg.get(section, 'filesystem')
+    if not path:
+        path = cfg.get(section, 'path')
     log = logger.logging.getLogger('site_health.%s' % section)
 
-    s = os.statvfs(filesystem)
+    s = os.statvfs(path)
     usage = (s.f_blocks - s.f_bavail)/float(s.f_blocks) * 100
     if (float(usage) > float(limit)):
         log.warning('Disk usage of %s is at %s percent which is above the ' \
-                    'threshold of %s percent.' % 
-                    (filesystem, str(usage), str(limit)))
+                    'threshold of %s percent.' % (path, str(usage), str(limit)))
     else:
         log.info('Disk usage of %s is at %s percent which is above the ' \
-                 'threshold of %s percent.' % 
-                 (filesystem, str(usage), str(limit)))
+                 'threshold of %s percent.' % (path, str(usage), str(limit)))
 
 def check_swap_usage(limit=None):
     """ Check system swap usage.
