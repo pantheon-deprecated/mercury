@@ -31,11 +31,14 @@ class ServiceHandler(logging.Handler):
             log.exception('FATAL: Uncaught exception in logging handler')
 
         service = record.name.split('.')[-1]
-        saved_status = cfg.get(service, 'status')
+        status = saved_status = cfg.get(service, 'status')
 
-        status = 'ERR' if record.levelname in ['ERROR'] else saved_status
-        status = 'WARN' if record.levelname in ['WARNING'] else saved_status
-        status = 'OK' if record.levelname in ['INFO'] else saved_status
+        if record.levelname in ['ERROR']:
+            status = 'ERR'
+        if record.levelname in ['WARNING']:
+            status = 'WARN'
+        if record.levelname in ['INFO']:
+            status = 'OK'
 
         if status != saved_status:
             cfg.set(service, 'status', status)
