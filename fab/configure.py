@@ -141,7 +141,7 @@ def _configure_iptables(server):
         local('/sbin/iptables-restore < /etc/iptables.rules')
 
     rules = open('/etc/iptables.rules').read()
-    ygg.send_event('Firewall configuration', 'The kernel\'s iptables module is now blocking unauthorized traffic. Rules:\n' + rules)
+    ygg.send_event('Firewall configuration', 'The kernel\'s iptables module is now blocking unauthorized traffic. Rules in effect:\n' + rules)
 
 def _configure_git_repo():
     ygg.send_event('Deployment configuration', 'The git version control tool is now being configured.')
@@ -172,4 +172,4 @@ def _report():
 
     local('echo "DEAR SYSADMIN: PANTHEON IS READY FOR YOU NOW.  Do not forget the README.txt, CHANGELOG.txt and docs!" | wall')
 
-    ygg.send_event('System configuration', 'The Pantheon system is successfully running for this site.')
+    ygg.send_event('Platform configuration', 'The Pantheon platform is now running.')

@@ -40,6 +40,10 @@ def update_pantheon(first_boot=False):
 
     """
     log = logger.logging.getLogger('update.pantheon')
+
+    # Ensure the JDK is properly installed.
+    local('apt-get install -y default-jdk')
+
     try:
         try:
             log.debug('Putting jenkins into quietDown mode.')
