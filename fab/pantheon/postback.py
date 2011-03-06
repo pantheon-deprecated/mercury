@@ -9,8 +9,6 @@ import jenkinstools
 
 from fabric.api import local
 
-import pantheon
-
 def postback(cargo, command='atlas'):
     """Send data back to Atlas.
     cargo: dict of data to send.

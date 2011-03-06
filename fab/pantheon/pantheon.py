@@ -9,6 +9,7 @@ import urllib2
 import zipfile
 import json
 import re
+import logger
 
 import postback
 import jenkinstools
@@ -163,20 +164,51 @@ def configure_root_certificate(pki_server):
 def jenkins_restart():
     local('curl -X POST http://localhost:8090/safeRestart')
 
-def parse_drush_output(drush_output):
+def jenkins_quiet():
+    urllib2.urlopen('http://localhost:8090/quietDown')
+
+def parse_drush_backend(drush_backend):
     """ Return drush backend json as a dictionary.
-    drush_output: drush backend json output.
+    drush_backend: drush backend json output.
     """
     # Create the patern
     pattern = re.compile('DRUSH_BACKEND_OUTPUT_START>>>%s<<<DRUSH_BACKEND_OUTPUT_END' % '(.*)')
 
     # Match the patern, returning None if not found.
-    match = pattern.match(drush_output)
+    match = pattern.match(drush_backend)
 
     if match:
         return json.loads(match.group(1))
 
     return None
+
+def log_drush_backend(data):
+    """ Iterate through the log messages and handle them appropriately
+    data: drush backend json output.
+    """
+    data = parse_drush_backend(data)
+    pattern = re.compile('Found command: %s \(commandfile' % '(.*)')
+    cmd = [pattern.match(entry['message']).group(1) for entry in data['log'] 
+           if pattern.match(entry['message'])]
+    log = logger.logging.getLogger('drush.%s' % cmd[0])
+
+    for entry in data['log']:
+        msg = entry['message']
+        lvl = entry['type']
+        entry['command'] = cmd[0]
+
+        # message is already used by a records namespace
+        entry['drush_message'] = msg
+        del entry['message']
+
+        if lvl in ('error', 'critical', 'failure', 'fatal'):
+            log.error('[%s] %s' % (lvl, msg), extra=entry)
+        elif lvl in ('warning'):
+            log.warning('[%s] %s' % (lvl, msg), extra=entry)
+        elif lvl in ('ok', 'success'):
+            log.info('[%s] %s' % (lvl, msg), extra=entry)
+        else:
+            log.debug('[%s] %s' % (lvl, msg), extra=entry)
 
 class PantheonServer:
 

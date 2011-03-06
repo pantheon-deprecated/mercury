@@ -2,87 +2,104 @@
 import os
 import socket
 import urllib
-import logging
-import logging.config
-from pantheon import ygg
+import ConfigParser
+
+from pantheon import logger
 
 from fabric.api import *
 
 # Get our own logger
-logging.config.fileConfig("logging.conf")
-logger = logging.getLogger('site_health')
+log = logger.logging.getLogger('site_health')
 
-def check_load_average(limit):
+conf_file = '/etc/pantheon/monitoring.conf'
+try:
+    cfg = ConfigParser.ConfigParser()
+    cfg.readfp(open(conf_file))
+except IOError:
+    log.exception('There was an error while loading the configuration file.')
+except:
+    log.exception('FATAL: Unhandled exception')
+    raise
+
+def check_load_average(limit=None):
     """ Check system load average.
     limit: int. Threshold
 
     """
+    section = 'load_average'
+    if not limit:
+        limit = cfg.getfloat(section, 'limit')
+    log = logger.logging.getLogger('site_health.%s' % section)
+
     loads = os.getloadavg()
     if (float(loads[0]) > float(limit)):
-        logger.warning('Load average is %s which is above the threshold of ' \
-                       '%s.' % (str(loads[0]), str(limit)))
-        status = {'status': 'WARN'}
-    else:
-        logger.info('Load average is %s which is below the threshold of %s.' % 
+        log.warning('Load average is %s which is above the threshold of %s.' % 
                     (str(loads[0]), str(limit)))
-        status = {'status': 'OK'}
-    ygg.set_service('load_average', status)
+    else:
+        log.info('Load average is %s which is below the threshold of %s.' % 
+                 (str(loads[0]), str(limit)))
 
-def check_disk_space(filesystem, limit):
+def check_disk_space(path=None, limit=None):
     """ Check system disk usage.
-    filesystem: str. Path to check against
+    path: str. Path to check against
     limit: int. Threshold as percentage.
 
     """
-    s = os.statvfs(filesystem)
+    section = 'disk_space'
+    if not limit:
+        limit = cfg.getfloat(section, 'limit')
+    if not path:
+        path = cfg.get(section, 'path')
+    log = logger.logging.getLogger('site_health.%s' % section)
+
+    s = os.statvfs(path)
     usage = (s.f_blocks - s.f_bavail)/float(s.f_blocks) * 100
     if (float(usage) > float(limit)):
-        logger.warning('Disk usage of %s is at %s percent which is above ' \
-                       'the threshold of %s percent.' % 
-                       (filesystem, str(usage), str(limit)))
-        status = {'status': 'WARN'}
+        log.warning('Disk usage of %s is at %s percent which is above the ' \
+                    'threshold of %s percent.' % (path, str(usage), str(limit)))
     else:
-        logger.info('Disk usage of %s is at %s percent which is above the ' \
-                    'threshold of %s percent.' % 
-                    (filesystem, str(usage), str(limit)))
-        status = {'status': 'OK'}
-    ygg.set_service('disk_space', status)
+        log.info('Disk usage of %s is at %s percent which is above the ' \
+                 'threshold of %s percent.' % (path, str(usage), str(limit)))
 
-def check_swap_usage(limit):
+def check_swap_usage(limit=None):
     """ Check system swap usage.
     limit: int. Threshold as percentage.
 
     """
+    section = 'swap_usage'
+    if not limit:
+        limit = cfg.getfloat(section, 'limit')
+    log = logger.logging.getLogger('site_health.%s' % section)
+
     swap_total = local("free | grep -i swap | awk '{print $2}'")
     swap_used = local("free | grep -i swap | awk '{print $3}'")
     usage = float(swap_used)/float(swap_total) * 100
     if (usage > float(limit)):
-        logger.warning('Swap usage is a %s percent which is above the ' \
-                       'threshold of %s percent.' % (str(usage), str(limit)))
-        status = {'status': 'WARN'}
-    else:
-        logger.info('Swap usage is a %s percent which is below the ' \
+        log.warning('Swap usage is a %s percent which is above the ' \
                     'threshold of %s percent.' % (str(usage), str(limit)))
-        status = {'status': 'OK'}
-    ygg.set_service('swap_usage', status)
+    else:
+        log.info('Swap usage is a %s percent which is below the ' \
+                 'threshold of %s percent.' % (str(usage), str(limit)))
 
-def check_io_wait_time(limit):
+def check_io_wait_time(limit=None):
     """ Check system io wait time.
     limit: int. Threshold as percentage.
 
     """
+    section = 'io_wait_time'
+    if not limit:
+        limit = cfg.getfloat(section, 'limit')
+    log = logger.logging.getLogger('site_health.%s' % section)
+
     iowait = local("vmstat | grep -v [a-z] | awk '{print $16}'").rstrip()
     if (float(iowait) > float(limit)):
-        logger.warning('IO wait times are at %s percent which is above the ' \
-                       'threshold of %s percent.' % (str(iowait), str(limit)))
-        status = {'status': 'WARN'}
-    else:
-        logger.info('IO wait times are at %s percent which is below the ' \
+        log.warning('IO wait times are at %s percent which is above the ' \
                     'threshold of %s percent.' % (str(iowait), str(limit)))
-        status = {'status': 'OK'}
-    ygg.set_service('io_wait_time', status)
+    else:
+        log.info('IO wait times are at %s percent which is below the ' \
+                 'threshold of %s percent.' % (str(iowait), str(limit)))
 
-def check_mysql(slow_query_limit, memory_usage, innodb_memory_usage, threads):
+def check_mysql(slow_query_limit=None, memory_usage=None, innodb_memory_usage=None, threads=None):
     """ Check mysql status.
     sloq_query_limit: int. Threshold as percentage.
     memory_usage: int. Threshold as percentage.
@@ -90,13 +107,23 @@ def check_mysql(slow_query_limit, memory_usage, innodb_memory_usage, threads):
     thread: int. Threshold as percentage.
 
     """
+    section = 'mysql'
+    if not slow_query_limit:
+        slow_query_limit = cfg.getfloat(section, 'slow_query_limit')
+    if not memory_usage:
+        memory_usage = cfg.getfloat(section, 'memory_usage')
+    if not innodb_memory_usage:
+        innodb_memory_usage = cfg.getfloat(section, 'innodb_memory_usage')
+    if not threads:
+        threads = cfg.getfloat(section, 'threads')
+    log = logger.logging.getLogger('site_health.%s' % section)
+
     with settings(warn_only=True):
         messages = list()
         report = local('mysqlreport')
         if report.failed:
-            logger.warning('mysql server does not appear to be running: %s' % 
+            log.warning('mysql server does not appear to be running: %s' % 
                            report)
-            status = {'status': 'ERR'}
         else:
           for line in report.splitlines():
               #check for slow wait times:
@@ -153,102 +180,106 @@ def check_mysql(slow_query_limit, memory_usage, innodb_memory_usage, threads):
                  
           message = ' '.join(messages)
           if 'above' in message: 
-              logger.warning(message)
-              status = {'status': 'WARN'}
+              log.warning(message)
           else:
-              logger.info(message)
-              status = {'status': 'OK'}
-    ygg.set_service('mysql', status)
+              log.info(message)
 
-def check_ldap():
-    """ Check ldap status.
-
-    """
-    try:
-        local('ldapsearch -H ldap://auth.getpantheon.com -x -ZZ')
-    except:
-        logger.exception('Cannot connect to LDAP on localhost.')
-        status = {'status': 'ERR'}
-    else:
-        logger.info('ldap responded')
-        status = {'status': 'OK'}
-    ygg.set_service('ldap', status)
-
-def check_apache(url):
+def check_apache(url=None):
     """ Check apache status.
     url: str. Url to test
 
     """
-    _test_url('apache',url)
+    section = 'apache'
+    if not url:
+        url = cfg.get(section, 'url')
+    log = logger.logging.getLogger('site_health.%s' % section)
 
-def check_varnish(url):
+    code = _test_url(url)
+    if (code >=  400):
+        log.warning('%s returned an error code of %s.' % (section, code))
+    else:
+        log.info('%s returned a status code of %s.' % (section, code))
+
+def check_varnish(url=None):
     """ Check varnish status.
     url: str. Url to test
 
     """
-    _test_url('varnish',url)
+    section = 'varnish'
+    if not url:
+        url = cfg.get(section, 'url')
+    log = logger.logging.getLogger('site_health.%s' % section)
 
-def check_pound_via_apache(url):
+    code = _test_url(url)
+    if (code >=  400):
+        log.warning('%s returned an error code of %s.' % (section, code))
+    else:
+        log.info('%s returned a status code of %s.' % (section, code))
+
+def check_pound_via_apache(url=None):
     """ Check pound status.
     url: str. Url to test
 
     """
-    _test_url('pound',url)
+    section = 'pound'
+    if not url:
+        url = cfg.get(section, 'url')
+    log = logger.logging.getLogger('site_health.%s' % section)
 
-def check_pound_via_socket(port):
+    code = _test_url(url)
+    if (code >=  400):
+        log.warning('%s returned an error code of %s.' % (section, code))
+    else:
+        log.info('%s returned a status code of %s.' % (section, code))
+
+def check_pound_via_socket(port=None):
     """ Check pound status.
     port: str. Port to test
 
     """
+    section = 'pound'
+    if not port:
+        port = cfg.getint(section, 'port')
+    log = logger.logging.getLogger('site_health.%s' % section)
+
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         port = int(port)
         s.connect(('localhost', port))
         s.shutdown(2)
     except:
-        logger.exception('Cannot connect to Pound on %s at %s.' % 
-                         ('localhost', str(port)))
-        status = {'status': 'ERR'}
-        ygg.set_service('pound_socket', status)
+        log.exception('Cannot connect to Pound on %s at %s.' % 
+                      ('localhost', str(port)))
     else:
-        logger.info('pound responded')
-        status = {'status': 'OK'}
-        ygg.set_service('pound_socket', status)
+        log.info('pound responded')
 
-def check_memcached(port):
+def check_memcached(port=None):
     """ Check memcached status.
     port: str. Port to test
 
     """
+    section = 'memcached'
+    if not port:
+        port = cfg.getint(section, 'port')
+    log = logger.logging.getLogger('site_health.%s' % section)
+
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         port = int(port)
         s.connect(('localhost', port))
         s.shutdown(2)
     except:
-        logger.exception('Cannot connect to Memcached on %s %s.' % 
-                         ('localhost', str(port)))
-        status = {'status': 'ERR'}
-        ygg.set_service('memcached', status)
+        log.exception('Cannot connect to Memcached on %s %s.' % 
+                      ('localhost', str(port)))
     else:
-        logger.info('memcached responded')
-        status = {'status': 'OK'}
-        ygg.set_service('memcached', status)
+        log.info('memcached responded')
 
-def _test_url(service, url):
+def _test_url(url):
     """ Test url response code.
-    service: str. Name of service under test
     url: str. Url to test
 
     """
-    code = urllib.urlopen(url).code
-    if (code >=  400):
-        logger.warning('%s returned an error code of %s.' % (service, code))
-        status = {'status': 'ERR'}
-    else:
-        logger.info('%s returned a status code of %s.' % (service, code))
-        status = {'status': 'OK'}
-    ygg.set_service(service, status)
+    return urllib.urlopen(url).code
 
 # TODO: figure out what to search for from the following output
 #    print(connection.info())

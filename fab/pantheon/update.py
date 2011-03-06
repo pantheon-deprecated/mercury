@@ -115,15 +115,18 @@ class Updater(project.BuildTools):
         alias = '@%s_%s' % (self.project, self.project_env)
         with settings(warn_only=True):
             result = local('drush %s -by updb' % alias)
-        json_out = pantheon.parse_drush_output(result)
+        #TODO: Create a custom junit xml handler
+        # Parse backend output and convert to python dict
+        drush_out = pantheon.parse_drush_backend(result)
         msgs = '\n'.join(['[%s] %s' % (o['type'], o['message'])
-                        for o in json_out['log']])
+                        for o in drush_out['log']])
         if (result.failed):
             jenkinstools.junit_fail(msgs, 'UpdateDB')
             postback.build_warning("Warning: UpdateDB encountered an error.")
             print("\n=== UpdateDB Debug Output ===\n%s\n" % msgs)
         else:
             jenkinstools.junit_pass(msgs, 'UpdateDB')
+        pantheon.log_drush_backend(result)
 
     def permissions_update(self):
         self.setup_permissions('update', self.project_env)
