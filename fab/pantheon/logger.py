@@ -44,7 +44,7 @@ class ServiceHandler(logging.Handler):
         if status != saved_status:
             cfg.set(service, 'status', status)
             # Write our configuration to file if the status has changed
-            with open('/opt/pantheon/fab/monitoring.conf', 'wb') as cf:
+            with open('/etc/pantheon/monitoring.conf', 'wb') as cf:
                 cfg.write(cf)
             send = {"status": status,
                     "message": record.message,
