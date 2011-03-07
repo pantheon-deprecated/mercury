@@ -32,13 +32,48 @@ class PantheonBackup():
         self.name = name + '.tar.gz'
 
     def backup_files(self):
-        """Backup files for environments of a project.
+        """Backup all files for environments of a project.
 
         """
+        local('mkdir -p %s' % self.backup_dir)
         for env in self.environments:
             source = os.path.join(self.server.webroot, self.project, env)
-            local('mkdir -p %s' % self.backup_dir)
             local('rsync -avz %s %s' % (source, self.backup_dir))
+
+    def get_dev_code(self, user, host):
+        """USED FOR REMOTE DEV: Clone of dev git repo.
+
+        """
+        local('mkdir -p %s' % self.backup_dir)
+        source = os.path.join(self.server.webroot, self.project, 'dev')
+        destination = '%s_%s' % (self.project, 'dev')
+        with cd(self.backup_dir):
+            local('git clone %s -b %s %s' % (source,
+                                             self.project,
+                                             destination))
+            # Manually set the origin URL so remote pushes have a destination.
+            with cd(destination):
+                local("sed -i 's/^.*url =.*$/\\turl = " + \
+                "%s@%s.gotpantheon.com:\/var\/git\/projects\/%s/' .git/config"\
+                % (user, host, self.project))
+
+    def get_dev_files(self):
+        """USED FOR REMOTE DEV: dev site files.
+
+        """
+        local('mkdir -p %s' % self.backup_dir)
+        source = os.path.join(self.server.webroot, self.project,
+                                      'dev/sites/default/files')
+        local('rsync -avz %s %s' % (source, self.backup_dir))
+
+    def get_dev_data(self):
+        """USED FOR REMOTE DEV: dev site data.
+
+        """
+        env_save = self.environments
+        self.environments = ['dev']
+        backup_data(dest = 'dev_%s.sql' % self.project)
+        self.environments = env_save
 
     def backup_data(self, dest=None):
         """Backup databases for environments of a project.
