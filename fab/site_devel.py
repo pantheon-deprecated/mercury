@@ -4,19 +4,34 @@ import string
 from pantheon import backup
 from pantheon import ygg
 
-def create_dev_archive(name, project, user):
-    archive = backup.PantheonBackup(name, project)
+def create_dev_archive(archive_name, project, user):
+    archive = backup.PantheonBackup(archive_name, project)
 
     # Only create archive of development environment data.
-    archive.environments = ['dev']
-    archive.backup_files()
-    archive.backup_data(dest='dev_database.sql')
+    archive.get_dev_files()
+    archive.get_dev_data()
+    archive.get_dev_code(user, host)
 
     # Create a drushrc aliases file.
     destination = os.path.join(archive.backup_dir,'%s.aliases.drushrc.php' % project)
     create_remote_drushrc(project, user, destination)
 
     # Create the tarball and move to final location.
+    archive.finalize()
+
+def get_dev_files(archive_name, project):
+    archive = backup.PantheonBackup(archive_name, project)
+    archive.get_dev_files()
+    archive.finalize()
+
+def get_dev_data(archive_name, project):
+    archive = backup.PantheonBackup(archive_name, project)
+    archive.get_dev_data()
+    archive.finalize()
+
+def get_dev_code(archive_name, project, user, host):
+    archive = backup.PantheonBackup(archive_name, project)
+    archive.get_dev_code(user, host)
     archive.finalize()
 
 def create_remote_drushrc(project, user, destination):
