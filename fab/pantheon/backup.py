@@ -72,7 +72,7 @@ class PantheonBackup():
         """
         env_save = self.environments
         self.environments = ['dev']
-        backup_data(dest = 'dev_%s.sql' % self.project)
+        self.backup_data(dest = 'dev_%s.sql' % self.project)
         self.environments = env_save
 
     def backup_data(self, dest=None):
