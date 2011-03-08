@@ -44,6 +44,10 @@ def update_pantheon(first_boot=False):
     determine if it was successful.
 
     """
+
+    # Ensure the JDK is properly installed.
+    local('apt-get install -y default-jdk')
+
     try:
         try:
             # Put jenkins into quietDown mode so no more jobs are started.
