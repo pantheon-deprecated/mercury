@@ -12,7 +12,7 @@ from fabric.api import *
 log = logger.logging.getLogger('monitor')
 
 cfg = ConfigParser.ConfigParser()
-conf_file = '/etc/pantheon/monitoring.conf'
+conf_file = '/etc/pantheon/services.status'
 try:
     cfg.readfp(open(conf_file))
 except IOError:
