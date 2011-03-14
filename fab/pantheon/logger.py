@@ -13,17 +13,17 @@ class DrushHandler(logging.Handler):
     def emit(self, record):
         send = {"drush": {"type": record.type,
                           "log_message": record.msg,
-                          "drush_message": record.drush_message,
+                          "message": record.drush_message,
                           "memory": record.memory,
                           "timestamp": record.timestamp,
-                          "error": record.error},
-                "source": 'drush',
-                "command": record.command}
+                          "error": record.error,
+                          "command": record.command},
+                "source": 'drush'}
         ygg.send_event(record.name, send, ['source-drush', 'inbox', 'all'])
 
 class ServiceHandler(logging.Handler):
     def emit(self, record):
-        conf_file = '/etc/pantheon/monitoring.conf'
+        conf_file = '/etc/pantheon/services.status'
         try:
             cfg = ConfigParser.ConfigParser()
             cfg.readfp(open(conf_file))
@@ -45,7 +45,7 @@ class ServiceHandler(logging.Handler):
         if status != saved_status:
             cfg.set(service, 'status', status)
             # Write our configuration to file if the status has changed
-            with open('/etc/pantheon/monitoring.conf', 'wb') as cf:
+            with open(conf_file, 'wb') as cf:
                 cfg.write(cf)
             send = {"status": status,
                     "message": record.msg,
