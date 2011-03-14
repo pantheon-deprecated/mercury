@@ -4,6 +4,8 @@ import logging.config
 import ygg
 import ConfigParser
 
+from pantheon import jenkinstools
+
 class NullHandler(logging.Handler):
     def emit(self, record):
         pass
@@ -11,7 +13,7 @@ class NullHandler(logging.Handler):
 class DrushHandler(logging.Handler):
     def emit(self, record):
         send = {"drush": {"type": record.type,
-                          "log_message": record.message,
+                          "log_message": record.msg,
                           "drush_message": record.drush_message,
                           "memory": record.memory,
                           "timestamp": record.timestamp,
@@ -47,7 +49,7 @@ class ServiceHandler(logging.Handler):
             with open('/etc/pantheon/monitoring.conf', 'wb') as cf:
                 cfg.write(cf)
             send = {"status": status,
-                    "message": record.message,
+                    "message": record.msg,
                     "type" : record.levelname}
             # Set service status in ygg 
             ygg.set_service(service, send)
@@ -55,7 +57,7 @@ class ServiceHandler(logging.Handler):
 class EventHandler(logging.Handler):
     def emit(self, record):
         source = record.name.split('.')[0]
-        send = {source: {"message": record.message,
+        send = {source: {"message": record.msg,
                          "type" : record.levelname,
                          "created": record.created,
                          "asctime": record.asctime},
@@ -73,11 +75,11 @@ class JunitHandler(logging.Handler):
             tc=None
 
         if record.levelname in ['ERROR', 'CRITICAL']:
-            jenkinstools.junit_error(record.message, ts, tc)
+            jenkinstools.junit_error(record.msg, ts, tc)
         if record.levelname in ['WARNING']:
-            jenkinstools.junit_fail(record.message, ts, tc)
+            jenkinstools.junit_fail(record.msg, ts, tc)
         if record.levelname in ['INFO']:
-            jenkinstools.junit_pass(record.message, ts, tc)
+            jenkinstools.junit_pass(record.msg, ts, tc)
 
 # register our custom handlers so they can be used by the config file
 logging.handlers.DrushHandler = DrushHandler
