@@ -65,6 +65,20 @@ class EventHandler(logging.Handler):
             labels = list(set(labels).union(set(record.labels)))
         ygg.send_event(record.name, send, labels)
 
+class JunitHandler(logging.Handler):
+    def emit(self, record):
+        ts = record.name.split('.')[0].capitalize()
+        tc = record.name.split('.')[-1].capitalize()
+        if ts == tc:
+            tc=None
+
+        if record.levelname in ['ERROR', 'CRITICAL']:
+            jenkinstools.junit_error(record.message, ts, tc)
+        if record.levelname in ['WARNING']:
+            jenkinstools.junit_fail(record.message, ts, tc)
+        if record.levelname in ['INFO']:
+            jenkinstools.junit_pass(record.message, ts, tc)
+
 # register our custom handlers so they can be used by the config file
 logging.handlers.DrushHandler = DrushHandler
 logging.handlers.ServiceHandler = ServiceHandler

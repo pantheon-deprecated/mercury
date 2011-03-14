@@ -22,7 +22,11 @@ def main():
     usage = "usage: %prog [options]"
     parser = OptionParser(usage=usage, description="Update pantheon code and server configurations.")
     parser.add_option('-p', '--postback', dest="postback", action="store_true", default=False, help='Postback to atlas.')
+    parser.add_option('-d', '--debug', dest="debug", action="store_true", default=False, help='Include debug output.')
     (options, args) = parser.parse_args()
+
+    if options.debug:
+        log.setLevel(10)
 
     update_pantheon(options.postback)
 
@@ -40,11 +44,11 @@ def update_pantheon(postback=True):
 
     """
     log = logger.logging.getLogger('update.pantheon')
-
-    # Ensure the JDK is properly installed.
-    local('apt-get install -y default-jdk')
+    log.info('Pantheon update started.')
 
     try:
+        # Ensure the JDK is properly installed.
+        local('apt-get install -y default-jdk')
         try:
             log.debug('Putting jenkins into quietDown mode.')
             pantheon.jenkins_quiet()
@@ -109,9 +113,9 @@ def update_pantheon(postback=True):
             else:
                 log.error("ABORTING: Jenkins hasn't responded after 5 minutes.")
                 raise Exception("ABORTING: Jenkins not responding.")
-            log.info('Update completed successfully.')
+            log.info('Pantheon update completed successfully.')
     except:
-        log.exception('Update encountered unrecoverable errors.')
+        log.exception('Pantheon update encountered unrecoverable errors.')
         raise
 
 def update_site_core(project='pantheon', keep=None):

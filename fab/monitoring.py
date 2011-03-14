@@ -9,11 +9,11 @@ from pantheon import logger
 from fabric.api import *
 
 # Get our own logger
-log = logger.logging.getLogger('site_health')
+log = logger.logging.getLogger('monitor')
 
+cfg = ConfigParser.ConfigParser()
 conf_file = '/etc/pantheon/monitoring.conf'
 try:
-    cfg = ConfigParser.ConfigParser()
     cfg.readfp(open(conf_file))
 except IOError:
     log.exception('There was an error while loading the configuration file.')
@@ -29,7 +29,7 @@ def check_load_average(limit=None):
     section = 'load_average'
     if not limit:
         limit = cfg.getfloat(section, 'limit')
-    log = logger.logging.getLogger('site_health.%s' % section)
+    log = logger.logging.getLogger('monitor.%s' % section)
 
     loads = os.getloadavg()
     if (float(loads[0]) > float(limit)):
@@ -50,7 +50,7 @@ def check_disk_space(path=None, limit=None):
         limit = cfg.getfloat(section, 'limit')
     if not path:
         path = cfg.get(section, 'path')
-    log = logger.logging.getLogger('site_health.%s' % section)
+    log = logger.logging.getLogger('monitor.%s' % section)
 
     s = os.statvfs(path)
     usage = (s.f_blocks - s.f_bavail)/float(s.f_blocks) * 100
@@ -69,7 +69,7 @@ def check_swap_usage(limit=None):
     section = 'swap_usage'
     if not limit:
         limit = cfg.getfloat(section, 'limit')
-    log = logger.logging.getLogger('site_health.%s' % section)
+    log = logger.logging.getLogger('monitor.%s' % section)
 
     swap_total = local("free | grep -i swap | awk '{print $2}'")
     swap_used = local("free | grep -i swap | awk '{print $3}'")
@@ -89,7 +89,7 @@ def check_io_wait_time(limit=None):
     section = 'io_wait_time'
     if not limit:
         limit = cfg.getfloat(section, 'limit')
-    log = logger.logging.getLogger('site_health.%s' % section)
+    log = logger.logging.getLogger('monitor.%s' % section)
 
     iowait = local("vmstat | grep -v [a-z] | awk '{print $16}'").rstrip()
     if (float(iowait) > float(limit)):
@@ -116,7 +116,7 @@ def check_mysql(slow_query_limit=None, memory_usage=None, innodb_memory_usage=No
         innodb_memory_usage = cfg.getfloat(section, 'innodb_memory_usage')
     if not threads:
         threads = cfg.getfloat(section, 'threads')
-    log = logger.logging.getLogger('site_health.%s' % section)
+    log = logger.logging.getLogger('monitor.%s' % section)
 
     with settings(warn_only=True):
         messages = list()
@@ -192,7 +192,7 @@ def check_apache(url=None):
     section = 'apache'
     if not url:
         url = cfg.get(section, 'url')
-    log = logger.logging.getLogger('site_health.%s' % section)
+    log = logger.logging.getLogger('monitor.%s' % section)
 
     code = _test_url(url)
     if (code >=  400):
@@ -208,7 +208,7 @@ def check_varnish(url=None):
     section = 'varnish'
     if not url:
         url = cfg.get(section, 'url')
-    log = logger.logging.getLogger('site_health.%s' % section)
+    log = logger.logging.getLogger('monitor.%s' % section)
 
     code = _test_url(url)
     if (code >=  400):
@@ -224,7 +224,7 @@ def check_pound_via_apache(url=None):
     section = 'pound'
     if not url:
         url = cfg.get(section, 'url')
-    log = logger.logging.getLogger('site_health.%s' % section)
+    log = logger.logging.getLogger('monitor.%s' % section)
 
     code = _test_url(url)
     if (code >=  400):
@@ -240,7 +240,7 @@ def check_pound_via_socket(port=None):
     section = 'pound'
     if not port:
         port = cfg.getint(section, 'port')
-    log = logger.logging.getLogger('site_health.%s' % section)
+    log = logger.logging.getLogger('monitor.%s' % section)
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
@@ -261,7 +261,7 @@ def check_memcached(port=None):
     section = 'memcached'
     if not port:
         port = cfg.getint(section, 'port')
-    log = logger.logging.getLogger('site_health.%s' % section)
+    log = logger.logging.getLogger('monitor.%s' % section)
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
