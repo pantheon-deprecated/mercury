@@ -3,8 +3,7 @@ import logging.handlers
 import logging.config
 import ygg
 import ConfigParser
-
-from pantheon import jenkinstools
+import jenkinstools
 
 class NullHandler(logging.Handler):
     def emit(self, record):
@@ -59,8 +58,7 @@ class EventHandler(logging.Handler):
         source = record.name.split('.')[0]
         send = {source: {"message": record.msg,
                          "type" : record.levelname,
-                         "created": record.created,
-                         "asctime": record.asctime},
+                         "created": record.created},
                 "source": source}
         labels = ['source-%s' % source, 'inbox', 'all']
         if hasattr(record, 'labels'):
