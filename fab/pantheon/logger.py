@@ -5,6 +5,8 @@ import ygg
 import ConfigParser
 import jenkinstools
 
+log = logging.getLogger("logger")
+
 class NullHandler(logging.Handler):
     def emit(self, record):
         pass
@@ -23,17 +25,9 @@ class DrushHandler(logging.Handler):
 
 class ServiceHandler(logging.Handler):
     def emit(self, record):
-        conf_file = '/etc/pantheon/services.status'
-        try:
-            cfg = ConfigParser.ConfigParser()
-            cfg.readfp(open(conf_file))
-        except IOError:
-            log.exception('Configuration file could not be loaded.')
-        except:
-            log.exception('FATAL: Uncaught exception in logging handler')
-
         service = record.name.split('.')[-1]
-        status = saved_status = cfg.get(service, 'status')
+        status_file = '/etc/pantheon/services.status'
+        status = None
 
         if record.levelname in ['ERROR']:
             status = 'ERR'
@@ -42,16 +36,37 @@ class ServiceHandler(logging.Handler):
         if record.levelname in ['INFO']:
             status = 'OK'
 
-        if status != saved_status:
-            cfg.set(service, 'status', status)
-            # Write our configuration to file if the status has changed
-            with open(conf_file, 'wb') as cf:
+        cfg = ConfigParser.ConfigParser()
+        try:
+            cfg.readfp(open(status_file))
+        except IOError as (errno, strerror):
+            if errno == 2:
+                log.debug('Status file not found. Writing to new file.')
+            else:
+                log.exception('FATAL: Uncaught exception in logging handler')
+        except:
+            log.exception('FATAL: Uncaught exception in logging handler')
+
+        if not cfg.has_section(service):
+            cfg.add_section(service)
+        if not cfg.has_option(service, 'status'):
+            if status:
+                cfg.set(service, 'status', status)
+            with open(status_file, 'wb') as cf:
                 cfg.write(cf)
-            send = {"status": status,
-                    "message": record.msg,
-                    "type" : record.levelname}
-            # Set service status in ygg 
-            ygg.set_service(service, send)
+        else:
+            saved_status = cfg.get(service, 'status')
+
+            if status not in [None, saved_status]:
+                cfg.set(service, 'status', status)
+                # Write configuration to file
+                with open(status_file, 'wb') as cf:
+                    cfg.write(cf)
+                send = {"status": status,
+                        "message": record.msg,
+                        "type" : record.levelname}
+                # Set service status in ygg 
+                ygg.set_service(service, send)
 
 class EventHandler(logging.Handler):
     def emit(self, record):
