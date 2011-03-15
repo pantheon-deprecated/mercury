@@ -5,6 +5,8 @@ import ygg
 import ConfigParser
 import jenkinstools
 
+log = logging.getLogger("logger")
+
 class NullHandler(logging.Handler):
     def emit(self, record):
         pass
