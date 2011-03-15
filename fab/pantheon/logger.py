@@ -27,7 +27,7 @@ class ServiceHandler(logging.Handler):
     def emit(self, record):
         service = record.name.split('.')[-1]
         status_file = '/etc/pantheon/services.status'
-        status = None
+        status = ''
 
         if record.levelname in ['ERROR']:
             status = 'ERR'
@@ -50,23 +50,20 @@ class ServiceHandler(logging.Handler):
         if not cfg.has_section(service):
             cfg.add_section(service)
         if not cfg.has_option(service, 'status'):
-            if status:
-                cfg.set(service, 'status', status)
-            with open(status_file, 'wb') as cf:
-                cfg.write(cf)
+            saved_status = None
         else:
             saved_status = cfg.get(service, 'status')
 
-            if status not in [None, saved_status]:
-                cfg.set(service, 'status', status)
-                # Write configuration to file
-                with open(status_file, 'wb') as cf:
-                    cfg.write(cf)
-                send = {"status": status,
-                        "message": record.msg,
-                        "type" : record.levelname}
-                # Set service status in ygg 
-                ygg.set_service(service, send)
+        if status is not saved_status:
+            cfg.set(service, 'status', status)
+            # Write configuration to file
+            with open(status_file, 'wb') as cf:
+                cfg.write(cf)
+            send = {"status": status,
+                    "message": record.msg,
+                    "type" : record.levelname}
+            # Set service status in ygg 
+            ygg.set_service(service, send)
 
 class EventHandler(logging.Handler):
     def emit(self, record):
