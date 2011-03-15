@@ -37,17 +37,27 @@ class ServiceHandler(logging.Handler):
         cfg = ConfigParser.ConfigParser()
         try:
             cfg.readfp(open(status_file))
-            if not cfg.has_section(service):
-                cfg.add_section(service)
-            if not cfg.has_option(service, 'status'):
-                cfg.set(service, 'status', status)
-                saved_status = status
+        except IOError as (errno, strerror):
+            if errno == 2:
+                log.debug('Status file not found. Writing to new file.')
             else:
-                saved_status = cfg.get(service, 'status')
+                log.exception('FATAL: Uncaught exception in logging handler')
+        except:
+            log.exception('FATAL: Uncaught exception in logging handler')
+
+        if not cfg.has_section(service):
+            cfg.add_section(service)
+        if not cfg.has_option(service, 'status'):
+            if status:
+                cfg.set(service, 'status', status)
+            with open(status_file, 'wb') as cf:
+                cfg.write(cf)
+        else:
+            saved_status = cfg.get(service, 'status')
 
             if status not in [None, saved_status]:
                 cfg.set(service, 'status', status)
-                # Write our configuration to file if the status has changed
+                # Write configuration to file
                 with open(status_file, 'wb') as cf:
                     cfg.write(cf)
                 send = {"status": status,
@@ -55,20 +65,6 @@ class ServiceHandler(logging.Handler):
                         "type" : record.levelname}
                 # Set service status in ygg 
                 ygg.set_service(service, send)
-
-        except IOError as (errno, strerror):
-            # If file doesn't exist create it
-            if errno == 2:
-                if not cfg.has_section(service):
-                    cfg.add_section(service)
-                cfg.set(service, 'status', status)
-                with open(status_file, 'wb') as cf:
-                    cfg.write(cf)
-            else:
-                log.exception('FATAL: Uncaught exception in logging handler')
-        except:
-            log.exception('FATAL: Uncaught exception in logging handler')
-
 
 class EventHandler(logging.Handler):
     def emit(self, record):
