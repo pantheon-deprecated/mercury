@@ -66,11 +66,11 @@ class PantheonBackup():
         """USED FOR REMOTE DEV: dev site data.
 
         """
-        local('mkdir -p %s' % os.path.join(self.backup_dir, 'dev_data'))
+        local('mkdir -p %s' % self.backup_dir)
         drupal_vars = pantheon.parse_vhost(self.server.get_vhost_file(
                                                  self.project, 'dev'))
-        destination = os.path.join(self.backup_dir, )
-        self._dump_data(dest, drupal_vars)
+        destination = os.path.join(self.backup_dir, 'dev_database.sql')
+        self._dump_data(destination, drupal_vars)
 
     def backup_files(self):
         """Backup all files for environments of a project.
