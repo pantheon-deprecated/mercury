@@ -14,7 +14,7 @@ def create_dev_archive(archive_name, project, user):
 
     # Create a drushrc aliases file.
     destination = os.path.join(archive.backup_dir,'%s.aliases.drushrc.php' % project)
-    create_remote_drushrc(project, user, destination)
+    get_remote_drushrc(project, user, destination)
 
     # Create the tarball and move to final location.
     archive.finalize()
@@ -29,12 +29,14 @@ def get_dev_data(archive_name, project):
     archive.get_dev_data()
     archive.finalize()
 
-def get_dev_code(archive_name, project, user, host):
+def get_dev_code(archive_name, project, user):
+    #TODO: For now host == project. This may change.
+    host = project
     archive = backup.PantheonBackup(archive_name, project)
     archive.get_dev_code(user, host)
     archive.finalize()
 
-def create_remote_drushrc(project, user, destination):
+def get_remote_drushrc(project, user, destination):
     config = ygg.get_config()[project]
     host = '%s.gotpantheon.com' % project
     environments = set(config['environments'].keys())

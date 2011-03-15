@@ -31,22 +31,13 @@ class PantheonBackup():
         self.backup_dir = os.path.join(self.working_dir, self.project)
         self.name = name + '.tar.gz'
 
-    def backup_files(self):
-        """Backup all files for environments of a project.
-
-        """
-        local('mkdir -p %s' % self.backup_dir)
-        for env in self.environments:
-            source = os.path.join(self.server.webroot, self.project, env)
-            local('rsync -avz %s %s' % (source, self.backup_dir))
-
     def get_dev_code(self, user, host):
         """USED FOR REMOTE DEV: Clone of dev git repo.
 
         """
         local('mkdir -p %s' % self.backup_dir)
         source = os.path.join(self.server.webroot, self.project, 'dev')
-        destination = '%s_%s' % (self.project, 'dev')
+        destination = 'dev_code'
         with cd(self.backup_dir):
             local('git clone %s -b %s %s' % (source,
                                              self.project,
@@ -64,29 +55,40 @@ class PantheonBackup():
         local('mkdir -p %s' % self.backup_dir)
         source = os.path.join(self.server.webroot, self.project,
                                       'dev/sites/default/files')
-        local('rsync -avz %s %s' % (source, self.backup_dir))
+        destination = self.backup_dir
+        # If 'dev_code' exists in backup_dir, this is a full dev-archive dump.
+        # Place the files within the drupal site tree.
+        if os.path.exists(os.path.join(self.backup_dir, 'dev_code/sites/default')):
+            destination = os.path.join(self.backup_dir, 'dev_code/sites/default')
+        local('rsync -avz %s %s' % (source, destination))
 
     def get_dev_data(self):
         """USED FOR REMOTE DEV: dev site data.
 
         """
-        env_save = self.environments
-        self.environments = ['dev']
-        self.backup_data(dest = 'dev_%s.sql' % self.project)
-        self.environments = env_save
+        local('mkdir -p %s' % os.path.join(self.backup_dir, 'dev_data'))
+        drupal_vars = pantheon.parse_vhost(self.server.get_vhost_file(
+                                                 self.project, 'dev'))
+        destination = os.path.join(self.backup_dir, )
+        self._dump_data(dest, drupal_vars)
 
-    def backup_data(self, dest=None):
+    def backup_files(self):
+        """Backup all files for environments of a project.
+
+        """
+        local('mkdir -p %s' % self.backup_dir)
+        for env in self.environments:
+            source = os.path.join(self.server.webroot, self.project, env)
+            local('rsync -avz %s %s' % (source, self.backup_dir))
+
+    def backup_data(self):
         """Backup databases for environments of a project.
 
         """
         for env in self.environments:
             drupal_vars = pantheon.parse_vhost(self.server.get_vhost_file(
                                                self.project, env))
-            # Allow the destination to be manually set inside backup_dir.
-            if not dest:
-                dest = os.path.join(self.backup_dir, env, 'database.sql')
-            else:
-                dest = os.path.join(self.backup_dir, dest)
+            dest = os.path.join(self.backup_dir, env, 'database.sql')
             self._dump_data(dest, drupal_vars)
 
     def backup_repo(self):
