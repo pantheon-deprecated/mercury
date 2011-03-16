@@ -37,7 +37,7 @@ class PantheonBackup():
         """
         local('mkdir -p %s' % self.backup_dir)
         source = os.path.join(self.server.webroot, self.project, 'dev')
-        destination = 'dev_code'
+        destination = 'code'
         with cd(self.backup_dir):
             local('git clone %s -b %s %s' % (source,
                                              self.project,
