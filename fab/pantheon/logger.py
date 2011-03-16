@@ -14,14 +14,16 @@ class NullHandler(logging.Handler):
 class DrushHandler(logging.Handler):
     def emit(self, record):
         send = {"drush": {"type": record.type,
-                          "log_message": record.msg,
-                          "message": record.drush_message,
+                          "message": record.msg,
                           "memory": record.memory,
                           "timestamp": record.timestamp,
                           "error": record.error,
+                          "project": record.project,
+                          "environment": record.environment,
                           "command": record.command},
                 "source": 'drush'}
-        ygg.send_event(record.name, send, ['source-drush', 'inbox', 'all'])
+        print(send)
+        #ygg.send_event(record.name, send, ['source-drush', 'inbox', 'all'])
 
 class ServiceHandler(logging.Handler):
     def emit(self, record):

@@ -182,33 +182,41 @@ def parse_drush_backend(drush_backend):
 
     return None
 
-def log_drush_backend(data):
+def log_drush_backend(data, context={}):
     """ Iterate through the log messages and handle them appropriately
     data: drush backend json output.
+    context: a dict containing the project and environment
     """
     data = parse_drush_backend(data)
-    pattern = re.compile('Found command: %s \(commandfile' % '(.*)')
-    cmd = [pattern.match(entry['message']).group(1) for entry in data['log'] 
-           if pattern.match(entry['message'])]
-    log = logger.logging.getLogger('drush.%s' % cmd[0])
-
+    # Drush outputs the drupal root and the command being run in its logs
+    # unforunately they are buried in log messages.
+    p1 = re.compile('Found command: %s \(commandfile' % '(.*)')
+    if not context:
+        p2 = re.compile('root directory at \/var\/www\/%s' % '(.*)')
     for entry in data['log']:
-        msg = entry['message']
-        lvl = entry['type']
-        entry['command'] = cmd[0]
-
+        if not context:
+            s = p2.search(entry['message']) 
+            if s:
+                context['project'], context['environment'] = re.split('/', s.group(1))
+        m = p1.match(entry['message']) 
+        if m:
+            context['command'] = m.group(1)
+            break
+    log = logger.logging.getLogger('drush.%s' % context['command'])
+    for entry in data['log']:
         # message is already used by a records namespace
-        entry['drush_message'] = msg
+        context['drush_message'] = entry['message']
         del entry['message']
+        context = dict(context, **entry)
 
-        if lvl in ('error', 'critical', 'failure', 'fatal'):
-            log.error('[%s] %s' % (lvl, msg), extra=entry)
-        elif lvl in ('warning'):
-            log.warning('[%s] %s' % (lvl, msg), extra=entry)
-        elif lvl in ('ok', 'success'):
-            log.info('[%s] %s' % (lvl, msg), extra=entry)
+        if context['type'] in ('error', 'critical', 'failure', 'fatal'):
+            log.error(context['drush_message'], extra=context)
+        elif context['type'] in ('warning'):
+            log.warning(context['drush_message'], extra=context)
+        elif context['type'] in ('ok', 'success'):
+            log.info(context['drush_message'], extra=context)
         else:
-            log.debug('[%s] %s' % (lvl, msg), extra=entry)
+            log.debug(context['drush_message'], extra=context)
 
 class PantheonServer:
 
