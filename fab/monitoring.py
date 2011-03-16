@@ -8,24 +8,27 @@ from pantheon import logger
 
 from fabric.api import *
 
-# Get our own logger
-log = logger.logging.getLogger('monitor')
+def _init_cfg():
+    # Get our own logger
+    log = logger.logging.getLogger('monitor')
 
-cfg = ConfigParser.ConfigParser()
-conf_file = '/etc/pantheon/services.conf'
-try:
-    cfg.readfp(open(conf_file))
-except IOError:
-    log.exception('There was an error while loading the configuration file.')
-except:
-    log.exception('FATAL: Unhandled exception')
-    raise
+    cfg = ConfigParser.ConfigParser()
+    conf_file = '/etc/pantheon/services.conf'
+    try:
+        cfg.readfp(open(conf_file))
+    except IOError:
+        log.exception('There was an error while loading the configuration file.')
+    except:
+        log.exception('FATAL: Unhandled exception')
+        raise
+    return cfg
 
 def check_load_average(limit=None):
     """ Check system load average.
     limit: int. Threshold
 
     """
+    cfg = _init_cfg()
     section = 'load_average'
     if not limit:
         limit = cfg.getfloat(section, 'limit')
@@ -45,6 +48,7 @@ def check_disk_space(path=None, limit=None):
     limit: int. Threshold as percentage.
 
     """
+    cfg = _init_cfg()
     section = 'disk_space'
     if not limit:
         limit = cfg.getfloat(section, 'limit')
@@ -66,6 +70,7 @@ def check_swap_usage(limit=None):
     limit: int. Threshold as percentage.
 
     """
+    cfg = _init_cfg()
     section = 'swap_usage'
     if not limit:
         limit = cfg.getfloat(section, 'limit')
@@ -86,6 +91,7 @@ def check_io_wait_time(limit=None):
     limit: int. Threshold as percentage.
 
     """
+    cfg = _init_cfg()
     section = 'io_wait_time'
     if not limit:
         limit = cfg.getfloat(section, 'limit')
@@ -107,6 +113,7 @@ def check_mysql(slow_query_limit=None, memory_usage=None, innodb_memory_usage=No
     thread: int. Threshold as percentage.
 
     """
+    cfg = _init_cfg()
     section = 'mysql'
     if not slow_query_limit:
         slow_query_limit = cfg.getfloat(section, 'slow_query_limit')
@@ -189,6 +196,7 @@ def check_apache(url=None):
     url: str. Url to test
 
     """
+    cfg = _init_cfg()
     section = 'apache'
     if not url:
         url = cfg.get(section, 'url')
@@ -205,6 +213,7 @@ def check_varnish(url=None):
     url: str. Url to test
 
     """
+    cfg = _init_cfg()
     section = 'varnish'
     if not url:
         url = cfg.get(section, 'url')
@@ -221,6 +230,7 @@ def check_pound_via_apache(url=None):
     url: str. Url to test
 
     """
+    cfg = _init_cfg()
     section = 'pound'
     if not url:
         url = cfg.get(section, 'url')
@@ -237,6 +247,7 @@ def check_pound_via_socket(port=None):
     port: str. Port to test
 
     """
+    cfg = _init_cfg()
     section = 'pound'
     if not port:
         port = cfg.getint(section, 'port')
@@ -258,6 +269,7 @@ def check_memcached(port=None):
     port: str. Port to test
 
     """
+    cfg = _init_cfg()
     section = 'memcached'
     if not port:
         port = cfg.getint(section, 'port')
