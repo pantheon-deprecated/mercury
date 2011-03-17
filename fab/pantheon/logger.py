@@ -56,7 +56,7 @@ class ServiceHandler(logging.Handler):
         else:
             saved_status = cfg.get(service, 'status')
 
-        if status is not saved_status:
+        if status != saved_status:
             cfg.set(service, 'status', status)
             # Write configuration to file
             with open(status_file, 'wb') as cf:
