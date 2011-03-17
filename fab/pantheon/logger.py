@@ -13,17 +13,17 @@ class NullHandler(logging.Handler):
 
 class DrushHandler(logging.Handler):
     def emit(self, record):
-        send = {"drush": {"type": record.type,
-                          "message": record.msg,
-                          "memory": record.memory,
-                          "timestamp": record.timestamp,
-                          "error": record.error,
-                          "project": record.project,
-                          "environment": record.environment,
-                          "command": record.command},
-                "source": 'drush'}
-        print(send)
-        #ygg.send_event(record.name, send, ['source-drush', 'inbox', 'all'])
+        source = record.name.split('.')[0]
+        details = {"message": record.msg,
+                   "type": record.type,
+                   "timestamp": record.timestamp,
+                   "memory": record.memory,
+                   "error": record.error,
+                   "project": record.project,
+                   "environment": record.environment,
+                   "command": record.command}
+        labels = ['source-%s' % source, 'inbox', 'all']
+        ygg.send_event(record.name, details, labels, source=source)
 
 class ServiceHandler(logging.Handler):
     def emit(self, record):
@@ -63,21 +63,21 @@ class ServiceHandler(logging.Handler):
                 cfg.write(cf)
             send = {"status": status,
                     "message": record.msg,
-                    "type" : record.levelname}
+                    "type" : record.levelname,
+                    "timestamp": record.created}
             # Set service status in ygg 
             ygg.set_service(service, send)
 
 class EventHandler(logging.Handler):
     def emit(self, record):
         source = record.name.split('.')[0]
-        send = {source: {"message": record.msg,
-                         "type" : record.levelname,
-                         "created": record.created},
-                "source": source}
+        details = {"message": record.msg,
+                   "type" : record.levelname,
+                   "timestamp": record.created}
         labels = ['source-%s' % source, 'inbox', 'all']
         if hasattr(record, 'labels'):
             labels = list(set(labels).union(set(record.labels)))
-        ygg.send_event(record.name, send, labels)
+        ygg.send_event(record.name, details, labels, source=source)
 
 class JunitHandler(logging.Handler):
     def emit(self, record):

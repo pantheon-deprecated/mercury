@@ -16,7 +16,7 @@ from optparse import OptionParser
 
 from fabric.api import *
 
-log = logger.logging.getLogger('update')
+log = logger.logging.getLogger('pantheon')
 
 def main():
     usage = "usage: %prog [options]"
@@ -43,8 +43,8 @@ def update_pantheon(postback=True):
     therefor cannot be run inside jenkins.)
 
     """
-    log = logger.logging.getLogger('update.pantheon')
-    log.info('Pantheon update started.')
+    log = logger.logging.getLogger('pantheon.update')
+    log.info('Nightly update started.')
 
     try:
         # Ensure the JDK is properly installed.
@@ -113,9 +113,9 @@ def update_pantheon(postback=True):
             else:
                 log.error("ABORTING: Jenkins hasn't responded after 5 minutes.")
                 raise Exception("ABORTING: Jenkins not responding.")
-            log.info('Pantheon update completed successfully.')
+            log.info('Nightly update completed successfully.')
     except:
-        log.exception('Pantheon update encountered unrecoverable errors.')
+        log.exception('Nightly update encountered unrecoverable errors.')
         raise
 
 def update_site_core(project='pantheon', keep=None):
@@ -126,6 +126,8 @@ def update_site_core(project='pantheon', keep=None):
              'force': Leave failed merge in working-tree (manual resolve).
              None: Reset to ORIG_HEAD if merge fails.
     """
+    log = logger.logging.getLogger('pantheon.update.core')
+    log.info('Update to core initiated.')
     updater = update.Updater(project, 'dev')
     try:
         result = updater.core_update(keep)
@@ -133,9 +135,11 @@ def update_site_core(project='pantheon', keep=None):
         updater.permissions_update()
     except:
         jenkinstools.junit_error(traceback.format_exc(), 'UpdateCore')
+        log.exception('Update to core encountered an error.')
         raise
     else:
         jenkinstools.junit_pass('Update successful.', 'UpdateCore')
+        log.info('Update to core successful.')
 
     postback.write_build_data('update_site_core', result)
 
@@ -148,6 +152,8 @@ def update_code(project, environment, tag=None, message=None):
     """ Update the working-tree for project/environment.
 
     """
+    log = logger.logging.getLogger('pantheon.update.code')
+    log.info('Updating code.')
     if not tag:
         tag = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
     if not message:
@@ -161,9 +167,11 @@ def update_code(project, environment, tag=None, message=None):
         updater.permissions_update()
     except:
         jenkinstools.junit_error(traceback.format_exc(), 'UpdateCode')
+        log.exception('Updating code encountered an error.')
         raise
     else:
         jenkinstools.junit_pass('Update successful.', 'UpdateCode')
+        log.info('Updating code successful.')
 
     # Send back repo status and drupal update status
     status.git_repo_status(project)
@@ -173,20 +181,26 @@ def rebuild_environment(project, environment):
     """Rebuild the project/environment with files and data from 'live'.
 
     """
+    log = logger.logging.getLogger('pantheon.update.rebuild')
+    log.info('Rebuilding %s to match live.' % environment)
     updater = update.Updater(project, environment)
     try:
         updater.files_update('live')
         updater.data_update('live')
     except:
         jenkinstools.junit_error(traceback.format_exc(), 'RebuildEnv')
+        log.exception('Rebuild encountered an error.')
         raise
     else:
         jenkinstools.junit_pass('Rebuild successful.', 'RebuildEnv')
+        log.info('Rebuild successful %s matches live.' % environment)
 
 def update_data(project, environment, source_env, updatedb='True'):
     """Update the data in project/environment using data from source_env.
 
     """
+    log = logger.logging.getLogger('pantheon.update.data')
+    log.info('Queuing data sync from %s to %s.' % (environment, source_env))
     updater = update.Updater(project, environment)
     try:
         updater.data_update(source_env)
@@ -195,9 +209,11 @@ def update_data(project, environment, source_env, updatedb='True'):
             updater.drupal_updatedb()
     except:
         jenkinstools.junit_error(traceback.format_exc(), 'UpdateData')
+        log.exception('Syncronization encountered an error.')
         raise
     else:
         jenkinstools.junit_pass('Update successful.', 'UpdateData')
+        log.info('Sync complete. %s matches %s.' % (environment, source_env))
 
     # The server has a 2min delay before updates to the index are processed
     with settings(warn_only=True):
@@ -211,14 +227,18 @@ def update_files(project, environment, source_env):
     """Update the files in project/environment using files from source_env.
 
     """
+    log = logger.logging.getLogger('pantheon.update.files')
+    log.info('Queuing data sync from %s to %s.' % (environment, source_env))
     updater = update.Updater(project, environment)
     try:
         updater.files_update(source_env)
     except:
         jenkinstools.junit_error(traceback.format_exc(), 'UpdateFiles')
+        log.exception('Syncronization encountered an error.')
         raise
     else:
         jenkinstools.junit_pass('Update successful.', 'UpdateFiles')
+        log.info('Sync complete. %s matches %s.' % (environment, source_env))
 
 def git_diff(project, environment, revision_1, revision_2=None):
     """Return git diff
