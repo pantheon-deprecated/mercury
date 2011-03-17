@@ -110,12 +110,12 @@ class PantheonBackup():
         config['project'] = self.project
         config.write()
 
-    def finalize(self):
+    def finalize(self, destination=None):
         """ Create archive, move to destination, remove working dir.
 
         """
         self.make_archive()
-        self.move_archive()
+        self.move_archive(destination)
         self.cleanup()
 
     def make_archive(self):
@@ -125,12 +125,14 @@ class PantheonBackup():
         with cd(self.working_dir):
             local('tar czf %s %s' % (self.name, self.project))
 
-    def move_archive(self):
+    def move_archive(self, destination=None):
         """Move archive from temporary working dir to ftp dir.
 
         """
+        if not destination:
+            destination = self.server.ftproot
         with cd(self.working_dir):
-            local('mv %s %s' % (self.name, self.server.ftproot))
+            local('mv %s %s' % (self.name, destination))
 
     def cleanup(self):
         """ Remove working_dir """

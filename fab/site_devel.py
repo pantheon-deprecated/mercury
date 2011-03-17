@@ -2,9 +2,38 @@ import os
 import string
 
 from pantheon import backup
-from pantheon import ygg
+from pantheon import pantheon
 
-def create_dev_archive(archive_name, project, user):
+DESTINATION = '/srv/dev_downloads'
+
+def get_dev_downloads(resource, archive_name, project, user=None):
+    """Wapper method for a Jenkins job to get development resources.
+    resource: type of download you want (all/files/data/code/drushrc)
+    archive_name: resulting name of archive.
+    project: project name
+    user: user that has ssh access to box.
+
+    """
+    if resource == 'all':
+        print "Creating archive of all dev resources."
+        _dev_all(archive_name, project, user)
+    elif resource == 'files':
+        print "Creating archive of dev files."
+        _dev_files(archive_name, project)
+    elif resource == 'data':
+        print "Creating archive of dev data."
+        _dev_data(archive_name, project)
+    elif resource == 'code':
+        print "Creating archive of dev code."
+        _dev_code(archive_name, project, user)
+    elif resource == 'drushrc':
+        print "Creating remote drushrc file."
+        destination = os.path.join(_get_destination(),
+                                   '%s.aliases.drushrc' % project)
+        _dev_drushrc(project, user, destination)
+
+
+def _dev_all(archive_name, project, user):
     archive = backup.PantheonBackup(archive_name, project)
 
     # Only create archive of development environment data.
@@ -14,32 +43,31 @@ def create_dev_archive(archive_name, project, user):
 
     # Create a drushrc aliases file.
     destination = os.path.join(archive.backup_dir,'%s.aliases.drushrc.php' % project)
-    get_remote_drushrc(project, user, destination)
+    _dev_drushrc(project, user, destination)
 
     # Create the tarball and move to final location.
-    archive.finalize()
+    archive.finalize(_get_destination())
 
-def get_dev_files(archive_name, project):
+def _dev_files(archive_name, project):
     archive = backup.PantheonBackup(archive_name, project)
     archive.get_dev_files()
-    archive.finalize()
+    archive.finalize(_get_destination())
 
-def get_dev_data(archive_name, project):
+def _dev_data(archive_name, project):
     archive = backup.PantheonBackup(archive_name, project)
     archive.get_dev_data()
-    archive.finalize()
+    archive.finalize(_get_destination())
 
-def get_dev_code(archive_name, project, user):
+def _dev_code(archive_name, project, user):
     #TODO: For now host == project. This may change.
     host = project
     archive = backup.PantheonBackup(archive_name, project)
     archive.get_dev_code(user, host)
-    archive.finalize()
+    archive.finalize(_get_destination())
 
-def get_remote_drushrc(project, user, destination):
-    config = ygg.get_config()[project]
+def _dev_drushrc(project, user, destination):
     host = '%s.gotpantheon.com' % project
-    environments = set(config['environments'].keys())
+    environments = pantheon.get_environments()
 
     # Build the environment specific aliases
     env_aliases = ''
@@ -65,4 +93,7 @@ $aliases['${project}_${env}'] = array(
   'root' => '${root}',
 );
 """
+
+def _get_destination():
+    return DESTINATION
 
