@@ -210,7 +210,7 @@ def update_data(project, environment, source_env, updatedb='True', taskid=None):
     log = logger.logging.LoggerAdapter(log, {"project": project,
                                              "environment": environment,
                                              "taskid": taskid})
-    log.info('Initialized data sync from %s to %s.' % (environment, source_env))
+    log.info('Initialized data sync from %s to %s.' % (source_env, environment))
     updater = update.Updater(project, environment)
     try:
         updater.data_update(source_env)
@@ -241,7 +241,7 @@ def update_files(project, environment, source_env, taskid=None):
     log = logger.logging.LoggerAdapter(log, {"project": project,
                                              "environment": environment,
                                              "taskid": taskid})
-    log.info('Initialized file sync from %s to %s.' % (environment, source_env))
+    log.info('Initialized file sync from %s to %s.' % (source_env, environment))
     updater = update.Updater(project, environment)
     try:
         updater.files_update(source_env)

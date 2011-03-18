@@ -199,15 +199,16 @@ def log_drush_backend(data, log=None, context={}):
         raise Exception(data['error_log']['DRUSH_NOT_COMPLETED'][0])
     if 'command' not in context:
         p1 = re.compile('Found command: %s \(commandfile' % '(.*)')
+    no_dupe = set()
     for entry in data['log']:
+        # message is already used by a records namespace
+        context['drush_message'] = entry['message']
+        del entry['message']
         if 'command' not in context:
-            m = p1.match(entry['message'])
+            m = p1.match(context['drush_message'])
             if m:
                 context['command'] = m.group(1)
-        if ('command') in context:
-            # message is already used by a records namespace
-            context['drush_message'] = entry['message']
-            del entry['message']
+        if ('command' in context) and (context['drush_message'] not in no_dupe):
             context = dict(context, **entry)
 
             if context['type'] in ('error', 'critical', 'failure', 'fatal'):
@@ -218,6 +219,7 @@ def log_drush_backend(data, log=None, context={}):
                 log.info(context['drush_message'], extra=context)
             else:
                 log.debug(context['drush_message'], extra=context)
+        no_dupe.add(context['drush_message'])
 
 class PantheonServer:
 
