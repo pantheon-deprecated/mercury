@@ -44,7 +44,8 @@ def update_pantheon(postback=True):
 
     """
     log = logger.logging.getLogger('pantheon.update')
-    log.info('Initiated nightly update..')
+    if postback:
+        log.info('Initiated pantheon update.')
 
     try:
         # Ensure the JDK is properly installed.
@@ -64,7 +65,7 @@ def update_pantheon(postback=True):
                 local('git reset --hard origin/%s' % branch, capture=False)
             local('/usr/sbin/bcfg2 -vqed', capture=False)
         except:
-            log.exception('Nightly update encountered a fatal error.')
+            log.exception('Pantheon update encountered a fatal error.')
         finally:
             for x in range(12):
                 if pantheon.jenkins_running():
@@ -112,9 +113,11 @@ def update_pantheon(postback=True):
             else:
                 log.error("ABORTING: Jenkins hasn't responded after 5 minutes.")
                 raise Exception("ABORTING: Jenkins not responding.")
-            log.info('Nightly update completed successfully.')
+            log.info('Pantheon update completed successfully.')
+        else:
+            log.info('Pantheon update completed successfully.')
     except:
-        log.exception('Nightly update encountered fatal errors.')
+        log.exception('Pantheon update encountered a fatal error.')
         raise
 
 def update_site_core(project='pantheon', keep=None, taskid=None):
