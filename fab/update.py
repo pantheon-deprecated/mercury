@@ -118,7 +118,7 @@ def update_pantheon(postback=True):
         log.exception('Nightly update encountered unrecoverable errors.')
         raise
 
-def update_site_core(project='pantheon', keep=None):
+def update_site_core(project='pantheon', keep=None, taskid=None):
     """Update Drupal core (from Drupal or Pressflow, to latest Pressflow).
        keep: Option when merge fails:
              'ours': Keep local changes when there are conflicts.
@@ -127,6 +127,9 @@ def update_site_core(project='pantheon', keep=None):
              None: Reset to ORIG_HEAD if merge fails.
     """
     log = logger.logging.getLogger('pantheon.update.core')
+    log = logger.logging.LoggerAdapter(log, {"project": project,
+                                             "environment": 'dev',
+                                             "taskid": taskid})
     log.info('Update to core initiated.')
     updater = update.Updater(project, 'dev')
     try:
@@ -148,11 +151,15 @@ def update_site_core(project='pantheon', keep=None):
         status.drupal_update_status(project)
         status.git_repo_status(project)
 
-def update_code(project, environment, tag=None, message=None):
+def update_code(project, environment, tag=None, message=None, taskid=None):
     """ Update the working-tree for project/environment.
 
     """
     log = logger.logging.getLogger('pantheon.update.code')
+    log = logger.logging.LoggerAdapter(log, {"project": project,
+                                             "environment": environment,
+                                             "taskid": taskid})
+
     log.info('Updating code.')
     if not tag:
         tag = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
@@ -181,8 +188,6 @@ def rebuild_environment(project, environment):
     """Rebuild the project/environment with files and data from 'live'.
 
     """
-    log = logger.logging.getLogger('pantheon.update.rebuild')
-    log.info('Rebuilding %s to match live.' % environment)
     updater = update.Updater(project, environment)
     try:
         updater.files_update('live')
@@ -193,51 +198,57 @@ def rebuild_environment(project, environment):
         raise
     else:
         jenkinstools.junit_pass('Rebuild successful.', 'RebuildEnv')
-        log.info('Rebuild successful %s matches live.' % environment)
 
-def update_data(project, environment, source_env, updatedb='True'):
+def update_data(project, environment, source_env, updatedb='True', taskid=None):
     """Update the data in project/environment using data from source_env.
 
     """
     log = logger.logging.getLogger('pantheon.update.data')
+    log = logger.logging.LoggerAdapter(log, {"project": project,
+                                             "environment": environment,
+                                             "taskid": taskid})
     log.info('Queuing data sync from %s to %s.' % (environment, source_env))
     updater = update.Updater(project, environment)
     try:
         updater.data_update(source_env)
         # updatedb is passed in as a string so we have to evaluate it
         if eval(string.capitalize(updatedb)):
-            updater.drupal_updatedb()
+            result = local("drush @%s_%s -b updb" % (project, environment))
+            pantheon.log_drush_backend(result, log)
     except:
         jenkinstools.junit_error(traceback.format_exc(), 'UpdateData')
-        log.exception('Syncronization encountered an error.')
+        log.exception('Data sync encountered a fatal error.')
         raise
     else:
         jenkinstools.junit_pass('Update successful.', 'UpdateData')
-        log.info('Sync complete. %s matches %s.' % (environment, source_env))
+        log.info('Data sync complete. %s matches %s.' % (environment, source_env))
 
     # The server has a 2min delay before updates to the index are processed
     with settings(warn_only=True):
         result = local("drush @%s_%s -b solr-reindex" % (project, environment))
-        #pantheon.log_drush_backend(result, log)
+        pantheon.log_drush_backend(result, log)
         result = local("drush @%s_%s -b cron" % (project, environment))
-        #pantheon.log_drush_backend(result, log)
+        pantheon.log_drush_backend(result, log)
 
-def update_files(project, environment, source_env):
+def update_files(project, environment, source_env, taskid=None):
     """Update the files in project/environment using files from source_env.
 
     """
     log = logger.logging.getLogger('pantheon.update.files')
-    log.info('Queuing data sync from %s to %s.' % (environment, source_env))
+    log = logger.logging.LoggerAdapter(log, {"project": project,
+                                             "environment": environment,
+                                             "taskid": taskid})
+    log.info('Queuing file sync from %s to %s.' % (environment, source_env))
     updater = update.Updater(project, environment)
     try:
         updater.files_update(source_env)
     except:
         jenkinstools.junit_error(traceback.format_exc(), 'UpdateFiles')
-        log.exception('Syncronization encountered an error.')
+        log.exception('File sync encountered a fatal error.')
         raise
     else:
         jenkinstools.junit_pass('Update successful.', 'UpdateFiles')
-        log.info('Sync complete. %s matches %s.' % (environment, source_env))
+        log.info('File sync complete. %s matches %s.' % (environment, source_env))
 
 def git_diff(project, environment, revision_1, revision_2=None):
     """Return git diff

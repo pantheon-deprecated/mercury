@@ -197,23 +197,14 @@ def log_drush_backend(data, log=None, context={}):
     if data['error_status'] == 1:
         log.error(data['error_log']['DRUSH_NOT_COMPLETED'][0], extra=context)
         raise Exception(data['error_log']['DRUSH_NOT_COMPLETED'][0])
-    if ('project' or 'environment') not in context:
-        p2 = re.compile('root directory at %s' % '(.*)')
     if 'command' not in context:
         p1 = re.compile('Found command: %s \(commandfile' % '(.*)')
     for entry in data['log']:
-        if ('project' or 'environment') not in context:
-            s = p2.search(entry['message'])
-            if s:
-                context['drupal_root'] = s.group(1)
-                pe = re.split('/', context['drupal_root'])
-                context['environment'] = pe[-1]
-                context['project'] = pe[-2]
         if 'command' not in context:
             m = p1.match(entry['message'])
             if m:
                 context['command'] = m.group(1)
-        if ('project' and 'environment' and 'command') in context:
+        if ('command') in context:
             # message is already used by a records namespace
             context['drush_message'] = entry['message']
             del entry['message']

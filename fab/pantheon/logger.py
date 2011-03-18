@@ -71,13 +71,22 @@ class ServiceHandler(logging.Handler):
 class EventHandler(logging.Handler):
     def emit(self, record):
         source = record.name.split('.')[0]
+        thread = record.taskid if hasattr(record, 'taskid') else record.name
+        
         details = {"message": record.msg,
                    "type" : record.levelname,
                    "timestamp": record.created}
         labels = ['source-%s' % source, 'inbox', 'all']
         if hasattr(record, 'labels'):
             labels = list(set(labels).union(set(record.labels)))
-        ygg.send_event(record.name, details, labels, source=source)
+        if hasattr(record, 'project'):
+            details['project'] = record.project
+        if hasattr(record, 'environment'):
+            details['environment'] = record.environment
+        if hasattr(record, 'command'):
+            details['command'] = record.command
+        print(details)
+        ygg.send_event(thread, details, labels, source=source)
 
 class JunitHandler(logging.Handler):
     def emit(self, record):

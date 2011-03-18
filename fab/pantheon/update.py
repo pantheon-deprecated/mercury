@@ -6,6 +6,7 @@ import pantheon
 import project
 import jenkinstools
 import postback
+import logger
 
 from fabric.api import *
 
@@ -115,7 +116,6 @@ class Updater(project.BuildTools):
         alias = '@%s_%s' % (self.project, self.project_env)
         with settings(warn_only=True):
             result = local('drush %s -by updb' % alias)
-        #TODO: Create a custom junit xml handler
         # Parse backend output and convert to python dict
         drush_out = pantheon.parse_drush_backend(result)
         msgs = '\n'.join(['[%s] %s' % (o['type'], o['message'])
@@ -126,8 +126,6 @@ class Updater(project.BuildTools):
             print("\n=== UpdateDB Debug Output ===\n%s\n" % msgs)
         else:
             jenkinstools.junit_pass(msgs, 'UpdateDB')
-        context = {"project": self.project, "environment": self.project_env}
-        pantheon.log_drush_backend(result, context)
 
     def permissions_update(self):
         self.setup_permissions('update', self.project_env)
