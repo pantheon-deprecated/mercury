@@ -16,7 +16,6 @@ from optparse import OptionParser
 
 from fabric.api import *
 
-log = logger.logging.getLogger('pantheon')
 
 def main():
     usage = "usage: %prog [options]"
@@ -24,6 +23,7 @@ def main():
     parser.add_option('-p', '--postback', dest="postback", action="store_true", default=False, help='Postback to atlas.')
     parser.add_option('-d', '--debug', dest="debug", action="store_true", default=False, help='Include debug output.')
     (options, args) = parser.parse_args()
+    log = logger.logging.getLogger('pantheon')
 
     if options.debug:
         log.setLevel(10)

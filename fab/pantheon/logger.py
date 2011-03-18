@@ -85,7 +85,6 @@ class EventHandler(logging.Handler):
             details['environment'] = record.environment
         if hasattr(record, 'command'):
             details['command'] = record.command
-        print(details)
         ygg.send_event(thread, details, labels, source=source)
 
 class JunitHandler(logging.Handler):
