@@ -23,11 +23,10 @@ def main():
     parser.add_option('-p', '--postback', dest="postback", action="store_true", default=False, help='Postback to atlas.')
     parser.add_option('-d', '--debug', dest="debug", action="store_true", default=False, help='Include debug output.')
     (options, args) = parser.parse_args()
-    log = logger.logging.getLogger('pantheon')
+    log = logger.logging.getLogger('pantheon.update')
 
     if options.debug:
         log.setLevel(10)
-
     update_pantheon(options.postback)
 
 def update_pantheon(postback=True):
