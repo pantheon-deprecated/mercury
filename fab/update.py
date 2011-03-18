@@ -2,12 +2,12 @@
 import datetime
 import tempfile
 import time
-import urllib2
 import os
 import traceback
 import string
 
 from pantheon import jenkinstools
+from pantheon import logger
 from pantheon import pantheon
 from pantheon import postback
 from pantheon import status
@@ -16,20 +16,24 @@ from optparse import OptionParser
 
 from fabric.api import *
 
+log = logger.logging.getLogger('pantheon')
+
 def main():
     usage = "usage: %prog [options]"
     parser = OptionParser(usage=usage, description="Update pantheon code and server configurations.")
     parser.add_option('-p', '--postback', dest="postback", action="store_true", default=False, help='Postback to atlas.')
+    parser.add_option('-d', '--debug', dest="debug", action="store_true", default=False, help='Include debug output.')
     (options, args) = parser.parse_args()
 
-    update_pantheon()
-    if options.postback:
-        post_update_pantheon()
+    if options.debug:
+        log.setLevel(10)
 
-def update_pantheon(first_boot=False):
+    update_pantheon(options.postback)
+
+def update_pantheon(postback=True):
     """Update pantheon code and server configurations.
 
-    first_boot: bool. If this is being called from the configure job. If it
+    postback: bool. If this is being called from the configure job, then it
     is the first boot, we don't need to wait for jenkins or send back update
     data.
 
@@ -38,49 +42,44 @@ def update_pantheon(first_boot=False):
     This script is run from a cron job because it may update Jenkins (and
     therefor cannot be run inside jenkins.)
 
-    If the script is successful, a known message will be printed to
-    stdout which will be redirected to a log file. The jenkins job
-    post_update_pantheon will check this log file for the message to
-    determine if it was successful.
-
     """
-
-    # Ensure the JDK is properly installed.
-    local('apt-get install -y default-jdk')
+    log = logger.logging.getLogger('pantheon.update')
+    log.info('Initiated nightly update..')
 
     try:
+        # Ensure the JDK is properly installed.
+        local('apt-get install -y default-jdk')
         try:
-            # Put jenkins into quietDown mode so no more jobs are started.
-            urllib2.urlopen('http://localhost:8090/quietDown')
-            # Find out if this server is using a testing branch.
+            log.debug('Putting jenkins into quietDown mode.')
+            pantheon.jenkins_quiet()
+            log.debug('Checking which branch to use.')
             branch = 'master'
             if os.path.exists('/opt/branch.txt'):
                 branch = open('/opt/branch.txt').read().strip() or 'master'
-            # Update from repo
+            log.debug('Using branch %s.' % branch)
+            log.debug('Updating from repo.')
             with cd('/opt/pantheon'):
                 local('git fetch --prune origin', capture=False)
                 local('git checkout --force %s' % branch, capture=False)
                 local('git reset --hard origin/%s' % branch, capture=False)
-            # Update from BCFG2
             local('/usr/sbin/bcfg2 -vqed', capture=False)
         except:
-            print(traceback.format_exc())
-            raise
+            log.exception('Nightly update encountered a fatal error.')
         finally:
-            # wait a min for jenkins to respond.
             for x in range(12):
                 if pantheon.jenkins_running():
                     break
                 else:
+                    log.debug('Waiting for jenkins to respond.')
                     time.sleep(10)
             else:
-                print("Jenkins not ready after 2 minutes.")
-                raise Exception("ABORTING: Jenkins not ready after 2 minutes.")
-            # Restart Jenkins
-            local('curl -X POST http://localhost:8090/safeRestart', capture=False)
+                log.error("ABORTING: Jenkins hasn't responded after 2 minutes.")
+                raise Exception("ABORTING: Jenkins not responding.")
+            log.debug('Restarting jenkins.')
+            pantheon.jenkins_restart()
 
         # If this is not the first boot, send back update data.
-        if not first_boot:
+        if postback:
             """
             We have to check for both queued jobs then the jenkins restart.
             This is because jobs could have been queued before the update
@@ -90,8 +89,7 @@ def update_pantheon(first_boot=False):
             wait until it is back up.
 
             """
-
-            # wait for any jobs that were queued to finish.
+            log.debug('Not first boot, recording update data.')
             while True:
                 queued = pantheon.jenkins_queued()
                 if queued == 0:
@@ -102,42 +100,24 @@ def update_pantheon(first_boot=False):
                 elif queued == -1:
                     break
                 else:
+                    log.debug('Waiting for queued jobs to finish.')
                     time.sleep(5)
             # wait for jenkins to restart.
             for x in range(30):
                 if pantheon.jenkins_running():
                     break
                 else:
+                    log.debug('Waiting for jenkins to respond.')
                     time.sleep(10)
             else:
-                raise Exception("ABORTING: Jenkins did not restart after 5 minutes.")
-            # stdout is redirected in cron, so this will go to log file.
-            print "UPDATE COMPLETED SUCCESSFULLY"
+                log.error("ABORTING: Jenkins hasn't responded after 5 minutes.")
+                raise Exception("ABORTING: Jenkins not responding.")
+            log.info('Nightly update completed successfully.')
     except:
-        print(traceback.format_exc())
+        log.exception('Nightly update encountered fatal errors.')
         raise
 
-def post_update_pantheon():
-    """Determine if cron run of pantheon_update was successful.
-
-    """
-    response = {'update_pantheon': dict()}
-    log_path = '/var/log/pantheon/update_pantheon.log'
-    if os.path.isfile(log_path):
-        with open(log_path, 'r') as log:
-            if 'UPDATE COMPLETED SUCCESSFULLY' in log:
-                response['update_pantheon']['status'] = 'SUCCESS'
-                response['update_pantheon']['msg'] = ''
-            else:
-                response['update_pantheon']['status'] = 'FAILURE'
-                response['update_pantheon']['msg'] = 'Pantheon update did not complete.'
-    else:
-        response['update_pantheon']['status'] = 'FAILURE'
-        response['update_pantheon']['msg'] = 'No Pantheon update log was found.'
-        print 'No update log found.'
-    postback.postback(response)
-
-def update_site_core(project='pantheon', keep=None):
+def update_site_core(project='pantheon', keep=None, taskid=None):
     """Update Drupal core (from Drupal or Pressflow, to latest Pressflow).
        keep: Option when merge fails:
              'ours': Keep local changes when there are conflicts.
@@ -145,16 +125,24 @@ def update_site_core(project='pantheon', keep=None):
              'force': Leave failed merge in working-tree (manual resolve).
              None: Reset to ORIG_HEAD if merge fails.
     """
+    log = logger.logging.getLogger('pantheon.update.core')
+    log = logger.logging.LoggerAdapter(log, {"project": project,
+                                             "environment": 'dev',
+                                             "taskid": taskid})
+    log.info('Initializing update to core.')
     updater = update.Updater(project, 'dev')
     try:
         result = updater.core_update(keep)
-        updater.drupal_updatedb()
+        re = local("drush @%s_%s -b updb" % (project, environment))
+        pantheon.log_drush_backend(re, log)
         updater.permissions_update()
     except:
         jenkinstools.junit_error(traceback.format_exc(), 'UpdateCore')
+        log.exception('Update to core encountered a fatal error.')
         raise
     else:
         jenkinstools.junit_pass('Update successful.', 'UpdateCore')
+        log.info('Update to core successful.')
 
     postback.write_build_data('update_site_core', result)
 
@@ -163,10 +151,16 @@ def update_site_core(project='pantheon', keep=None):
         status.drupal_update_status(project)
         status.git_repo_status(project)
 
-def update_code(project, environment, tag=None, message=None):
+def update_code(project, environment, tag=None, message=None, taskid=None):
     """ Update the working-tree for project/environment.
 
     """
+    log = logger.logging.getLogger('pantheon.update.code')
+    log = logger.logging.LoggerAdapter(log, {"project": project,
+                                             "environment": environment,
+                                             "taskid": taskid})
+
+    log.info('Initialized update to code for %s.' % environment)
     if not tag:
         tag = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
     if not message:
@@ -176,13 +170,16 @@ def update_code(project, environment, tag=None, message=None):
     try:
         updater.test_tag(tag)
         updater.code_update(tag, message)
-        updater.drupal_updatedb()
+        result = local("drush @%s_%s -b updb" % (project, environment))
+        pantheon.log_drush_backend(result, log)
         updater.permissions_update()
     except:
         jenkinstools.junit_error(traceback.format_exc(), 'UpdateCode')
+        log.exception('The update to code encountered a fatal error.')
         raise
     else:
         jenkinstools.junit_pass('Update successful.', 'UpdateCode')
+        log.info('Update to code successful on %s.' % environment)
 
     # Send back repo status and drupal update status
     status.git_repo_status(project)
@@ -202,39 +199,56 @@ def rebuild_environment(project, environment):
     else:
         jenkinstools.junit_pass('Rebuild successful.', 'RebuildEnv')
 
-def update_data(project, environment, source_env, updatedb='True'):
+def update_data(project, environment, source_env, updatedb='True', taskid=None):
     """Update the data in project/environment using data from source_env.
 
     """
+    log = logger.logging.getLogger('pantheon.update.data')
+    log = logger.logging.LoggerAdapter(log, {"project": project,
+                                             "environment": environment,
+                                             "taskid": taskid})
+    log.info('Initialized data sync from %s to %s.' % (environment, source_env))
     updater = update.Updater(project, environment)
     try:
         updater.data_update(source_env)
         # updatedb is passed in as a string so we have to evaluate it
         if eval(string.capitalize(updatedb)):
-            updater.drupal_updatedb()
+            result = local("drush @%s_%s -b updb" % (project, environment))
+            pantheon.log_drush_backend(result, log)
     except:
         jenkinstools.junit_error(traceback.format_exc(), 'UpdateData')
+        log.exception('Data sync encountered a fatal error.')
         raise
     else:
         jenkinstools.junit_pass('Update successful.', 'UpdateData')
+        log.info('Data sync successful. %s matches %s.' % (environment, source_env))
 
     # The server has a 2min delay before updates to the index are processed
     with settings(warn_only=True):
-        local("drush @%s_%s solr-reindex" % (project, environment))
-        local("drush @%s_%s cron" % (project, environment))
+        result = local("drush @%s_%s -b solr-reindex" % (project, environment))
+        pantheon.log_drush_backend(result, log)
+        result = local("drush @%s_%s -b cron" % (project, environment))
+        pantheon.log_drush_backend(result, log)
 
-def update_files(project, environment, source_env):
+def update_files(project, environment, source_env, taskid=None):
     """Update the files in project/environment using files from source_env.
 
     """
+    log = logger.logging.getLogger('pantheon.update.files')
+    log = logger.logging.LoggerAdapter(log, {"project": project,
+                                             "environment": environment,
+                                             "taskid": taskid})
+    log.info('Initialized file sync from %s to %s.' % (environment, source_env))
     updater = update.Updater(project, environment)
     try:
         updater.files_update(source_env)
     except:
         jenkinstools.junit_error(traceback.format_exc(), 'UpdateFiles')
+        log.exception('File sync encountered a fatal error.')
         raise
     else:
         jenkinstools.junit_pass('Update successful.', 'UpdateFiles')
+        log.info('File sync successful. %s matches %s.' % (environment, source_env))
 
 def git_diff(project, environment, revision_1, revision_2=None):
     """Return git diff
