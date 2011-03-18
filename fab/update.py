@@ -135,7 +135,7 @@ def update_site_core(project='pantheon', keep=None, taskid=None):
     updater = update.Updater(project, 'dev')
     try:
         result = updater.core_update(keep)
-        re = local("drush @%s_%s -b updb" % (project, environment))
+        re = local("drush @%s_dev -b updb" % project)
         pantheon.log_drush_backend(re, log)
         updater.permissions_update()
     except:
