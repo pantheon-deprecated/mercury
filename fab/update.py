@@ -65,6 +65,7 @@ def update_pantheon(postback=True):
             local('/usr/sbin/bcfg2 -vqed', capture=False)
         except:
             log.exception('Pantheon update encountered a fatal error.')
+            raise
         finally:
             for x in range(12):
                 if pantheon.jenkins_running():
