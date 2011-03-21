@@ -1,10 +1,12 @@
 import os
+import string
 import tempfile
 
 from configobj import ConfigObj
 from fabric.api import *
 
 import pantheon
+import ygg
 
 def remove(archive):
     """Remove a backup tarball from the server.
@@ -31,10 +33,11 @@ class PantheonBackup():
         self.backup_dir = os.path.join(self.working_dir, self.project)
         self.name = name + '.tar.gz'
 
-    def get_dev_code(self, user, host):
+    def get_dev_code(self, user):
         """USED FOR REMOTE DEV: Clone of dev git repo.
 
         """
+        server_name = _get_server_name(self.project)
         local('mkdir -p %s' % self.backup_dir)
         source = os.path.join(self.server.webroot, self.project, 'dev')
         destination = 'code'
@@ -46,7 +49,7 @@ class PantheonBackup():
             with cd(destination):
                 local("sed -i 's/^.*url =.*$/\\turl = " + \
                 "%s@%s.gotpantheon.com:\/var\/git\/projects\/%s/' .git/config"\
-                % (user, host, self.project))
+                % (user, server_name, self.project))
 
     def get_dev_files(self):
         """USED FOR REMOTE DEV: dev site files.
@@ -71,6 +74,31 @@ class PantheonBackup():
                                                  self.project, 'dev'))
         destination = os.path.join(self.backup_dir, 'dev_database.sql')
         self._dump_data(destination, drupal_vars)
+
+
+    def get_dev_drushrc(self, user):
+        """USED FROM REMOTE DEV: create a drushrc file.
+
+        """
+        server_name = _get_server_name(self.project)
+        local('mkdir -p %s' % self.backup_dir)
+        # Build the environment specific aliases
+        env_aliases = ''
+        template = string.Template(_get_env_alias())
+
+        for env in self.environments:
+            values = {'host': '%s.gotpantheon.com' % server_name,
+                      'user': user,
+                      'project': self.project,
+                      'env': env,
+                      'root': '/var/www/%s/%s' % (self.project, env)}
+            env_aliases += template.safe_substitute(values)
+
+        destination = os.path.join(self.backup_dir,
+                                   '%s.aliases.drushrc.php' % self.project)
+
+        with open(destination, 'w') as f:
+            f.write('<?php\n%s\n' % env_aliases)
 
     def backup_files(self):
         """Backup all files for environments of a project.
@@ -110,12 +138,12 @@ class PantheonBackup():
         config['project'] = self.project
         config.write()
 
-    def finalize(self):
+    def finalize(self, destination=None):
         """ Create archive, move to destination, remove working dir.
 
         """
         self.make_archive()
-        self.move_archive()
+        self.move_archive(destination)
         self.cleanup()
 
     def make_archive(self):
@@ -125,12 +153,14 @@ class PantheonBackup():
         with cd(self.working_dir):
             local('tar czf %s %s' % (self.name, self.project))
 
-    def move_archive(self):
+    def move_archive(self, destination=None):
         """Move archive from temporary working dir to ftp dir.
 
         """
+        if not destination:
+            destination = self.server.ftproot
         with cd(self.working_dir):
-            local('mv %s %s' % (self.name, self.server.ftproot))
+            local('mv %s %s' % (self.name, destination))
 
     def cleanup(self):
         """ Remove working_dir """
@@ -153,4 +183,25 @@ class PantheonBackup():
                                          destination))
         if result.failed:
             abort("Export of database '%s' failed." % db_dict.get('db_name'))
+
+def _get_server_name(project):
+    """Return server name from apache alias "env.server_name.gotpantheon.com"
+    """
+    config = ygg.get_config()
+    alias = config[project]['environments']['dev']['apache']['ServerAlias']
+    return alias.split('.')[1]
+
+def _get_env_alias():
+    """Return slug of php for drushrc.
+
+    """
+    return """
+$aliases['${project}_${env}'] = array(
+  'remote-host' => '${host}',
+  'remote-user' => '${user}',
+  'uri' => 'default',
+  'root' => '${root}',
+);
+"""
+
 
