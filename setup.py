@@ -14,7 +14,7 @@ def deploy():
                 'python-setuptools']
 
     os.system('apt-get install -y %s' % ' '.join(packages))
-    os.system('pip install fabric')
+    os.system('pip install fabric==0.9.3')
     os.system('cd /opt/pantheon/fab && fab initialize')
 
 if __name__ == '__main__':

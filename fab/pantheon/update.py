@@ -6,6 +6,7 @@ import pantheon
 import project
 import jenkinstools
 import postback
+import logger
 
 from fabric.api import *
 
@@ -115,9 +116,10 @@ class Updater(project.BuildTools):
         alias = '@%s_%s' % (self.project, self.project_env)
         with settings(warn_only=True):
             result = local('drush %s -by updb' % alias)
-        json_out = pantheon.parse_drush_output(result)
+        # Parse backend output and convert to python dict
+        drush_out = pantheon.parse_drush_backend(result)
         msgs = '\n'.join(['[%s] %s' % (o['type'], o['message'])
-                        for o in json_out['log']])
+                        for o in drush_out['log']])
         if (result.failed):
             jenkinstools.junit_fail(msgs, 'UpdateDB')
             postback.build_warning("Warning: UpdateDB encountered an error.")
