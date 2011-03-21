@@ -59,7 +59,7 @@ info = json.loads(encoded_info)
 
 # Transfer the file to long-term storage.
 file = open(path)
-arch_connection = httplib.HTTPSConnection(ARCHIVE_SERVER)
+arch_connection = httplib.HTTPSConnection(info['hostname'])
 arch_connection.request("PUT", info['path'], file, info['headers'])
 arch_complete_response = arch_connection.getresponse()
 if arch_complete_response.status == 200:
