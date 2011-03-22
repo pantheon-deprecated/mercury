@@ -90,12 +90,11 @@ class EventHandler(logging.Handler):
 class JunitHandler(logging.Handler):
     def emit(self, record):
         # A taskid is only passed in when running a jenkins job.
-        if hasattr(record, 'taskid'):
-            suitename = record.name.split('.')[-1].capitalize()
-            casename = record.funcName.capitalize()
+        suitename = record.name.split('.')[-1].capitalize()
+        casename = record.funcName.capitalize()
 
-            results = jenkinstools.Junit(suitename, casename)
-
+        results = jenkinstools.Junit(suitename, casename)
+        if results.workspace != '/etc/pantheon/jenkins/workspace':
             if record.levelname in ['ERROR', 'CRITICAL']:
                 results.error(record.msg)
             if record.levelname in ['WARNING']:
