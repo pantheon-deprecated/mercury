@@ -89,17 +89,21 @@ class EventHandler(logging.Handler):
 
 class JunitHandler(logging.Handler):
     def emit(self, record):
-        ts = record.name.split('.')[-1].capitalize()
-        tc = record.funcName.capitalize()
-        if ts == tc:
-            tc=None
+        # A taskid is only passed in when running a jenkins job.
+        if hasattr(record, 'taskid'):
+            suitename = record.name.split('.')[-1].capitalize()
+            casename = record.funcName.capitalize()
 
-        if record.levelname in ['ERROR', 'CRITICAL']:
-            jenkinstools.junit_error(record.msg, ts, tc)
-        if record.levelname in ['WARNING']:
-            jenkinstools.junit_fail(record.msg, ts, tc)
-        if record.levelname in ['INFO']:
-            jenkinstools.junit_pass(record.msg, ts, tc)
+            results = jenkinstools.Junit(suitename, casename)
+
+            if record.levelname in ['ERROR', 'CRITICAL']:
+                results.error(record.msg)
+            if record.levelname in ['WARNING']:
+                results.fail(record.msg)
+            if record.levelname in ['INFO']:
+                results.success(record.msg)
+        else:
+            pass
 
 # register our custom handlers so they can be used by the config file
 logging.handlers.DrushHandler = DrushHandler
