@@ -12,12 +12,18 @@ from fabric.api import *
 
 class Updater(project.BuildTools):
 
-    def __init__(self, project, environment):
+    def __init__(self, project, environment, taskid=None):
         super(Updater, self).__init__()
 
         self.project_env = environment
         self.author = 'Jenkins User <jenkins@pantheon>'
         self.env_path = os.path.join(self.project_path, environment)
+        self.taskid = taskid
+        self.log = logger.logging.getLogger('pantheon.update.Updater')
+        self.log = logger.logging.LoggerAdapter(self.log, 
+                                                {"project": project,
+                                                 "environment": environment,
+                                                 "taskid": taskid})
 
 
     def core_update(self, keep=None):
@@ -100,32 +106,67 @@ class Updater(project.BuildTools):
             local('git push')
 
     def data_update(self, source_env):
-        tempdir = tempfile.mkdtemp()
-        export = dbtools.export_data(self, source_env, tempdir)
-        dbtools.import_data(self.project, self.project_env, export)
-        local('rm -rf %s' % tempdir)
+        self.log.info('Initialized data sync')
+        try:
+            tempdir = tempfile.mkdtemp()
+            export = dbtools.export_data(self, source_env, tempdir)
+            dbtools.import_data(self.project, self.project_env, export)
+            local('rm -rf %s' % tempdir)
+        except:
+            self.log.exception('Data sync encountered a fatal error.')
+            raise
+        else:
+            self.log.info('Data sync successful.')
 
     def files_update(self, source_env):
-        source = os.path.join(self.project_path,
-                              '%s/sites/default/files' % source_env)
-        dest = os.path.join(self.project_path,
-                            '%s/sites/default/' % self.project_env)
-        local('rsync -av --delete %s %s' % (source, dest))
+        self.log.info('Initialized file sync')
+        try:
+            source = os.path.join(self.project_path,
+                                  '%s/sites/default/files' % source_env)
+            dest = os.path.join(self.project_path,
+                                '%s/sites/default/' % self.project_env)
+            local('rsync -av --delete %s %s' % (source, dest))
+        except:
+            self.log.exception('File sync encountered a fatal error.')
+            raise
+        else:
+            self.log.info('File sync successful.')
 
     def drupal_updatedb(self):
-        alias = '@%s_%s' % (self.project, self.project_env)
-        with settings(warn_only=True):
-            result = local('drush %s -by updb' % alias)
-        # Parse backend output and convert to python dict
-        drush_out = pantheon.parse_drush_backend(result)
-        msgs = '\n'.join(['[%s] %s' % (o['type'], o['message'])
-                        for o in drush_out['log']])
-        if (result.failed):
-            jenkinstools.junit_fail(msgs, 'UpdateDB')
-            postback.build_warning("Warning: UpdateDB encountered an error.")
-            print("\n=== UpdateDB Debug Output ===\n%s\n" % msgs)
+        self.log.info('Initiated Updatedb.')
+        try:
+            alias = '@%s_%s' % (self.project, self.project_env)
+            with settings(warn_only=True):
+                result = local('drush %s -by updb' % alias)
+        except:
+            self.log.exception('Updatedb encountered a fatal error.')
+            raise
         else:
-            jenkinstools.junit_pass(msgs, 'UpdateDB')
+            pantheon.log_drush_backend(result, self.log)
+
+    def run_cron(self):
+        self.log.info('Initialized cron.')
+        try:
+            with settings(warn_only=True):
+                result = local("drush @%s_%s -b cron" % 
+                               (self.project, self.project_env))
+        except:
+            self.log.exception('Cron encountered a fatal error.')
+            raise
+        else:
+            pantheon.log_drush_backend(result, self.log)
+
+    def solr_reindex(self):
+        self.log.info('Initialized solr-reindex.')
+        try:
+            with settings(warn_only=True):
+                result = local("drush @%s_%s -b solr-reindex" % 
+                               (self.project, self.project_env))
+        except:
+            self.log.exception('Solr-reindex encountered a fatal error.')
+            raise
+        else:
+            pantheon.log_drush_backend(result, self.log)
 
     def permissions_update(self):
         self.setup_permissions('update', self.project_env)

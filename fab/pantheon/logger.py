@@ -5,7 +5,7 @@ import ygg
 import ConfigParser
 import jenkinstools
 
-log = logging.getLogger("logger")
+log = logging.getLogger("pantheon.logger")
 
 class NullHandler(logging.Handler):
     def emit(self, record):
@@ -23,7 +23,7 @@ class DrushHandler(logging.Handler):
                    "environment": record.environment,
                    "command": record.command}
         labels = ['source-%s' % source, 'inbox', 'all']
-        ygg.send_event(record.name, details, labels, source=source)
+        ygg.send_event(record.thread, details, labels, source=source)
 
 class ServiceHandler(logging.Handler):
     def emit(self, record):
@@ -71,7 +71,7 @@ class ServiceHandler(logging.Handler):
 class EventHandler(logging.Handler):
     def emit(self, record):
         source = record.name.split('.')[0]
-        thread = record.taskid if hasattr(record, 'taskid') else record.name
+        thread = record.taskid if hasattr(record, 'taskid') else record.thread
         
         details = {"message": record.msg,
                    "type" : record.levelname,
@@ -89,8 +89,8 @@ class EventHandler(logging.Handler):
 
 class JunitHandler(logging.Handler):
     def emit(self, record):
-        ts = record.name.split('.')[0].capitalize()
-        tc = record.name.split('.')[-1].capitalize()
+        ts = record.name.split('.')[-1].capitalize()
+        tc = record.funcName.capitalize()
         if ts == tc:
             tc=None
 

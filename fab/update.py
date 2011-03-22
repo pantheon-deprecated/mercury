@@ -133,7 +133,7 @@ def update_site_core(project='pantheon', keep=None, taskid=None):
                                              "environment": 'dev',
                                              "taskid": taskid})
     log.info('Initializing update to core.')
-    updater = update.Updater(project, 'dev')
+    updater = update.Updater(project, 'dev', taskid)
     try:
         result = updater.core_update(keep)
         re = local("drush @%s_dev -b updb" % project)
@@ -169,7 +169,7 @@ def update_code(project, environment, tag=None, message=None, taskid=None):
     if not message:
         message = 'Tagging as %s for release.' % tag
 
-    updater = update.Updater(project, environment)
+    updater = update.Updater(project, environment, taskid)
     try:
         updater.test_tag(tag)
         updater.code_update(tag, message)
@@ -192,7 +192,7 @@ def rebuild_environment(project, environment):
     """Rebuild the project/environment with files and data from 'live'.
 
     """
-    updater = update.Updater(project, environment)
+    updater = update.Updater(project, environment, taskid)
     try:
         updater.files_update('live')
         updater.data_update('live')
@@ -206,58 +206,28 @@ def update_data(project, environment, source_env, updatedb='True', taskid=None):
     """Update the data in project/environment using data from source_env.
 
     """
-    log = logger.logging.getLogger('pantheon.update.data')
-    log = logger.logging.LoggerAdapter(log, {"project": project,
-                                             "environment": environment,
-                                             "taskid": taskid})
-    log.info('Initialized data sync from %s to %s.' % (source_env, environment))
-    updater = update.Updater(project, environment)
-    try:
-        updater.data_update(source_env)
-        # updatedb is passed in as a string so we have to evaluate it
-        if eval(string.capitalize(updatedb)):
-            result = local("drush @%s_%s -b updb" % (project, environment))
-            pantheon.log_drush_backend(result, log)
-    except:
-        jenkinstools.junit_error(traceback.format_exc(), 'UpdateData')
-        log.exception('Data sync encountered a fatal error.')
-        raise
-    else:
-        jenkinstools.junit_pass('Update successful.', 'UpdateData')
-        log.info('Data sync successful. %s matches %s.' % (environment, source_env))
+    updater = update.Updater(project, environment, taskid)
+    updater.data_update(source_env)
+    # updatedb is passed in as a string so we have to evaluate it
+    if eval(string.capitalize(updatedb)):
+        updater.drupal_updatedb()
 
     # The server has a 2min delay before updates to the index are processed
-    with settings(warn_only=True):
-        result = local("drush @%s_%s -b solr-reindex" % (project, environment))
-        pantheon.log_drush_backend(result, log)
-        result = local("drush @%s_%s -b cron" % (project, environment))
-        pantheon.log_drush_backend(result, log)
+    updater.solr_reindex()
+    updater.run_cron()
 
 def update_files(project, environment, source_env, taskid=None):
     """Update the files in project/environment using files from source_env.
 
     """
-    log = logger.logging.getLogger('pantheon.update.files')
-    log = logger.logging.LoggerAdapter(log, {"project": project,
-                                             "environment": environment,
-                                             "taskid": taskid})
-    log.info('Initialized file sync from %s to %s.' % (source_env, environment))
-    updater = update.Updater(project, environment)
-    try:
-        updater.files_update(source_env)
-    except:
-        jenkinstools.junit_error(traceback.format_exc(), 'UpdateFiles')
-        log.exception('File sync encountered a fatal error.')
-        raise
-    else:
-        jenkinstools.junit_pass('Update successful.', 'UpdateFiles')
-        log.info('File sync successful. %s matches %s.' % (environment, source_env))
+    updater = update.Updater(project, environment, taskid)
+    updater.files_update(source_env)
 
 def git_diff(project, environment, revision_1, revision_2=None):
     """Return git diff
 
     """
-    updater = update.Updater(project, environment)
+    updater = update.Updater(project, environment, taskid)
     if not revision_2:
            updater.run_command('git diff %s' % revision_1)
     else:
@@ -267,7 +237,7 @@ def git_status(project, environment):
     """Return git status
 
     """
-    updater = update.Updater(project, environment)
+    updater = update.Updater(project, environment, taskid)
     try:
         updater.run_command('git status')
     except:
