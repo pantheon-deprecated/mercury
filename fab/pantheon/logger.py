@@ -105,6 +105,7 @@ class JunitHandler(logging.Handler):
 logging.handlers.DrushHandler = DrushHandler
 logging.handlers.ServiceHandler = ServiceHandler
 logging.handlers.EventHandler = EventHandler
+logging.handlers.JunitHandler = JunitHandler
 logging.handlers.NullHandler = NullHandler
 
 with open('/opt/pantheon/fab/pantheon/logging.conf', 'r') as f:

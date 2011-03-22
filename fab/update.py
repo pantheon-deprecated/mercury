@@ -3,10 +3,8 @@ import datetime
 import tempfile
 import time
 import os
-import traceback
 import string
 
-from pantheon import jenkinstools
 from pantheon import logger
 from pantheon import pantheon
 from pantheon import postback
@@ -15,7 +13,6 @@ from pantheon import update
 from optparse import OptionParser
 
 from fabric.api import *
-
 
 def main():
     usage = "usage: %prog [options]"
@@ -128,24 +125,10 @@ def update_site_core(project='pantheon', keep=None, taskid=None):
              'force': Leave failed merge in working-tree (manual resolve).
              None: Reset to ORIG_HEAD if merge fails.
     """
-    log = logger.logging.getLogger('pantheon.update.core')
-    log = logger.logging.LoggerAdapter(log, {"project": project,
-                                             "environment": 'dev',
-                                             "taskid": taskid})
-    log.info('Initializing update to core.')
     updater = update.Updater(project, 'dev', taskid)
-    try:
-        result = updater.core_update(keep)
-        re = local("drush @%s_dev -b updb" % project)
-        pantheon.log_drush_backend(re, log)
-        updater.permissions_update()
-    except:
-        jenkinstools.junit_error(traceback.format_exc(), 'UpdateCore')
-        log.exception('Update to core encountered a fatal error.')
-        raise
-    else:
-        jenkinstools.junit_pass('Update successful.', 'UpdateCore')
-        log.info('Update to core successful.')
+    result = updater.core_update(keep)
+    updater.drupal_updatedb()
+    updater.permissions_update()
 
     postback.write_build_data('update_site_core', result)
 
@@ -158,31 +141,16 @@ def update_code(project, environment, tag=None, message=None, taskid=None):
     """ Update the working-tree for project/environment.
 
     """
-    log = logger.logging.getLogger('pantheon.update.code')
-    log = logger.logging.LoggerAdapter(log, {"project": project,
-                                             "environment": environment,
-                                             "taskid": taskid})
-
-    log.info('Initialized update to code for %s.' % environment)
     if not tag:
         tag = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
     if not message:
         message = 'Tagging as %s for release.' % tag
 
     updater = update.Updater(project, environment, taskid)
-    try:
-        updater.test_tag(tag)
-        updater.code_update(tag, message)
-        result = local("drush @%s_%s -b updb" % (project, environment))
-        pantheon.log_drush_backend(result, log)
-        updater.permissions_update()
-    except:
-        jenkinstools.junit_error(traceback.format_exc(), 'UpdateCode')
-        log.exception('The update to code encountered a fatal error.')
-        raise
-    else:
-        jenkinstools.junit_pass('Update successful.', 'UpdateCode')
-        log.info('Update to code successful on %s.' % environment)
+    updater.test_tag(tag)
+    updater.code_update(tag, message)
+    updater.drupal_updatedb()
+    updater.permissions_update()
 
     # Send back repo status and drupal update status
     status.git_repo_status(project)
@@ -193,14 +161,8 @@ def rebuild_environment(project, environment):
 
     """
     updater = update.Updater(project, environment, taskid)
-    try:
-        updater.files_update('live')
-        updater.data_update('live')
-    except:
-        jenkinstools.junit_error(traceback.format_exc(), 'RebuildEnv')
-        raise
-    else:
-        jenkinstools.junit_pass('Rebuild successful.', 'RebuildEnv')
+    updater.files_update('live')
+    updater.data_update('live')
 
 def update_data(project, environment, source_env, updatedb='True', taskid=None):
     """Update the data in project/environment using data from source_env.
@@ -238,13 +200,7 @@ def git_status(project, environment):
 
     """
     updater = update.Updater(project, environment, taskid)
-    try:
-        updater.run_command('git status')
-    except:
-        jenkinstools.junit_error(traceback.format_exc(), 'GitStatus')
-        raise
-    else:
-        jenkinstools.junit_pass('', 'GitStatus')
+    updater.run_command('git status')
 
 if __name__ == '__main__':
     main()
