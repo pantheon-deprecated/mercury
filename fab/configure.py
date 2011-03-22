@@ -103,15 +103,15 @@ def _configure_certificates():
     ygg.send_event('Authorization', 'Certificate issued. Verification result:\n' + verification)
 
 def _configure_server(server):
-    ygg.send_event('Software updates', 'Package updates have started.')
+    ygg.send_event('Software updates', 'Configuration updates have started.')
     # Get any new packages.
-    server.update_packages()
-    # Update pantheon code, run bcfg2, restart jenkins.
+    #server.update_packages()
+    # Update pantheon code, run bcfg2, restart Jenkins.
     update.update_pantheon(postback=False)
     # Create the tunable files.
     local('cp /etc/pantheon/templates/tuneables /etc/pantheon/server_tuneables')
     local('chmod 755 /etc/pantheon/server_tuneables')
-    ygg.send_event('Software updates', 'Package updates have finished.')
+    ygg.send_event('Software updates', 'Configuration updates have finished.')
 
 def _configure_postfix(server):
     ygg.send_event('Email delivery configuration', 'Postfix is now being configured.')
