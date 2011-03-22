@@ -6,21 +6,30 @@ from configobj import ConfigObj
 from fabric.api import *
 
 import pantheon
+import logger
 import ygg
 
-def remove(archive):
+def remove(archive, taskid=None):
     """Remove a backup tarball from the server.
     archive: name of the archive to remove.
 
     """
-    server = pantheon.PantheonServer()
-    path = os.path.join(server.ftproot, archive)
-    if os.path.exists(path):
-        local('rm -f %s' % path)
+    log = logger.logging.getLogger('pantheon.backup.remove')
+    log.info('Removing archive.')
+    try:
+        server = pantheon.PantheonServer()
+        path = os.path.join(server.ftproot, archive)
+        if os.path.exists(path):
+            local('rm -f %s' % path)
+    except:
+        log.exception('Remove encountered a fatal error.')
+        raise
+    else:
+        log.info('Remove successful.')
 
 class PantheonBackup():
 
-    def __init__(self, name, project):
+    def __init__(self, name, project, taskid=None):
         """Initialize Backup Object.
         name: name of backup (resulting file: name.tar.gz)
         project: name of project to backup.
@@ -32,6 +41,11 @@ class PantheonBackup():
         self.working_dir = tempfile.mkdtemp()
         self.backup_dir = os.path.join(self.working_dir, self.project)
         self.name = name + '.tar.gz'
+        self.taskid = taskid
+        self.log = logger.logging.getLogger('pantheon.backup.PantheonBackup')
+        self.log = logger.logging.LoggerAdapter(self.log, 
+                                                {"project": project,
+                                                 "taskid": taskid})
 
     def get_dev_code(self, user):
         """USED FOR REMOTE DEV: Clone of dev git repo.
@@ -45,11 +59,11 @@ class PantheonBackup():
             local('git clone %s -b %s %s' % (source,
                                              self.project,
                                              destination))
-            # Manually set the origin URL so remote pushes have a destination.
+            # Manually set origin URL so remote pushes have a destination.
             with cd(destination):
                 local("sed -i 's/^.*url =.*$/\\turl = " + \
-                "%s@%s.gotpantheon.com:\/var\/git\/projects\/%s/' .git/config"\
-                % (user, server_name, self.project))
+                "%s@%s.gotpantheon.com:\/var\/git\/projects\/%s/' " \
+                ".git/config" % (user, server_name, self.project))
 
     def get_dev_files(self):
         """USED FOR REMOTE DEV: dev site files.
@@ -104,27 +118,48 @@ class PantheonBackup():
         """Backup all files for environments of a project.
 
         """
-        local('mkdir -p %s' % self.backup_dir)
-        for env in self.environments:
-            source = os.path.join(self.server.webroot, self.project, env)
-            local('rsync -avz %s %s' % (source, self.backup_dir))
+        self.log.info('Initialized backup of files.')
+        try:
+            local('mkdir -p %s' % self.backup_dir)
+            for env in self.environments:
+                source = os.path.join(self.server.webroot, self.project, env)
+                local('rsync -avz %s %s' % (source, self.backup_dir))
+        except:
+            self.log.exception('Backup encountered a fatal error.')
+            raise
+        else:
+            self.log.info('Backup successful.')
 
     def backup_data(self):
         """Backup databases for environments of a project.
 
         """
-        for env in self.environments:
-            drupal_vars = pantheon.parse_vhost(self.server.get_vhost_file(
-                                               self.project, env))
-            dest = os.path.join(self.backup_dir, env, 'database.sql')
-            self._dump_data(dest, drupal_vars)
+        self.log.info('Initialized backup of data.')
+        try:
+            for env in self.environments:
+                drupal_vars = pantheon.parse_vhost(self.server.get_vhost_file(
+                                                   self.project, env))
+                dest = os.path.join(self.backup_dir, env, 'database.sql')
+                self._dump_data(dest, drupal_vars)
+        except:
+            self.log.exception('Backup encountered a fatal error.')
+            raise
+        else:
+            self.log.info('Backup successful.')
 
     def backup_repo(self):
         """Backup central repository for a project.
 
         """
-        dest = os.path.join(self.backup_dir, '%s.git' % (self.project))
-        local('rsync -avz /var/git/projects/%s/ %s' % (self.project, dest))
+        self.log.info('Initialized backup of repo.')
+        try:
+            dest = os.path.join(self.backup_dir, '%s.git' % (self.project))
+            local('rsync -avz /var/git/projects/%s/ %s' % (self.project, dest))
+        except:
+            self.log.exception('Backup encountered a fatal error.')
+            raise
+        else:
+            self.log.info('Backup successful.')
 
     def backup_config(self, version):
         """Write the backup config file.
@@ -132,11 +167,18 @@ class PantheonBackup():
                  compatibility as backup formats could change.
 
         """
-        config_file = os.path.join(self.backup_dir, 'pantheon.backup')
-        config = ConfigObj(config_file)
-        config['backup_version'] = version
-        config['project'] = self.project
-        config.write()
+        self.log.info('Initialized backup of config.')
+        try:
+            config_file = os.path.join(self.backup_dir, 'pantheon.backup')
+            config = ConfigObj(config_file)
+            config['backup_version'] = version
+            config['project'] = self.project
+            config.write()
+        except:
+            self.log.exception('Backup encountered a fatal error.')
+            raise
+        else:
+            self.log.info('Backup successful.')
 
     def finalize(self, destination=None):
         """ Create archive, move to destination, remove working dir.
@@ -150,21 +192,42 @@ class PantheonBackup():
         """Tar/gzip the files to be backed up.
 
         """
-        with cd(self.working_dir):
-            local('tar czf %s %s' % (self.name, self.project))
+        self.log.info('Packing archive.')
+        try:
+            with cd(self.working_dir):
+                local('tar czf %s %s' % (self.name, self.project))
+        except:
+            self.log.exception('Packing encountered a fatal error.')
+            raise
+        else:
+            self.log.info('Packing successful.')
 
     def move_archive(self, destination=None):
         """Move archive from temporary working dir to ftp dir.
 
         """
-        if not destination:
-            destination = self.server.ftproot
-        with cd(self.working_dir):
-            local('mv %s %s' % (self.name, destination))
+        self.log.info('Making archive available.')
+        try:
+            if not destination:
+                destination = self.server.ftproot
+            with cd(self.working_dir):
+                local('mv %s %s' % (self.name, destination))
+        except:
+            self.log.exception('Archive encountered a fatal error.')
+            raise
+        else:
+            self.log.info('Archive now available.')
 
     def cleanup(self):
         """ Remove working_dir """
-        local('rm -rf %s' % self.working_dir)
+        self.log.info('Cleaning up.')
+        try:
+            local('rm -rf %s' % self.working_dir)
+        except:
+            self.log.exception('Cleanup encountered a fatal error.')
+            raise
+        else:
+            self.log.info('Cleanup complete.')
 
 
     def _dump_data(self, destination, db_dict):
