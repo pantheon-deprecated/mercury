@@ -396,12 +396,11 @@ class PantheonServer:
 
 #TODO: Add more logging for better coverage
 class PantheonArchive(object):
-
     def __init__(self, path):
+        self.log = logger.logging.getLogger('pantheon.PantheonArchive')
         self.path = path
         self.filetype = self._get_archive_type()
         self.archive = self._open_archive()
-        self.log = logger.logging.getLogger('pantheon.PantheonArchive')
 
     def extract(self):
         """Extract a tar/tar.gz/zip archive into a temporary directory.
