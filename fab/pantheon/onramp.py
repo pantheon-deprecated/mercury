@@ -15,7 +15,7 @@ def get_drupal_root(base):
     """Return the location of drupal root within 'base' dir tree.
 
     """
-    log = logging.logger.getLogger('pantheon.onramp.drupalroot')
+    log = logger.logging.getLogger('pantheon.onramp.drupalroot')
     for root, dirs, files in os.walk(base, topdown=True):
         if ('index.php' in files) and ('sites' in dirs):
             log.info('Drupal root found.')
@@ -70,7 +70,7 @@ class ImportTools(project.BuildTools):
         processing directory for import process.
 
         """
-        self.log = logging.logger.getLogger('pantheon.onramp.ImportTools')
+        self.log = logger.logging.getLogger('pantheon.onramp.ImportTools')
         super(ImportTools, self).__init__()
 
         self.author = 'Jenkins User <jenkins@pantheon>'
