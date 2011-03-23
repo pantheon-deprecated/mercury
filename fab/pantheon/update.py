@@ -4,7 +4,6 @@ import tempfile
 import dbtools
 import pantheon
 import project
-import jenkinstools
 import postback
 import logger
 

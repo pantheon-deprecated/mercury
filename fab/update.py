@@ -117,7 +117,7 @@ def update_pantheon(postback=True):
         log.exception('Pantheon update encountered a fatal error.')
         raise
 
-def update_site_core(project='pantheon', keep=None):
+def update_site_core(project='pantheon', keep=None, taskid=None):
     """Update Drupal core (from Drupal or Pressflow, to latest Pressflow).
        keep: Option when merge fails:
              'ours': Keep local changes when there are conflicts.
@@ -137,7 +137,7 @@ def update_site_core(project='pantheon', keep=None):
         status.drupal_update_status(project)
         status.git_repo_status(project)
 
-def update_code(project, environment, tag=None, message=None):
+def update_code(project, environment, tag=None, message=None, taskid=None):
     """ Update the working-tree for project/environment.
 
     """
@@ -164,7 +164,7 @@ def rebuild_environment(project, environment):
     updater.files_update('live')
     updater.data_update('live')
 
-def update_data(project, environment, source_env, updatedb='True'):
+def update_data(project, environment, source_env, updatedb='True', taskid=None):
     """Update the data in project/environment using data from source_env.
 
     """
@@ -178,7 +178,7 @@ def update_data(project, environment, source_env, updatedb='True'):
     updater.solr_reindex()
     updater.run_cron()
 
-def update_files(project, environment, source_env):
+def update_files(project, environment, source_env, taskid=None):
     """Update the files in project/environment using files from source_env.
 
     """

@@ -1,11 +1,8 @@
-import traceback
-
-import update
-
 from pantheon import install
 from pantheon import status
-from pantheon import jenkinstools
+from pantheon import logger
 
+#TODO: Move logging into pantheon libraries for better coverage.
 def install_site(project='pantheon', profile='pantheon', version=6, **kw):
     """ Create a new Drupal installation.
     project: Installation namespace.
@@ -17,14 +14,18 @@ def install_site(project='pantheon', profile='pantheon', version=6, **kw):
             'project': project,
             'version': version}
 
-    handler = _get_profile_handler(**data)
+    log = logger.logging.getLogger('pantheon.install.site')
+    log = logger.logging.LoggerAdapter(log, data)
+    log.info('Site installation of %s using %s version %s initiated.' % 
+             (project, profile, version))
     try:
+        handler = _get_profile_handler(**data)
         handler.build(**data)
     except:
-        jenkinstools.junit_error(traceback.format_exc(), 'InstallSite')
+        log.exception('Site installation was unsuccessful')
         raise
     else:
-        jenkinstools.junit_pass('', 'InstallSite')
+        log.info('Site installation successful')
 
 class _PantheonProfile(install.InstallTools):
     """ Default Pantheon Installation Profile.

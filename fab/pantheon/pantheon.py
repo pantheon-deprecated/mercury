@@ -12,7 +12,6 @@ import re
 import logger
 
 import postback
-import jenkinstools
 
 from fabric.api import *
 
@@ -221,6 +220,7 @@ def log_drush_backend(data, log=None, context={}):
                 log.debug(context['drush_message'], extra=context)
         no_dupe.add(context['drush_message'])
 
+#TODO: Add more logging for better coverage
 class PantheonServer:
 
     def __init__(self):
@@ -394,12 +394,14 @@ class PantheonServer:
         with open('/etc/pantheon/ldapgroup', 'w') as f:
             f.write('%s' % require_group)
 
+#TODO: Add more logging for better coverage
 class PantheonArchive(object):
 
     def __init__(self, path):
         self.path = path
         self.filetype = self._get_archive_type()
         self.archive = self._open_archive()
+        self.log = logger.logging.getLogger('pantheon.PantheonArchive')
 
     def extract(self):
         """Extract a tar/tar.gz/zip archive into a temporary directory.
@@ -420,14 +422,14 @@ class PantheonArchive(object):
 
         """
         if tarfile.is_tarfile(self.path):
-            jenkinstools.junit_pass('Tar found.','ArchiveType')
+            self.log.info('Tar archive found.')
             return 'tar'
         elif zipfile.is_zipfile(self.path):
-            jenkinstools.junit_pass('Zip found.','ArchiveType')
+            self.log.info('Zip archive found.')
             return 'zip'
         else:
             err = 'Error: Not a valid tar/zip archive.'
-            jenkinstools.junit_fail(err,'ArchiveType')
+            self.log.error(err)
             postback.build_error(err)
 
     def _open_archive(self):
