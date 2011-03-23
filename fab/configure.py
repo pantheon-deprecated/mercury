@@ -4,16 +4,18 @@ import update
 import time
 import urllib2
 import json
-import traceback
 from pantheon import ygg
+from pantheon import logger
 
 from fabric.api import *
 
 from pantheon import pantheon
-from pantheon import jenkinstools
 
+#TODO: Move logging into the pantheon library
 def configure():
     '''configure the Pantheon system.'''
+    log = logger.logging.getLogger('pantheon.configure.configure')
+    log.info('Initialized configuration.')
     server = pantheon.PantheonServer()
     try:
         _test_for_previous_run()
@@ -27,10 +29,10 @@ def configure():
         _mark_incep(server)
         _report()
     except:
-        jenkinstools.junit_error(traceback.format_exc(), 'Configure')
+        log.exception('Configuration was unsuccessful.')
         raise
     else:
-        jenkinstools.junit_pass('Configure successful.', 'Configure')
+        log.info('Configuration was successful.')
 
 def _test_for_previous_run():
     if os.path.exists("/etc/pantheon/incep"):

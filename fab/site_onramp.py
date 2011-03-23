@@ -1,10 +1,9 @@
-import traceback
 
 from pantheon import onramp
 from pantheon import pantheon
 from pantheon import restore
 from pantheon import status
-from pantheon import jenkinstools
+from pantheon import logger
 
 def onramp_site(project='pantheon', url=None, profile=None, **kw):
     """Create a new Drupal installation.
@@ -13,18 +12,22 @@ def onramp_site(project='pantheon', url=None, profile=None, **kw):
     **kw: Optional dictionary of values to process on installation.
 
     """
-
+    #TODO: Move logging into pantheon libraries for better coverage.
+    log = logger.logging.getLogger('pantheon.onramp.site')
+    log = logger.logging.LoggerAdapter(log,
+                                       {"project": project})
     archive = onramp.download(url)
     location = onramp.extract(archive)
     handler = _get_handler(profile, project, location)
 
+    log.info('Initiated site build.')
     try:
         handler.build(location)
     except:
-        jenkinstools.junit_error(traceback.format_exc(), 'OnrampSite')
+        log.exception('Site build encountered an exception.')
         raise
     else:
-        jenkinstools.junit_pass('', 'OnrampSite')
+        log.info('Site build was successful.')
 
 def _get_handler(profile, project, location):
     """Return instantiated profile object.
