@@ -187,7 +187,7 @@ class Updater(project.BuildTools):
             pantheon.log_drush_backend(result, self.log)
 
     def permissions_update(self):
-        self.log.info('Initislized permissions update.')
+        self.log.info('Initialized permissions update.')
         try:
             self.setup_permissions('update', self.project_env)
         except:
