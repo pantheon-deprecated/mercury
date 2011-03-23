@@ -22,10 +22,10 @@ def remove(archive):
         if os.path.exists(path):
             local('rm -f %s' % path)
     except:
-        log.exception('Remove encountered a fatal error.')
+        log.exception('Archive removal was unsuccessful.')
         raise
     else:
-        log.info('Remove successful.')
+        log.info('Archive removal successful.')
 
 class PantheonBackup():
 
