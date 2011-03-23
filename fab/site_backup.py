@@ -1,7 +1,4 @@
-import traceback
-
 from pantheon import backup
-from pantheon import jenkinstools
 
 def backup_site(archive_name, project='pantheon'):
     archive = backup.PantheonBackup(archive_name, project)
