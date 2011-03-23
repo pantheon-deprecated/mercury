@@ -253,10 +253,10 @@ class PantheonBackup():
         try:
             local('rm -rf %s' % self.working_dir)
         except:
-            self.log.exception('Cleanup could not complete.')
+            self.log.exception('Cleanup unsuccessful.')
             raise
         else:
-            self.log.info('Cleanup complete.')
+            self.log.info('Cleanup successful.')
 
 
     def _dump_data(self, destination, db_dict):
