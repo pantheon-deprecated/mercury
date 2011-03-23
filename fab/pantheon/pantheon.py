@@ -188,7 +188,7 @@ def log_drush_backend(data, log=None, context={}):
     context: a dict containing the project and environment
     """
     if not log:
-        log = logger.logging.getLogger('pantheon.drush')
+        log = logger.logging.getLogger('pantheon.pantheon.drush')
 
     # Drush outputs the drupal root and the command being run in its logs
     # unforunately they are buried in log messages.
@@ -397,7 +397,7 @@ class PantheonServer:
 #TODO: Add more logging for better coverage
 class PantheonArchive(object):
     def __init__(self, path):
-        self.log = logger.logging.getLogger('pantheon.PantheonArchive')
+        self.log = logger.logging.getLogger('pantheon.pantheon.PantheonArchive')
         self.path = path
         self.filetype = self._get_archive_type()
         self.archive = self._open_archive()
