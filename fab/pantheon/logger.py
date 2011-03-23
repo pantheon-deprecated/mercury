@@ -2,6 +2,7 @@ import logging
 import logging.handlers
 import logging.config
 import ygg
+import os
 import ConfigParser
 import jenkinstools
 
@@ -71,7 +72,10 @@ class ServiceHandler(logging.Handler):
 class EventHandler(logging.Handler):
     def emit(self, record):
         source = record.name.split('.')[0]
-        thread = record.taskid if hasattr(record, 'taskid') else record.thread
+        # Check for task_id to determine if were running a jenkins job.
+        thread = os.environ.get('task_id')
+        if thread is None:
+            thread = record.thread
         
         details = {"message": record.msg,
                    "type" : record.levelname,
@@ -89,12 +93,12 @@ class EventHandler(logging.Handler):
 
 class JunitHandler(logging.Handler):
     def emit(self, record):
-        # A taskid is only passed in when running a jenkins job.
-        suitename = record.name.split('.')[-1].capitalize()
-        casename = record.funcName.capitalize()
-
-        results = jenkinstools.Junit(suitename, casename)
-        if results.workspace != '/etc/pantheon/jenkins/workspace':
+        # Check for WORKSPACE to determine if were running a jenkins job.
+        workspace = os.environ.get('WORKSPACE')
+        if workspace is not None:
+            suitename = record.name.split('.')[-1].capitalize()
+            casename = record.funcName.capitalize()
+            results = jenkinstools.Junit(suitename, casename)
             if record.levelname in ['ERROR', 'CRITICAL']:
                 results.error(record.msg)
             if record.levelname in ['WARNING']:

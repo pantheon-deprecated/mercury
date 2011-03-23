@@ -117,7 +117,7 @@ def update_pantheon(postback=True):
         log.exception('Pantheon update encountered a fatal error.')
         raise
 
-def update_site_core(project='pantheon', keep=None, taskid=None):
+def update_site_core(project='pantheon', keep=None):
     """Update Drupal core (from Drupal or Pressflow, to latest Pressflow).
        keep: Option when merge fails:
              'ours': Keep local changes when there are conflicts.
@@ -125,7 +125,7 @@ def update_site_core(project='pantheon', keep=None, taskid=None):
              'force': Leave failed merge in working-tree (manual resolve).
              None: Reset to ORIG_HEAD if merge fails.
     """
-    updater = update.Updater(project, 'dev', taskid)
+    updater = update.Updater(project, 'dev')
     result = updater.core_update(keep)
     updater.drupal_updatedb()
     updater.permissions_update()
@@ -137,7 +137,7 @@ def update_site_core(project='pantheon', keep=None, taskid=None):
         status.drupal_update_status(project)
         status.git_repo_status(project)
 
-def update_code(project, environment, tag=None, message=None, taskid=None):
+def update_code(project, environment, tag=None, message=None):
     """ Update the working-tree for project/environment.
 
     """
@@ -146,7 +146,7 @@ def update_code(project, environment, tag=None, message=None, taskid=None):
     if not message:
         message = 'Tagging as %s for release.' % tag
 
-    updater = update.Updater(project, environment, taskid)
+    updater = update.Updater(project, environment)
     updater.test_tag(tag)
     updater.code_update(tag, message)
     updater.drupal_updatedb()
@@ -160,15 +160,15 @@ def rebuild_environment(project, environment):
     """Rebuild the project/environment with files and data from 'live'.
 
     """
-    updater = update.Updater(project, environment, taskid)
+    updater = update.Updater(project, environment)
     updater.files_update('live')
     updater.data_update('live')
 
-def update_data(project, environment, source_env, updatedb='True', taskid=None):
+def update_data(project, environment, source_env, updatedb='True'):
     """Update the data in project/environment using data from source_env.
 
     """
-    updater = update.Updater(project, environment, taskid)
+    updater = update.Updater(project, environment)
     updater.data_update(source_env)
     # updatedb is passed in as a string so we have to evaluate it
     if eval(string.capitalize(updatedb)):
@@ -178,18 +178,18 @@ def update_data(project, environment, source_env, updatedb='True', taskid=None):
     updater.solr_reindex()
     updater.run_cron()
 
-def update_files(project, environment, source_env, taskid=None):
+def update_files(project, environment, source_env):
     """Update the files in project/environment using files from source_env.
 
     """
-    updater = update.Updater(project, environment, taskid)
+    updater = update.Updater(project, environment)
     updater.files_update(source_env)
 
 def git_diff(project, environment, revision_1, revision_2=None):
     """Return git diff
 
     """
-    updater = update.Updater(project, environment, taskid)
+    updater = update.Updater(project, environment)
     if not revision_2:
            updater.run_command('git diff %s' % revision_1)
     else:
@@ -199,7 +199,7 @@ def git_status(project, environment):
     """Return git status
 
     """
-    updater = update.Updater(project, environment, taskid)
+    updater = update.Updater(project, environment)
     updater.run_command('git status')
 
 if __name__ == '__main__':

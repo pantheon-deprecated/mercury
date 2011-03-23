@@ -12,19 +12,16 @@ from fabric.api import *
 
 class Updater(project.BuildTools):
 
-    def __init__(self, project, environment, taskid=None):
+    def __init__(self, project, environment):
         super(Updater, self).__init__()
 
         self.project_env = environment
         self.author = 'Jenkins User <jenkins@pantheon>'
         self.env_path = os.path.join(self.project_path, environment)
-        self.taskid = taskid
         self.log = logger.logging.getLogger('pantheon.update.Updater')
         self.log = logger.logging.LoggerAdapter(self.log, 
                                                 {"project": project,
-                                                 "environment": environment,
-                                                 "taskid": taskid})
-
+                                                 "environment": environment})
 
     def core_update(self, keep=None):
         """Update core in dev environment.

@@ -9,7 +9,7 @@ import pantheon
 import logger
 import ygg
 
-def remove(archive, taskid=None):
+def remove(archive):
     """Remove a backup tarball from the server.
     archive: name of the archive to remove.
 
@@ -29,7 +29,7 @@ def remove(archive, taskid=None):
 
 class PantheonBackup():
 
-    def __init__(self, name, project, taskid=None):
+    def __init__(self, name, project):
         """Initialize Backup Object.
         name: name of backup (resulting file: name.tar.gz)
         project: name of project to backup.
@@ -41,11 +41,9 @@ class PantheonBackup():
         self.working_dir = tempfile.mkdtemp()
         self.backup_dir = os.path.join(self.working_dir, self.project)
         self.name = name + '.tar.gz'
-        self.taskid = taskid
         self.log = logger.logging.getLogger('pantheon.backup.PantheonBackup')
         self.log = logger.logging.LoggerAdapter(self.log, 
-                                                {"project": project,
-                                                 "taskid": taskid})
+                                                {"project": project})
 
     def get_dev_code(self, user):
         """USED FOR REMOTE DEV: Clone of dev git repo.
