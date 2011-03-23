@@ -1,10 +1,4 @@
-import os
-import string
-import traceback
-
 from pantheon import backup
-from pantheon import jenkinstools
-from pantheon import pantheon
 
 DESTINATION = '/srv/dev_downloads'
 
@@ -16,19 +10,13 @@ def get_dev_downloads(resource, project, user=None):
     user: user that has ssh access to box.
 
     """
-    try:
-        archive_name = 'local_dev_%s' % resource
-        resource_handler = {'all': _dev_all,
-                            'files': _dev_files,
-                            'data': _dev_data,
-                            'code': _dev_code,
-                            'drushrc': _dev_drushrc}
-        resource_handler[resource](archive_name, project, user)
-    except:
-        jenkinstools.junit_error(traceback.format_exc(), 'DevDownloads')
-        raise
-    else:
-        jenkinstools.junit_pass('', 'DevDownloads')
+    archive_name = 'local_dev_%s' % resource
+    resource_handler = {'all': _dev_all,
+                        'files': _dev_files,
+                        'data': _dev_data,
+                        'code': _dev_code,
+                        'drushrc': _dev_drushrc}
+    resource_handler[resource](archive_name, project, user)
 
 def _dev_all(archive_name, project, user):
     archive = backup.PantheonBackup(archive_name, project)
