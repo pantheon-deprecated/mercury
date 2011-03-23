@@ -6,6 +6,7 @@ import drupaltools
 import pantheon
 import project
 import postback
+import logger
 
 from fabric.api import *
 #TODO: Improve the logging messages
@@ -69,12 +70,12 @@ class ImportTools(project.BuildTools):
         processing directory for import process.
 
         """
+        self.log = logging.logger.getLogger('pantheon.onramp.ImportTools')
         super(ImportTools, self).__init__()
 
         self.author = 'Jenkins User <jenkins@pantheon>'
         self.destination = os.path.join(self.server.webroot, self.project)
         self.force_update = False
-        self.log = logging.logger.getLogger('pantheon.onramp.ImportTools')
 
     def parse_archive(self, extract_location):
         """Get the site name and database dump file from archive to be imported.
