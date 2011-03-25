@@ -3,24 +3,25 @@ import tempfile
 
 import dbtools
 import drupaltools
-import jenkinstools
 import pantheon
 import project
 import postback
+import logger
 
 from fabric.api import *
+#TODO: Improve the logging messages
 
 def get_drupal_root(base):
     """Return the location of drupal root within 'base' dir tree.
 
     """
+    log = logger.logging.getLogger('pantheon.onramp.drupalroot')
     for root, dirs, files in os.walk(base, topdown=True):
         if ('index.php' in files) and ('sites' in dirs):
-            jenkinstools.junit_pass('Drupal root found.', 'DrupalRoot')
+            log.info('Drupal root found.')
             return root
-    err = 'Cannot locate drupal install in archive.'
-    jenkinstools.junit_fail(err, 'DrupalRoot')
-    postback.build_error(err)
+    log.error('Cannot locate drupal install in archive.')
+    postback.build_error('Cannot locate drupal install in archive.')
 
 def download(url):
     if url.startswith('file:///'):
@@ -69,6 +70,7 @@ class ImportTools(project.BuildTools):
         processing directory for import process.
 
         """
+        self.log = logger.logging.getLogger('pantheon.onramp.ImportTools')
         super(ImportTools, self).__init__()
 
         self.author = 'Jenkins User <jenkins@pantheon>'
@@ -201,7 +203,7 @@ class ImportTools(project.BuildTools):
             if os.path.islink(file_dest):
                 local('rm -f %s' % file_dest)
                 msg = 'File path was broken symlink. Site files may be missing'
-                jenkinstools.junit_fail(msg, 'SetupFilesDir')
+                self.log.info(msg)
                 postback.build_warning(msg)
             local('mkdir -p %s' % file_dest)
 
@@ -267,17 +269,14 @@ class ImportTools(project.BuildTools):
                     # If importing vanilla drupal, this module wont exist.
                     if module != 'cookie_cache_bypass':
                         message = 'Could not enable %s module.' % module
-                        jenkinstools.junit_fail('%s\n%s' % 
-                                               (message, result.stderr), 
-                                               'EnableModules', module)
+                        self.log.warning('%s\n%s' % (message, result.stderr))
                         postback.build_warning(message)
                         print message
                         print '\n%s module could not be enabled. ' % module + \
                               'Error Message:'
                         print '\n%s' % result.stderr
                 else:
-                    jenkinstools.junit_pass('%s enabled.' % module, 
-                                           'EnableModules', module)
+                    self.log.info('%s enabled.' % module)
 
         if self.version == 6:
             drupal_vars = {
@@ -391,14 +390,14 @@ class ImportTools(project.BuildTools):
         if site_count > 1:
             err = 'Multiple settings.php files were found:\n' + \
                   '\n'.join(sites)
-            jenkinstools.junit_fail(err, 'SiteCount')
+            self.log.error(err)
             postback.build_error(err)
         elif site_count == 0:
             err = 'Error: No settings.php files were found.'
-            jenkinstools.junit_fail(err, 'SiteCount')
+            self.log.error(err)
             postback.build_error(err)
         else:
-            jenkinstools.junit_pass('Site found.', 'SiteCount')
+            self.log.info('Site found.')
             return sites[0]
 
     def _get_database_dump(self):
@@ -413,16 +412,15 @@ class ImportTools(project.BuildTools):
         count = len(sql_dump)
         if count == 0:
             err = 'No database dump files were found (*.mysql or *.sql)'
-            jenkinstools.junit_fail(err, 'MYSQLCount')
+            self.log.error(err)
             postback.build_error(err)
         elif count > 1:
             err = 'Multiple database dump files were found:\n' + \
                   '\n'.join(sql_dump)
-            jenkinstools.junit_fail(err, 'MYSQLCount')
+            self.log.error(err)
             postback.build_error(err)
         else:
-            jenkinstools.junit_pass('MYSQL Dump found at %s' % 
-                                   (sql_dump[0]), 'MYSQLCount')
+            self.log.info('MYSQL Dump found at %s' % sql_dump[0])
             return sql_dump[0]
 
     def _get_drupal_version_info(self):
@@ -433,11 +431,10 @@ class ImportTools(project.BuildTools):
         version = drupaltools.get_drupal_version(self.working_dir)
         if not version:
             err = 'Error: This does not appear to be a Drupal 6 site.'
-            jenkinstools.junit_fail(err, 'DrupalVersion')
+            self.log.error(err)
             postback.build_error(err)
         else:
-            jenkinstools.junit_pass('Drupal version %s found.' % (version),
-                                   'DrupalVersion')
+            self.log.info('Drupal version %s found.' % (version))
 
         platform = drupaltools.get_drupal_platform(self.working_dir)
 

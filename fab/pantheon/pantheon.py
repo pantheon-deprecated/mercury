@@ -12,7 +12,6 @@ import re
 import logger
 
 import postback
-import jenkinstools
 
 from fabric.api import *
 
@@ -189,14 +188,13 @@ def log_drush_backend(data, log=None, context={}):
     context: a dict containing the project and environment
     """
     if not log:
-        log = logger.logging.getLogger('pantheon.drush')
+        log = logger.logging.getLogger('pantheon.pantheon.drush')
 
     # Drush outputs the drupal root and the command being run in its logs
     # unforunately they are buried in log messages.
     data = parse_drush_backend(data)
     if data['error_status'] == 1:
         log.error(data['error_log']['DRUSH_NOT_COMPLETED'][0], extra=context)
-        raise Exception(data['error_log']['DRUSH_NOT_COMPLETED'][0])
     if 'command' not in context:
         p1 = re.compile('Found command: %s \(commandfile' % '(.*)')
     no_dupe = set()
@@ -221,6 +219,7 @@ def log_drush_backend(data, log=None, context={}):
                 log.debug(context['drush_message'], extra=context)
         no_dupe.add(context['drush_message'])
 
+#TODO: Add more logging for better coverage
 class PantheonServer:
 
     def __init__(self):
@@ -394,9 +393,10 @@ class PantheonServer:
         with open('/etc/pantheon/ldapgroup', 'w') as f:
             f.write('%s' % require_group)
 
+#TODO: Add more logging for better coverage
 class PantheonArchive(object):
-
     def __init__(self, path):
+        self.log = logger.logging.getLogger('pantheon.pantheon.PantheonArchive')
         self.path = path
         self.filetype = self._get_archive_type()
         self.archive = self._open_archive()
@@ -420,14 +420,14 @@ class PantheonArchive(object):
 
         """
         if tarfile.is_tarfile(self.path):
-            jenkinstools.junit_pass('Tar found.','ArchiveType')
+            self.log.info('Tar archive found.')
             return 'tar'
         elif zipfile.is_zipfile(self.path):
-            jenkinstools.junit_pass('Zip found.','ArchiveType')
+            self.log.info('Zip archive found.')
             return 'zip'
         else:
             err = 'Error: Not a valid tar/zip archive.'
-            jenkinstools.junit_fail(err,'ArchiveType')
+            self.log.error(err)
             postback.build_error(err)
 
     def _open_archive(self):

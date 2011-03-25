@@ -4,16 +4,18 @@ import update
 import time
 import urllib2
 import json
-import traceback
 from pantheon import ygg
+from pantheon import logger
 
 from fabric.api import *
 
 from pantheon import pantheon
-from pantheon import jenkinstools
 
+#TODO: Move logging into the pantheon library
 def configure():
     '''configure the Pantheon system.'''
+    log = logger.logging.getLogger('pantheon.configure.configure')
+    log.info('Initialized configuration.')
     server = pantheon.PantheonServer()
     try:
         _test_for_previous_run()
@@ -27,10 +29,10 @@ def configure():
         _mark_incep(server)
         _report()
     except:
-        jenkinstools.junit_error(traceback.format_exc(), 'Configure')
+        log.exception('Configuration was unsuccessful.')
         raise
     else:
-        jenkinstools.junit_pass('Configure successful.', 'Configure')
+        log.info('Configuration was successful.')
 
 def _test_for_previous_run():
     if os.path.exists("/etc/pantheon/incep"):
@@ -103,15 +105,15 @@ def _configure_certificates():
     ygg.send_event('Authorization', 'Certificate issued. Verification result:\n' + verification)
 
 def _configure_server(server):
-    ygg.send_event('Software updates', 'Package updates have started.')
+    ygg.send_event('Software updates', 'Configuration updates have started.')
     # Get any new packages.
-    server.update_packages()
-    # Update pantheon code, run bcfg2, restart jenkins.
+    #server.update_packages()
+    # Update pantheon code, run bcfg2, restart Jenkins.
     update.update_pantheon(postback=False)
     # Create the tunable files.
     local('cp /etc/pantheon/templates/tuneables /etc/pantheon/server_tuneables')
     local('chmod 755 /etc/pantheon/server_tuneables')
-    ygg.send_event('Software updates', 'Package updates have finished.')
+    ygg.send_event('Software updates', 'Configuration updates have finished.')
 
 def _configure_postfix(server):
     ygg.send_event('Email delivery configuration', 'Postfix is now being configured.')

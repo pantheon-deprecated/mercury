@@ -11,7 +11,8 @@ def deploy():
                 'python-paramiko',
                 'python-pip',
                 'python-crypto',
-                'python-setuptools']
+                'python-setuptools',
+                'python-lxml']
 
     os.system('apt-get install -y %s' % ' '.join(packages))
     os.system('pip install fabric==0.9.3')

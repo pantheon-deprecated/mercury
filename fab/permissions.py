@@ -2,15 +2,17 @@
 import os
 import string
 import tempfile
-import traceback
 
 from fabric.api import *
 from pantheon import pantheon
-from pantheon import jenkinstools
+from pantheon import logger
 
+#TODO: Move logging into pantheon libraries for better coverage.
 def configure_permissions(base_domain = "example.com",
-                      require_group = None,
-                      server_host = None):
+                          require_group = None,
+                          server_host = None):
+    log = logger.logging.getLogger('pantheon.permissions.configure')
+    log.info('Initialized permissions configuration.')
     try:
         server = pantheon.PantheonServer()
 
@@ -83,10 +85,10 @@ def configure_permissions(base_domain = "example.com",
         set_acl_groupwritability(require_group, '/var/www')
         set_acl_groupwritability(require_group, '/var/git/projects')
     except:
-        jenkinstools.junit_error(traceback.format_exc(), 'ConfigPermissions')
+        log.exception('Permission configuration unsuccessful.')
         raise
     else:
-        jenkinstools.junit_pass('Configuration completed.', 'ConfigurePermissions')
+        log.info('Permissions configuration successful.')
 
 def _ldap_domain_to_ldap(domain):
     return ','.join(['dc=%s' % part.lower() for part in domain.split('.')])
@@ -98,3 +100,4 @@ def set_acl_groupwritability(require_group, directory):
     local('setfacl --recursive --no-mask --modify group:%s:rwx %s' % (require_group, directory))
     local('setfacl --recursive --modify default:mask:rwx %s' % directory)
     local('setfacl --recursive --modify default:group:%s:rwx %s' % (require_group, directory))
+

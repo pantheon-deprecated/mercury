@@ -2,10 +2,11 @@ import logging
 import logging.handlers
 import logging.config
 import ygg
+import os
 import ConfigParser
 import jenkinstools
 
-log = logging.getLogger("logger")
+log = logging.getLogger("pantheon.logger")
 
 class NullHandler(logging.Handler):
     def emit(self, record):
@@ -23,7 +24,7 @@ class DrushHandler(logging.Handler):
                    "environment": record.environment,
                    "command": record.command}
         labels = ['source-%s' % source, 'inbox', 'all']
-        ygg.send_event(record.name, details, labels, source=source)
+        ygg.send_event(record.thread, details, labels, source=source)
 
 class ServiceHandler(logging.Handler):
     def emit(self, record):
@@ -71,7 +72,10 @@ class ServiceHandler(logging.Handler):
 class EventHandler(logging.Handler):
     def emit(self, record):
         source = record.name.split('.')[0]
-        thread = record.taskid if hasattr(record, 'taskid') else record.name
+        # Check for task_id to determine if were running a jenkins job.
+        thread = os.environ.get('task_id')
+        if thread is None:
+            thread = record.thread
         
         details = {"message": record.msg,
                    "type" : record.levelname,
@@ -89,22 +93,26 @@ class EventHandler(logging.Handler):
 
 class JunitHandler(logging.Handler):
     def emit(self, record):
-        ts = record.name.split('.')[0].capitalize()
-        tc = record.name.split('.')[-1].capitalize()
-        if ts == tc:
-            tc=None
-
-        if record.levelname in ['ERROR', 'CRITICAL']:
-            jenkinstools.junit_error(record.msg, ts, tc)
-        if record.levelname in ['WARNING']:
-            jenkinstools.junit_fail(record.msg, ts, tc)
-        if record.levelname in ['INFO']:
-            jenkinstools.junit_pass(record.msg, ts, tc)
+        # Check for WORKSPACE to determine if were running a jenkins job.
+        workspace = os.environ.get('WORKSPACE')
+        if workspace is not None:
+            suitename = record.name.split('.')[-1].capitalize()
+            casename = record.funcName.capitalize()
+            results = jenkinstools.Junit(suitename, casename)
+            if record.levelname in ['ERROR', 'CRITICAL']:
+                results.error(record.msg)
+            if record.levelname in ['WARNING']:
+                results.fail(record.msg)
+            if record.levelname in ['INFO']:
+                results.success(record.msg)
+        else:
+            pass
 
 # register our custom handlers so they can be used by the config file
 logging.handlers.DrushHandler = DrushHandler
 logging.handlers.ServiceHandler = ServiceHandler
 logging.handlers.EventHandler = EventHandler
+logging.handlers.JunitHandler = JunitHandler
 logging.handlers.NullHandler = NullHandler
 
 with open('/opt/pantheon/fab/pantheon/logging.conf', 'r') as f:

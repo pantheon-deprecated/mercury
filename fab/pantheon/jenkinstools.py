@@ -1,90 +1,89 @@
 import os
+from lxml import etree
 
-from xml.dom.minidom import Document
-from xml.dom.minidom import parse
+class Junit():
+    def __init__(self, suitename, casename):
+        self.suitename = suitename.capitalize()
+        self.casename = "test%s" % casename.capitalize()
+        self.workspace = get_workspace()
 
-def junit_pass(msg, suitename, casename=None):
-    """ Create a junit file for a passed test
-        msg: The message to add
-        suitename: Name used for the testsuite.
-        casename: Name used for the testcase.
-    """
-    if not casename:
-        casename = suitename
-    doc = _base_xml(suitename)
-    testcase = doc.createElement("testcase")
-    testcase.setAttribute("name", "test%s" % casename)
-    txt = doc.createTextNode(msg)
-    testcase.appendChild(txt)
-    testsuite = doc.getElementsByTagName('testsuite')[0]
-    testsuite.appendChild(testcase)
-    _write_junit_file(doc, suitename)
+    def success(self, msg):
+        """ Create a junit file for a passed test
+            msg: The message to add
+        """
+        suites = self._base_xml()
+        suite = self._get_suite(suites)
+        case = self._get_case(suite)
+        case.text = '\n'.join([case.text, msg]) if case.text else msg
+        self._write_junit_file(suites)
 
-def junit_fail(msg, suitename, casename=None):
-    """ Create a junit file for a failed test
-        msg: The message to add
-        suitename: Name used for the testsuite.
-        casename: Name used for the testcase.
-    """
+    def fail(self, msg):
+        """ Create a junit file for a failed test
+            msg: The message to add
+        """
+        suites = self._base_xml()
+        suite = self._get_suite(suites)
+        case = self._get_case(suite)
+        fail = self._get_fail(case)
+        fail.text = '\n'.join([fail.text, msg]) if fail.text else msg
+        self._write_junit_file(suites)
 
-    if not casename:
-        casename = suitename
-    doc = _base_xml(suitename)
-    testcase = doc.createElement("testcase")
-    testcase.setAttribute("name", "test%s" % casename)
-    failure = doc.createElement("failure")
-    txt = doc.createTextNode(msg)
-    failure.appendChild(txt)
-    testcase.appendChild(failure)
-    testsuite = doc.getElementsByTagName('testsuite')[0]
-    testsuite.appendChild(testcase)
-    _write_junit_file(doc, suitename)
+    def error(self, msg):
+        """ Create a junit file for a error
+            msg: The message to add
+        """
+        suites = self._base_xml()
+        suite = self._get_suite(suites)
+        case = self._get_case(suite)
+        error = self._get_error(case)
+        error.text = '\n'.join([error.text, msg]) if error.text else msg
+        self._write_junit_file(suites)
 
-def junit_error(msg, suitename, casename=None):
-    """ Create a junit file for a error
-        msg: The message to add
-        suitename: Name used for the testsuite.
-        casename: Name used for the testcase.
-    """
+    def _get_fail(self, case):
+        fail = case.find("failure")
+        if fail is None:
+            return etree.SubElement(case, "failure")
+        return fail
 
-    if not casename:
-        casename = suitename
-    doc = _base_xml(suitename)
-    testcase = doc.createElement("testcase")
-    testcase.setAttribute("name", "test%s" % casename)
-    error = doc.createElement("error")
-    txt = doc.createTextNode(msg)
-    error.appendChild(txt)
-    testcase.appendChild(error)
-    testsuite = doc.getElementsByTagName('testsuite')[0]
-    testsuite.appendChild(testcase)
-    _write_junit_file(doc, suitename)
+    def _get_error(self, case):
+        error = case.find("error")
+        if error is None:
+            return etree.SubElement(case, "error")
+        return error
 
-def _base_xml(suitename):
-    """ Creates the base xml doc structure
-        suitename: Name used for the testsuite.
-    """
-    try:
-        f = open(os.path.join(get_workspace(), "%s.xml" % suitename), 'r')
-    except:
-        doc = Document()
-        testsuites = doc.createElement("testsuites")
-        doc.appendChild(testsuites)
-        testsuite = doc.createElement("testsuite")
-        testsuite.setAttribute("name", suitename)
-        testsuites.appendChild(testsuite)
-    else:
-        doc = parse(f)
-        f.close()
-    return doc
+    def _get_suite(self, suites):
+        suite = suites.find("testsuite[@name='%s']" % self.suitename)
+        if suite is None:
+            return etree.SubElement(suites, "testsuite", name=self.suitename)
+        return suite
 
-def _write_junit_file(doc, filename='results'):
-    """ Write a new junit file
-        doc: The structured xml document to write to a file
-        filename: The filename for the junit report
-    """
-    with open(os.path.join(get_workspace(), "%s.xml" % filename), 'w') as f:
-        f.write(doc.toprettyxml(indent="  "))
+    def _get_case(self, suite):
+        case = suite.find("testcase[@name='%s']" % self.casename)
+        if case is None:
+            return etree.SubElement(suite, "testcase", name=self.casename)
+        return case
+
+    def _base_xml(self):
+        """ Creates the base xml doc structure
+            suitename: Name used for the testsuite.
+        """
+        try:
+            f = open(os.path.join(self.workspace, "results.xml"), 'r')
+        except:
+            doc = etree.Element("testsuites")
+            return doc
+        else:
+            doc = etree.parse(f)
+            f.close()
+            return doc.getroot()
+
+    def _write_junit_file(self, doc):
+        """ Write a new junit file
+            doc: The Element Tree object to write to a file
+        """
+        doc = etree.ElementTree(doc)
+        with open(os.path.join(self.workspace, "results.xml"), 'w') as f:
+            doc.write(f, xml_declaration=True, pretty_print=True)
 
 def get_workspace():
     """Return the workspace to store build data information.
