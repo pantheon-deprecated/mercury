@@ -65,7 +65,7 @@ class PantheonBackup():
                     "%s@%s.gotpantheon.com:\/var\/git\/projects\/%s/' " \
                     ".git/config" % (user, server_name, self.project))
         except:
-            self.log.exception('Archiveing of code was unsuccessful.')
+            self.log.exception('Archival of code was unsuccessful.')
             raise
         else:
             self.log.info('Archive of code successful.')
@@ -89,7 +89,7 @@ class PantheonBackup():
                                            'dev_code/sites/default')
             local('rsync -avz %s %s' % (source, destination))
         except:
-            self.log.exception('Archiveing of files was unsuccessful.')
+            self.log.exception('Archival of files was unsuccessful.')
             raise
         else:
             self.log.info('Archive of files successful.')
@@ -106,7 +106,7 @@ class PantheonBackup():
             destination = os.path.join(self.backup_dir, 'dev_database.sql')
             self._dump_data(destination, drupal_vars)
         except:
-            self.log.exception('Archiveing of data was unsuccessful.')
+            self.log.exception('Archival of data was unsuccessful.')
             raise
         else:
             self.log.info('Archive of data successful.')
@@ -138,7 +138,7 @@ class PantheonBackup():
             with open(destination, 'w') as f:
                 f.write('<?php\n%s\n' % env_aliases)
         except:
-            self.log.exception('Archiveing of drush was unsuccessful.')
+            self.log.exception('Archival of drush was unsuccessful.')
             raise
         else:
             self.log.info('Archive of drush successful.')
