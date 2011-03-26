@@ -280,7 +280,7 @@ class PantheonBackup():
 
     def cleanup(self):
         """ Remove working_dir """
-        self.log.info('Cleaning up.')
+        self.log.debug('Cleaning up.')
         try:
             local('rm -rf %s' % self.working_dir)
         except:
