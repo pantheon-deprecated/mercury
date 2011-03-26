@@ -15,7 +15,6 @@ from pantheon import pantheon
 def configure():
     '''configure the Pantheon system.'''
     log = logger.logging.getLogger('pantheon.configure.configure')
-    log.info('Initialized configuration.')
     server = pantheon.PantheonServer()
     try:
         _test_for_previous_run()
