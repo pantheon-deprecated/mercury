@@ -194,7 +194,7 @@ def log_drush_backend(data, log=None, context={}):
     # unforunately they are buried in log messages.
     data = parse_drush_backend(data)
     if data['error_status'] == 1:
-        log.error(data['error_log']['DRUSH_NOT_COMPLETED'][0], extra=context)
+        log.error('Drush command could not be completed successfully.')
     if 'command' not in context:
         p1 = re.compile('Found command: %s \(commandfile' % '(.*)')
     no_dupe = set()
