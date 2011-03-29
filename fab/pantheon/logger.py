@@ -66,7 +66,7 @@ class ServiceHandler(logging.Handler):
                     "message": record.msg,
                     "type" : record.levelname,
                     "timestamp": record.created}
-            # Set service status in ygg 
+            # Set service status in ygg
             ygg.set_service(service, send)
 
 class EventHandler(logging.Handler):
@@ -76,7 +76,7 @@ class EventHandler(logging.Handler):
         thread = os.environ.get('task_id')
         if thread is None:
             thread = record.thread
-        
+
         details = {"message": record.msg,
                    "type" : record.levelname,
                    "timestamp": record.created}
@@ -115,6 +115,8 @@ logging.handlers.EventHandler = EventHandler
 logging.handlers.JunitHandler = JunitHandler
 logging.handlers.NullHandler = NullHandler
 
-with open('/opt/pantheon/fab/pantheon/logging.conf', 'r') as f:
-    logging.config.fileConfig(f)
-
+try:
+    with open('/opt/pantheon/fab/pantheon/logging.conf', 'r') as f:
+        logging.config.fileConfig(f)
+except IOError:
+    pass
