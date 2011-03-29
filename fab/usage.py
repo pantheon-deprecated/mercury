@@ -64,6 +64,6 @@ def _set_bandwidth(now):
     _set_batch_usage(batch_post)
 
 
-def update_usage():
+def publish_usage():
     now = time.time()
     _set_bandwidth(now)
