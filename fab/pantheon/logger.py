@@ -7,24 +7,11 @@ import ConfigParser
 import jenkinstools
 
 log = logging.getLogger("pantheon.logger")
+certificate = '/etc/pantheon/system.pem'
 
 class NullHandler(logging.Handler):
     def emit(self, record):
         pass
-
-class DrushHandler(logging.Handler):
-    def emit(self, record):
-        source = record.name.split('.')[0]
-        details = {"message": record.msg,
-                   "type": record.type,
-                   "timestamp": record.timestamp,
-                   "memory": record.memory,
-                   "error": record.error,
-                   "project": record.project,
-                   "environment": record.environment,
-                   "command": record.command}
-        labels = ['source-%s' % source, 'inbox', 'all']
-        ygg.send_event(record.thread, details, labels, source=source)
 
 class ServiceHandler(logging.Handler):
     def emit(self, record):
@@ -66,30 +53,34 @@ class ServiceHandler(logging.Handler):
                     "message": record.msg,
                     "type" : record.levelname,
                     "timestamp": record.created}
-            # Set service status in ygg
-            ygg.set_service(service, send)
+            if os.path.isfile(certificate):
+                # Set service status in ygg
+                ygg.set_service(service, send)
 
 class EventHandler(logging.Handler):
     def emit(self, record):
-        source = record.name.split('.')[0]
-        # Check for task_id to determine if were running a jenkins job.
-        thread = os.environ.get('task_id')
-        if thread is None:
-            thread = record.thread
+        if os.path.isfile(certificate):
+            source = record.name.split('.')[0]
+            # Check for task_id to determine if were running a jenkins job.
+            thread = os.environ.get('task_id')
+            if thread is None:
+                thread = record.thread
 
-        details = {"message": record.msg,
-                   "type" : record.levelname,
-                   "timestamp": record.created}
-        labels = ['source-%s' % source, 'inbox', 'all']
-        if hasattr(record, 'labels'):
-            labels = list(set(labels).union(set(record.labels)))
-        if hasattr(record, 'project'):
-            details['project'] = record.project
-        if hasattr(record, 'environment'):
-            details['environment'] = record.environment
-        if hasattr(record, 'command'):
-            details['command'] = record.command
-        ygg.send_event(thread, details, labels, source=source)
+            details = {"message": record.msg,
+                       "type" : record.levelname,
+                       "timestamp": record.created}
+            labels = ['source-%s' % source, 'inbox', 'all']
+            if hasattr(record, 'labels'):
+                labels = list(set(labels).union(set(record.labels)))
+            if hasattr(record, 'project'):
+                details['project'] = record.project
+            if hasattr(record, 'environment'):
+                details['environment'] = record.environment
+            if hasattr(record, 'command'):
+                details['command'] = record.command
+            ygg.send_event(thread, details, labels, source=source)
+        else:
+            pass
 
 class JunitHandler(logging.Handler):
     def emit(self, record):
@@ -109,7 +100,6 @@ class JunitHandler(logging.Handler):
             pass
 
 # register our custom handlers so they can be used by the config file
-logging.handlers.DrushHandler = DrushHandler
 logging.handlers.ServiceHandler = ServiceHandler
 logging.handlers.EventHandler = EventHandler
 logging.handlers.JunitHandler = JunitHandler
