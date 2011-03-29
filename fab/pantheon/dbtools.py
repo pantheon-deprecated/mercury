@@ -1,3 +1,4 @@
+import logger
 import MySQLdb
 import os
 import pantheon
@@ -108,6 +109,7 @@ class MySQLConn(object):
         query: SQL statement.
 
         """
+        log = logger.logging.getLogger('pantheon.dbtools.execute')
         try:
             self.cursor.execute(query)
             self.connection.commit()
@@ -117,7 +119,7 @@ class MySQLConn(object):
             if not warn_only:
                 raise
         except MySQLdb.Warning, w:
-            print "MySQL Warning: %s" % (w)
+            log.warning("MySQL Warning: %s" % (w))
         if fetchall:
             return self.cursor.fetchall()
         else:

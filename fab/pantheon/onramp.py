@@ -190,6 +190,7 @@ class ImportTools(project.BuildTools):
         create a symlink in their former location.
 
         """
+        log = logger.logging.getLogger('pantheon.onramp.setupfilesdir')
         file_location = self._get_files_dir()
         if file_location:
             file_path = os.path.join(self.working_dir, file_location)
@@ -225,10 +226,15 @@ class ImportTools(project.BuildTools):
             file_var = 'file_directory_path'
             file_var_temp = 'file_directory_temp'
             # Change the base path in files table for Drupal 6
-            local('mysql -u root %s -e "UPDATE files SET filepath = \
-                   REPLACE(filepath,\'%s\',\'%s\');"'% (database,
+            try:
+                local('mysql -u root %s -e "UPDATE files SET filepath = \
+                       REPLACE(filepath,\'%s\',\'%s\');"'% (database,
                                                         file_location,
                                                         'sites/default/files'))
+            except:
+                log.warning('Could not update filepaths in database. \
+                             Possible problem with database table prefixes.')
+            
         elif self.version == 7:
             file_var = 'file_public_path'
             file_var_temp = 'file_temporary_path'
@@ -315,7 +321,7 @@ class ImportTools(project.BuildTools):
         # apachesolr module for drupal 7 stores config in db.
         # TODO: use drush/drupal api to do this work.
         if self.version == 7:
-            db.execute('TRUNCATE apachesolr_server')
+            db.execute(query='TRUNCATE apachesolr_server', warn_only=False)
             for env in self.environments:
                 config = self.config['environments'][env]['solr']
                 host = config['solr_host']
@@ -324,10 +330,10 @@ class ImportTools(project.BuildTools):
                 name = '%s %s' % (self.project, env)
                 path = config['solr_path']
 
-                db.execute('INSERT INTO apachesolr_server ' + \
+                db.execute(query='INSERT INTO apachesolr_server ' + \
                     '(host, port, server_id, name, path) VALUES ' + \
                     '("%s", "%s", "%s", "%s", "%s")' % \
-                           (host, port, sid, name, path))
+                           (host, port, sid, name, path), warn_only=False)
         db.close()
 
         # D7: apachesolr config link will not display until cache cleared?
