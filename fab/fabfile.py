@@ -10,5 +10,6 @@ from site_backup import *
 from site_devel import *
 from site_onramp import *
 from site_install import *
+from usage import *
 from update import *
 env.hosts = ['pantheon@localhost']

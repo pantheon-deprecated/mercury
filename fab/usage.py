@@ -3,7 +3,6 @@ import subprocess
 import datetime
 import json
 import time
-import pprint
 
 CERTIFICATE = "/etc/pantheon/system.pem"
 API_SERVER = "api.getpantheon.com"
@@ -15,12 +14,12 @@ connection = httplib.HTTPSConnection(
     cert_file = CERTIFICATE
 )
 
-now = time.time()
 
 def get_nearest_hour(unix_timestamp):
     return unix_timestamp - (unix_timestamp % 3600)
 
-def set_batch_usage(batch_post):
+
+def _set_batch_usage(batch_post):
     body = json.dumps(batch_post)
     connection.request("POST", "/sites/self/usage/", body)
     complete_response = connection.getresponse()
@@ -30,10 +29,13 @@ def set_batch_usage(batch_post):
         raise Exception('Could not set usage.')
 
 
-def set_bandwith():
+def _set_bandwidth(now):
     command = ["/usr/bin/vnstat", "--hours", "--dumpdb"]
     lines = subprocess.Popen(command, stdout=subprocess.PIPE).communicate()[0].split("\n")
     batch_post = []
+
+    print("Recent bandwidth (inbound/outbound KiB):")
+
     for line in lines:
         # Ignore blank or non-hour lines.
         if line == "" or not line.startswith("h;"):
@@ -48,7 +50,7 @@ def set_bandwith():
         outbound_kib = parts[4]
 
         stamp = datetime.datetime.utcfromtimestamp(hour)
-        print("[Bandwidth] [%s] %s/%s" % (stamp.strftime("%Y-%m-%d %H:%M:%S"), inbound_kib, outbound_kib))
+        print("[%s] %s/%s" % (stamp.strftime("%Y-%m-%d %H:%M:%S"), inbound_kib, outbound_kib))
 
         batch_post.append({"metric": "bandwidth_in",
                            "start": hour,
@@ -58,7 +60,10 @@ def set_bandwith():
                            "start": hour,
                            "duration": 3600,
                            "amount": outbound_kib})
-    set_batch_usage(batch_post)
+    print("Publishing to the Pantheon API...")
+    _set_batch_usage(batch_post)
 
 
-set_bandwith()
+def publish_usage():
+    now = time.time()
+    _set_bandwidth(now)
