@@ -221,8 +221,12 @@ class PantheonBackup():
         """ Create archive, move to destination, remove working dir.
 
         """
-        self.make_archive()
-        self.move_archive()
+        try:
+            self.make_archive()
+            self.move_archive()
+        except:
+            self.log.error('Failure creating/storing backup.')
+        
         self.cleanup()
 
     def make_archive(self):
@@ -268,7 +272,9 @@ class PantheonBackup():
 
         # Transfer the file to long-term storage.
         file = open(path)
+        st = os.stat(path)
         arch_connection = httplib.HTTPSConnection(info['hostname'])
+        self.log.info('Sending %s bytes to remote storage' % st.st_size)
         arch_connection.request("PUT", info['path'], file, info['headers'])
         arch_complete_response = arch_connection.getresponse()
         if arch_complete_response.status == 200:
