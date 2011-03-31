@@ -174,7 +174,9 @@ class ImportTools(project.BuildTools):
         else:
             modules = ['apachesolr-7.x-1.0-beta3', 'memcache-7.x-1.0-beta3']
         with cd(temp_dir):
-            local("drush dl -y %s" % ' '.join(modules))
+            with settings(warn_only=True):
+                result = local("drush dl -by %s" % ' '.join(modules))
+            pantheon.log_drush_backend(result, self.log)
             local("cp -R * %s" % module_dir)
         local("rm -rf " + temp_dir)
         #TODO: Handle pantheon required modules existing in sites/default/modules.
