@@ -249,12 +249,7 @@ class PantheonBackup():
         """
         # TODO: maybe generalize this?
         self.log.info('Moving archive to external storage.')
-        connection = httplib.HTTPSConnection(
-            API_SERVER,
-            8443,
-            key_file = CERTIFICATE,
-            cert_file = CERTIFICATE
-        )
+        connection = getYggConnection()
         path = '%s/%s' % (self.working_dir, self.name)
         hash = hash_file(path)
         headers = {'Content-Type': 'application/x-tar',
@@ -278,8 +273,16 @@ class PantheonBackup():
         arch_connection.request("PUT", info['path'], file, info['headers'])
         arch_complete_response = arch_connection.getresponse()
         if arch_complete_response.status == 200:
+            # We get a fresh connection because who knows how long it took to 
+            # transfer things to long-term storage
+            connection = getYggConnection()
             connection.request("PUT", "/sites/self/archive/" + self.name + "/complete")
-            self.log.info('Upload to remote storage complete.')
+            try:
+                yggresp = connection.getresponse()
+                self.log.debug('Ygg complet notification status: %s' % yggresp.status)
+                self.log.info('Upload %s to remote storage complete.' % self.name)
+            except Exception as e:
+                self.log.info('Error logging completion: %s' % e)
         else:
             self.log.exception('Uploading to remote storage.')
             
@@ -339,3 +342,11 @@ def hash_file(path):
         for chunk in iter(lambda: file.read(128*hash.block_size), ''):
             hash.update(chunk)
     return base64.b64encode(hash.digest())
+
+def getYggConnection():
+    return httplib.HTTPSConnection(
+        API_SERVER,
+        8443,
+        key_file = CERTIFICATE,
+        cert_file = CERTIFICATE
+    )
