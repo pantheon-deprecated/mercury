@@ -279,9 +279,9 @@ class PantheonBackup():
         arch_complete_response = arch_connection.getresponse()
         if arch_complete_response.status == 200:
             connection.request("PUT", "/sites/self/archive/" + self.name + "/complete")
-            self.log.info('Successfully pushed the file to the archive.')
+            self.log.info('Upload to remote storage complete.')
         else:
-            self.log.exception('Uploading the file to the archive failed.')
+            self.log.exception('Uploading to remote storage.')
             
 
     def cleanup(self):
