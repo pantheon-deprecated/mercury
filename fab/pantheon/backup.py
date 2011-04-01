@@ -1,5 +1,10 @@
+import base64
+import hashlib
+import httplib
+import json
 import os
 import string
+import sys
 import tempfile
 
 from configobj import ConfigObj
@@ -9,23 +14,26 @@ import pantheon
 import logger
 import ygg
 
+CERTIFICATE = "/etc/pantheon/system.pem"
+API_SERVER = "api.getpantheon.com"
+ARCHIVE_SERVER = "s3.amazonaws.com"
+
 def remove(archive):
     """Remove a backup tarball from the server.
     archive: name of the archive to remove.
 
     """
     log = logger.logging.getLogger('pantheon.backup.remove')
-    log.info('Removing archive.')
     try:
         server = pantheon.PantheonServer()
         path = os.path.join(server.ftproot, archive)
         if os.path.exists(path):
             local('rm -f %s' % path)
     except:
-        log.exception('Archive removal was unsuccessful.')
+        log.exception('Removal of local backup archive was unsuccessful.')
         raise
     else:
-        log.info('Archive removal successful.')
+        log.debug('Removal of local backup archive successful.')
 
 class PantheonBackup():
 
@@ -213,8 +221,12 @@ class PantheonBackup():
         """ Create archive, move to destination, remove working dir.
 
         """
-        self.make_archive()
-        self.move_archive(destination)
+        try:
+            self.make_archive()
+            self.move_archive()
+        except:
+            self.log.error('Failure creating/storing backup.')
+        
         self.cleanup()
 
     def make_archive(self):
@@ -232,31 +244,56 @@ class PantheonBackup():
             self.log.info('Make archive successful.')
 
     def move_archive(self, destination=None):
-        """Move archive from temporary working dir to ftp dir.
+        """Move archive from temporary working dir to S3.
 
         """
-        self.log.info('Making archive available.')
-        try:
-            if not destination:
-                destination = self.server.ftproot
-            with cd(self.working_dir):
-                local('mv %s %s' % (self.name, destination))
-        except:
-            self.log.exception('Archive unable to be made available.')
-            raise
+        # TODO: maybe generalize this?
+        self.log.info('Moving archive to external storage.')
+        connection = httplib.HTTPSConnection(
+            API_SERVER,
+            8443,
+            key_file = CERTIFICATE,
+            cert_file = CERTIFICATE
+        )
+        path = '%s/%s' % (self.working_dir, self.name)
+        hash = hash_file(path)
+        headers = {'Content-Type': 'application/x-tar',
+                   'Content-MD5': hash}
+        encoded_headers = json.dumps(headers)
+        connection.request("PUT", "/sites/self/archive/" + self.name, encoded_headers)
+        complete_response = connection.getresponse()
+        if complete_response.status == 200:
+            self.log.info('Successfully obtained authorization.')
         else:
-            self.log.info('Archive now available.')
+            self.log.exception('Obtaining authorization failed.')
+            
+        encoded_info = complete_response.read()
+        info = json.loads(encoded_info)
+
+        # Transfer the file to long-term storage.
+        file = open(path)
+        st = os.stat(path)
+        arch_connection = httplib.HTTPSConnection(info['hostname'])
+        self.log.info('Sending %s bytes to remote storage' % st.st_size)
+        arch_connection.request("PUT", info['path'], file, info['headers'])
+        arch_complete_response = arch_connection.getresponse()
+        if arch_complete_response.status == 200:
+            connection.request("PUT", "/sites/self/archive/" + self.name + "/complete")
+            self.log.info('Upload to remote storage complete.')
+        else:
+            self.log.exception('Uploading to remote storage.')
+            
 
     def cleanup(self):
         """ Remove working_dir """
-        self.log.info('Cleaning up.')
+        self.log.debug('Cleaning up.')
         try:
             local('rm -rf %s' % self.working_dir)
         except:
             self.log.exception('Cleanup unsuccessful.')
             raise
         else:
-            self.log.info('Cleanup successful.')
+            self.log.debug('Cleanup successful.')
 
 
     def _dump_data(self, destination, db_dict):
@@ -296,4 +333,9 @@ $aliases['${project}_${env}'] = array(
 );
 """
 
-
+def hash_file(path):
+    hash = hashlib.md5()
+    with open(path, "rb") as file:
+        for chunk in iter(lambda: file.read(128*hash.block_size), ''):
+            hash.update(chunk)
+    return base64.b64encode(hash.digest())
