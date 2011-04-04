@@ -144,7 +144,9 @@ class BuildTools(object):
         """
         settings_file = os.path.join(site_dir, 'settings.php')
         settings_default = os.path.join(site_dir, 'default.settings.php')
-        settings_pantheon = os.path.join(site_dir, 'pantheon.settings.php')
+        settings_pantheon = os.path.join(self.project_path, 
+                                         'pantheon%s.settings.php' % 
+                                         self.version)
 
         # Stomp on changes to default.settings.php - no need to conflict here.
         settings_contents = local(
@@ -157,15 +159,14 @@ class BuildTools(object):
 
         # Comment out $base_url entries.
         local("sed -i 's/^[^#|*]*\$base_url/# $base_url/' %s" % settings_file)
-
-        # Create pantheon.settings.php
-        pantheon.copy_template('pantheon%s.settings.php' % self.version,
-                               settings_pantheon)
+        if not os.path.isfile(settings_pantheon):
+            # Create pantheon.settings.php
+            local("bcfg2 -vqedb projects")
 
         # Include pantheon.settings.php at the end of settings.php
         with open(os.path.join(site_dir, 'settings.php'), 'a') as f:
             f.write('\n/* Added by Pantheon */\n')
-            f.write("include_once 'pantheon.settings.php';\n")
+            f.write("include_once '%s';\n" % settings_pantheon)
 
     def setup_drush_alias(self):
         """ Create drush aliases for each environment in a project.
