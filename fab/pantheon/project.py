@@ -159,9 +159,10 @@ class BuildTools(object):
 
         # Comment out $base_url entries.
         local("sed -i 's/^[^#|*]*\$base_url/# $base_url/' %s" % settings_file)
+
         if not os.path.isfile(settings_pantheon):
             # Create pantheon.settings.php
-            local("bcfg2 -vqedb projects")
+            bcfg2_project()
 
         # Include pantheon.settings.php at the end of settings.php
         with open(os.path.join(site_dir, 'settings.php'), 'a') as f:
@@ -358,8 +359,9 @@ class BuildTools(object):
                 local('chmod %s settings.php' % settings_perms)
                 local('chown %s:%s settings.php' % (settings_owner,
                                                     settings_group))
+            with cd(self.project_path):
                 # pantheon.settings.php
-                local('chmod 440 pantheon.settings.php')
-                local('chown %s:%s pantheon.settings.php' % (owner,
-                                                             settings_group))
+                local('chown %s:%s pantheon%s.settings.php' % (owner,
+                                                               settings_group,
+                                                               self.version))
 
