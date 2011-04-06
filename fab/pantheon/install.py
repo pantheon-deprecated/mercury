@@ -18,7 +18,9 @@ def _drush_download(modules, destination):
     temp_dir = tempfile.mkdtemp()
     with cd(temp_dir):
         for module in modules:
-             local('drush -y dl %s' % module)
+             with settings(warn_only=True):
+                 result = local('drush -by dl %s' % module)
+             pantheon.log_drush_backend(result)
         local('mv * %s' % destination)
     local('rm -rf %s' % temp_dir)
 
