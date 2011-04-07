@@ -359,10 +359,10 @@ class BuildTools(object):
                 local('chmod %s settings.php' % settings_perms)
                 local('chown %s:%s settings.php' % (settings_owner,
                                                     settings_group))
-            with cd(self.project_path):
-                # pantheon.settings.php
-                local('chmod 440 pantheon%s.settings.php' % self.version)
-                local('chown %s:%s pantheon%s.settings.php' % (owner,
-                                                               settings_group,
-                                                               self.version))
+        with cd(self.project_path):
+            # pantheon.settings.php
+            local('chmod 440 pantheon%s.settings.php' % self.version)
+            local('chown %s:%s pantheon%s.settings.php' % (owner,
+                                                           settings_group,
+                                                           self.version))
 
