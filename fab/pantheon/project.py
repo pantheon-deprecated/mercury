@@ -160,8 +160,9 @@ class BuildTools(object):
         # Comment out $base_url entries.
         local("sed -i 's/^[^#|*]*\$base_url/# $base_url/' %s" % settings_file)
 
-        # Create pantheon.settings.php
-        bcfg2_project()
+        # Credate pantheon.settings.php
+        if not os.path.isfile(settings_pantheon):
+            self.bcfg2_project()
 
         # Include pantheon.settings.php at the end of settings.php
         with open(os.path.join(site_dir, 'settings.php'), 'a') as f:
