@@ -195,14 +195,14 @@ def log_drush_backend(data, log=None, context={}):
     data = parse_drush_backend(data)
     if (data == None) or (data['error_status'] == 1):
         log.error('Drush command could not be completed successfully.')
-        log.debug(data)
+        log.debug(str(data))
         return None
     if 'command' not in context:
         p1 = re.compile('Found command: %s \(commandfile' % '(.*)')
     no_dupe = set()
     for entry in data['log']:
         # message is already used by a records namespace
-        context['drush_message'] = entry['message']
+        context['drush_message'] = str(entry['message'])
         del entry['message']
         if 'command' not in context:
             m = p1.match(context['drush_message'])
