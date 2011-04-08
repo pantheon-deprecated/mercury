@@ -364,7 +364,7 @@ class BuildTools(object):
 
         if not self.version:
             self.version = drupaltools.get_drupal_version('%s/dev' % 
-                                                          self.project_path)
+                                                          self.project_path)[0]
         with cd(self.project_path):
             # pantheon.settings.php
             local('chmod 440 pantheon%s.settings.php' % self.version)
