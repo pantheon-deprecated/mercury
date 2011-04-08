@@ -210,7 +210,7 @@ class ImportTools(project.BuildTools):
             local('mkdir -p %s' % file_dest)
 
         # if files are not located in default location, move them there.
-        if (file_path) and (file_location != 'sites/default/files'):
+        if (file_path) and (file_location != 'sites/%s/files' % self.site):
             with settings(warn_only=True):
                 local('cp -R %s/* %s' % (file_path, file_dest))
             local('rm -rf %s' % file_path)
