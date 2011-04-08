@@ -144,7 +144,9 @@ class BuildTools(object):
         """
         settings_file = os.path.join(site_dir, 'settings.php')
         settings_default = os.path.join(site_dir, 'default.settings.php')
-        settings_pantheon = os.path.join(site_dir, 'pantheon.settings.php')
+        settings_pantheon = os.path.join(self.project_path, 
+                                         'pantheon%s.settings.php' % 
+                                         self.version)
 
         # Stomp on changes to default.settings.php - no need to conflict here.
         settings_contents = local(
@@ -158,14 +160,14 @@ class BuildTools(object):
         # Comment out $base_url entries.
         local("sed -i 's/^[^#|*]*\$base_url/# $base_url/' %s" % settings_file)
 
-        # Create pantheon.settings.php
-        pantheon.copy_template('pantheon%s.settings.php' % self.version,
-                               settings_pantheon)
+        # Credate pantheon.settings.php
+        if not os.path.isfile(settings_pantheon):
+            self.bcfg2_project()
 
         # Include pantheon.settings.php at the end of settings.php
         with open(os.path.join(site_dir, 'settings.php'), 'a') as f:
             f.write('\n/* Added by Pantheon */\n')
-            f.write("include_once 'pantheon.settings.php';\n")
+            f.write("include_once '%s';\n" % settings_pantheon)
 
     def setup_drush_alias(self):
         """ Create drush aliases for each environment in a project.
@@ -357,8 +359,10 @@ class BuildTools(object):
                 local('chmod %s settings.php' % settings_perms)
                 local('chown %s:%s settings.php' % (settings_owner,
                                                     settings_group))
-                # pantheon.settings.php
-                local('chmod 440 pantheon.settings.php')
-                local('chown %s:%s pantheon.settings.php' % (owner,
-                                                             settings_group))
+        with cd(self.project_path):
+            # pantheon.settings.php
+            local('chmod 440 pantheon%s.settings.php' % self.version)
+            local('chown %s:%s pantheon%s.settings.php' % (owner,
+                                                           settings_group,
+                                                           self.version))
 
