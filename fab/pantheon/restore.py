@@ -51,7 +51,7 @@ class RestoreTools(project.BuildTools):
 
         """
         for env in self.environments:
-            if os.path.exists(self.destination):
+            if os.path.exists('%s/%s' % (self.destination, env)):
                 local('rm -rf %s/%s' % (self.destination, env))
             with cd(os.path.join(self.working_dir, self.backup_project)):
                 local('rsync -avz %s %s' % (env, self.destination))
