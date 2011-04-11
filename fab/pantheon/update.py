@@ -190,7 +190,7 @@ class Updater(project.BuildTools):
         self.log.info('Initialized permissions update.')
         try:
             self.setup_permissions('update', self.project_env)
-        except:
+        except Exception as e:
             self.log.exception('Permissions update encountered a fatal error.')
             raise
         else:
