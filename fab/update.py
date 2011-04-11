@@ -127,16 +127,20 @@ def update_site_core(project='pantheon', keep=None, taskid=None):
     """
     updater = update.Updater(project, 'dev')
     result = updater.core_update(keep)
-    updater.drupal_updatedb()
-    updater.permissions_update()
-
-    postback.write_build_data('update_site_core', result)
-
     if result['merge'] == 'success':
         # Send drupal version information.
         status.drupal_update_status(project)
         status.git_repo_status(project)
+        updater.drupal_updatedb()
+        updater.permissions_update()
+        postback.write_build_data('update_site_core', result)
 
+    else:
+        log = logger.logging.getLogger('pantheon.update_site_core')
+        updater.permissions_update()
+        log.error('Upstream merge did not succeed. Review conflicts.')
+        
+        
 def update_code(project, environment, tag=None, message=None, taskid=None):
     """ Update the working-tree for project/environment.
 
