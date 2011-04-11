@@ -171,6 +171,6 @@ def _report():
     print('#   Pantheon Setup Complete! #')
     print('##############################')
 
-    local('echo "DEAR SYSADMIN: PANTHEON IS READY FOR YOU NOW.  Do not forget the README.txt, CHANGELOG.txt and docs!" | wall')
+    local('echo "DEAR SYSADMIN: PANTHEON IS READY FOR YOU NOW." | wall')
 
     ygg.send_event('Platform configuration', 'The Pantheon platform is now running.')
