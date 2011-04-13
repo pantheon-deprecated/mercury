@@ -3,6 +3,7 @@ import sys
 import tempfile
 
 import dbtools
+import drupaltools
 import pantheon
 import ygg
 
@@ -31,6 +32,7 @@ class BuildTools(object):
         self.project_path = os.path.join(self.server.webroot, self.project)
         self.db_password = self.config\
                 ['environments']['live']['mysql']['db_password']
+        self.version = None
 
     def bcfg2_project(self):
         local('bcfg2 -vqedb projects', capture=False)
@@ -359,6 +361,10 @@ class BuildTools(object):
                 local('chmod %s settings.php' % settings_perms)
                 local('chown %s:%s settings.php' % (settings_owner,
                                                     settings_group))
+
+        if not self.version:
+            self.version = drupaltools.get_drupal_version('%s/dev' % 
+                                                          self.project_path)[0]
         with cd(self.project_path):
             # pantheon.settings.php
             local('chmod 440 pantheon%s.settings.php' % self.version)
