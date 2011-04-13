@@ -1,9 +1,7 @@
 import os
 import re
-import sys
 
 import drupaltools
-import pantheon
 import project
 
 from fabric.api import local
@@ -56,6 +54,8 @@ class RestoreTools(project.BuildTools):
         for env in self.environments:
             with cd(os.path.join(self.working_dir, self.backup_project)):
                 local('rsync -avz %s %s' % (env, self.destination))
+                with cd(env):
+                    local('git branch -m %s %s' % (self.project, self.backup_project))
 
     def restore_repository(self):
         """ Restore GIT repo from backup.
@@ -84,6 +84,8 @@ class RestoreTools(project.BuildTools):
                     local('git remote add --mirror origin ' + \
                           'git://git.getpantheon.com/pantheon/%s.git' % match.group(1))
                     break
+            local('git branch -m %s %s' % (self.backup_project, self.project))
+
 
     def setup_permissions(self):
         """ Set permissions on project, and repo using the 'restore' handler.
