@@ -89,8 +89,10 @@ class RestoreTools(project.BuildTools):
                     local('git remote add --mirror origin ' + \
                           'git://git.getpantheon.com/pantheon/%s.git' % match.group(1))
                     break
-            local('git branch -m %s %s' % (self.backup_project, self.project))
 
+            # If restoring into a new project name.    
+            if self.backup_project != self.project:
+                local('git branch -m %s %s' % (self.backup_project, self.project))
 
     def setup_permissions(self):
         """ Set permissions on project, and repo using the 'restore' handler.
