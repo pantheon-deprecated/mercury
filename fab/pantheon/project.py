@@ -26,7 +26,7 @@ class BuildTools(object):
         config = ygg.get_config()
         self.server = pantheon.PantheonServer()
 
-        self.project = config.keys()[0]
+        self.project = str(config.keys()[0])
         self.config = config[self.project]
         self.environments = set(self.config['environments'].keys())
         self.project_path = os.path.join(self.server.webroot, self.project)
