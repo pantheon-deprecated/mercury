@@ -53,8 +53,14 @@ class RestoreTools(project.BuildTools):
                 local('rm -rf %s/%s' % (self.destination, env))
             with cd(os.path.join(self.working_dir, self.backup_project)):
                 local('rsync -avz %s %s' % (env, self.destination))
-                with cd(env):
-                    local('git branch -m %s %s' % (self.project, self.backup_project))
+            # It's possible that the backup is from a different project.
+            # If so: rename branch, set remote, and set merge refs.
+            if self.backup_project != self.project:
+                with cd(os.path.join(self.destination, env)):
+                    local('git branch -m %s %s' % (self.backup_project, self.project))
+                    local('git remote set-url origin /var/git/projects/%s' % self.project)
+                    local('git config branch.%s.remote origin' % self.project)
+                    local('git config branch.%s.merge refs/heads/%s' % (self.project, self.project))
 
     def restore_repository(self):
         """ Restore GIT repo from backup.

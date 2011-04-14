@@ -361,7 +361,14 @@ class BuildTools(object):
                 local('chmod %s settings.php' % settings_perms)
                 local('chown %s:%s settings.php' % (settings_owner,
                                                     settings_group))
-
+                # TODO: New sites will not have a pantheon.settings.php in their
+                # repos. However, existing backups will, and if the settings
+                # file exists, we need it to have correct permissions.
+                if os.path.exists(os.path.join(site_dir,
+                                               'pantheon.settings.php')):
+                    local('chmod 440 pantheon.settings.php')
+                    local('chown %s:%s pantheon.settings.php' % (owner,
+                                                       settings_group))
         if not self.version:
             self.version = drupaltools.get_drupal_version('%s/dev' % 
                                                           self.project_path)[0]
