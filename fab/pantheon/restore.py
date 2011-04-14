@@ -55,9 +55,10 @@ class RestoreTools(project.BuildTools):
                 local('rsync -avz %s %s' % (env, self.destination))
             # It's possible that the backup is from a different project.
             # If so: rename branch, set remote, and set merge refs.
-            if self.backup_project != self.project:
-                with cd(os.path.join(self.destination, env)):
-                    local('git branch -m %s %s' % (self.backup_project, self.project))
+            with cd(os.path.join(self.destination, env)):
+                self.old_branch = local('git name-rev --name-only HEAD').strip()
+                if self.old_branch != self.project:
+                    local('git branch -m %s %s' % (self.old_branch, self.project))
                     local('git remote set-url origin /var/git/projects/%s' % self.project)
                     local('git config branch.%s.remote origin' % self.project)
                     local('git config branch.%s.merge refs/heads/%s' % (self.project, self.project))
@@ -91,8 +92,8 @@ class RestoreTools(project.BuildTools):
                     break
 
             # If restoring into a new project name.    
-            if self.backup_project != self.project:
-                local('git branch -m %s %s' % (self.backup_project, self.project))
+            if self.old_branch != self.project:
+                local('git branch -m %s %s' % (self.old_branch, self.project))
 
     def setup_permissions(self):
         """ Set permissions on project, and repo using the 'restore' handler.
