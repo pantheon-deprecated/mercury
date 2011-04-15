@@ -49,6 +49,13 @@ def update_pantheon(postback=True):
         try:
             log.debug('Putting jenkins into quietDown mode.')
             pantheon.jenkins_quiet()
+            # Get package security updates.
+            log.debug('Checking for security releases')
+            local('aptitude update')
+            local('aptitude safe-upgrade -o Aptitude::Delete-Unused=false ' + \
+                  '--assume-yes --target-release `lsb_release -cs`-security', \
+                  capture=False)
+            # Update pantheon code.
             log.debug('Checking which branch to use.')
             branch = 'master'
             if os.path.exists('/opt/branch.txt'):
@@ -59,6 +66,7 @@ def update_pantheon(postback=True):
                 local('git fetch --prune origin', capture=False)
                 local('git checkout --force %s' % branch, capture=False)
                 local('git reset --hard origin/%s' % branch, capture=False)
+            # Run bcfg2.
             local('/usr/sbin/bcfg2 -vqed', capture=False)
         except:
             log.exception('Pantheon update encountered a fatal error.')
