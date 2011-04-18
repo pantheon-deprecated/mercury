@@ -62,7 +62,7 @@ def _set_bandwidth(now):
                            "start": hour,
                            "duration": 3600,
                            "amount": outbound_kib})
-    print("Publishing to the Pantheon API...")
+    print("Publishing bandwidth in/out to the Pantheon API...")
     _set_batch_usage(batch_post)
 
 def _set_ram(now):
@@ -75,12 +75,12 @@ def _set_ram(now):
     
     print("MemTotal: %s kB" % ram)
 
-    day = get_nearset_day(now)
+    day = get_nearest_day(now)
     batch_post.append({"metric": "memory",
                        "start": day,
                        "duration": 122400,
                        "amount": ram})
-    print("Publishing to the Pantheon API...")
+    print("Publishing MemTotal to the Pantheon API...")
     _set_batch_usage(batch_post)
 
 def publish_usage():
