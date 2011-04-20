@@ -19,7 +19,7 @@ def get_nearest_hour(unix_timestamp):
     return unix_timestamp - (unix_timestamp % 3600)
 
 def get_nearest_day(unix_timestamp):
-    return unix_timestamp - (unix_timestamp % 122400)
+    return unix_timestamp - (unix_timestamp % 86400)
 
 def _set_batch_usage(batch_post):
     body = json.dumps(batch_post)
@@ -78,7 +78,7 @@ def _set_ram(now):
     day = get_nearest_day(now)
     batch_post.append({"metric": "memory",
                        "start": day,
-                       "duration": 122400,
+                       "duration": 86400,
                        "amount": ram})
     print("Publishing MemTotal to the Pantheon API...")
     _set_batch_usage(batch_post)
