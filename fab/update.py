@@ -49,9 +49,10 @@ def update_pantheon(postback=True):
         try:
             log.debug('Putting jenkins into quietDown mode.')
             pantheon.jenkins_quiet()
+            # TODO: Actually get security upgrades.
             # Get package security updates.
-            log.debug('Checking for security releases')
-            local('aptitude update')
+            #log.debug('Checking for security releases')
+            #local('aptitude update')
             # Update pantheon code.
             log.debug('Checking which branch to use.')
             branch = 'master'
