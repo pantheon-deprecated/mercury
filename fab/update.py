@@ -52,9 +52,6 @@ def update_pantheon(postback=True):
             # Get package security updates.
             log.debug('Checking for security releases')
             local('aptitude update')
-            #local('aptitude safe-upgrade -o Aptitude::Delete-Unused=false ' + \
-            #      '--assume-yes --target-release `lsb_release -cs`-security', \
-            #      capture=False)
             # Update pantheon code.
             log.debug('Checking which branch to use.')
             branch = 'master'
