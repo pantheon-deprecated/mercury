@@ -160,6 +160,7 @@ class Updater(project.BuildTools):
             self.log.exception('Updatedb encountered a fatal error.')
             raise
         else:
+            self.log.info('Updatedb complete.')
             pantheon.log_drush_backend(result, self.log)
 
     def run_cron(self):
