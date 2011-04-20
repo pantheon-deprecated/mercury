@@ -169,7 +169,8 @@ class BuildTools(object):
         # Include pantheon.settings.php at the end of settings.php
         with open(os.path.join(site_dir, 'settings.php'), 'a') as f:
             f.write('\n/* Added by Pantheon */\n')
-            f.write("include_once '%s';\n" % settings_pantheon)
+            f.write("include_once './../../../pantheon%s.settings.php';\n" % \
+                    self.version)
 
     def setup_drush_alias(self):
         """ Create drush aliases for each environment in a project.
