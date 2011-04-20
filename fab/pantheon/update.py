@@ -160,6 +160,7 @@ class Updater(project.BuildTools):
             self.log.exception('Updatedb encountered a fatal error.')
             raise
         else:
+            self.log.info('Updatedb complete.')
             pantheon.log_drush_backend(result, self.log)
 
     def run_cron(self):
@@ -190,7 +191,7 @@ class Updater(project.BuildTools):
         self.log.info('Initialized permissions update.')
         try:
             self.setup_permissions('update', self.project_env)
-        except:
+        except Exception as e:
             self.log.exception('Permissions update encountered a fatal error.')
             raise
         else:

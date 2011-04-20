@@ -1,9 +1,7 @@
 import os
 import re
-import sys
 
 import drupaltools
-import pantheon
 import project
 
 from fabric.api import local
@@ -50,12 +48,20 @@ class RestoreTools(project.BuildTools):
         """ Restore code from backup.
 
         """
-        if os.path.exists(self.destination):
-            local('rm -rf %s' % self.destination)
-        local('mkdir -p %s' % self.destination)
         for env in self.environments:
+            if os.path.exists('%s/%s' % (self.destination, env)):
+                local('rm -rf %s/%s' % (self.destination, env))
             with cd(os.path.join(self.working_dir, self.backup_project)):
                 local('rsync -avz %s %s' % (env, self.destination))
+            # It's possible that the backup is from a different project.
+            # If so: rename branch, set remote, and set merge refs.
+            with cd(os.path.join(self.destination, env)):
+                self.old_branch = local('git name-rev --name-only HEAD').strip()
+                if self.old_branch != self.project:
+                    local('git branch -m %s %s' % (self.old_branch, self.project))
+                    local('git remote set-url origin /var/git/projects/%s' % self.project)
+                    local('git config branch.%s.remote origin' % self.project)
+                    local('git config branch.%s.merge refs/heads/%s' % (self.project, self.project))
 
     def restore_repository(self):
         """ Restore GIT repo from backup.
@@ -84,6 +90,10 @@ class RestoreTools(project.BuildTools):
                     local('git remote add --mirror origin ' + \
                           'git://git.getpantheon.com/pantheon/%s.git' % match.group(1))
                     break
+
+            # If restoring into a new project name.    
+            if self.old_branch != self.project:
+                local('git branch -m %s %s' % (self.old_branch, self.project))
 
     def setup_permissions(self):
         """ Set permissions on project, and repo using the 'restore' handler.

@@ -3,6 +3,7 @@ import sys
 import tempfile
 
 import dbtools
+import drupaltools
 import pantheon
 import ygg
 
@@ -25,12 +26,13 @@ class BuildTools(object):
         config = ygg.get_config()
         self.server = pantheon.PantheonServer()
 
-        self.project = config.keys()[0]
+        self.project = str(config.keys()[0])
         self.config = config[self.project]
         self.environments = set(self.config['environments'].keys())
         self.project_path = os.path.join(self.server.webroot, self.project)
         self.db_password = self.config\
                 ['environments']['live']['mysql']['db_password']
+        self.version = None
 
     def bcfg2_project(self):
         local('bcfg2 -vqedb projects', capture=False)
@@ -144,7 +146,9 @@ class BuildTools(object):
         """
         settings_file = os.path.join(site_dir, 'settings.php')
         settings_default = os.path.join(site_dir, 'default.settings.php')
-        settings_pantheon = os.path.join(site_dir, 'pantheon.settings.php')
+        settings_pantheon = os.path.join(self.project_path, 
+                                         'pantheon%s.settings.php' % 
+                                         self.version)
 
         # Stomp on changes to default.settings.php - no need to conflict here.
         settings_contents = local(
@@ -158,14 +162,15 @@ class BuildTools(object):
         # Comment out $base_url entries.
         local("sed -i 's/^[^#|*]*\$base_url/# $base_url/' %s" % settings_file)
 
-        # Create pantheon.settings.php
-        pantheon.copy_template('pantheon%s.settings.php' % self.version,
-                               settings_pantheon)
+        # Credate pantheon.settings.php
+        if not os.path.isfile(settings_pantheon):
+            self.bcfg2_project()
 
         # Include pantheon.settings.php at the end of settings.php
         with open(os.path.join(site_dir, 'settings.php'), 'a') as f:
             f.write('\n/* Added by Pantheon */\n')
-            f.write("include_once 'pantheon.settings.php';\n")
+            f.write("include_once '../pantheon%s.settings.php';\n" % \
+                    self.version)
 
     def setup_drush_alias(self):
         """ Create drush aliases for each environment in a project.
@@ -357,8 +362,21 @@ class BuildTools(object):
                 local('chmod %s settings.php' % settings_perms)
                 local('chown %s:%s settings.php' % (settings_owner,
                                                     settings_group))
-                # pantheon.settings.php
-                local('chmod 440 pantheon.settings.php')
-                local('chown %s:%s pantheon.settings.php' % (owner,
-                                                             settings_group))
+                # TODO: New sites will not have a pantheon.settings.php in their
+                # repos. However, existing backups will, and if the settings
+                # file exists, we need it to have correct permissions.
+                if os.path.exists(os.path.join(site_dir,
+                                               'pantheon.settings.php')):
+                    local('chmod 440 pantheon.settings.php')
+                    local('chown %s:%s pantheon.settings.php' % (owner,
+                                                       settings_group))
+        if not self.version:
+            self.version = drupaltools.get_drupal_version('%s/dev' % 
+                                                          self.project_path)[0]
+        with cd(self.project_path):
+            # pantheon.settings.php
+            local('chmod 440 pantheon%s.settings.php' % self.version)
+            local('chown %s:%s pantheon%s.settings.php' % (owner,
+                                                           settings_group,
+                                                           self.version))
 

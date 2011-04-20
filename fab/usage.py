@@ -18,6 +18,8 @@ connection = httplib.HTTPSConnection(
 def get_nearest_hour(unix_timestamp):
     return unix_timestamp - (unix_timestamp % 3600)
 
+def get_nearest_day(unix_timestamp):
+    return unix_timestamp - (unix_timestamp % 86400)
 
 def _set_batch_usage(batch_post):
     body = json.dumps(batch_post)
@@ -60,10 +62,28 @@ def _set_bandwidth(now):
                            "start": hour,
                            "duration": 3600,
                            "amount": outbound_kib})
-    print("Publishing to the Pantheon API...")
+    print("Publishing bandwidth in/out to the Pantheon API...")
     _set_batch_usage(batch_post)
 
+def _set_ram(now):
+    batch_post = []
+    memfile = open('/proc/meminfo')
+    for line in memfile.readlines():
+        line=line.strip()
+        if (line[:8] == 'MemTotal'):
+            ram = line.rstrip('kB').lstrip('MemTotal:').strip()
+    
+    print("MemTotal: %s kB" % ram)
+
+    day = get_nearest_day(now)
+    batch_post.append({"metric": "memory",
+                       "start": day,
+                       "duration": 86400,
+                       "amount": ram})
+    print("Publishing MemTotal to the Pantheon API...")
+    _set_batch_usage(batch_post)
 
 def publish_usage():
     now = time.time()
     _set_bandwidth(now)
+    _set_ram(now)
