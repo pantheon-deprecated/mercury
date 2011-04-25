@@ -46,6 +46,12 @@ def update_pantheon(postback=True):
     try:
         # Ensure the JDK is properly installed.
         local('apt-get install -y default-jdk')
+        
+        # Nightly security package updates.
+        # Never update openssh-server automatically.
+        local('aptitude hold openssh-server openssh-client')
+        local('aptitude update')
+        local('aptitude safe-upgrade -o Aptitude::Delete-Unused=false --assume-yes --target-release `lsb_release -cs`-security', capture=False)
         try:
             log.debug('Putting jenkins into quietDown mode.')
             pantheon.jenkins_quiet()
