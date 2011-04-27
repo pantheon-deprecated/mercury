@@ -46,7 +46,6 @@ def update_pantheon(postback=True):
     try:
         # Ensure the JDK is properly installed.
         local('apt-get install -y default-jdk')
-        
         # Nightly security package updates.
         # Never update openssh-server automatically.
         local('aptitude hold openssh-server openssh-client')
