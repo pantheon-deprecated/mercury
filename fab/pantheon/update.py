@@ -98,7 +98,7 @@ class Updater(project.BuildTools):
             # 'live')
             elif self.project_env == 'live':
                 with cd(os.path.join(self.project_path, 'test')):
-                    tag = local('git describe --tags').rstrip('\n')
+                    tag = local('git describe --tags --abbrev=0').rstrip('\n')
                 self._fetch_and_reset(tag)
         except:
             self.log.exception('Code update encountered a fatal error.')
