@@ -255,13 +255,14 @@ class ImportTools(project.BuildTools):
         if self.version == 6:
             required_modules = ['apachesolr',
                                 'apachesolr_search',
-                                'cookie_cache_bypass',
                                 'locale',
+                                'pantheon',
                                 'syslog',
                                 'varnish']
         elif self.version == 7:
             required_modules = ['apachesolr',
-                                'apachesolr_search']
+                                'apachesolr_search',
+                                'syslog']
 
         # Enable modules.
         with settings(hide('warnings'), warn_only=True):
