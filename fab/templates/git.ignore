@@ -1,7 +1,7 @@
 # Drupal #
 ##########
-sites/*/files
-files
+sites/*/files/*
+files/*
 
 # Packages #
 ############
