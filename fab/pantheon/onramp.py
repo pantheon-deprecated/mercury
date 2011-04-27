@@ -217,7 +217,10 @@ class ImportTools(project.BuildTools):
             path = os.path.split(file_path)
             # Symlink from former location to sites/default/files
             if not os.path.islink(path[0]):
-                rel_path = os.path.relpath(file_dest, os.path.split(file_path)[0])
+                # If parent folder for files path doesn't exist, create it.
+                if not os.path.exists(path[0]):
+                    local('mkdir -p %s' % path[0])
+                rel_path = os.path.relpath(file_dest, path[0])
                 local('ln -s %s %s' % (rel_path, file_path))
 
         # Change paths in the files table
