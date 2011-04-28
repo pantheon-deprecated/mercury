@@ -86,4 +86,9 @@ def _api_request(method, path, data = None):
     if method == 'PUT' or method == 'POST':
         return True
 
-    return json.loads(response.read())
+    try:
+        return json.loads(response.read())
+    except:
+        print('Response code: %s' % response.status)
+        raise
+
