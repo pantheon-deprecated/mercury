@@ -165,6 +165,9 @@ class BuildTools(object):
         # Credate pantheon.settings.php
         if not os.path.isfile(settings_pantheon):
             self.bcfg2_project()
+        if hasattr(self, 'working_dir'):
+            local("cp %s %s" % (settings_pantheon, 
+                  os.path.abspath(os.path.join(self.working_dir, '..'))))
 
         # Include pantheon.settings.php at the end of settings.php
         with open(os.path.join(site_dir, 'settings.php'), 'a') as f:

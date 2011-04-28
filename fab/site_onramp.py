@@ -53,6 +53,7 @@ class _ImportProfile(onramp.ImportTools):
     """
     def build(self, location):
 
+        self.build_location = location
         # Parse the extracted archive.
         self.parse_archive(location)
 
