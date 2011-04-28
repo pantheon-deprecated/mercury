@@ -270,7 +270,8 @@ class ImportTools(project.BuildTools):
         # Enable modules.
         with settings(hide('warnings'), warn_only=True):
             for module in required_modules:
-                result = local('drush -y @working_dir en %s' % module)
+                result = local('drush -by @working_dir en %s' % module)
+                pantheon.log_drush_backend(result, self.log)
                 if result.failed:
                     # If importing vanilla drupal, this module wont exist.
                     if module != 'cookie_cache_bypass':
@@ -338,7 +339,8 @@ class ImportTools(project.BuildTools):
 
         # D7: apachesolr config link will not display until cache cleared?
         with settings(warn_only=True):
-            local('drush @working_dir -y cc all')
+            result = local('drush @working_dir -y cc all')
+            pantheon.log_drush_backend(result, self.log)
 
        # Remove temporary working_dir drush alias.
         alias_file = '/opt/drush/aliases/working_dir.alias.drushrc.php'
@@ -379,6 +381,7 @@ class ImportTools(project.BuildTools):
 
         """
         local('rm -rf %s' % self.working_dir)
+        local('rm -rf %s' % self.build_location)
 
     def _get_site_name(self):
         """Return the name of the site to be imported.
