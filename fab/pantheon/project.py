@@ -146,9 +146,8 @@ class BuildTools(object):
         """
         settings_file = os.path.join(site_dir, 'settings.php')
         settings_default = os.path.join(site_dir, 'default.settings.php')
-        settings_pantheon = os.path.join(self.project_path, 
-                                         'pantheon%s.settings.php' % 
-                                         self.version)
+        settings_pantheon = 'pantheon%s.settings.php' % self.version
+        os.path.join(self.project_path, settings_pantheon)
 
         # Stomp on changes to default.settings.php - no need to conflict here.
         settings_contents = local(
@@ -162,12 +161,20 @@ class BuildTools(object):
         # Comment out $base_url entries.
         local("sed -i 's/^[^#|*]*\$base_url/# $base_url/' %s" % settings_file)
 
-        # Credate pantheon.settings.php
-        if not os.path.isfile(settings_pantheon):
+        # Create pantheon.settings.php
+        if not os.path.isfile(os.path.join(self.project_path, 
+                                           settings_pantheon)):
             self.bcfg2_project()
+
+        # Import needs a valid settings file in the tmp directory
         if hasattr(self, 'working_dir'):
-            local("cp %s %s" % (settings_pantheon, 
-                  os.path.abspath(os.path.join(self.working_dir, '..'))))
+            tmp_file_dir = os.path.abspath(os.path.join(self.working_dir, '..'))
+            local("cp %s %s" % 
+                  (os.path.join(self.project_path, settings_pantheon), 
+                   tmp_file_dir))
+            vhost_file = '/etc/apache2/sites-available/%s_dev' % self.project
+            local("sed -i -e 's|($vhost_file)|(\"%s\")|' %s/%s" % 
+                  (vhost_file, tmp_file_dir, settings_pantheon))
 
         # Include pantheon.settings.php at the end of settings.php
         with open(os.path.join(site_dir, 'settings.php'), 'a') as f:
