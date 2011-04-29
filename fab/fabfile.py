@@ -12,4 +12,5 @@ from site_onramp import *
 from site_install import *
 from usage import *
 from update import *
+from chronos import *
 env.hosts = ['pantheon@localhost']
