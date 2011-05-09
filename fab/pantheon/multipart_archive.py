@@ -1,11 +1,6 @@
-import hashlib
-import base64
 import httplib
-import sys
 import os
-import logging
-import json
-import pprint
+from pprint import pprint
 
 class RangeableFileObject():
     """File object wrapper to enable raw range handling.
@@ -37,45 +32,28 @@ class RangeableFileObject():
             return getattr(self.fo, name)
         raise AttributeError, name
 
-    def tell(self):
-        """Return the position within the range.
-        This is different from fo.seek in that position 0 is the 
-        first byte position of the range tuple. For example, if
-        this object was created with a range tuple of (500,899),
-        tell() will return 0 when at byte position 500 of the file.
-        """
-        return (self.realpos - self.firstbyte)
-    
     def read(self, size=-1):
         """Read within the range.
         This method will limit the size read based on the range.
         """
-        size = self._calc_read_size(size)
+        size = self.__len__()
         rslt = self.fo.read(size)
         self.realpos += len(rslt)
         return rslt
     
-    def _calc_read_size(self, size):
+    def __len__(self):
         """Handles calculating the amount of data to read based on
         the range.
         """
-        if self.lastbyte:
-            if size > -1:
-                if ((self.realpos + size) >= self.lastbyte):
-                    size = (self.lastbyte - self.realpos)
-            else:
-                size = (self.lastbyte - self.realpos)
-        return size
+        #return self._calc_read_size(self.chunk_size)
+        return self.lastbyte - self.firstbyte 
 
     def _do_seek(self,offset):
         """Seek based on whether wrapped object supports seek().
         offset is relative to the current position (self.realpos).
         """
         assert offset >= 0
-        if not hasattr(self.fo, 'seek'):
-            self._poor_mans_seek(offset)
-        else:
-            self.fo.seek(self.realpos + offset)
+        self.fo.seek(self.realpos + offset)
         self.realpos+= offset
 
     def seek(self,offset,whence=0):
@@ -97,26 +75,6 @@ class RangeableFileObject():
         
         self._do_seek(realoffset - self.realpos)
 
-    def _poor_mans_seek(self,offset):
-        """Seek by calling the wrapped file objects read() method.
-        This is used for file like objects that do not have native
-        seek support. The wrapped objects read() method is called
-        to manually seek to the desired position.
-        offset -- read this number of bytes from the wrapped
-                  file object.
-        raise RangeError if we encounter EOF before reaching the 
-        specified offset.
-        """
-        pos = 0
-        bufsize = 1024
-        while pos < offset:
-            if (pos + bufsize) > offset:
-                bufsize = offset - pos
-            buf = self.fo.read(bufsize)
-            if len(buf) != bufsize:
-                raise RangeError(9, 'Requested Range Not Satisfiable')
-            pos+= bufsize
-        
 def range_tuple_normalize(range_tup):
     """Normalize a (first_byte,last_byte) range tuple.
     Return a tuple whose first element is guaranteed to be an int
@@ -144,42 +102,31 @@ def range_tuple_normalize(range_tup):
 def fbuffer(fpath, chunk_size):
     fsize = os.path.getsize(fpath)
     byte = 0
-    for i in range(fsize/chunk_size + 1):
-        fo = RangeableFileObject(file(fpath), (byte, byte + chunk_size))
-        yield fo
-        fo.close()
+    for i in range(fsize/chunk_size):
+        print("Part: {0}".format(i+1))
+        rfo = RangeableFileObject(file(fpath), (byte, byte + chunk_size))
+        yield rfo
+        rfo.close()
         byte += chunk_size
-        print(((i+1) / float(fsize/chunk_size + 1))*100)
+        print(float(byte)/float(fsize)*100)
+    else:
+        print("Part: {0}".format(i+2))
+        rfo = RangeableFileObject(file(fpath), (byte, fsize))
+        yield rfo
+        print(float(100))
+        rfo.close()
 
-CERTIFICATE = "/etc/pantheon/system.pem"
-API_SERVER = "api.getpantheon.com"
-ARCHIVE_SERVER = "s3.amazonaws.com"
-
-path = sys.argv[1]
-filename = os.path.basename(path)
-
-connection = httplib.HTTPSConnection(
-    API_SERVER,
-    8443,
-    key_file = CERTIFICATE,
-    cert_file = CERTIFICATE
+filepath = 'test.txt'
+chunksize = 873
+connection = httplib.HTTPConnection(
+    'www.postbin.org',
 )
-def hash_file(path):
-    hash = hashlib.md5()
-    with open(path, "rb") as file:
-        for chunk in iter(lambda: file.read(128*hash.block_size), ''):
-            hash.update(chunk)
-    return base64.b64encode(hash.digest())
 
-# Get the MD5 hash of the file.
-hash = hash_file(path)
+for chunk in fbuffer(filepath, chunksize):
+    connection.connect()
+    connection.request("POST", '/1jskuz1', chunk)
+    complete_response = connection.getresponse()
+    pprint(complete_response.read())
+    connection.close()
+#    print(chunk.read())
 
-# Get the authorization headers.
-headers = {'Content-Type': 'application/x-tar',
-           'Content-MD5': hash}
-encoded_headers = json.dumps(headers)
-
-connection.request("PUT", '{0}?uploads'.format(filename), headers)
-print(conntect.response())
-#for chunk in fbuffer('logging.conf', 234):
-#    connection.request("PUT", '/%s?partNumber=%s&uploadId=%s' % (filename, part, upid), chunk, 'authheaders')
