@@ -90,12 +90,13 @@ class JunitHandler(logging.Handler):
             suitename = record.name.split('.')[-1].capitalize()
             casename = record.funcName.capitalize()
             results = jenkinstools.Junit(suitename, casename)
+            msg = record.msg.encode('utf-8')
             if record.levelname in ['ERROR', 'CRITICAL']:
-                results.error(record.msg)
+                results.error(msg)
             if record.levelname in ['WARNING']:
-                results.fail(record.msg)
+                results.fail(msg)
             if record.levelname in ['INFO']:
-                results.success(record.msg)
+                results.success(msg)
         else:
             pass
 

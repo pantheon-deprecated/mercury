@@ -251,6 +251,8 @@ class BuildTools(object):
         """
         with cd(self.working_dir):
             local('git checkout %s' % self.project)
+            # Set up .gitignore
+            pantheon.copy_template('git.ignore', os.path.join(self.working_dir, '.gitignore'))
             local('git add -A .')
             local("git commit --author=\"%s\" -m 'Initialize Project: %s'" % (
                                                    self.author, self.project))
