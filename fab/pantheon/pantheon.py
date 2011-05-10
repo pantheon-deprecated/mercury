@@ -202,7 +202,7 @@ def log_drush_backend(data, log=None, context={}):
     no_dupe = set()
     for entry in data['log']:
         # message is already used by a records namespace
-        context['drush_message'] = str(entry['message'])
+        context['drush_message'] = str(entry['message'].encode('utf-8'))
         del entry['message']
         if 'command' not in context:
             m = p1.match(context['drush_message'])
