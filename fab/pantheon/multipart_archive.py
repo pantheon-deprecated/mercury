@@ -103,30 +103,28 @@ def fbuffer(fpath, chunk_size):
     fsize = os.path.getsize(fpath)
     byte = 0
     for i in range(fsize/chunk_size):
-        print("Part: {0}".format(i+1))
-        rfo = RangeableFileObject(file(fpath), (byte, byte + chunk_size))
-        yield rfo
-        rfo.close()
-        byte += chunk_size
-        print(float(byte)/float(fsize)*100)
+        if (fsize > chunk_size):
+            rfo = RangeableFileObject(file(fpath), (byte, byte + chunk_size))
+            yield rfo
+            rfo.close()
+            byte += chunk_size
     else:
-        print("Part: {0}".format(i+2))
         rfo = RangeableFileObject(file(fpath), (byte, fsize))
         yield rfo
-        print(float(100))
         rfo.close()
 
-filepath = 'test.txt'
-chunksize = 873
+filepath = 'test5.txt'
+chunksize = 893
 connection = httplib.HTTPConnection(
     'www.postbin.org',
 )
 
-for chunk in fbuffer(filepath, chunksize):
+#for chunk in fbuffer(filepath, chunksize):
+if True:
+    chunk = open(filepath)
     connection.connect()
-    connection.request("POST", '/1jskuz1', chunk)
+    connection.request("PUT", '/1jskuz1', chunk)
     complete_response = connection.getresponse()
     pprint(complete_response.read())
     connection.close()
 #    print(chunk.read())
-
