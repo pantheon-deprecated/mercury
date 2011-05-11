@@ -18,7 +18,7 @@ ch.setFormatter(formatter)
 logger.addHandler(ch)
 
 CERTIFICATE = "/etc/pantheon/system.pem"
-API_SERVER = "184.106.214.232"
+API_SERVER = "api.getpantheon.com"
 ARCHIVE_SERVER = "s3.amazonaws.com"
 
 #TODO: Add optional cli arguements to set threshold and chunksize
