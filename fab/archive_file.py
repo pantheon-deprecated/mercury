@@ -30,7 +30,7 @@ def main():
         print('First arguement not a file.')
 
 class Archive:
-    def __init__(self, path, threshold=104857600):
+    def __init__(self, path, threshold=4194304000, chunk_size=4194304000):
         self.connection = httplib.HTTPSConnection(
                                                   API_SERVER,
                                                   8443,
@@ -42,17 +42,19 @@ class Archive:
         self.filename = os.path.basename(path)
         self.partno = 0
         self.parts = []
-        # Amazon S3 has a minimum upload size of 5242880
-        self.chunk_size = 5242880
+        self.chunk_size = chunk_size
 
     def is_multipart(self):
+        # Amazon S3 has a minimum upload size of 5242880
         assert self.filesize >= 5242880,"File size is too small."
+        # Amazon S3 has a minimum upload size of 5242880
         assert self.chunk_size >= 5242880,"Chunk size is too small."
         return True if self.filesize > self.threshold else False
 
     def submit(self):
         if self.filesize < self.threshold:
-            assert self.threshold < 5300000000,"Threshold is too large."
+            # Amazon S3 has a maximum upload size of 5242880000
+            assert self.threshold < 5242880000,"Threshold is too large."
             fo = open(self.path)
             info = json.loads(self.get_upload_header(fo))
             fo.seek(0)
