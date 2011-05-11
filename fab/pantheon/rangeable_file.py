@@ -145,7 +145,8 @@ def fbuffer(fpath, chunk_size):
 
 """ Test code
 import httplib
-filepath = 'test5.txt'
+import sys
+filepath = sys.argv[1]
 chunksize = 804
 connection = httplib.HTTPConnection(
     'www.postbin.org',
@@ -158,3 +159,4 @@ for chunk in fbuffer(filepath, chunksize):
     connection.close()
 #    print(chunk.read())
 """
+
