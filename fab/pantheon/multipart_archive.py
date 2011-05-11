@@ -33,7 +33,7 @@ def main(path):
     #partno = 1
     #parts = []
     mpa = Multipart_archive(path)
-    for chunk in rangeable_file.fbuffer(path, 2500):
+    for chunk in rangeable_file.fbuffer(path, 507):
         partno = mpa.partno
         mph = mpa.get_multipart_upload_header(chunk)
         chunk.seek(0)
@@ -55,7 +55,7 @@ class Multipart_archive:
     def __init__(self, path):
         self.path = path
         self.filename = os.path.basename(path)
-        self.upid = self.initiate_multipart_archive(self.filename)
+        self.upid = self.initiate_multipart_archive()
         self.partno = 1
         self.parts = []
 
@@ -72,19 +72,13 @@ class Multipart_archive:
         return base64.b64encode(part_hash.digest())
 
 
-    def initiate_multipart_archive(self, filename):
-        """ Return the upload id from ygg.
-
-        Keyword arguements:
-        filename -- the name of the file being imported
-
-        """
+    def initiate_multipart_archive(self):
+        """ Return the upload id from ygg."""
         # Get the authorization headers.
         headers = {'Content-Type': 'application/x-tar',
                    'multipart': 'initiate'}
         encoded_headers = json.dumps(headers)
-        connection.request("PUT", "/sites/self/archive/{0}".format(filename), 
-                           encoded_headers)
+        connection.request("PUT", "/sites/self/archive/{0}".format(self.filename), encoded_headers)
         complete_response = connection.getresponse()
         if complete_response.status == 200:
             logger.debug('Successfully obtained authorization.')
@@ -103,8 +97,6 @@ class Multipart_archive:
 
         Keyword arguements:
         part -- file object of current chunk
-        partno -- part number
-        upid -- unique upload id
 
         """
         # Get the MD5 hash of the file.
@@ -132,6 +124,7 @@ class Multipart_archive:
         return json.loads(encoded_info)
 
     def complete_multipart_upload(self):
+        """ Return completion response from ygg."""
         # Notify the event system of the completed transfer.
         connection.connect()
         headers = {'Content-Type': 'application/x-tar',
@@ -139,8 +132,7 @@ class Multipart_archive:
                    'upload-id': self.upid,
                    'parts': self.parts}
         encoded_headers = json.dumps(headers)
-        connection.request("PUT", "/sites/self/archive/{0}".format(self.filename), 
-                           encoded_headers)
+        connection.request("PUT", "/sites/self/archive/{0}".format(self.filename), encoded_headers)
         complete_response = connection.getresponse()
         if complete_response.status == 200:
             logger.debug('Successfully obtained authorization.')
