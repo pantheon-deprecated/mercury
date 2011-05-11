@@ -21,7 +21,7 @@ CERTIFICATE = "/etc/pantheon/system.pem"
 API_SERVER = "184.106.214.232"
 ARCHIVE_SERVER = "s3.amazonaws.com"
 
-#TODO: Add optional arguements to set threshold and chunksize
+#TODO: Add optional cli arguements to set threshold and chunksize
 def main():
     if os.path.isfile(sys.argv[1]):
         archive = Archive(sys.argv[1])
@@ -69,20 +69,20 @@ class Archive:
             self.complete_multipart_upload()
         self.connection.close()
 
-    def hash_file(self, part):
-        """ Return MD5 hash of part
+    def hash_file(self, fo):
+        """ Return MD5 hash of file object
 
         Keyword arguements:
-        part -- the file object to hash
+        fo -- the file object to hash
 
         """
-        part_hash = hashlib.md5()
-        for chunk in iter(lambda: part.read(128*part_hash.block_size), ''):
-            part_hash.update(chunk)
-        return base64.b64encode(part_hash.digest())
+        fo_hash = hashlib.md5()
+        for chunk in iter(lambda: fo.read(128*fo_hash.block_size), ''):
+            fo_hash.update(chunk)
+        return base64.b64encode(fo_hash.digest())
 
     def initiate_multipart_upload(self):
-        """ Return the upload id from ygg."""
+        """ Return the upload id from api."""
         # Get the authorization headers.
         headers = {'Content-Type': 'application/x-tar',
                    'multipart': 'initiate'}
@@ -91,10 +91,10 @@ class Archive:
         return self._api_request(path, encoded_headers)
 
     def get_multipart_upload_header(self, part):
-        """ Return the multipart upload headers from ygg.
+        """ Return multipart upload headers from api.
 
         Keyword arguements:
-        part -- file object of current chunk
+        part -- file object to get headers for
 
         """
         # Get the MD5 hash of the file.
@@ -112,6 +112,12 @@ class Archive:
         return self._api_request(path, encoded_headers)
 
     def get_upload_header(self, fo):
+        """ Return upload headers from api.
+
+        Keyword arguements:
+        fo -- file object to get headers for
+
+        """
         logger.debug("Archiving file at path: %s" % self.path)
         part_hash = self.hash_file(fo)
         logger.debug("Hash of file is: %s" % part_hash)
@@ -121,9 +127,9 @@ class Archive:
         path = "/sites/self/archive/{0}".format(self.filename)
         return self._api_request(path, encoded_headers)
 
-    #TODO: re-work multipart upload completion into the ygg rest api
+    #TODO: re-work multipart upload completion into the rest api
     def complete_multipart_upload(self):
-        """ Return completion response from ygg."""
+        """ Return multipart upload completion response from api."""
         # Notify the event system of the completed transfer.
         headers = {'Content-Type': 'application/x-tar',
                    'multipart': 'complete',
@@ -134,11 +140,19 @@ class Archive:
         return self._api_request(path, encoded_headers)
 
     def complete_upload(self):
+        """ Return upload completion response from api."""
         path = "/sites/self/archive/{0}/complete".format(self.filename)
         return self._api_request(path)
 
-    #TODO: tweak ygg._api_request to allow passing modified headers
     def _api_request(self, path, encoded_headers=None):
+        """Returns encoded response data from api.
+
+        Keyword arguements:
+        path            -- api request path
+        encoded_headers -- api request headers
+        Make PUT request to config server.
+
+        """
         self.connection.connect()
         if encoded_headers:
             self.connection.request("PUT", path, encoded_headers)
@@ -155,6 +169,14 @@ class Archive:
         return encoded_info
 
     def _arch_request(self, data, info):
+        """Returns encoded response data from archive server.
+
+        Keyword arguements:
+        data -- data to archive
+        info -- api request headers
+        Make PUT request to store data on archive server.
+
+        """
         # Transfer the file to long-term storage.
         arch_connection = httplib.HTTPSConnection(info['hostname'])
         arch_connection.request("PUT", 
