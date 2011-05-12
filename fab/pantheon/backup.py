@@ -325,7 +325,8 @@ class Archive():
             response = self._arch_request(fo, info)
             self._complete_upload()
         elif self.is_multipart():
-            self.log.info('Archive is too large. Breaking up into parts.')
+            self.log.info('Large backup detected. Using multipart upload ' \
+                          'method.')
             self.upid = json.loads(self._initiate_multipart_upload())
             for chunk in rangeable_file.fbuffer(self.path, self.chunk_size):
                 info = json.loads(self._get_multipart_upload_header(chunk))
