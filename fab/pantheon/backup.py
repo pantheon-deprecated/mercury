@@ -327,7 +327,12 @@ class Archive():
         elif self.is_multipart():
             self.log.info('Large backup detected. Using multipart upload ' \
                           'method.')
-            self.upid = json.loads(self._initiate_multipart_upload())
+            #TODO: Use boto to get upid after next release
+            #self.upid = json.loads(self._initiate_multipart_upload())
+            info = json.loads(self._initiate_multipart_upload())
+            response = self._arch_request(None, info)
+            from xml.etree import ElementTree
+            self.upid = ElementTree.XML(response.read()).getchildren()[2].text
             for chunk in rangeable_file.fbuffer(self.path, self.chunk_size):
                 info = json.loads(self._get_multipart_upload_header(chunk))
                 self.log.info('Sending part {0}'.format(self.partno))
@@ -433,7 +438,7 @@ class Archive():
             self.log.debug('Successfully obtained authorization.')
         else:
             self.log.error('Obtaining authorization failed.')
-            raise
+            raise Exception(complete_response.reason)
         encoded_info = complete_response.read()
         return encoded_info
 
@@ -448,19 +453,21 @@ class Archive():
         """
         # Transfer the file to long-term storage.
         arch_connection = httplib.HTTPSConnection(info['hostname'])
-        data.seek(0,2)
-        self.log.info('Sending %s bytes to remote storage' % data.tell())
-        data.seek(0)
-        arch_connection.request("PUT", 
+        if data:
+            data.seek(0,2)
+            self.log.info('Sending %s bytes to remote storage' % data.tell())
+            data.seek(0)
+        arch_connection.request(info['verb'], 
                                 info['path'], 
                                 data, 
                                 info['headers'])
         arch_complete_response = arch_connection.getresponse()
         if arch_complete_response.status == 200:
-            self.log.info('Successfully pushed the file to remote storage.')
+            if data:
+                self.log.info('Successfully pushed the file to remote storage.')
         else:
             self.log.error('Uploading file to remote storage failed.')
-            raise
+            raise Exception(arch_complete_response.reason)
         return arch_complete_response
 
 def _get_server_name(project):
