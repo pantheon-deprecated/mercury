@@ -17,6 +17,8 @@ class RangeableFileObject():
         The file object provided is assumed to be at byte offset 0.
 
         """
+        fo.seek(0,2)
+        self.fsize = fo.tell()
         self.fo = fo
         (self.firstbyte, self.lastbyte) = range_tuple_normalize(rangetup)
         self.realpos = 0
@@ -74,6 +76,17 @@ class RangeableFileObject():
         self.fo.seek(self.realpos + offset)
         self.realpos+= offset
 
+    def tell(self):
+        """Return the position within the range.
+
+        This is different from fo.seek in that position 0 is the 
+        first byte position of the range tuple. For example, if
+        this object was created with a range tuple of (500,899),
+        tell() will return 0 when at byte position 500 of the file.
+
+        """
+        return (self.realpos - self.firstbyte)
+
     def seek(self,offset,whence=0):
         """Seek within the byte range.
 
@@ -88,8 +101,9 @@ class RangeableFileObject():
         elif whence == 1: # relative seek
             realoffset = self.realpos + offset
         elif whence == 2: # absolute from end of file
+            realoffset = self.fsize + offset
             # XXX: are we raising the right Error here?
-            raise IOError('seek from end of file not supported.')
+            #raise IOError('seek from end of file not supported.')
         
         # do not allow seek past lastbyte in range
         if self.lastbyte and (realoffset >= self.lastbyte):

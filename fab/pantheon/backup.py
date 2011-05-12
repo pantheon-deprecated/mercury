@@ -13,6 +13,7 @@ from fabric.api import *
 import pantheon
 import logger
 import ygg
+import rangeable_file
 
 CERTIFICATE = "/etc/pantheon/system.pem"
 API_SERVER = "api.getpantheon.com"
@@ -247,45 +248,15 @@ class PantheonBackup():
         """Move archive from temporary working dir to S3.
 
         """
-        # TODO: maybe generalize this?
         self.log.info('Moving archive to external storage.')
-        connection = getYggConnection()
         path = '%s/%s' % (self.working_dir, self.name)
-        hash = hash_file(path)
-        headers = {'Content-Type': 'application/x-tar',
-                   'Content-MD5': hash}
-        encoded_headers = json.dumps(headers)
-        connection.request("PUT", "/sites/self/archive/" + self.name, encoded_headers)
-        complete_response = connection.getresponse()
-        if complete_response.status == 200:
-            self.log.info('Successfully obtained authorization.')
+        try:
+            arch = Archive(path)
+            arch.submit()
+        except:
+            self.log.exception('Upload to remote storage unsuccessful.')
         else:
-            self.log.exception('Obtaining authorization failed.')
-            
-        encoded_info = complete_response.read()
-        info = json.loads(encoded_info)
-
-        # Transfer the file to long-term storage.
-        file = open(path)
-        st = os.stat(path)
-        arch_connection = httplib.HTTPSConnection(info['hostname'])
-        self.log.info('Sending %s bytes to remote storage' % st.st_size)
-        arch_connection.request("PUT", info['path'], file, info['headers'])
-        arch_complete_response = arch_connection.getresponse()
-        if arch_complete_response.status == 200:
-            # We get a fresh connection because who knows how long it took to 
-            # transfer things to long-term storage
-            connection = getYggConnection()
-            connection.request("PUT", "/sites/self/archive/" + self.name + "/complete")
-            try:
-                yggresp = connection.getresponse()
-                self.log.debug('Ygg complet notification status: %s' % yggresp.status)
-                self.log.info('Upload %s to remote storage complete.' % self.name)
-            except Exception as e:
-                self.log.info('Error logging completion: %s' % e)
-        else:
-            self.log.exception('Uploading to remote storage.')
-            
+            self.log.info('Upload %s to remote storage complete.' % self.name)
 
     def cleanup(self):
         """ Remove working_dir """
@@ -316,6 +287,181 @@ class PantheonBackup():
         if result.failed:
             abort("Export of database '%s' failed." % db_dict.get('db_name'))
 
+class Archive():
+    def __init__(self, path, threshold=4194304000, chunk_size=4194304000):
+        """Initiates an archivable file object
+
+        Keyword arguements:
+        path       -- the path to the file
+        threshold  -- filesize at which we switch to multipart upload
+        chunk_size -- the size to break multipart uploads into
+
+        """
+        self.connection = httplib.HTTPSConnection(
+                                                  API_SERVER,
+                                                  8443,
+                                                  key_file = CERTIFICATE,
+                                                  cert_file = CERTIFICATE)
+        self.path = path
+        self.filesize = os.path.getsize(path)
+        self.threshold = threshold
+        self.filename = os.path.basename(path)
+        self.partno = 0
+        self.parts = []
+        self.chunk_size = chunk_size
+        self.log = logger.logging.getLogger('pantheon.backup.Archive')
+
+    def is_multipart(self):
+        # Amazon S3 has a minimum upload size of 5242880
+        assert self.filesize >= 5242880,"File size is too small."
+        assert self.chunk_size >= 5242880,"Chunk size is too small."
+        return True if self.filesize > self.threshold else False
+
+    def submit(self):
+        if self.filesize < self.threshold:
+            # Amazon S3 has a maximum upload size of 5242880000
+            assert self.threshold < 5242880000,"Threshold is too large."
+            fo = open(self.path)
+            info = json.loads(self.get_upload_header(fo))
+            response = self._arch_request(fo, info)
+            self.complete_upload()
+        elif self.is_multipart():
+            self.log.info('Archive is too large. Breaking up into parts.')
+            self.upid = json.loads(self.initiate_multipart_upload())
+            for chunk in rangeable_file.fbuffer(self.path, self.chunk_size):
+                info = json.loads(self.get_multipart_upload_header(chunk))
+                self.log.info('Sending part {0}'.format(self.partno))
+                response = self._arch_request(chunk, info)
+                etag = response.getheader('etag')
+                self.parts.append((self.partno, etag))
+            self.complete_multipart_upload()
+        self.connection.close()
+
+    def hash_file(self, fo):
+        """ Return MD5 hash of file object
+
+        Keyword arguements:
+        fo -- the file object to hash
+
+        """
+        fo_hash = hashlib.md5()
+        for chunk in iter(lambda: fo.read(128*fo_hash.block_size), ''):
+            fo_hash.update(chunk)
+        return base64.b64encode(fo_hash.digest())
+
+    def initiate_multipart_upload(self):
+        """ Return the upload id from api."""
+        # Get the authorization headers.
+        headers = {'Content-Type': 'application/x-tar',
+                   'multipart': 'initiate'}
+        encoded_headers = json.dumps(headers)
+        path = "/sites/self/archive/{0}".format(self.filename)
+        return self._api_request(path, encoded_headers)
+
+    def get_multipart_upload_header(self, part):
+        """ Return multipart upload headers from api.
+
+        Keyword arguements:
+        part -- file object to get headers for
+
+        """
+        # Get the MD5 hash of the file.
+        self.log.debug("Archiving file at path: %s" % self.path)
+        part_hash = self.hash_file(part)
+        self.log.debug("Hash of file is: %s" % part_hash)
+        self.partno+=1
+        headers = {'Content-Type': 'application/x-tar',
+                   'Content-MD5': part_hash,
+                   'multipart': 'upload',
+                   'upload-id': self.upid,
+                   'part-number': self.partno}
+        encoded_headers = json.dumps(headers)
+        path = "/sites/self/archive/{0}".format(self.filename)
+        return self._api_request(path, encoded_headers)
+
+    def get_upload_header(self, fo):
+        """ Return upload headers from api.
+
+        Keyword arguements:
+        fo -- file object to get headers for
+
+        """
+        self.log.debug("Archiving file at path: %s" % self.path)
+        part_hash = self.hash_file(fo)
+        self.log.debug("Hash of file is: %s" % part_hash)
+        headers = {'Content-Type': 'application/x-tar',
+                   'Content-MD5': part_hash}
+        encoded_headers = json.dumps(headers)
+        path = "/sites/self/archive/{0}".format(self.filename)
+        return self._api_request(path, encoded_headers)
+
+    #TODO: re-work multipart upload completion into the rest api
+    def complete_multipart_upload(self):
+        """ Return multipart upload completion response from api."""
+        # Notify the event system of the completed transfer.
+        headers = {'Content-Type': 'application/x-tar',
+                   'multipart': 'complete',
+                   'upload-id': self.upid,
+                   'parts': self.parts}
+        encoded_headers = json.dumps(headers)
+        path = "/sites/self/archive/{0}".format(self.filename)
+        return self._api_request(path, encoded_headers)
+
+    def complete_upload(self):
+        """ Return upload completion response from api."""
+        path = "/sites/self/archive/{0}/complete".format(self.filename)
+        return self._api_request(path)
+
+    def _api_request(self, path, encoded_headers=None):
+        """Returns encoded response data from api.
+
+        Keyword arguements:
+        path            -- api request path
+        encoded_headers -- api request headers
+        Make PUT request to config server.
+
+        """
+        self.connection.connect()
+        if encoded_headers:
+            self.connection.request("PUT", path, encoded_headers)
+        else:
+            self.connection.request("PUT", path)
+
+        complete_response = self.connection.getresponse()
+        if complete_response.status == 200:
+            self.log.debug('Successfully obtained authorization.')
+        else:
+            self.log.error('Obtaining authorization failed.')
+            raise
+        encoded_info = complete_response.read()
+        return encoded_info
+
+    def _arch_request(self, data, info):
+        """Returns encoded response data from archive server.
+
+        Keyword arguements:
+        data -- data to archive
+        info -- api request headers
+        Make PUT request to store data on archive server.
+
+        """
+        # Transfer the file to long-term storage.
+        arch_connection = httplib.HTTPSConnection(info['hostname'])
+        data.seek(0,2)
+        self.log.info('Sending %s bytes to remote storage' % data.tell())
+        data.seek(0)
+        arch_connection.request("PUT", 
+                                info['path'], 
+                                data, 
+                                info['headers'])
+        arch_complete_response = arch_connection.getresponse()
+        if arch_complete_response.status == 200:
+            self.log.info('Successfully pushed the file to remote storage.')
+        else:
+            self.log.error('Uploading file to remote storage failed.')
+            raise
+        return arch_complete_response
+
 def _get_server_name(project):
     """Return server name from apache alias "env.server_name.gotpantheon.com"
     """
@@ -335,18 +481,3 @@ $aliases['${project}_${env}'] = array(
   'root' => '${root}',
 );
 """
-
-def hash_file(path):
-    hash = hashlib.md5()
-    with open(path, "rb") as file:
-        for chunk in iter(lambda: file.read(128*hash.block_size), ''):
-            hash.update(chunk)
-    return base64.b64encode(hash.digest())
-
-def getYggConnection():
-    return httplib.HTTPSConnection(
-        API_SERVER,
-        8443,
-        key_file = CERTIFICATE,
-        cert_file = CERTIFICATE
-    )
