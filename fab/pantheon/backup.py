@@ -244,15 +244,14 @@ class PantheonBackup():
         else:
             self.log.info('Make archive successful.')
 
-    def move_archive(self, destination=None):
+    def move_archive(self):
         """Move archive from temporary working dir to S3.
 
         """
         self.log.info('Moving archive to external storage.')
         path = '%s/%s' % (self.working_dir, self.name)
         try:
-            arch = Archive(path)
-            arch.submit()
+            Archive(path).submit()
         except:
             self.log.exception('Upload to remote storage unsuccessful.')
         else:
@@ -322,22 +321,22 @@ class Archive():
             # Amazon S3 has a maximum upload size of 5242880000
             assert self.threshold < 5242880000,"Threshold is too large."
             fo = open(self.path)
-            info = json.loads(self.get_upload_header(fo))
+            info = json.loads(self._get_upload_header(fo))
             response = self._arch_request(fo, info)
-            self.complete_upload()
+            self._complete_upload()
         elif self.is_multipart():
             self.log.info('Archive is too large. Breaking up into parts.')
-            self.upid = json.loads(self.initiate_multipart_upload())
+            self.upid = json.loads(self._initiate_multipart_upload())
             for chunk in rangeable_file.fbuffer(self.path, self.chunk_size):
-                info = json.loads(self.get_multipart_upload_header(chunk))
+                info = json.loads(self._get_multipart_upload_header(chunk))
                 self.log.info('Sending part {0}'.format(self.partno))
                 response = self._arch_request(chunk, info)
                 etag = response.getheader('etag')
                 self.parts.append((self.partno, etag))
-            self.complete_multipart_upload()
+            self._complete_multipart_upload()
         self.connection.close()
 
-    def hash_file(self, fo):
+    def _hash_file(self, fo):
         """ Return MD5 hash of file object
 
         Keyword arguements:
@@ -349,7 +348,7 @@ class Archive():
             fo_hash.update(chunk)
         return base64.b64encode(fo_hash.digest())
 
-    def initiate_multipart_upload(self):
+    def _initiate_multipart_upload(self):
         """ Return the upload id from api."""
         # Get the authorization headers.
         headers = {'Content-Type': 'application/x-tar',
@@ -358,7 +357,7 @@ class Archive():
         path = "/sites/self/archive/{0}".format(self.filename)
         return self._api_request(path, encoded_headers)
 
-    def get_multipart_upload_header(self, part):
+    def _get_multipart_upload_header(self, part):
         """ Return multipart upload headers from api.
 
         Keyword arguements:
@@ -367,7 +366,7 @@ class Archive():
         """
         # Get the MD5 hash of the file.
         self.log.debug("Archiving file at path: %s" % self.path)
-        part_hash = self.hash_file(part)
+        part_hash = self._hash_file(part)
         self.log.debug("Hash of file is: %s" % part_hash)
         self.partno+=1
         headers = {'Content-Type': 'application/x-tar',
@@ -379,7 +378,7 @@ class Archive():
         path = "/sites/self/archive/{0}".format(self.filename)
         return self._api_request(path, encoded_headers)
 
-    def get_upload_header(self, fo):
+    def _get_upload_header(self, fo):
         """ Return upload headers from api.
 
         Keyword arguements:
@@ -387,7 +386,7 @@ class Archive():
 
         """
         self.log.debug("Archiving file at path: %s" % self.path)
-        part_hash = self.hash_file(fo)
+        part_hash = self._hash_file(fo)
         self.log.debug("Hash of file is: %s" % part_hash)
         headers = {'Content-Type': 'application/x-tar',
                    'Content-MD5': part_hash}
@@ -396,7 +395,7 @@ class Archive():
         return self._api_request(path, encoded_headers)
 
     #TODO: re-work multipart upload completion into the rest api
-    def complete_multipart_upload(self):
+    def _complete_multipart_upload(self):
         """ Return multipart upload completion response from api."""
         # Notify the event system of the completed transfer.
         headers = {'Content-Type': 'application/x-tar',
@@ -407,11 +406,12 @@ class Archive():
         path = "/sites/self/archive/{0}".format(self.filename)
         return self._api_request(path, encoded_headers)
 
-    def complete_upload(self):
+    def _complete_upload(self):
         """ Return upload completion response from api."""
         path = "/sites/self/archive/{0}/complete".format(self.filename)
         return self._api_request(path)
 
+    #TODO: Maybe refactored into the ygg library
     def _api_request(self, path, encoded_headers=None):
         """Returns encoded response data from api.
 
