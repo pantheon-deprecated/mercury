@@ -47,7 +47,7 @@ class InstallTools(project.BuildTools):
         if self.version == 6:
             modules = ['apachesolr','memcache','varnish']
         if self.version == 7:
-            modules = ['apachesolr-7.x-1.0-beta3', 'memcache-7.x-1.0-beta3']
+            modules = ['apachesolr-7.x-1.0-beta6', 'memcache-7.x-1.0-beta3']
         module_dir = os.path.join(self.working_dir, 'sites/all/modules')
         local('mkdir -p %s' % module_dir)
         _drush_download(modules, module_dir)
