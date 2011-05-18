@@ -1,5 +1,4 @@
 import os
-import sys
 import tempfile
 
 import dbtools
@@ -150,8 +149,7 @@ class BuildTools(object):
         os.path.join(self.project_path, settings_pantheon)
 
         # Stomp on changes to default.settings.php - no need to conflict here.
-        settings_contents = local(
-           'git --git-dir=/var/git/projects/%s cat-file ' % self.project + \
+        local('git --git-dir=/var/git/projects/%s cat-file ' % self.project + \
            'blob refs/heads/master:sites/default/default.settings.php > %s' % (
                                                              settings_default))
         # Make sure settings.php exists.
@@ -162,25 +160,28 @@ class BuildTools(object):
         local("sed -i 's/^[^#|*]*\$base_url/# $base_url/' %s" % settings_file)
 
         # Create pantheon.settings.php
-        if not os.path.isfile(os.path.join(self.project_path, 
+        if not os.path.isfile(os.path.join(self.project_path,
                                            settings_pantheon)):
             self.bcfg2_project()
 
         # Import needs a valid settings file in the tmp directory
         if hasattr(self, 'working_dir'):
             tmp_file_dir = os.path.abspath(os.path.join(self.working_dir, '..'))
-            local("cp %s %s" % 
-                  (os.path.join(self.project_path, settings_pantheon), 
+            local("cp %s %s" %
+                  (os.path.join(self.project_path, settings_pantheon),
                    tmp_file_dir))
             vhost_file = '/etc/apache2/sites-available/%s_dev' % self.project
-            local("sed -i -e 's|($vhost_file)|(\"%s\")|' %s/%s" % 
+            local("sed -i -e 's|($vhost_file)|(\"%s\")|' %s/%s" %
                   (vhost_file, tmp_file_dir, settings_pantheon))
 
         # Include pantheon.settings.php at the end of settings.php
         with open(os.path.join(site_dir, 'settings.php'), 'a') as f:
-            f.write('\n/* Added by Pantheon */\n')
-            f.write("include_once '../pantheon%s.settings.php';\n" % \
-                    self.version)
+            f.write("""
+/* Added by Pantheon */
+if (file_exists('../pantheon%s.settings.php')) {
+    include_once '../pantheon%s.settings.php';
+}
+""" % (self.version, self.version))
 
     def setup_drush_alias(self):
         """ Create drush aliases for each environment in a project.
@@ -383,7 +384,7 @@ class BuildTools(object):
                     local('chown %s:%s pantheon.settings.php' % (owner,
                                                        settings_group))
         if not self.version:
-            self.version = drupaltools.get_drupal_version('%s/dev' % 
+            self.version = drupaltools.get_drupal_version('%s/dev' %
                                                           self.project_path)[0]
         with cd(self.project_path):
             # pantheon.settings.php
