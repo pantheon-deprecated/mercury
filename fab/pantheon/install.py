@@ -37,16 +37,18 @@ class InstallTools(project.BuildTools):
     def setup_working_dir(self):
         super(InstallTools, self).setup_working_dir(self.working_dir)
 
-    def process_makefile(url):
+    def process_makefile(self, url):
         # Get makefile and build it in working_dir
         makefile = local('curl %s' % url)
         with tempfile.NamedTemporaryFile() as f:
             f.write(makefile)
             f.seek(0)
-            local('drush make %s %s' % (f.name, self.working_dir))
+            # Remove the working directory, drush doesn't like it to exist.
+            local('rmdir %s' % self.working_dir)
+            local('drush make %s %s' % (f.name, self.working_dir), capture=False)
 
         # Makefiles could use vc repos as sources, remove all metadata.
-        with cd(build_dir):
+        with cd(self.working_dir):
             with settings(hide('warnings'), warn_only=True):
                 local("find . -depth -name .git -exec rm -fr {} \;")
                 local("find . -depth -name .bzr -exec rm -fr {} \;")
@@ -54,7 +56,7 @@ class InstallTools(project.BuildTools):
                 local("find . -depth -name CVS -exec rm -fr {} \;")
 
         # It is possible that the makefile uses a non-current drupal version.
-        self.version, self.revision = self._get_drupal_version_info()
+        self.version, self.revision = self._get_drupal_version_info(self.working_dir)
         with cd(os.path.join('/var/git/projects', self.project)):
             local('git branch %s %s' % (self.project, self.revision))
 
