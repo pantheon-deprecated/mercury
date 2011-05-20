@@ -1,4 +1,3 @@
-
 from pantheon import onramp
 from pantheon import pantheon
 from pantheon import restore
@@ -41,6 +40,9 @@ def _get_handler(profile, project, location):
     profiles = {'import': _ImportProfile,
                 'restore': _RestoreProfile}
 
+    # If the profile is not pre-defined try to determine if it is a restore
+    # or an import (we may not know if they are uploading a pantheon backup or
+    # their own existing site). Defaults to 'onramp'.
     if profile not in profiles.keys():
         profile = onramp.get_onramp_profile(location)
 

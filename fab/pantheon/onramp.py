@@ -87,10 +87,9 @@ class ImportTools(project.BuildTools):
         # Remove existing VCS files.
         with cd(self.working_dir):
             with settings(hide('warnings'), warn_only=True):
-                local("rm -r ./.bzr")
-                local("rm -r ./.git")
                 local("find . -depth -name '._*' -exec rm -fr {} \;")
                 local("find . -depth -name .git -exec rm -fr {} \;")
+                local("find . -depth -name .bzr -exec rm -fr {} \;")
                 local("find . -depth -name .svn -exec rm -fr {} \;")
                 local("find . -depth -name CVS -exec rm -fr {} \;")
 

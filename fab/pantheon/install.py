@@ -26,16 +26,50 @@ def _drush_download(modules, destination):
 
 class InstallTools(project.BuildTools):
 
-    def __init__(self, project, version, **kw):
+    def __init__(self, project, **kw):
         """ Initialize generic installation object & helper functions. """
         super(InstallTools, self).__init__()
         self.working_dir = tempfile.mkdtemp()
         self.author = 'Jenkins User <jenkins@pantheon>'
         self.destination = os.path.join(self.server.webroot, self.project)
-        self.version = int(version)
+        self.version = kw.get('version', 6)
 
     def setup_working_dir(self):
         super(InstallTools, self).setup_working_dir(self.working_dir)
+
+    def process_makefile(url):
+        # Get makefile and build it in working_dir
+        makefile = local('curl %s' % url)
+        with tempfile.NamedTemporaryFile() as f:
+            f.write(makefile)
+            f.seek(0)
+            local('drush make %s %s' % (f.name, self.working_dir))
+
+        # Makefiles could use vc repos as sources, remove all metadata.
+        with cd(build_dir):
+            with settings(hide('warnings'), warn_only=True):
+                local("find . -depth -name .git -exec rm -fr {} \;")
+                local("find . -depth -name .bzr -exec rm -fr {} \;")
+                local("find . -depth -name .svn -exec rm -fr {} \;")
+                local("find . -depth -name CVS -exec rm -fr {} \;")
+
+        # It is possible that the makefile uses a non-current drupal version.
+        self.version, self.revision = self._get_drupal_version_info()
+        with cd(os.path.join('/var/git/projects', self.project)):
+            local('git branch %s %s' % (self.project, self.revision))
+
+        # Get the .git data for the project repo, and put in the working_dir
+        tempdir = tempfile.mkdtemp()
+        local('git clone /var/git/projects/%s -b %s %s' % (self.project,
+                                                           self.project,
+                                                           tempdir))
+        local('mv %s %s' % (os.path.join(tempdir, '.git'), self.working_dir))
+        local('rm -r %s' % tempdir)
+
+        # Commit the result of the makefile.
+        with cd(self.working_dir):
+            local('git add .')
+            local("git commit -am 'Build from makefile'")
 
     def setup_database(self):
         """ Create a new database and set user grants. """
