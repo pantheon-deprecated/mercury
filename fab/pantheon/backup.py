@@ -166,7 +166,7 @@ class PantheonBackup():
         ns = int(result[result.rfind('\n')+1:result.rfind('\t')])
         #Calc the database size of each env
         for env in self.environments:
-            result = local('mysql --execute=\'SELECT ROUND(sum(DATA_LENGTH + INDEX_LENGTH - DATA_FREE)/1024) AS Size FROM INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA =  "{0}_{1}"\G\''.format(self.project, env))
+            result = local('mysql --execute=\'SELECT ROUND((sum(DATA_LENGTH) + sum(INDEX_LENGTH) - sum(DATA_FREE))/1024) AS Size FROM INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA =  "{0}_{1}"\G\''.format(self.project, env))
             ns += int(result[result.rfind(' ')+1:])
         #Add 80% to needed space to account for tarball
         return fs > (ns*1.8)
