@@ -111,16 +111,19 @@ def _initialize_drush():
     """Install Drush and Drush-Make.
 
     """
-    local('[ ! -d drush ] || rm -rf drush')
-    local('wget http://ftp.drupal.org/files/projects/drush-6.x-3.3.tar.gz')
-    local('tar xvzf drush-6.x-3.3.tar.gz')
-    local('rm -f drush-6.x-3.3.tar.gz')
-    local('chmod 555 drush/drush')
-    local('chown -R root: drush')
-    local('rm -rf /opt/drush && mv drush /opt/')
-    local('mkdir /opt/drush/aliases')
-    local('ln -sf /opt/drush/drush /usr/local/bin/drush')
-    local('drush dl drush_make')
+    with cd('/opt'):
+        local('[ ! -d drush ] || rm -rf drush')
+        local('git clone http://git.drupal.org/project/drush.git')
+        with cd('drush'):
+            local('git checkout tags/7.x-4.4')
+        local('chmod 555 drush/drush')
+        local('chown -R root: drush')
+        local('rm -rf /opt/drush && mv drush /opt/')
+        local('mkdir /opt/drush/aliases')
+        local('ln -sf /opt/drush/drush /usr/local/bin/drush')
+        local('drush dl drush_make')
+        with open('/opt/drush/.gitignore', 'w') as f:
+            f.write('.gitignore\naliases')
 
 def _initialize_solr(server=pantheon.PantheonServer()):
     """Download Apache Solr.
