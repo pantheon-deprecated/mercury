@@ -1,5 +1,6 @@
 import os
 import random
+import re
 import string
 import sys
 import tempfile
@@ -38,14 +39,44 @@ class InstallTools(project.BuildTools):
         super(InstallTools, self).setup_working_dir(self.working_dir)
 
     def process_makefile(self, url):
-        # Get makefile and build it in working_dir
-        makefile = local('curl %s' % url)
-        with tempfile.NamedTemporaryFile() as f:
-            f.write(makefile)
-            f.seek(0)
-            # Remove the working directory, drush doesn't like it to exist.
-            local('rmdir %s' % self.working_dir)
-            local('drush make %s %s' % (f.name, self.working_dir), capture=False)
+        # Get makefile and store in a temporary location
+        tempdir = tempfile.mkdtemp()
+        makefile = os.path.join(tempdir, 'install.make')
+        local('curl %s > %s' % (url, makefile))
+
+        with open(makefile, 'r') as f:
+            contents = f.read()
+
+        # Determine core version. Default to 6.
+        version = re.search('\s*core\s*=\s*([67])\..*', contents)
+        if version is not None:
+            try:
+                self.version = int(version.group(1))
+            except IndexError:
+                self.version = 6
+        else:
+            self.version = 6
+
+        # Now that we know the version, setup a local repository.
+        super(InstallTools, self).setup_project_repo()
+
+        # Comment out any pre-defined "core" as we will replace with pressflow.
+        with cd(tempdir):
+            # core defined like project[drupal] =
+            local(r"sed -i 's/^\(.*projects\[drupal\].*\)/;\1/' install.make")
+            # core defined like project[] =
+            local(r"sed -i 's/^\(.*projects\[\]\s*=\s*[\s\"]drupal[\s\"].*\)/;\1/' install.make")
+
+        # Replace 'core' with pressflow
+        with open(makefile, 'a') as f:
+            f.write('\nprojects[pressflow][type] = "core"')
+            f.write('\nprojects[pressflow][download][type] = git')
+            f.write('\nprojects[pressflow][download][url] = ' + \
+            'git://github.com/pantheon-systems/pantheon%s.git\n' % self.version)
+
+        # Remove the working directory, drush doesn't like it to exist.
+        local('rmdir %s' % self.working_dir)
+        local('drush make %s %s' % (makefile, self.working_dir), capture=False)
 
         # Makefiles could use vc repos as sources, remove all metadata.
         with cd(self.working_dir):
