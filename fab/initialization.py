@@ -107,14 +107,15 @@ def _initialize_iptables(server):
     else:
         local('cp /etc/pantheon/templates/iptables /etc/iptables.rules')
 
-def _initialize_drush():
+def initialize_drush():
     """Install Drush and Drush-Make.
 
     """
     local('[ ! -d drush ] || rm -rf drush')
-    local('wget http://ftp.drupal.org/files/projects/drush-6.x-3.3.tar.gz')
-    local('tar xvzf drush-6.x-3.3.tar.gz')
-    local('rm -f drush-6.x-3.3.tar.gz')
+    #local('wget http://ftp.drupal.org/files/projects/drush-6.x-3.3.tar.gz')
+    local('git clone --branch 7.x-4.x http://git.drupal.org/project/drush.git')
+    #local('tar xvzf drush-6.x-3.3.tar.gz')
+    #local('rm -f drush-6.x-3.3.tar.gz')
     local('chmod 555 drush/drush')
     local('chown -R root: drush')
     local('rm -rf /opt/drush && mv drush /opt/')
