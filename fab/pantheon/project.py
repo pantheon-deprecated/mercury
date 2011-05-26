@@ -58,22 +58,20 @@ class BuildTools(object):
             if os.path.exists(location):
                 local('rm -rf %s' % location)
 
-    def setup_project_repo(self):
+    def setup_project_repo(self, upstream_repo=None):
         """ Create a new project repo, and download pantheon/drupal core.
 
         """
         project_repo = os.path.join('/var/git/projects', self.project)
 
+        if upstream_repo is None:
+            upstream_repo = 'git://git.getpantheon.com/pantheon/%s.git' % (
+                                                              self.version)
+
         # Get Pantheon core
-        local('git clone --mirror ' + \
-              'git://git.getpantheon.com/pantheon/%s.git %s' % (self.version,
-                                                                project_repo))
+        local('git clone --mirror %s %s' % (upstream_repo, project_repo))
 
         with cd(project_repo):
-            # Drupal Core
-            #TODO: Use official Drupal git repo once available.
-            local('git fetch git://git.getpantheon.com/drupal/' + \
-                  '%s.git master:drupal_core' % (self.version))
             # Repo config
             local('git config core.sharedRepository group')
             # Group write.

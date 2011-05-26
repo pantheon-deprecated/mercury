@@ -7,6 +7,7 @@ import tempfile
 
 from fabric.api import *
 
+import drupaltools
 import pantheon
 import project
 
@@ -37,6 +38,12 @@ class InstallTools(project.BuildTools):
 
     def setup_working_dir(self):
         super(InstallTools, self).setup_working_dir(self.working_dir)
+
+    def process_gitsource(self, url):
+        self.setup_project_repo(url)
+        self.setup_project_branch()
+        self.setup_working_dir()
+        self.version = int(drupaltools.get_drupal_version(self.working_dir)[:1])
 
     def process_makefile(self, url):
         # Get makefile and store in a temporary location
@@ -86,10 +93,9 @@ class InstallTools(project.BuildTools):
                 local("find . -depth -name .svn -exec rm -fr {} \;")
                 local("find . -depth -name CVS -exec rm -fr {} \;")
 
-        # It is possible that the makefile uses a non-current drupal version.
-        self.version, self.revision = self._get_drupal_version_info(self.working_dir)
+        # Create a project branch
         with cd(os.path.join('/var/git/projects', self.project)):
-            local('git branch %s %s' % (self.project, self.revision))
+            local('git branch %s' % self.project)
 
         # Get the .git data for the project repo, and put in the working_dir
         tempdir = tempfile.mkdtemp()
