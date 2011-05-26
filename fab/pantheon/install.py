@@ -11,9 +11,11 @@ import drupaltools
 import pantheon
 import project
 
-def _drush_download(modules, destination):
+def _drush_download(modules, destination, version):
     """ Download list of modules using Drush.
     modules: list of module names.
+    destination: where to move the module after download
+    version: set the default major version
 
     """
     #TODO: temporary until integrated in pantheon repo
@@ -21,7 +23,8 @@ def _drush_download(modules, destination):
     with cd(temp_dir):
         for module in modules:
              with settings(warn_only=True):
-                 result = local('drush -by dl %s' % module)
+                 result = local('drush -by --default-major=%s dl %s' % 
+                                (version, module))
              pantheon.log_drush_backend(result)
         local('mv * %s' % destination)
     local('rm -rf %s' % temp_dir)
@@ -123,7 +126,7 @@ class InstallTools(project.BuildTools):
             modules = ['apachesolr-7.x-1.0-beta3', 'memcache-7.x-1.0-beta3']
         module_dir = os.path.join(self.working_dir, 'sites/all/modules')
         local('mkdir -p %s' % module_dir)
-        _drush_download(modules, module_dir)
+        _drush_download(modules, module_dir, self.version)
 
     def setup_pantheon_libraries(self):
         super(InstallTools, self).setup_pantheon_libraries(self.working_dir)
