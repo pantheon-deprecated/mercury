@@ -8,7 +8,7 @@ def install_site(project='pantheon', version=6, profile='pantheon'):
     """
     data = {'profile': profile,
             'project': project,
-            'version': version}
+            'version': int(version)}
 
     _installer(**data)
 
