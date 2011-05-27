@@ -12,22 +12,13 @@ def install_site(project='pantheon', version=6, profile='pantheon'):
 
     _installer(**data)
 
-def install_project(project='pantheon', url=None):
+def install_project(url=None, profile='gitsource'):
     """ Create a new Installation from a git source.
 
     """
-    data = {'project': project,
-            'url': url,
-            'profile': 'gitsource'}
-    _installer(**data)
+    data = {'url': url,
+            'profile': profile}
 
-def install_makefile(project='pantheon', url=None):
-    """ Create a new installation from a drush makefile.
-
-    """
-    data = {'project': project,
-            'url': url,
-            'profile': 'makefile'}
     _installer(**data)
 
 def _installer(**kw):
