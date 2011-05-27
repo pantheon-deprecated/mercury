@@ -31,7 +31,7 @@ def _drush_download(modules, destination, version):
 
 class InstallTools(project.BuildTools):
 
-    def __init__(self, project, **kw):
+    def __init__(self, **kw):
         """ Initialize generic installation object & helper functions. """
         super(InstallTools, self).__init__()
         self.working_dir = tempfile.mkdtemp()
