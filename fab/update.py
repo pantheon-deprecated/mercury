@@ -10,21 +10,72 @@ from pantheon import pantheon
 from pantheon import postback
 from pantheon import status
 from pantheon import update
+from pantheon import ygg
 from optparse import OptionParser
 
 from fabric.api import *
 
 def main():
-    usage = "usage: %prog [options]"
-    parser = OptionParser(usage=usage, description="Update pantheon code and server configurations.")
-    parser.add_option('-p', '--postback', dest="postback", action="store_true", default=False, help='Postback to atlas.')
-    parser.add_option('-d', '--debug', dest="debug", action="store_true", default=False, help='Include debug output.')
+    usage = "usage: %prog [options] project *environments"
+    parser = OptionParser(usage=usage, description="Update pantheon code and " \
+                                                   "server configurations.")
+    parser.add_option('-p', '--postback', dest="postback", action="store_true", 
+                      default=False, help='Postback to atlas.')
+    parser.add_option('-d', '--debug', dest="debug", action="store_true", 
+                      default=False, help='Include debug output.')
+    parser.add_option('-u', '--updatedb', dest="updatedb", action="store_true", 
+                      default=False, help='Run updatedb on an environment.')
+    parser.add_option('-s', '--solr-reindex', dest="solr_reindex", 
+                      action="store_true", default=False, 
+                      help='Run solr-reindex on an environment.')
+    parser.add_option('-c', '--cron', dest="cron", action="store_true", 
+                      default=False, help='Run cron on an environment.')
     (options, args) = parser.parse_args()
     log = logger.logging.getLogger('pantheon.update')
 
     if options.debug:
         log.setLevel(10)
-    update_pantheon(options.postback)
+    if len(args) == 0:
+        update_pantheon(options.postback)
+    elif len(args) == 1:
+        config = ygg.get_config()
+        project = args.pop(0)
+        if project in config.keys():
+            for env in config[project]['environments'].keys():
+                site = update.Updater(project, env)
+                if options.updatedb:
+                    log.info('Running updatedb on {0}.'.format(env))
+                    site.drupal_updatedb() 
+                if options.solr_reindex:
+                    log.info('Running solr-reindex on {0}.'.format(env))
+                    # The server has a 2min delay before re-indexing
+                    site.solr_reindex() 
+                if options.cron:
+                    log.info('Running cron on {0}.'.format(env))
+                    site.run_cron() 
+        else:
+            parser.error('Specified project not found.')
+    elif len(args) > 1:
+        config = ygg.get_config()
+        project = args.pop(0)
+        if project in config.keys():
+            for env in args:
+                if env in config[project]['environments'].keys():
+                    site = update.Updater(project, env)
+                    if options.updatedb:
+                        log.info('Running updatedb on {0}.'.format(env))
+                        site.drupal_updatedb() 
+                    if options.solr_reindex:
+                        log.info('Running solr-reindex on {0}.'.format(env))
+                        # The server has a 2min delay before re-indexing
+                        site.solr_reindex() 
+                    if options.cron:
+                        log.info('Running cron on {0}.'.format(env))
+                        site.run_cron() 
+                else:
+                    log.info('Skipping {0}, environment not found.'.format(env))
+        else:
+            parser.error('Specified project not found.')
 
 def update_pantheon(postback=True):
     """Update pantheon code and server configurations.
@@ -139,7 +190,6 @@ def update_site_core(project='pantheon', keep=None, taskid=None):
         # Send drupal version information.
         status.drupal_update_status(project)
         status.git_repo_status(project)
-        updater.drupal_updatedb()
         updater.permissions_update()
         postback.write_build_data('update_site_core', result)
 
@@ -161,7 +211,6 @@ def update_code(project, environment, tag=None, message=None, taskid=None):
     updater = update.Updater(project, environment)
     updater.test_tag(tag)
     updater.code_update(tag, message)
-    updater.drupal_updatedb()
     updater.permissions_update()
 
     # Send back repo status and drupal update status
@@ -182,13 +231,6 @@ def update_data(project, environment, source_env, updatedb='True', taskid=None):
     """
     updater = update.Updater(project, environment)
     updater.data_update(source_env)
-    # updatedb is passed in as a string so we have to evaluate it
-    if eval(string.capitalize(updatedb)):
-        updater.drupal_updatedb()
-
-    # The server has a 2min delay before updates to the index are processed
-    updater.solr_reindex()
-    updater.run_cron()
 
 def update_files(project, environment, source_env, taskid=None):
     """Update the files in project/environment using files from source_env.
