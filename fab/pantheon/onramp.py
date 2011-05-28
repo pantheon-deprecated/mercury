@@ -93,6 +93,10 @@ class ImportTools(project.BuildTools):
                 local("find . -depth -name .svn -exec rm -fr {} \;")
                 local("find . -depth -name CVS -exec rm -fr {} \;")
 
+        # Comment any RewriteBase directives in .htaccess
+        local("sed -i 's/^[^#]*RewriteBase/# RewriteBase/' %s" % os.path.join(
+                                               self.working_dir, '.htaccess'))
+
         self.site = self._get_site_name()
         self.db_dump = self._get_database_dump()
         self.version, self.revision = self._get_drupal_version_info(self.working_dir)
