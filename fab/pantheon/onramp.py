@@ -178,7 +178,8 @@ class ImportTools(project.BuildTools):
             modules = ['apachesolr-7.x-1.0-beta3', 'memcache-7.x-1.0-beta3']
         with cd(temp_dir):
             with settings(warn_only=True):
-                result = local("drush dl -by %s" % ' '.join(modules))
+                result = local("drush dl -by --default-major=%s %s" % 
+                               (self.version, ' '.join(modules)))
             pantheon.log_drush_backend(result, self.log)
             local("cp -R * %s" % module_dir)
         local("rm -rf " + temp_dir)
