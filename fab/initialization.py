@@ -118,10 +118,9 @@ def _initialize_drush():
             local('git checkout tags/7.x-4.4')
         local('chmod 555 drush/drush')
         local('chown -R root: drush')
-        local('rm -rf /opt/drush && mv drush /opt/')
-        local('mkdir /opt/drush/aliases')
+        local('mkdir -p /opt/drush/aliases')
         local('ln -sf /opt/drush/drush /usr/local/bin/drush')
-        local('drush dl drush_make')
+        local('drush dl -y --default-major=6 drush_make')
         with open('/opt/drush/.gitignore', 'w') as f:
             f.write('.gitignore\naliases')
 
