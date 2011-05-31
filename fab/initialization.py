@@ -120,7 +120,7 @@ def _initialize_drush():
         local('chown -R root: drush')
         local('mkdir /opt/drush/aliases')
         local('ln -sf /opt/drush/drush /usr/local/bin/drush')
-        local('drush dl drush_make')
+        local('drush dl --default-major=6 drush_make')
         with open('/opt/drush/.gitignore', 'w') as f:
             f.write('.gitignore\naliases')
 
