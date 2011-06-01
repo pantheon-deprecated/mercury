@@ -171,8 +171,8 @@ class PantheonBackup():
                 '/1024), 0) AS Size FROM INFORMATION_SCHEMA.TABLES where ' \
                 'TABLE_SCHEMA =  "{0}_{1}"\G\''.format(self.project, env))
             ns += int(result[result.rfind(' ')+1:])
-        #Add 80% to needed space to account for tarball
-        return fs > (ns*1.8)
+        #Double needed space to account for tarball
+        return fs > (ns*2)
 
     def backup_files(self):
         """Backup all files for environments of a project.
