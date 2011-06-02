@@ -6,6 +6,7 @@ import os
 import string
 
 from pantheon import logger
+from pantheon import ygg
 from pantheon import pantheon
 from pantheon import postback
 from pantheon import status
@@ -255,6 +256,40 @@ def git_status(project, environment):
     """
     updater = update.Updater(project, environment)
     updater.run_command('git status')
+
+def create_aliases():
+    config = ygg.get_config()
+    server = pantheon.PantheonServer()
+    project = str(config.keys()[0])
+    config = config[project]
+    environments = set(config['environments'].keys())
+    for env in environments:
+        drush_dict = {'project': project,
+                      'environment': env,
+                      'root': config['environments'][env]['apache']['DocumentRoot']}
+        server.create_drush_alias(drush_dict)
+
+def upgrade_drush(tag='7.x-4.4'):
+    """Git clone Drush and download Drush-Make.
+
+    """ 
+    if not os.path.exists('/opt/drush/.git'):
+        with cd('/opt'):
+            local('[ ! -d drush ] || rm -rf drush')
+            local('git clone http://git.drupal.org/project/drush.git')
+    with cd('/opt'):
+        with cd('drush'):
+            local('git checkout -f tags/{0}'.format(tag))
+        local('chmod 555 drush/drush')
+        local('chown -R root: drush')
+        local('ln -sf /opt/drush/drush /usr/local/bin/drush')
+        local('drush dl --package-handler=git_drupalorg -y ' \
+              '--destination=/opt/drush/commands ' \
+              '--default-major=6 drush_make')
+    local('mkdir -p /opt/drush/aliases')
+    create_aliases()
+    with open('/opt/drush/.gitignore', 'w') as f:
+        f.write('\n'.join(['.gitignore','aliases','commands/drush_make','']))
 
 if __name__ == '__main__':
     main()
