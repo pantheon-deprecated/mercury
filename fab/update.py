@@ -239,7 +239,7 @@ def upgrade_drush(tag='7.x-4.4',make_tag='6.x-2.2'):
     drush_path = '/opt/drush'
     commands_path = os.path.join(drush_path, 'commands')
     alias_path = os.path.join(drush_path, 'aliases')
-    if not os.path.exists('{0}/.git'.format(drush_path)):
+    if not os.path.exists(os.path.join(drush_path, '.git')):
         with cd('/opt'):
             local('[ ! -d drush ] || rm -rf drush')
             local('git clone http://git.drupal.org/project/drush.git')
@@ -249,16 +249,17 @@ def upgrade_drush(tag='7.x-4.4',make_tag='6.x-2.2'):
             local('git reset --hard')
         local('chmod 555 drush/drush')
         local('chown -R root: drush')
-        local('ln -sf {0}/drush /usr/local/bin/drush'.format(drush_path))
+        local('ln -sf {0} /usr/local/bin/drush'.format(os.path.join(drush_path,
+                                                                    'drush')))
         local('drush dl --package-handler=git_drupalorg -y ' \
               '--destination={0} ' \
               '--default-major=6 drush_make'.format(commands_path))
-        with cd(commands_path):
+        with cd(os.path.join(commands_path,'drush_make')):
             local('git checkout -f tags/{0}'.format(make_tag))
             local('git reset --hard')
     local('mkdir -p {0}'.format(alias_path))
     update.Updater().setup_drush_alias()
-    with open('{0}/.gitignore'.format(drush_path), 'w') as f:
+    with open(os.path.join(drush_path, '.gitignore'), 'w') as f:
         f.write('\n'.join(['.gitignore','aliases','commands/drush_make','']))
 
 if __name__ == '__main__':
