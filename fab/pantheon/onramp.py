@@ -87,16 +87,19 @@ class ImportTools(project.BuildTools):
         # Remove existing VCS files.
         with cd(self.working_dir):
             with settings(hide('warnings'), warn_only=True):
-                local("rm -r ./.bzr")
-                local("rm -r ./.git")
                 local("find . -depth -name '._*' -exec rm -fr {} \;")
                 local("find . -depth -name .git -exec rm -fr {} \;")
+                local("find . -depth -name .bzr -exec rm -fr {} \;")
                 local("find . -depth -name .svn -exec rm -fr {} \;")
                 local("find . -depth -name CVS -exec rm -fr {} \;")
 
+        # Comment any RewriteBase directives in .htaccess
+        local("sed -i 's/^[^#]*RewriteBase/# RewriteBase/' %s" % os.path.join(
+                                               self.working_dir, '.htaccess'))
+
         self.site = self._get_site_name()
         self.db_dump = self._get_database_dump()
-        self.version, self.revision = self._get_drupal_version_info()
+        self.version, self.revision = self._get_drupal_version_info(self.working_dir)
 
     def setup_project_branch(self):
         # Pressflow branches at 6.6. If on an earlier version, force update.
@@ -175,7 +178,8 @@ class ImportTools(project.BuildTools):
             modules = ['apachesolr-7.x-1.0-beta3', 'memcache-7.x-1.0-beta3']
         with cd(temp_dir):
             with settings(warn_only=True):
-                result = local("drush dl -by %s" % ' '.join(modules))
+                result = local("drush dl -by --default-major=%s %s" % 
+                               (self.version, ' '.join(modules)))
             pantheon.log_drush_backend(result, self.log)
             local("cp -R * %s" % module_dir)
         local("rm -rf " + temp_dir)
@@ -431,56 +435,6 @@ class ImportTools(project.BuildTools):
         else:
             self.log.info('MYSQL Dump found at %s' % sql_dump[0])
             return sql_dump[0]
-
-    def _get_drupal_version_info(self):
-        """Determine the platform, version, and revision of the imported site.
-        Returns tuple of major_version (6 or 7) and the nearest git revision.
-
-        """
-        version = drupaltools.get_drupal_version(self.working_dir)
-        if not version:
-            err = 'Error: This does not appear to be a Drupal 6 site.'
-            self.log.error(err)
-            postback.build_error(err)
-        else:
-            self.log.info('Drupal version %s found.' % (version))
-
-        platform = drupaltools.get_drupal_platform(self.working_dir)
-
-        major_version = int(version[0:1])
-        if major_version == 6:
-            if platform == 'DRUPAL':
-                revision = 'DRUPAL-%s' % version
-            elif platform == 'PRESSFLOW' or platform == 'PANTHEON':
-                revision = self._get_pressflow_revision(6)
-        elif major_version == 7:
-            #TODO: Temporary until D7 git setup is finalized.
-            if platform == 'DRUPAL':
-                # TODO: replace - with . in tags once git repo is finalized.
-                revision = version.replace('-','.') # temp hack
-            elif platform == 'PRESSFLOW' or platform == 'PANTHEON':
-                revision = self._get_pressflow_revision(7)
-        return (major_version, revision)
-
-    def _get_pressflow_revision(self, version=6):
-        #TODO: Make sure this is D7 friendly once Pressflow setup is finalized.
-        print "\nPlease Wait. Determining closest Pantheon revision.\n"
-        temp_dir = tempfile.mkdtemp()
-        repo = 'git://git.getpantheon.com/pantheon/%s.git' % version
-        local('git clone %s %s' % (repo, temp_dir))
-        with cd(temp_dir):
-            match = {'diff': None, 'commit': None}
-            commits = local('git log --pretty=format:%H').split('\n')
-            with hide('running'):
-                for commit in commits:
-                    local("git reset --hard " + commit)
-                    diff = int(local("diff -rup %s ./ | wc -l" % \
-                                                   self.working_dir))
-                    if match['commit'] == None or diff < match['diff']:
-                        match['diff'] = diff
-                        match['commit'] = commit
-        local('rm -rf %s' % temp_dir)
-        return match['commit']
 
     def _get_files_dir(self, env='dev'):
         database = '%s_%s' % (self.project, env)
