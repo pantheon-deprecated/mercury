@@ -11,7 +11,7 @@ from fabric.api import *
 
 class Updater(project.BuildTools):
 
-    def __init__(self, project, environment):
+    def __init__(self, environment):
         super(Updater, self).__init__()
 
         self.project_env = environment
@@ -19,7 +19,7 @@ class Updater(project.BuildTools):
         self.env_path = os.path.join(self.project_path, environment)
         self.log = logger.logging.getLogger('pantheon.update.Updater')
         self.log = logger.logging.LoggerAdapter(self.log, 
-                                                {"project": project,
+                                                {"project": self.project,
                                                  "environment": environment})
 
     def core_update(self, keep=None):
