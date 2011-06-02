@@ -272,6 +272,8 @@ def create_aliases():
 def upgrade_drush(tag='7.x-4.4'):
     """Git clone Drush and download Drush-Make.
 
+    tag: the drush version tag to checkout
+
     """ 
     if not os.path.exists('/opt/drush/.git'):
         with cd('/opt'):
@@ -280,6 +282,7 @@ def upgrade_drush(tag='7.x-4.4'):
     with cd('/opt'):
         with cd('drush'):
             local('git checkout -f tags/{0}'.format(tag))
+            local('git reset --hard')
         local('chmod 555 drush/drush')
         local('chown -R root: drush')
         local('ln -sf /opt/drush/drush /usr/local/bin/drush')
