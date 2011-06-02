@@ -17,7 +17,7 @@ from optparse import OptionParser
 from fabric.api import *
 
 def main():
-    usage = "usage: %prog [options] project *environments"
+    usage = "usage: %prog [options] *environments"
     parser = OptionParser(usage=usage, description="Update pantheon code and " \
                                                    "server configurations.")
     parser.add_option('-p', '--postback', dest="postback", action="store_true", 
@@ -38,45 +38,19 @@ def main():
         log.setLevel(10)
     if len(args) == 0:
         update_pantheon(options.postback)
-    elif len(args) == 1:
-        config = ygg.get_config()
-        project = args.pop(0)
-        if project in config.keys():
-            for env in config[project]['environments'].keys():
-                site = update.Updater(project, env)
-                if options.updatedb:
-                    log.info('Running updatedb on {0}.'.format(env))
-                    site.drupal_updatedb() 
-                if options.solr_reindex:
-                    log.info('Running solr-reindex on {0}.'.format(env))
-                    # The server has a 2min delay before re-indexing
-                    site.solr_reindex() 
-                if options.cron:
-                    log.info('Running cron on {0}.'.format(env))
-                    site.run_cron() 
-        else:
-            parser.error('Specified project not found.')
-    elif len(args) > 1:
-        config = ygg.get_config()
-        project = args.pop(0)
-        if project in config.keys():
-            for env in args:
-                if env in config[project]['environments'].keys():
-                    site = update.Updater(project, env)
-                    if options.updatedb:
-                        log.info('Running updatedb on {0}.'.format(env))
-                        site.drupal_updatedb() 
-                    if options.solr_reindex:
-                        log.info('Running solr-reindex on {0}.'.format(env))
-                        # The server has a 2min delay before re-indexing
-                        site.solr_reindex() 
-                    if options.cron:
-                        log.info('Running cron on {0}.'.format(env))
-                        site.run_cron() 
-                else:
-                    log.info('Skipping {0}, environment not found.'.format(env))
-        else:
-            parser.error('Specified project not found.')
+    elif len(args) > 0:
+        for env in args:
+            site = update.Updater(env)
+            if options.updatedb:
+                log.info('Running updatedb on {0}.'.format(env))
+                site.drupal_updatedb() 
+            if options.solr_reindex:
+                log.info('Running solr-reindex on {0}.'.format(env))
+                # The server has a 2min delay before re-indexing
+                site.solr_reindex() 
+            if options.cron:
+                log.info('Running cron on {0}.'.format(env))
+                site.run_cron() 
 
 def update_pantheon(postback=True):
     """Update pantheon code and server configurations.
@@ -185,7 +159,7 @@ def update_site_core(project='pantheon', keep=None, taskid=None):
              'force': Leave failed merge in working-tree (manual resolve).
              None: Reset to ORIG_HEAD if merge fails.
     """
-    updater = update.Updater(project, 'dev')
+    updater = update.Updater('dev')
     result = updater.core_update(keep)
     if result['merge'] == 'success':
         # Send drupal version information.
@@ -209,7 +183,7 @@ def update_code(project, environment, tag=None, message=None, taskid=None):
     if not message:
         message = 'Tagging as %s for release.' % tag
 
-    updater = update.Updater(project, environment)
+    updater = update.Updater(environment)
     updater.test_tag(tag)
     updater.code_update(tag, message)
     updater.permissions_update()
@@ -222,7 +196,7 @@ def rebuild_environment(project, environment):
     """Rebuild the project/environment with files and data from 'live'.
 
     """
-    updater = update.Updater(project, environment)
+    updater = update.Updater(environment)
     updater.files_update('live')
     updater.data_update('live')
 
@@ -230,21 +204,21 @@ def update_data(project, environment, source_env, updatedb='True', taskid=None):
     """Update the data in project/environment using data from source_env.
 
     """
-    updater = update.Updater(project, environment)
+    updater = update.Updater(environment)
     updater.data_update(source_env)
 
 def update_files(project, environment, source_env, taskid=None):
     """Update the files in project/environment using files from source_env.
 
     """
-    updater = update.Updater(project, environment)
+    updater = update.Updater(environment)
     updater.files_update(source_env)
 
 def git_diff(project, environment, revision_1, revision_2=None):
     """Return git diff
 
     """
-    updater = update.Updater(project, environment)
+    updater = update.Updater(environment)
     if not revision_2:
            updater.run_command('git diff %s' % revision_1)
     else:
@@ -254,7 +228,7 @@ def git_status(project, environment):
     """Return git status
 
     """
-    updater = update.Updater(project, environment)
+    updater = update.Updater(environment)
     updater.run_command('git status')
 
 def create_aliases():
