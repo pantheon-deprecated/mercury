@@ -78,6 +78,8 @@ class EventHandler(logging.Handler):
                 details['environment'] = record.environment
             if hasattr(record, 'command'):
                 details['command'] = record.command
+            if hasattr(record, 'job_complete'):
+                details['job_complete'] = record.job_complete
             ygg.send_event(thread, details, labels, source=source)
         else:
             pass

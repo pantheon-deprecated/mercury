@@ -50,6 +50,7 @@ def main():
             if options.cron:
                 log.info('Running cron on {0}.'.format(env))
                 site.run_cron() 
+        log.info('Update complete.', extra=dict({"job_complete": 1}))
 
 def update_pantheon(postback=True):
     """Update pantheon code and server configurations.
