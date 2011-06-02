@@ -35,9 +35,10 @@ def get_drupal_update_status(project):
             # python -> json -> php boolean disagreements. Just use int.
             drupal_update = int(latest_drupal_version != drupal_version)
 
-            # Pantheon log only makes sense if already using Pressflow/Pantheon
-            # If using Drupal, the log would show every pressflow commit ever.
-            if platform == 'PANTHEON' or platform == 'PRESSFLOW':
+            #TODO: This should be removed once the onramp process has switched
+            # to always using the latest version of pantheon.
+            if platform == 'PANTHEON' or platform == 'PRESSFLOW' or \
+                                         drupal_version[0] == '7':
                 pantheon_log = local('git log refs/heads/%s' % project + \
                                      '..refs/remotes/origin/master'
                                     ).rstrip('\n')
