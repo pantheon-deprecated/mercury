@@ -11,16 +11,19 @@ from fabric.api import *
 
 class Updater(project.BuildTools):
 
-    def __init__(self, environment):
+    def __init__(self, environment=None):
         super(Updater, self).__init__()
 
-        self.project_env = environment
-        self.author = 'Jenkins User <jenkins@pantheon>'
-        self.env_path = os.path.join(self.project_path, environment)
         self.log = logger.logging.getLogger('pantheon.update.Updater')
-        self.log = logger.logging.LoggerAdapter(self.log, 
-                                                {"project": self.project,
-                                                 "environment": environment})
+        context = {"project":self.project}
+        if environment:
+            assert environment in self.environments, \
+                   'Environment not found in project: {0}'.format(self.project)
+            context['environment'] = environment
+            self.update_env = environment
+            self.author = 'Jenkins User <jenkins@pantheon>'
+            self.env_path = os.path.join(self.project_path, environment)
+        self.log = logger.logging.LoggerAdapter(self.log, context)
 
     def core_update(self, keep=None):
         """Update core in dev environment.
@@ -84,19 +87,19 @@ class Updater(project.BuildTools):
         self.log.info('Initialized code update.')
         try:
             # Update code in 'dev' (Only used when updating from remote push)
-            if self.project_env == 'dev':
+            if self.update_env == 'dev':
                 with cd(self.env_path):
                     local('git pull')
 
             # Update code in 'test' (commit & tag in 'dev', fetch in 'test')
-            elif self.project_env == 'test':
+            elif self.update_env == 'test':
                 self.code_commit(message)
                 self._tag_code(tag, message)
                 self._fetch_and_reset(tag)
 
             # Update code in 'live' (get latest tag from 'test', fetch in 
             # 'live')
-            elif self.project_env == 'live':
+            elif self.update_env == 'live':
                 with cd(os.path.join(self.project_path, 'test')):
                     tag = local('git describe --tags --abbrev=0').rstrip('\n')
                 self._fetch_and_reset(tag)
@@ -128,7 +131,7 @@ class Updater(project.BuildTools):
         try:
             tempdir = tempfile.mkdtemp()
             export = dbtools.export_data(self, source_env, tempdir)
-            dbtools.import_data(self.project, self.project_env, export)
+            dbtools.import_data(self.project, self.update_env, export)
             local('rm -rf %s' % tempdir)
         except:
             self.log.exception('Data sync encountered a fatal error.')
@@ -142,7 +145,7 @@ class Updater(project.BuildTools):
             source = os.path.join(self.project_path,
                                   '%s/sites/default/files' % source_env)
             dest = os.path.join(self.project_path,
-                                '%s/sites/default/' % self.project_env)
+                                '%s/sites/default/' % self.update_env)
             local('rsync -av --delete %s %s' % (source, dest))
         except:
             self.log.exception('File sync encountered a fatal error.')
@@ -153,7 +156,7 @@ class Updater(project.BuildTools):
     def drupal_updatedb(self):
         self.log.info('Initiated Updatedb.')
         try:
-            alias = '@%s_%s' % (self.project, self.project_env)
+            alias = '@%s_%s' % (self.project, self.update_env)
             with settings(warn_only=True):
                 result = local('drush %s -by updb' % alias)
         except:
@@ -168,7 +171,7 @@ class Updater(project.BuildTools):
         try:
             with settings(warn_only=True):
                 result = local("drush @%s_%s -b cron" % 
-                               (self.project, self.project_env))
+                               (self.project, self.update_env))
         except:
             self.log.exception('Cron encountered a fatal error.')
             raise
@@ -180,7 +183,7 @@ class Updater(project.BuildTools):
         try:
             with settings(warn_only=True):
                 result = local("drush @%s_%s -b solr-reindex" % 
-                               (self.project, self.project_env))
+                               (self.project, self.update_env))
         except:
             self.log.exception('Solr-reindex encountered a fatal error.')
             raise
@@ -190,7 +193,7 @@ class Updater(project.BuildTools):
     def permissions_update(self):
         self.log.info('Initialized permissions update.')
         try:
-            self.setup_permissions('update', self.project_env)
+            self.setup_permissions('update', self.update_env)
         except Exception as e:
             self.log.exception('Permissions update encountered a fatal error.')
             raise
@@ -230,7 +233,7 @@ class Updater(project.BuildTools):
 
     def _fetch_and_reset(self, tag):
         try:
-            with cd(os.path.join(self.project_path, self.project_env)):
+            with cd(os.path.join(self.project_path, self.update_env)):
                 local('git checkout %s' % self.project)
                 local('git fetch -t')
                 local('git reset --hard "%s"' % tag)
