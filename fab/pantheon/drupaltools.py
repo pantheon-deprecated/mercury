@@ -59,13 +59,6 @@ def get_drupal_update_status(project):
                            'available': {'drupal_version': latest_drupal_version,}}
     return status
 
-def get_drupal_platform(drupal_root):
-    #TODO: Make sure this is D7 friendly once Pressflow setup is finalized.
-    return ((local("awk \"/\'info\' =>/\" " + \
-            os.path.join(drupal_root, 'modules/system/system.module') + \
-            r' | grep "Powered" | sed "s_^.*Powered by \([a-zA-Z]*\).*_\1_"')
-            ).rstrip('\n').upper())
-
 def get_drupal_version(drupal_root):
     """Return the current drupal version.
 

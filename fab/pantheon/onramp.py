@@ -99,14 +99,7 @@ class ImportTools(project.BuildTools):
 
         self.site = self._get_site_name()
         self.db_dump = self._get_database_dump()
-        self.version, self.revision = self._get_drupal_version_info(self.working_dir)
-
-    def setup_project_branch(self):
-        # Pressflow branches at 6.6. If on an earlier version, force update.
-        if self.revision in ['DRUPAL-6-%s' % i for i in range(6)]:
-            self.revision = 'DRUPAL-6-6'
-            self.force_update = True
-        super(ImportTools, self).setup_project_branch(self.revision)
+        self.version = int(drupaltools.get_drupal_version[0])
 
     def setup_database(self):
         """ Create a new database and import from dumpfile.
@@ -144,10 +137,8 @@ class ImportTools(project.BuildTools):
             local('cp -R .git %s' % self.working_dir)
         with cd(self.working_dir):
             local('rm -f PRESSFLOW.txt')
-            # If drupal version is prior to 6.6 (when pressflow was forked),
-            # force an upgrade to 6.6 (so later operations are supported).
-            if self.force_update:
-                local('git reset --hard')
+            # Stomp on any changes to core.
+            local('git reset --hard')
         local('rm -rf %s' % temp_dir)
 
         source = os.path.join(self.working_dir, 'sites/%s' % self.site)
