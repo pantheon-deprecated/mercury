@@ -44,9 +44,10 @@ def get_drupal_update_status(project):
             # If log is impty, no updates.
             pantheon_update = int(bool(pantheon_log))
 
+            #TODO: remove the reference to platform once Atlas no longer uses it.
             status[env] = {'drupal_update': drupal_update,
                            'pantheon_update': pantheon_update,
-                           'current': {'platform': platform,
+                           'current': {'platform': 'DRUPAL',
                                        'drupal_version': drupal_version},
                            'available': {'drupal_version': latest_drupal_version,}}
     return status
