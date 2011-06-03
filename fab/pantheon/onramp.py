@@ -99,7 +99,7 @@ class ImportTools(project.BuildTools):
 
         self.site = self._get_site_name()
         self.db_dump = self._get_database_dump()
-        self.version = int(drupaltools.get_drupal_version[0])
+        self.version = int(drupaltools.get_drupal_version(self.working_dir)[0])
 
     def setup_database(self):
         """ Create a new database and import from dumpfile.
