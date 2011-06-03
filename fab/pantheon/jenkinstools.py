@@ -83,7 +83,8 @@ class Junit():
         """
         doc = etree.ElementTree(doc)
         with open(os.path.join(self.workspace, "results.xml"), 'w') as f:
-            doc.write(f, xml_declaration=True, pretty_print=True)
+            doc.write(f, encoding='UTF-8', xml_declaration=True, 
+                      pretty_print=True)
 
 def get_workspace():
     """Return the workspace to store build data information.

@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!-- $Id: schema.xml,v 1.1.2.1.2.38 2010/07/01 02:42:07 pwolanin Exp $ -->
 
 <!--
  This is the Solr schema file. This file should be named "schema.xml" and
@@ -11,7 +10,7 @@
  http://wiki.apache.org/solr/SchemaXml
 -->
 
-<schema name="drupal-1.1" version="1.2">
+<schema name="drupal-1.3" version="1.2">
     <!-- attribute "name" is the name of this schema and is only used for display purposes.
          Applications should change this to reflect the nature of the search collection.
          version="1.2" is Solr's version number for the schema syntax and semantics.  It should
@@ -168,6 +167,7 @@
                 enablePositionIncrements="true"
                 />
         <filter class="solr.WordDelimiterFilterFactory"
+                protected="protwords.txt"
                 generateWordParts="1"
                 generateNumberParts="1"
                 catenateWords="1"
@@ -189,6 +189,7 @@
                 enablePositionIncrements="true"
                 />
         <filter class="solr.WordDelimiterFilterFactory"
+                protected="protwords.txt"
                 generateWordParts="1"
                 generateNumberParts="1"
                 catenateWords="0"

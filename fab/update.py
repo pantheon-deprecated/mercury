@@ -15,16 +15,41 @@ from optparse import OptionParser
 from fabric.api import *
 
 def main():
-    usage = "usage: %prog [options]"
-    parser = OptionParser(usage=usage, description="Update pantheon code and server configurations.")
-    parser.add_option('-p', '--postback', dest="postback", action="store_true", default=False, help='Postback to atlas.')
-    parser.add_option('-d', '--debug', dest="debug", action="store_true", default=False, help='Include debug output.')
+    usage = "usage: %prog [options] *environments"
+    parser = OptionParser(usage=usage, description="Update pantheon code and " \
+                                                   "server configurations.")
+    parser.add_option('-p', '--postback', dest="postback", action="store_true", 
+                      default=False, help='Postback to atlas.')
+    parser.add_option('-d', '--debug', dest="debug", action="store_true", 
+                      default=False, help='Include debug output.')
+    parser.add_option('-u', '--updatedb', dest="updatedb", action="store_true", 
+                      default=False, help='Run updatedb on an environment.')
+    parser.add_option('-s', '--solr-reindex', dest="solr_reindex", 
+                      action="store_true", default=False, 
+                      help='Run solr-reindex on an environment.')
+    parser.add_option('-c', '--cron', dest="cron", action="store_true", 
+                      default=False, help='Run cron on an environment.')
     (options, args) = parser.parse_args()
     log = logger.logging.getLogger('pantheon.update')
 
     if options.debug:
         log.setLevel(10)
-    update_pantheon(options.postback)
+    if len(args) == 0:
+        update_pantheon(options.postback)
+    elif len(args) > 0:
+        for env in args:
+            site = update.Updater(env)
+            if options.updatedb:
+                log.info('Running updatedb on {0}.'.format(env))
+                site.drupal_updatedb() 
+            if options.solr_reindex:
+                log.info('Running solr-reindex on {0}.'.format(env))
+                # The server has a 2min delay before re-indexing
+                site.solr_reindex() 
+            if options.cron:
+                log.info('Running cron on {0}.'.format(env))
+                site.run_cron() 
+        log.info('Update complete.', extra=dict({"job_complete": 1}))
 
 def update_pantheon(postback=True):
     """Update pantheon code and server configurations.
@@ -133,13 +158,12 @@ def update_site_core(project='pantheon', keep=None, taskid=None):
              'force': Leave failed merge in working-tree (manual resolve).
              None: Reset to ORIG_HEAD if merge fails.
     """
-    updater = update.Updater(project, 'dev')
+    updater = update.Updater('dev')
     result = updater.core_update(keep)
     if result['merge'] == 'success':
         # Send drupal version information.
         status.drupal_update_status(project)
         status.git_repo_status(project)
-        updater.drupal_updatedb()
         updater.permissions_update()
         postback.write_build_data('update_site_core', result)
 
@@ -158,10 +182,9 @@ def update_code(project, environment, tag=None, message=None, taskid=None):
     if not message:
         message = 'Tagging as %s for release.' % tag
 
-    updater = update.Updater(project, environment)
+    updater = update.Updater(environment)
     updater.test_tag(tag)
     updater.code_update(tag, message)
-    updater.drupal_updatedb()
     updater.permissions_update()
 
     # Send back repo status and drupal update status
@@ -172,7 +195,7 @@ def rebuild_environment(project, environment):
     """Rebuild the project/environment with files and data from 'live'.
 
     """
-    updater = update.Updater(project, environment)
+    updater = update.Updater(environment)
     updater.files_update('live')
     updater.data_update('live')
 
@@ -180,28 +203,21 @@ def update_data(project, environment, source_env, updatedb='True', taskid=None):
     """Update the data in project/environment using data from source_env.
 
     """
-    updater = update.Updater(project, environment)
+    updater = update.Updater(environment)
     updater.data_update(source_env)
-    # updatedb is passed in as a string so we have to evaluate it
-    if eval(string.capitalize(updatedb)):
-        updater.drupal_updatedb()
-
-    # The server has a 2min delay before updates to the index are processed
-    updater.solr_reindex()
-    updater.run_cron()
 
 def update_files(project, environment, source_env, taskid=None):
     """Update the files in project/environment using files from source_env.
 
     """
-    updater = update.Updater(project, environment)
+    updater = update.Updater(environment)
     updater.files_update(source_env)
 
 def git_diff(project, environment, revision_1, revision_2=None):
     """Return git diff
 
     """
-    updater = update.Updater(project, environment)
+    updater = update.Updater(environment)
     if not revision_2:
            updater.run_command('git diff %s' % revision_1)
     else:
@@ -211,8 +227,40 @@ def git_status(project, environment):
     """Return git status
 
     """
-    updater = update.Updater(project, environment)
+    updater = update.Updater(environment)
     updater.run_command('git status')
+
+def upgrade_drush(tag='7.x-4.4',make_tag='6.x-2.2'):
+    """Git clone Drush and download Drush-Make.
+
+    tag: the drush version tag to checkout
+
+    """ 
+    drush_path = '/opt/drush'
+    commands_path = os.path.join(drush_path, 'commands')
+    alias_path = os.path.join(drush_path, 'aliases')
+    if not os.path.exists(os.path.join(drush_path, '.git')):
+        with cd('/opt'):
+            local('[ ! -d drush ] || rm -rf drush')
+            local('git clone http://git.drupal.org/project/drush.git')
+    with cd('/opt'):
+        with cd(drush_path):
+            local('git checkout -f tags/{0}'.format(tag))
+            local('git reset --hard')
+        local('chmod 555 drush/drush')
+        local('chown -R root: drush')
+        local('ln -sf {0} /usr/local/bin/drush'.format(os.path.join(drush_path,
+                                                                    'drush')))
+        local('drush dl --package-handler=git_drupalorg -y ' \
+              '--destination={0} ' \
+              '--default-major=6 drush_make'.format(commands_path))
+        with cd(os.path.join(commands_path,'drush_make')):
+            local('git checkout -f tags/{0}'.format(make_tag))
+            local('git reset --hard')
+    local('mkdir -p {0}'.format(alias_path))
+    update.Updater().setup_drush_alias()
+    with open(os.path.join(drush_path, '.gitignore'), 'w') as f:
+        f.write('\n'.join(['.gitignore','aliases','commands/drush_make','']))
 
 if __name__ == '__main__':
     main()
