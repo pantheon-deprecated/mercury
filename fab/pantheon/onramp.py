@@ -175,7 +175,7 @@ class ImportTools(project.BuildTools):
         if self.version == 6:
             modules = ['apachesolr','memcache','varnish']
         else:
-            modules = ['apachesolr-7.x-1.0-beta3', 'memcache-7.x-1.0-beta3']
+            modules = ['apachesolr-7.x-1.0-beta6', 'memcache-7.x-1.0-beta3']
         with cd(temp_dir):
             with settings(warn_only=True):
                 result = local("drush dl -by --default-major=%s %s" % 
