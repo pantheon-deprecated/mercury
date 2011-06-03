@@ -152,6 +152,28 @@ class PantheonBackup():
         else:
             self.log.info('Archive of drush successful.')
 
+    def free_space(self):
+        """Returns bool. True if free space is greater then backup size.
+
+        """
+        #Get the total free space
+        fs = os.statvfs('/')
+        fs = int(fs.f_bavail * fs.f_frsize / 1024)
+        #Calc the disk usage of project webroot and git repo
+        paths = [os.path.join(self.server.webroot, self.project),
+                 os.path.join('/var/git/projects', self.project)]
+        result = local('du -slc {0}'.format(' '.join(paths)))
+        ns = int(result[result.rfind('\n')+1:result.rfind('\t')])
+        #Calc the database size of each env
+        for env in self.environments:
+            result = local('mysql --execute=\'SELECT IFNULL(ROUND((' \
+                'sum(DATA_LENGTH) + sum(INDEX_LENGTH) - sum(DATA_FREE))' \
+                '/1024), 0) AS Size FROM INFORMATION_SCHEMA.TABLES where ' \
+                'TABLE_SCHEMA =  "{0}_{1}"\G\''.format(self.project, env))
+            ns += int(result[result.rfind(' ')+1:])
+        #Double needed space to account for tarball
+        return fs > (ns*2)
+
     def backup_files(self):
         """Backup all files for environments of a project.
 

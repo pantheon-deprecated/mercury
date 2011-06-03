@@ -78,6 +78,8 @@ class EventHandler(logging.Handler):
                 details['environment'] = record.environment
             if hasattr(record, 'command'):
                 details['command'] = record.command
+            if hasattr(record, 'job_complete'):
+                details['job_complete'] = record.job_complete
             ygg.send_event(thread, details, labels, source=source)
         else:
             pass
@@ -90,13 +92,12 @@ class JunitHandler(logging.Handler):
             suitename = record.name.split('.')[-1].capitalize()
             casename = record.funcName.capitalize()
             results = jenkinstools.Junit(suitename, casename)
-            msg = record.msg.encode('utf-8')
             if record.levelname in ['ERROR', 'CRITICAL']:
-                results.error(msg)
+                results.error(record.msg)
             if record.levelname in ['WARNING']:
-                results.fail(msg)
+                results.fail(record.msg)
             if record.levelname in ['INFO']:
-                results.success(msg)
+                results.success(record.msg)
         else:
             pass
 
