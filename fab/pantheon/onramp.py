@@ -317,20 +317,20 @@ class ImportTools(project.BuildTools):
         # apachesolr module for drupal 7 stores config in db.
         # TODO: use drush/drupal api to do this work.
         try:
-          if self.version == 7:
-              db.execute('TRUNCATE apachesolr_server')
-              for env in self.environments:
-                  config = self.config['environments'][env]['solr']
-                  host = config['solr_host']
-                  port = config['solr_port']
-                  sid = config['apachesolr_default_server']
-                  name = '%s %s' % (self.project, env)
-                  path = config['solr_path']
-  
-                  db.execute('INSERT INTO apachesolr_server ' + \
-                      '(host, port, server_id, name, path) VALUES ' + \
-                      '("%s", "%s", "%s", "%s", "%s")' % \
-                             (host, port, sid, name, path))
+            if self.version == 7:
+                db.execute('TRUNCATE apachesolr_server')
+                for env in self.environments:
+                    config = self.config['environments'][env]['solr']
+                    host = config['solr_host']
+                    port = config['solr_port']
+                    sid = config['apachesolr_default_server']
+                    name = '%s %s' % (self.project, env)
+                    path = config['solr_path']
+    
+                    db.execute('INSERT INTO apachesolr_server ' + \
+                        '(host, port, server_id, name, path) VALUES ' + \
+                        '("%s", "%s", "%s", "%s", "%s")' % \
+                               (host, port, sid, name, path))
         except Exception as mysql_error:
              self.log.error('Auto-configuration of ApacheSolr module failed: %s' % mysql_error)
              pass
