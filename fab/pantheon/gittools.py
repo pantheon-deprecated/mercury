@@ -24,8 +24,11 @@ def post_receive_hook(params):
     # Development environment exists.
     else:
         with cd(dest):
-            # Hide output from showing on git's report back to user.
+                # Hide output from showing on git's report back to user.
                 with settings(hide('running', 'warnings'), warn_only=True):
+                    # Send project code to central git server.
+                    _send_to_chronos(project)
+                    # update the dev environment
                     dev_update = local('env -i git pull')
                 # Output status to the git push initiator.
                 if dev_update.failed:
@@ -53,6 +56,21 @@ def _parse_hook_params(params):
     project = refs.split('/')[2].rstrip('\n')
     return (project, revision_old, revision_new)
 
+def _send_to_chronos(project):
+    """ Send project code to chronos.
+
+    Eventually all project code will go through chronos, but for now we want
+    to test it in parallel.
+
+    """
+    chronos = "https://code.getpantheon.com/sites/self/code"
+
+    os.environ["GIT_SSL_CERT"] = "/etc/pantheon/system.pem"
+    with cd(os.path.join('/var/git/projects', project)):
+        # We don't override env vars here because we actually want to push
+        # from the central repo (where the hook is triggered)
+        local("git push %s refs/heads/%s:refs/heads/master" % (
+                              chronos, project), capture=False)
 
 class GitRepo():
 
