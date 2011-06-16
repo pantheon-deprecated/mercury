@@ -16,7 +16,7 @@
  limitations under the License.
 -->
 
-<config name="drupal-1.9.6">
+<config name="drupal-3.0-beta7">
 
   <!-- Set this to 'false' if you want solr to continue working after it has 
        encountered an severe configuration error.  In a production environment, 
@@ -103,10 +103,8 @@
     <useCompoundFile>false</useCompoundFile>
     <ramBufferSizeMB>32</ramBufferSizeMB>
     <mergeFactor>4</mergeFactor>
-    <!-- Deprecated -->
-    <!--<maxBufferedDocs>1000</maxBufferedDocs>-->
     <maxMergeDocs>2147483647</maxMergeDocs>
-    <maxFieldLength>10000</maxFieldLength>
+    <maxFieldLength>20000</maxFieldLength>
 
     <!-- If true, unlock any held write or commit locks on startup. 
          This defeats the locking mechanism that allows multiple
@@ -409,6 +407,7 @@
     <!-- default values for query parameters -->
      <lst name="defaults">
        <str name="echoParams">explicit</str>
+       <bool name="omitHeader">true</bool>
        <!--
        <int name="rows">10</int>
        <str name="fl">*</str>
@@ -447,22 +446,21 @@
     <lst name="defaults">
      <str name="defType">dismax</str>
      <str name="echoParams">explicit</str>
+     <bool name="omitHeader">true</bool>
     </lst>
   </requestHandler>
 
   <!-- Note how you can register the same handler multiple times with
        different names (and different init parameters)
     -->
-  <requestHandler name="partitioned" class="solr.SearchHandler" default="true">
+  <requestHandler name="drupal" class="solr.SearchHandler" default="true">
     <lst name="defaults">
      <str name="defType">dismax</str>
      <str name="echoParams">explicit</str>
+     <bool name="omitHeader">true</bool>
      <float name="tie">0.01</float>
-     <str name="qf">
-        body^40.0 title^5.0 name^3.0 taxonomy_names^2.0 tags_h1^5.0 tags_h2_h3^3.0 tags_h4_h5_h6^2.0 tags_inline^1.0
-     </str>
      <str name="pf">
-        body^2.0
+        content^2.0
      </str>
      <int name="ps">15</int>
      <!-- Abort any searches longer than 4 seconds -->
@@ -474,18 +472,18 @@
 
    <!-- example highlighter config, enable per-query with hl=true -->
      <str name="hl">true</str>
-     <str name="hl.fl">body</str>
+     <str name="hl.fl">content</str>
      <int name="hl.snippets">3</int>
      <str name="hl.mergeContiguous">true</str>
    <!-- instructs Solr to return the field itself if no query terms are
         found -->
-     <str name="f.body.hl.alternateField">teaser</str>
-     <str name="f.body.hl.maxAlternateFieldLength">256</str>
+     <str name="f.content.hl.alternateField">teaser</str>
+     <str name="f.content.hl.maxAlternateFieldLength">256</str>
      <!-- JS: I wasn't getting good results here... I'm turning off for now
      because I was getting periods (.) by themselves at the beginning of
      snippets and don't feel like debugging anymore.  Without the regex is
      faster too -->
-     <!--<str name="f.body.hl.fragmenter">regex</str>--> <!-- defined below -->
+     <!--<str name="f.content.hl.fragmenter">regex</str>--> <!-- defined below -->
 
     <!-- By default, don't spell check -->
       <str name="spellcheck">false</str>
@@ -572,6 +570,8 @@
     </lst>
 
   </searchComponent>
+
+  <queryConverter name="queryConverter" class="solr.SpellingQueryConverter"/>
 
   <!-- a search component that enables you to configure the top results for
        a given query regardless of the normal lucene scoring.-->
