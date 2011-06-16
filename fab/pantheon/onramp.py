@@ -164,10 +164,10 @@ class ImportTools(project.BuildTools):
         if self.version == 6:
             modules = ['apachesolr','memcache','varnish']
         else:
-            modules = ['apachesolr-7.x-1.0-beta6', 'memcache-7.x-1.0-beta3']
+            modules = ['apachesolr-7.x-1.0-beta8', 'memcache-7.x-1.0-beta3']
         with cd(temp_dir):
             with settings(warn_only=True):
-                result = local("drush dl -by --default-major=%s %s" % 
+                result = local("drush dl -by --default-major=%s %s" %
                                (self.version, ' '.join(modules)))
             pantheon.log_drush_backend(result, self.log)
             local("cp -R * %s" % module_dir)
@@ -316,23 +316,32 @@ class ImportTools(project.BuildTools):
         # TODO: use drush/drupal api to do this work.
         try:
             if self.version == 7:
-                db.execute('TRUNCATE apachesolr_server')
+                db.execute('TRUNCATE apachesolr_environment')
                 for env in self.environments:
                     config = self.config['environments'][env]['solr']
-                    host = config['solr_host']
-                    port = config['solr_port']
-                    sid = config['apachesolr_default_server']
+
+                    env_id = config['apachesolr_default_server']
                     name = '%s %s' % (self.project, env)
-                    path = config['solr_path']
-    
-                    db.execute('INSERT INTO apachesolr_server ' + \
-                        '(host, port, server_id, name, path) VALUES ' + \
-                        '("%s", "%s", "%s", "%s", "%s")' % \
-                               (host, port, sid, name, path))
+                    url = 'http://%s:%s/%s' % (config['solr_host'],
+                                               config['solr_port'],
+                                               config['solr_path'])
+
+                    # Populate the solr environments
+                    db.execute('INSERT INTO apachesolr_environment ' + \
+                        '(env_id, name, url) VALUES ' + \
+                        '("%s", "%s", "%s")' % (env_id, name, url))
+
+                    # Populate the solr environment variables
+                    serial_val = 's:1:"0";'
+                    db.execute('INSERT INTO apachesolr_environment_variable ' + \
+                               '(env_id, name, value) VALUES ' + \
+                               '("%s","apachesolr_read_only","%s")' % (env_id,
+                                                                  serial_val))
+
         except Exception as mysql_error:
              self.log.error('Auto-configuration of ApacheSolr module failed: %s' % mysql_error)
              pass
-        
+
         db.close()
 
         # D7: apachesolr config link will not display until cache cleared?
