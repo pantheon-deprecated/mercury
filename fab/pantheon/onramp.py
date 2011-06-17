@@ -320,11 +320,11 @@ class ImportTools(project.BuildTools):
                 for env in self.environments:
                     config = self.config['environments'][env]['solr']
 
-                    env_id = config['apachesolr_default_server']
+                    env_id = '%s_%s' % (self.project, env)
                     name = '%s %s' % (self.project, env)
-                    url = 'http://%s:%s/%s' % (config['solr_host'],
-                                               config['solr_port'],
-                                               config['solr_path'])
+                    url = 'http://%s:%s%s' % (config['solr_host'],
+                                              config['solr_port'],
+                                              config['solr_path'])
 
                     # Populate the solr environments
                     db.execute('INSERT INTO apachesolr_environment ' + \
@@ -332,11 +332,10 @@ class ImportTools(project.BuildTools):
                         '("%s", "%s", "%s")' % (env_id, name, url))
 
                     # Populate the solr environment variables
-                    serial_val = 's:1:"0";'
-                    db.execute('INSERT INTO apachesolr_environment_variable ' + \
+                    db.execute('INSERT INTO apachesolr_environment_variable '+\
                                '(env_id, name, value) VALUES ' + \
-                               '("%s","apachesolr_read_only","%s")' % (env_id,
-                                                                  serial_val))
+                               "('%s','apachesolr_read_only','s:1:\"0\"')" % (
+                                                                      env_id))
 
         except Exception as mysql_error:
              self.log.error('Auto-configuration of ApacheSolr module failed: %s' % mysql_error)
