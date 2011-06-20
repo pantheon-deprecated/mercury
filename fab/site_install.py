@@ -49,8 +49,8 @@ def _installer(**kw):
         installer.setup_database()
         installer.setup_files_dir()
         installer.setup_settings_file()
-        installer.setup_pantheon_modules()
-        installer.setup_pantheon_libraries()
+#        installer.setup_pantheon_modules()
+#        installer.setup_pantheon_libraries()
 
         # Push changes from working directory to central repo
         installer.push_to_repo()

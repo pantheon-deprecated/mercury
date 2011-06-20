@@ -74,8 +74,8 @@ class _ImportProfile(onramp.ImportTools):
         self.import_site_files()
         self.setup_files_dir()
         self.setup_settings_file()
-        self.setup_pantheon_modules()
-        self.setup_pantheon_libraries()
+#        self.setup_pantheon_modules()
+#        self.setup_pantheon_libraries()
 
         # Push imported project from working directory to central repo
         self.push_to_repo()
