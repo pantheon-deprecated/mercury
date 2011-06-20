@@ -340,10 +340,10 @@ class ImportTools(project.BuildTools):
             result = local('drush @working_dir -y cc all')
             pantheon.log_drush_backend(result, self.log)
 
-       # Run updatedb
-       drupaltools.updatedb(alias='@working_dir')
+        # Run updatedb
+        drupaltools.updatedb(alias='@working_dir')
 
-       # Remove temporary working_dir drush alias.
+        # Remove temporary working_dir drush alias.
         alias_file = '/opt/drush/aliases/working_dir.alias.drushrc.php'
         if os.path.exists(alias_file):
             local('rm -f %s' % alias_file)
