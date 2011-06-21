@@ -167,7 +167,7 @@ class ImportTools(project.BuildTools):
             modules = ['apachesolr-7.x-1.0-beta6', 'memcache-7.x-1.0-beta3']
         with cd(temp_dir):
             with settings(warn_only=True):
-                result = local("drush dl -by --default-major=%s %s" % 
+                result = local("drush dl -by --default-major=%s %s" %
                                (self.version, ' '.join(modules)))
             pantheon.log_drush_backend(result, self.log)
             local("cp -R * %s" % module_dir)
@@ -252,13 +252,16 @@ class ImportTools(project.BuildTools):
             required_modules = ['apachesolr',
                                 'apachesolr_search',
                                 'locale',
-                                'pantheon',
+                                'pantheon_api',
+                                'pantheon_login',
                                 'syslog',
                                 'varnish']
         elif self.version == 7:
             required_modules = ['apachesolr',
                                 'apachesolr_search',
-                                'syslog']
+                                'syslog',
+                                'pantheon_api',
+                                'pantheon_login']
 
         # Enable modules.
         with settings(hide('warnings'), warn_only=True):
@@ -324,7 +327,7 @@ class ImportTools(project.BuildTools):
                     sid = config['apachesolr_default_server']
                     name = '%s %s' % (self.project, env)
                     path = config['solr_path']
-    
+
                     db.execute('INSERT INTO apachesolr_server ' + \
                         '(host, port, server_id, name, path) VALUES ' + \
                         '("%s", "%s", "%s", "%s", "%s")' % \
@@ -332,7 +335,7 @@ class ImportTools(project.BuildTools):
         except Exception as mysql_error:
              self.log.error('Auto-configuration of ApacheSolr module failed: %s' % mysql_error)
              pass
-        
+
         db.close()
 
         # D7: apachesolr config link will not display until cache cleared?
@@ -392,7 +395,7 @@ class ImportTools(project.BuildTools):
                         if os.path.isdir(os.path.join(root,s)) and (
                            'settings.php' in os.listdir(os.path.join(root,s)))]
 
-        # Unless only one site is found, post error and exit.  
+        # Unless only one site is found, post error and exit.
         site_count = len(sites)
         if site_count > 1:
             err = 'Multiple settings.php files were found:\n' + \
