@@ -7,6 +7,11 @@ import MySQLdb
 
 import pantheon
 
+def updatedb(alias):
+    with settings(warn_only=True):
+        result = local('drush %s -by updb' % alias)
+    return result
+
 def get_drupal_update_status(project):
     """Return dictionary of Drupal/Pressflow version/update information.
     project: Name of project.

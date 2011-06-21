@@ -310,7 +310,6 @@ class ImportTools(project.BuildTools):
                                '(env_id, name, value) VALUES ' + \
                                "('%s','apachesolr_read_only','s:1:\"0\"')" % (
                                                                       env_id))
-
         except Exception as mysql_error:
              self.log.error('Auto-configuration of ApacheSolr module failed: %s' % mysql_error)
              pass
@@ -322,7 +321,10 @@ class ImportTools(project.BuildTools):
             result = local('drush @working_dir -y cc all')
             pantheon.log_drush_backend(result, self.log)
 
-       # Remove temporary working_dir drush alias.
+        # Run updatedb
+        drupaltools.updatedb(alias='@working_dir')
+
+        # Remove temporary working_dir drush alias.
         alias_file = '/opt/drush/aliases/working_dir.alias.drushrc.php'
         if os.path.exists(alias_file):
             local('rm -f %s' % alias_file)
