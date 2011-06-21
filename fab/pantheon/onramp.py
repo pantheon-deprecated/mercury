@@ -151,32 +151,6 @@ class ImportTools(project.BuildTools):
             with cd(os.path.join(self.working_dir,'sites')):
                 local('ln -s %s %s' % ('default', self.site))
 
-    def setup_pantheon_modules(self):
-        """Setup required Pantheon modules and libraries.
-
-        """
-        module_dir = os.path.join(self.working_dir, 'sites/all/modules')
-        if not os.path.exists(module_dir):
-            local('mkdir -p %s' % module_dir)
-
-        # Download modules in temp dir so drush doesn't complain.
-        temp_dir = tempfile.mkdtemp()
-        if self.version == 6:
-            modules = ['apachesolr','memcache','varnish']
-        else:
-            modules = ['apachesolr-7.x-1.0-beta8', 'memcache-7.x-1.0-beta3']
-        with cd(temp_dir):
-            with settings(warn_only=True):
-                result = local("drush dl -by --default-major=%s %s" %
-                               (self.version, ' '.join(modules)))
-            pantheon.log_drush_backend(result, self.log)
-            local("cp -R * %s" % module_dir)
-        local("rm -rf " + temp_dir)
-        #TODO: Handle pantheon required modules existing in sites/default/modules.
-
-    def setup_pantheon_libraries(self):
-        super(ImportTools, self).setup_pantheon_libraries(self.working_dir)
-
     def setup_files_dir(self):
         """Move site files to sites/default/files if they are not already.
 
