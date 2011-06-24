@@ -1,3 +1,5 @@
+import httplib
+import json
 import os
 import tempfile
 
@@ -97,7 +99,7 @@ class Updater(project.BuildTools):
                 self._tag_code(tag, message)
                 self._fetch_and_reset(tag)
 
-            # Update code in 'live' (get latest tag from 'test', fetch in 
+            # Update code in 'live' (get latest tag from 'test', fetch in
             # 'live')
             elif self.update_env == 'live':
                 with cd(os.path.join(self.project_path, 'test')):
@@ -142,11 +144,17 @@ class Updater(project.BuildTools):
     def files_update(self, source_env):
         self.log.info('Initialized file sync')
         try:
-            source = os.path.join(self.project_path,
-                                  '%s/sites/default/files' % source_env)
-            dest = os.path.join(self.project_path,
-                                '%s/sites/default/' % self.update_env)
-            local('rsync -av --delete %s %s' % (source, dest))
+            self.log.info('Attempting sync via Pantheon files API...')
+            count = _file_api_clone(source_env, self.update_env)
+            if count > 0:
+                self.log.info('Sync via files API succeeded.')
+            else:
+                self.log.info('Attempting Rsync...')
+                source = os.path.join(self.project_path,
+                                      '%s/sites/default/files' % source_env)
+                dest = os.path.join(self.project_path,
+                                    '%s/sites/default/' % self.update_env)
+                local('rsync -av --delete %s %s' % (source, dest))
         except:
             self.log.exception('File sync encountered a fatal error.')
             raise
@@ -170,7 +178,7 @@ class Updater(project.BuildTools):
         self.log.info('Initialized cron.')
         try:
             with settings(warn_only=True):
-                result = local("drush @%s_%s -b cron" % 
+                result = local("drush @%s_%s -b cron" %
                                (self.project, self.update_env))
         except:
             self.log.exception('Cron encountered a fatal error.')
@@ -182,7 +190,7 @@ class Updater(project.BuildTools):
         self.log.info('Initialized solr-reindex.')
         try:
             with settings(warn_only=True):
-                result = local("drush @%s_%s -b solr-reindex" % 
+                result = local("drush @%s_%s -b solr-reindex" %
                                (self.project, self.update_env))
         except:
             self.log.exception('Solr-reindex encountered a fatal error.')
@@ -240,4 +248,33 @@ class Updater(project.BuildTools):
         except:
             self.log.exception('Fetch and reset encountered a fatal error.')
             raise
+
+
+def _file_api_clone(source, destination):
+    """Make POST request to files server.
+    Returns dict of response data.
+
+    """
+    host = 'files.getpantheon.com'
+    port = 443
+    certificate = '/etc/pantheon/system.pem'
+    path = '/sites/self/environments/%s/files?clone-from-environment=%s' % (destination, source)
+    connection = httplib.HTTPSConnection(host,
+                                         port,
+                                         key_file = certificate,
+                                         cert_file = certificate)
+
+    connection.request('POST', path)
+    response = connection.getresponse()
+
+    if response.status == 404:
+        return None
+    if response.status == 403:
+        return False
+
+    try:
+        return json.loads(response.read())
+    except:
+        print('Response code: %s' % response.status)
+        raise
 
