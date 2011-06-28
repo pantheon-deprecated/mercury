@@ -324,7 +324,7 @@ class ImportTools(project.BuildTools):
                     sid = config['apachesolr_default_server']
                     name = '%s %s' % (self.project, env)
                     path = config['solr_path']
-    
+
                     db.execute('INSERT INTO apachesolr_server ' + \
                         '(host, port, server_id, name, path) VALUES ' + \
                         '("%s", "%s", "%s", "%s", "%s")' % \
@@ -332,7 +332,7 @@ class ImportTools(project.BuildTools):
         except Exception as mysql_error:
              self.log.error('Auto-configuration of ApacheSolr module failed: %s' % mysql_error)
              pass
-        
+
         db.close()
 
         # D7: apachesolr config link will not display until cache cleared?
@@ -340,7 +340,10 @@ class ImportTools(project.BuildTools):
             result = local('drush @working_dir -y cc all')
             pantheon.log_drush_backend(result, self.log)
 
-       # Remove temporary working_dir drush alias.
+        # Run updatedb
+        drupaltools.updatedb(alias='@working_dir')
+
+        # Remove temporary working_dir drush alias.
         alias_file = '/opt/drush/aliases/working_dir.alias.drushrc.php'
         if os.path.exists(alias_file):
             local('rm -f %s' % alias_file)
