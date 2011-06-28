@@ -229,7 +229,7 @@ if (file_exists('../pantheon%s.settings.php')) {
             if handler == 'import':
                 # Data (already exists in 'dev' - import into other envs)
                 if env != 'dev':
-                    dbtools.import_data(self.project, env, dump_file)
+                    dbtools.import_data(self, env, dump_file)
 
                 # Files
                 source = os.path.join(working_dir, 'sites/default/files')

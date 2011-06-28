@@ -134,7 +134,7 @@ class Updater(project.BuildTools):
         try:
             tempdir = tempfile.mkdtemp()
             export = dbtools.export_data(self, source_env, tempdir)
-            dbtools.import_data(self.project, self.update_env, export)
+            dbtools.import_data(self, self.update_env, export)
             local('rm -rf %s' % tempdir)
         except:
             self.log.exception('Data sync encountered a fatal error.')
