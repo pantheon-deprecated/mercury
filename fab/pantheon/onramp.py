@@ -167,7 +167,7 @@ class ImportTools(project.BuildTools):
             modules = ['apachesolr-7.x-1.0-beta6', 'memcache-7.x-1.0-beta3']
         with cd(temp_dir):
             with settings(warn_only=True):
-                result = local("drush dl -by --default-major=%s %s" % 
+                result = local("drush dl -by --default-major=%s %s" %
                                (self.version, ' '.join(modules)))
             pantheon.log_drush_backend(result, self.log)
             local("cp -R * %s" % module_dir)
@@ -217,7 +217,7 @@ class ImportTools(project.BuildTools):
                 local('ln -s %s %s' % (rel_path, file_path))
 
         # Change paths in the files table
-        database = '%s_%s' % (self.project, 'dev')
+        database = self.config['environments']['dev']['mysql']['db_name']
 
         if self.version == 6:
             file_var = 'file_directory_path'
@@ -395,7 +395,7 @@ class ImportTools(project.BuildTools):
                         if os.path.isdir(os.path.join(root,s)) and (
                            'settings.php' in os.listdir(os.path.join(root,s)))]
 
-        # Unless only one site is found, post error and exit.  
+        # Unless only one site is found, post error and exit.
         site_count = len(sites)
         if site_count > 1:
             err = 'Multiple settings.php files were found:\n' + \
