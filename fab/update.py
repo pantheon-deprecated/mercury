@@ -29,6 +29,8 @@ def main():
                       help='Run solr-reindex on an environment.')
     parser.add_option('-c', '--cron', dest="cron", action="store_true", 
                       default=False, help='Run cron on an environment.')
+    parser.add_option('-v', '--varnish', dest="varnish", action="store_true", 
+                      default=False, help='Restart varnish.')
     (options, args) = parser.parse_args()
     log = logger.logging.getLogger('pantheon.update')
 
@@ -49,6 +51,9 @@ def main():
             if options.cron:
                 log.info('Running cron on {0}.'.format(env))
                 site.run_cron() 
+            if options.varnish:
+                log.info('Restarting varnish.')
+                site.restart_varnish() 
         log.info('Update complete.', extra=dict({"job_complete": 1}))
 
 def update_pantheon(postback=True):

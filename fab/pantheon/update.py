@@ -198,6 +198,15 @@ class Updater(project.BuildTools):
         else:
             pantheon.log_drush_backend(result, self.log)
 
+    def restart_varnish(self):
+        self.log.info('Restarting varnish.')
+        try:
+            with settings(warn_only=True):
+                local("/etc/init.d/varnish restart")
+        except:
+            self.log.exception('Encountered an error during restart.')
+            raise
+
     def permissions_update(self):
         self.log.info('Initialized permissions update.')
         try:
