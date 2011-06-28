@@ -6,6 +6,7 @@ import pantheon
 import project
 import postback
 import logger
+import drupaltools
 
 from fabric.api import *
 
@@ -157,8 +158,7 @@ class Updater(project.BuildTools):
         self.log.info('Initiated Updatedb.')
         try:
             alias = '@%s_%s' % (self.project, self.update_env)
-            with settings(warn_only=True):
-                result = local('drush %s -by updb' % alias)
+            result = drupaltools.updatedb(alias)
         except:
             self.log.exception('Updatedb encountered a fatal error.')
             raise
