@@ -104,6 +104,7 @@ class ImportTools(project.BuildTools):
 
         """
         for env in self.environments:
+            (db_username, db_password, db_name) = pantheon.get_database_vars(self, env)
             # The database is only imported into the dev environment initially
             # so that we can do all import processing in one place, then deploy
             # to the other environments.
@@ -113,7 +114,7 @@ class ImportTools(project.BuildTools):
                 db_dump = None
 
             super(ImportTools, self).setup_database(env,
-                                                    self.db_password,
+                                                    db_password,
                                                     db_dump,
                                                     True)
         # Remove the database dump from processing dir after import.
@@ -217,14 +218,14 @@ class ImportTools(project.BuildTools):
                 local('ln -s %s %s' % (rel_path, file_path))
 
         # Change paths in the files table
-        database = '%s_%s' % (self.project, 'dev')
+        (db_username, db_password, db_name) = pantheon.get_database_vars(self, 'dev')
 
         if self.version == 6:
             file_var = 'file_directory_path'
             file_var_temp = 'file_directory_temp'
             # Change the base path in files table for Drupal 6
             local('mysql -u root %s -e "UPDATE files SET filepath = \
-                   REPLACE(filepath,\'%s\',\'%s\');"'% (database,
+                   REPLACE(filepath,\'%s\',\'%s\');"'% (db_name,
                                                         file_location,
                                                         'sites/default/files'))
         elif self.version == 7:
@@ -232,9 +233,9 @@ class ImportTools(project.BuildTools):
             file_var_temp = 'file_temporary_path'
 
         # Change file path drupal variables
-        db = dbtools.MySQLConn(database=database,
-                               username = self.project,
-                               password = self.db_password)
+        db = dbtools.MySQLConn(database = db_name,
+                               username = db_username,
+                               password = db_password)
         db.vset(file_var, 'sites/default/files')
         db.vset(file_var_temp, '/tmp')
         db.close()
@@ -308,10 +309,10 @@ class ImportTools(project.BuildTools):
                 'search_default_module': 'apachesolr_search'}
 
         # Set variables.
-        database = '%s_dev' % self.project
-        db = dbtools.MySQLConn(database=database,
-                               username = self.project,
-                               password = self.db_password)
+        (db_username, db_password, db_name) = pantheon.get_database_vars(self, 'dev')
+        db = dbtools.MySQLConn(database = db_name,
+                               username = db_username,
+                               password = db_password)
         for key, value in drupal_vars.iteritems():
             db.vset(key, value)
 
@@ -436,12 +437,12 @@ class ImportTools(project.BuildTools):
             self.log.info('MYSQL Dump found at %s' % sql_dump[0])
             return sql_dump[0]
 
-    def _get_files_dir(self, env='dev'):
-        database = '%s_%s' % (self.project, env)
+    def _get_files_dir(self, environment='dev'):
+        (db_username, db_password, db_name) = pantheon.get_database_vars(self, environment)
         # Get file_directory_path directly from database, as we don't have a working drush yet.
         return local("mysql -u %s -p'%s' %s --skip-column-names --batch -e \
                       \"SELECT value FROM variable WHERE name='file_directory_path';\" | \
-                        sed 's/^.*\"\(.*\)\".*$/\\1/'" % (self.project,
-                                                          self.db_password,
-                                                          database)).rstrip('\n')
+                        sed 's/^.*\"\(.*\)\".*$/\\1/'" % (db_username,
+                                                          db_password,
+                                                          db_name)).rstrip('\n')
 

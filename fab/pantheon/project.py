@@ -108,8 +108,9 @@ class BuildTools(object):
         onramp (optional): bool. perform additional prep during import process.
 
         """
-        username = self.project
-        database = '%s_%s' % (self.project, environment)
+        username = self.config['environments'][environment]['mysql']['db_username']
+        database = self.config['environments'][environment]['mysql']['db_name']
+        password = self.config['environments'][environment]['mysql']['db_password']
 
         dbtools.create_database(database)
         dbtools.set_database_grants(database, username, password)
@@ -228,7 +229,7 @@ if (file_exists('../pantheon%s.settings.php')) {
             if handler == 'import':
                 # Data (already exists in 'dev' - import into other envs)
                 if env != 'dev':
-                    dbtools.import_data(self.project, env, dump_file)
+                    dbtools.import_data(self, env, dump_file)
 
                 # Files
                 source = os.path.join(working_dir, 'sites/default/files')

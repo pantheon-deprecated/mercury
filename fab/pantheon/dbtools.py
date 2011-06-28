@@ -21,13 +21,13 @@ def export_data(self, environment, destination):
                                                        filepath))
     return filepath
 
-def import_data(project, environment, source):
+def import_data(self, environment, source):
     """Create database then import from source.
 
     """
-    database = '%s_%s' % (project, environment)
-    create_database(database)
-    import_db_dump(source, database)
+    (db_username, db_password, db_name) = pantheon.get_database_vars(self, environment)
+    create_database(db_name)
+    import_db_dump(source, db_name)
 
 def create_database(database):
     """Drop database if it already exists, then create a new empty db.
