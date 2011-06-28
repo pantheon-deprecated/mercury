@@ -108,8 +108,9 @@ class BuildTools(object):
         onramp (optional): bool. perform additional prep during import process.
 
         """
-        username = self.project
-        database = '%s_%s' % (self.project, environment)
+        username = self.config['environments'][environment]['mysql']['db_username']
+        database = self.config['environments'][environment]['mysql']['db_name']
+        password = self.config['environments'][environment]['mysql']['db_password']
 
         dbtools.create_database(database)
         dbtools.set_database_grants(database, username, password)
