@@ -65,8 +65,14 @@ class BuildTools(object):
         project_repo = os.path.join('/var/git/projects', self.project)
 
         if upstream_repo is None:
-            upstream_repo = 'git://git.getpantheon.com/pantheon/%s.git' % (
-                                                              self.version)
+            if os.path.exists('/opt/branch.txt'):
+                dev_branch = open('/opt/branch.txt').read().strip() or None
+            if dev_branch:
+                upstream_repo = 'git://github.com/pantheon-systems/' + \
+                                '%s-%s.git' % (self.version, dev_branch)
+            else:
+                upstream_repo = 'git://git.getpantheon.com/pantheon/%s.git' %(
+                                                                 self.version)
 
         # Get Pantheon core
         local('git clone --mirror %s %s' % (upstream_repo, project_repo))
