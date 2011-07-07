@@ -67,18 +67,19 @@ class BuildTools(object):
         # If this is a development server check branch.txt for source.
         # In case we sometimes want to test some random repo, also check
         # that the upstream is our internal git server.
-        if os.path.exists('/opt/branch.txt') and upstream_repo.startswith(
-                                              'git://git.getpantheon.com'):
-            dev_branch = open('/opt/branch.txt').read().strip() or None
-            if dev_branch:
-                # Get version by checking repo source string.
-                version = upstream_repo[-5]
-                upstream_repo = 'git://github.com/pantheon-systems/' + \
-                                '%s-%s.git' % (version, dev_branch)
+        if os.path.exists('/opt/branch.txt') and upstream_repo:
+            if upstream_repo.startswith('git://git.getpantheon.com'):
+                dev_branch = open('/opt/branch.txt').read().strip() or None
+                if dev_branch:
+                    # Get version by checking repo source string.
+                    self.version = upstream_repo[-5]
+                    upstream_repo = 'git://github.com/pantheon-systems/' + \
+                                    '%s-%s.git' % (version, dev_branch)
 
         # Default to drupal 6.
         if upstream_repo is None:
-            upstream_repo = 'git://git.getpantheon.com/pantheon/6.git'
+            upstream_repo = 'git://git.getpantheon.com/pantheon/%s.git' % (
+                                                              self.version)
 
         # Get Pantheon core
         local('git clone --mirror %s %s' % (upstream_repo, project_repo))
