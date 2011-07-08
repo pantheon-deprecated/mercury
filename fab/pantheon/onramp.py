@@ -227,13 +227,16 @@ class ImportTools(project.BuildTools):
             required_modules = ['apachesolr',
                                 'apachesolr_search',
                                 'locale',
-                                'pantheon',
+                                'pantheon_api',
+                                'pantheon_login',
                                 'syslog',
                                 'varnish']
         elif self.version == 7:
             required_modules = ['apachesolr',
                                 'apachesolr_search',
-                                'syslog']
+                                'syslog',
+                                'pantheon_api',
+                                'pantheon_login']
 
         # Enable modules.
         with settings(hide('warnings'), warn_only=True):
