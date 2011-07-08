@@ -65,21 +65,30 @@ class BuildTools(object):
         project_repo = os.path.join('/var/git/projects', self.project)
 
         # If this is a development server check branch.txt for source.
-        # In case we sometimes want to test some random repo, also check
-        # that the upstream is our internal git server.
-        if os.path.exists('/opt/branch.txt') and upstream_repo:
-            if upstream_repo.startswith('git://git.getpantheon.com'):
-                dev_branch = open('/opt/branch.txt').read().strip() or None
-                if dev_branch:
-                    # Get version by checking repo source string.
-                    self.version = upstream_repo[-5]
-                    upstream_repo = 'git://github.com/pantheon-systems/' + \
-                                    '%s-%s.git' % (version, dev_branch)
+        if os.path.exists('/opt/branch.txt'):
+            dev_branch = open('/opt/branch.txt').read().strip() or None
+            if dev_branch == 'master':
+                dev_branch = None
 
-        # Default to drupal 6.
+        # For imports, no upstream is set. But self.version is known.
         if upstream_repo is None:
-            upstream_repo = 'git://git.getpantheon.com/pantheon/%s.git' % (
-                                                              self.version)
+            # Is this a development branch?
+            if dev_branch:
+                upstream_repo = 'git://github.com/pantheon-systems/' + \
+                                '%s-%s.git' % (self.version, dev_branch)
+            else:
+                upstream_repo = 'git://git.getpantheon.com/pantheon/%s.git' %(
+                                                                 self.version)
+        else:
+            # If this is a development server, make sure the upstream has
+            # not been changed to some other source before modifying. Mostly
+            # because we make hackish assumptions about determining version
+            # and destination.
+            if dev_branch and upstream_repo.startswith(
+                                 'git://git.getpantheon.com'):
+                self.version = upstream_repo[-5]
+                upstream_repo = 'git://github.com/pantheon-systems/' + \
+                                '%s-%s.git' % (self.version, dev_branch)
 
         # Get Pantheon core
         local('git clone --mirror %s %s' % (upstream_repo, project_repo))
