@@ -133,19 +133,6 @@ class BuildTools(object):
                 dbtools.clear_cache_tables(database)
                 dbtools.convert_to_innodb(database)
 
-    def setup_pantheon_libraries(self, working_dir):
-        """ Download Pantheon required libraries.
-        working_dir: full path to the temp processing directory.
-
-        """
-        module_dir = os.path.join(working_dir, 'sites/all/modules')
-        # SolrPhpClient
-        with cd(os.path.join(module_dir, 'apachesolr')):
-            local('wget http://solr-php-client.googlecode.com/' + \
-                  'files/SolrPhpClient.r22.2009-11-09.tgz')
-            local('tar xzf SolrPhpClient.r22.2009-11-09.tgz')
-            local('rm -f SolrPhpClient.r22.2009-11-09.tgz')
-
     def setup_settings_file(self, site_dir):
         """ Setup pantheon.settings.php and settings.php.
         site_dir: path to the site directory. E.g. /var/www/sites/default

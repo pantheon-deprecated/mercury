@@ -152,32 +152,6 @@ class ImportTools(project.BuildTools):
             with cd(os.path.join(self.working_dir,'sites')):
                 local('ln -s %s %s' % ('default', self.site))
 
-    def setup_pantheon_modules(self):
-        """Setup required Pantheon modules and libraries.
-
-        """
-        module_dir = os.path.join(self.working_dir, 'sites/all/modules')
-        if not os.path.exists(module_dir):
-            local('mkdir -p %s' % module_dir)
-
-        # Download modules in temp dir so drush doesn't complain.
-        temp_dir = tempfile.mkdtemp()
-        if self.version == 6:
-            modules = ['apachesolr','memcache','varnish']
-        else:
-            modules = ['apachesolr-7.x-1.0-beta6', 'memcache-7.x-1.0-beta3']
-        with cd(temp_dir):
-            with settings(warn_only=True):
-                result = local("drush dl -by --default-major=%s %s" %
-                               (self.version, ' '.join(modules)))
-            pantheon.log_drush_backend(result, self.log)
-            local("cp -R * %s" % module_dir)
-        local("rm -rf " + temp_dir)
-        #TODO: Handle pantheon required modules existing in sites/default/modules.
-
-    def setup_pantheon_libraries(self):
-        super(ImportTools, self).setup_pantheon_libraries(self.working_dir)
-
     def setup_files_dir(self):
         """Move site files to sites/default/files if they are not already.
 
@@ -317,19 +291,26 @@ class ImportTools(project.BuildTools):
         # TODO: use drush/drupal api to do this work.
         try:
             if self.version == 7:
-                db.execute('TRUNCATE apachesolr_server')
+                db.execute('TRUNCATE apachesolr_environment')
                 for env in self.environments:
                     config = self.config['environments'][env]['solr']
-                    host = config['solr_host']
-                    port = config['solr_port']
-                    sid = config['apachesolr_default_server']
-                    name = '%s %s' % (self.project, env)
-                    path = config['solr_path']
 
-                    db.execute('INSERT INTO apachesolr_server ' + \
-                        '(host, port, server_id, name, path) VALUES ' + \
-                        '("%s", "%s", "%s", "%s", "%s")' % \
-                               (host, port, sid, name, path))
+                    env_id = '%s_%s' % (self.project, env)
+                    name = '%s %s' % (self.project, env)
+                    url = 'http://%s:%s%s' % (config['solr_host'],
+                                              config['solr_port'],
+                                              config['solr_path'])
+
+                    # Populate the solr environments
+                    db.execute('INSERT INTO apachesolr_environment ' + \
+                        '(env_id, name, url) VALUES ' + \
+                        '("%s", "%s", "%s")' % (env_id, name, url))
+
+                    # Populate the solr environment variables
+                    db.execute('INSERT INTO apachesolr_environment_variable '+\
+                               '(env_id, name, value) VALUES ' + \
+                               "('%s','apachesolr_read_only','s:1:\"0\"')" % (
+                                                                      env_id))
         except Exception as mysql_error:
              self.log.error('Auto-configuration of ApacheSolr module failed: %s' % mysql_error)
              pass
