@@ -32,10 +32,12 @@ class ServiceHandler(logging.Handler):
         except IOError as (errno, strerror):
             if errno == 2:
                 log.debug('Status file not found. Writing to new file.')
+            elif errno == 111:
+                log.debug('Socket error: Connection refused.')
             else:
-                log.exception('FATAL: Uncaught exception in logging handler')
+                log.exception('Uncaught exception in logging handler. {0}: {0}'.format(errno, strerror))
         except:
-            log.exception('FATAL: Uncaught exception in logging handler')
+            log.exception('Uncaught exception in logging handler.')
 
         if not cfg.has_section(service):
             cfg.add_section(service)
