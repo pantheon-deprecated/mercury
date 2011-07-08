@@ -236,7 +236,8 @@ class ImportTools(project.BuildTools):
                                 'apachesolr_search',
                                 'syslog',
                                 'pantheon_api',
-                                'pantheon_login']
+                                'pantheon_login',
+                                'pantheon_apachesolr']
 
         # Enable modules.
         with settings(hide('warnings'), warn_only=True):
