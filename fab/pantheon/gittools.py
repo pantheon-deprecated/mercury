@@ -102,7 +102,8 @@ class GitRepo():
 
         """
         with cd(self.repo):
-            diff = local('git diff --stat %s %s' % (base, other))
+            with settings(warn_only=True):
+                diff = local('git diff --stat %s %s' % (base, other))
         return diff
 
     def _get_log(self, num_entries):
