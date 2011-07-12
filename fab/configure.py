@@ -89,6 +89,10 @@ def _configure_certificates():
     local('chmod 640 /etc/pantheon/system.pem')
     local('chgrp ssl-cert /etc/pantheon/system.pem')
 
+    # Export cert in pkcs12 format
+    local('openssl pkcs12 -export -password pass: -in /etc/pantheon/system.pem -out /etc/pantheon/system.p12')
+    local('chmod 600 /etc/pantheon/system.p12')
+
     # Start pound, which has been waiting for system.pem
     local('/etc/init.d/pound start');
 
