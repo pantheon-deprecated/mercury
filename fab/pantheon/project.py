@@ -63,6 +63,7 @@ class BuildTools(object):
 
         """
         project_repo = os.path.join('/var/git/projects', self.project)
+        dev_branch = None
 
         # If this is a development server check branch.txt for source.
         if os.path.exists('/opt/branch.txt'):
