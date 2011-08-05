@@ -96,6 +96,8 @@ def _configure_certificates():
     # Start pound, which has been waiting for system.pem
     local('/etc/init.d/pound start');
 
+    # Update client config to use unique identifier
+    local('sed -i "s/^user = .*/user = %s/g" /etc/bcfg2.conf' % cn)
     # Update BCFG2's client configuration to use the zone (a.k.a. OU) from the certificate
     local('sed -i "s/^bcfg2 = .*/bcfg2 = https:\/\/config.%s:6789/g" /etc/bcfg2.conf' % ou)
 
