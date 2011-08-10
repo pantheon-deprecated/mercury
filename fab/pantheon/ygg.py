@@ -1,7 +1,8 @@
 import httplib
 import json
 
-host = 'api.getpantheon.com'
+#host = 'api.getpantheon.com'
+host = '184.106.215.201'
 port = 8443
 certificate = '/etc/pantheon/system.pem'
 

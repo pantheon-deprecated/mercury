@@ -32,6 +32,7 @@ def configure():
         raise
     else:
         log.info('Configuration was successful.')
+        ygg._api_request('POST', 'sites/self/legacy-phone-home', '"pantheon_config"')
 
 def _test_for_previous_run():
     if os.path.exists("/etc/pantheon/incep"):

@@ -29,7 +29,7 @@ def configure_permissions(base_domain = "example.com",
             temp_file.seek(0)
             local("sudo debconf-set-selections " + temp_file.name)
 
-        # /etc/ldap/ldap.conf    
+        # /etc/ldap/ldap.conf
         template = pantheon.get_template('openldap.ldap.conf')
         openldap_conf = pantheon.build_template(template, values)
         with open('/etc/ldap/ldap.conf', 'w') as f:
@@ -80,7 +80,7 @@ def configure_permissions(base_domain = "example.com",
         # Make the git repo and www directories writable by the group
         local("chown -R %s:%s /var/www" % (require_group, require_group))
         local("chmod -R g+w /var/www")
-        
+
         # Set ACLs
         set_acl_groupwritability(require_group, '/var/www')
         set_acl_groupwritability(require_group, '/var/git/projects')
@@ -89,6 +89,7 @@ def configure_permissions(base_domain = "example.com",
         raise
     else:
         log.info('Permissions configuration successful.')
+        ygg._api_request('POST', 'sites/self/legacy-phone-home', '"configure_permissions"')
 
 def _ldap_domain_to_ldap(domain):
     return ','.join(['dc=%s' % part.lower() for part in domain.split('.')])
