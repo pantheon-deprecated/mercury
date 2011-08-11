@@ -90,7 +90,7 @@ def configure_permissions(base_domain = "example.com",
         raise
     else:
         log.info('Permissions configuration successful.')
-        ygg._api_request('POST', '/sites/self/legacy-phone-home', '"configure_permissions"')
+        ygg._api_request('POST', '/sites/self/legacy-phone-home', 'configure_permissions')
 
 def _ldap_domain_to_ldap(domain):
     return ','.join(['dc=%s' % part.lower() for part in domain.split('.')])
