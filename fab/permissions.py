@@ -6,6 +6,7 @@ import tempfile
 from fabric.api import *
 from pantheon import pantheon
 from pantheon import logger
+from pantheon import lygg
 
 #TODO: Move logging into pantheon libraries for better coverage.
 def configure_permissions(base_domain = "example.com",
