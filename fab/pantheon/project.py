@@ -5,6 +5,7 @@ import dbtools
 import drupaltools
 import pantheon
 import ygg
+from vars import *
 
 from fabric.api import *
 
@@ -65,11 +66,9 @@ class BuildTools(object):
         project_repo = os.path.join('/var/git/projects', self.project)
         dev_branch = None
 
-        # If this is a development server check branch.txt for source.
-        if os.path.exists('/opt/branch.txt'):
-            dev_branch = open('/opt/branch.txt').read().strip() or None
-            if dev_branch == 'master':
-                dev_branch = None
+        # If this is a development server check MERCURY_BRANCH for source.
+        if MERCURY_BRANCH != 'master':
+            dev_branch = MERCURY_BRANCH
 
         # For imports, no upstream is set. But self.version is known.
         if upstream_repo is None:

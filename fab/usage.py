@@ -3,15 +3,13 @@ import subprocess
 import datetime
 import json
 import time
-
-CERTIFICATE = "/etc/pantheon/system.pem"
-API_SERVER = "api.getpantheon.com"
+from pantheon.vars import *
 
 connection = httplib.HTTPSConnection(
-    API_SERVER,
-    8443,
-    key_file = CERTIFICATE,
-    cert_file = CERTIFICATE
+    API_HOST,
+    API_PORT,
+    key_file = VM_CERTIFICATE,
+    cert_file = VM_CERTIFICATE
 )
 
 
@@ -72,7 +70,7 @@ def _set_ram(now):
         line=line.strip()
         if (line[:8] == 'MemTotal'):
             ram = line.rstrip('kB').lstrip('MemTotal:').strip()
-    
+
     print("MemTotal: %s kB" % ram)
 
     day = get_nearest_day(now)
