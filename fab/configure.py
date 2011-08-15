@@ -171,8 +171,6 @@ def _report():
     any identifying or personal information to us.
 
     '''
-    id = local('hostname -f | md5sum | sed "s/[^a-zA-Z0-9]//g"').rstrip('\n')
-    local('curl "http://getpantheon.com/pantheon.php?id="' + id + '"&product=pantheon"')
 
     print('##############################')
     print('#   Pantheon Setup Complete! #')
