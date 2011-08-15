@@ -2,8 +2,6 @@ import httplib
 import json
 from vars import *
 
-certificate = '/etc/pantheon/system.pem'
-
 # Note: Same call structure as in the Prometheus httprequest module.
 # TODO: Unify
 def send_event(thread, details, labels=['source-cloud'], site='self', source='cloud'):
