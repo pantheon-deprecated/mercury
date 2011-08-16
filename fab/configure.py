@@ -10,6 +10,7 @@ from pantheon import logger
 from fabric.api import *
 
 from pantheon import pantheon
+from pantheon.vars import *
 
 #TODO: Move logging into the pantheon library
 def configure():
@@ -32,7 +33,12 @@ def configure():
         raise
     else:
         log.info('Configuration was successful.')
-        ygg._api_request('POST', '/sites/self/legacy-phone-home?phase=pantheon_config')
+        print('\n\n--- LOCAL CONFIGURATION ---')
+        print('MERCURY_BRANCH: %s' % MERCURY_BRANCH)
+        print('API_HOST: %s' % API_HOST)
+        print('API_PORT: %s' % API_PORT)
+        print('VM_CERTIFICATE: %s' % VM_CERTIFICATE)
+        result = ygg._api_request('POST', '/sites/self/legacy-phone-home?phase=pantheon_config')
 
 def _test_for_previous_run():
     if os.path.exists("/etc/pantheon/incep"):
@@ -171,8 +177,6 @@ def _report():
     any identifying or personal information to us.
 
     '''
-    id = local('hostname -f | md5sum | sed "s/[^a-zA-Z0-9]//g"').rstrip('\n')
-    local('curl "http://getpantheon.com/pantheon.php?id="' + id + '"&product=pantheon"')
 
     print('##############################')
     print('#   Pantheon Setup Complete! #')
