@@ -1,9 +1,6 @@
 import httplib
 import json
-
-host = 'api.getpantheon.com'
-port = 8443
-certificate = '/etc/pantheon/system.pem'
+from vars import *
 
 # Note: Same call structure as in the Prometheus httprequest module.
 # TODO: Unify
@@ -70,10 +67,10 @@ def _api_request(method, path, data = None):
         headers = {'Content-Type': 'application/json'}
         data = json.dumps(data)
 
-    connection = httplib.HTTPSConnection(host,
-                                         port,
-                                         key_file = certificate,
-                                         cert_file = certificate)
+    connection = httplib.HTTPSConnection(API_HOST,
+                                         API_PORT,
+                                         key_file = VM_CERTIFICATE,
+                                         cert_file = VM_CERTIFICATE)
 
     connection.request(method, path, data, headers)
     response = connection.getresponse()

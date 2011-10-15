@@ -14,9 +14,8 @@ import pantheon
 import logger
 import ygg
 import rangeable_file
+from vars import *
 
-CERTIFICATE = "/etc/pantheon/system.pem"
-API_SERVER = "api.getpantheon.com"
 ARCHIVE_SERVER = "s3.amazonaws.com"
 
 def remove(archive):
@@ -51,7 +50,7 @@ class PantheonBackup():
         self.backup_dir = os.path.join(self.working_dir, self.project)
         self.name = name + '.tar.gz'
         self.log = logger.logging.getLogger('pantheon.backup.PantheonBackup')
-        self.log = logger.logging.LoggerAdapter(self.log, 
+        self.log = logger.logging.LoggerAdapter(self.log,
                                                 {"project": project})
 
     def get_dev_code(self, user):
@@ -89,12 +88,12 @@ class PantheonBackup():
             source = os.path.join(self.server.webroot, self.project,
                                           'dev/sites/default/files')
             destination = self.backup_dir
-            # If 'dev_code' exists in backup_dir, 
+            # If 'dev_code' exists in backup_dir,
             # this is a full dev-archive dump.
             # Place the files within the drupal site tree.
-            if os.path.exists(os.path.join(self.backup_dir, 
+            if os.path.exists(os.path.join(self.backup_dir,
                                            'dev_code/sites/default')):
-                destination = os.path.join(self.backup_dir, 
+                destination = os.path.join(self.backup_dir,
                                            'dev_code/sites/default')
             local('rsync -avz %s %s' % (source, destination))
         except:
@@ -249,7 +248,7 @@ class PantheonBackup():
             self.move_archive()
         except:
             self.log.error('Failure creating/storing backup.')
-        
+
         self.cleanup()
 
     def make_archive(self):
@@ -319,10 +318,10 @@ class Archive():
 
         """
         self.connection = httplib.HTTPSConnection(
-                                                  API_SERVER,
-                                                  8443,
-                                                  key_file = CERTIFICATE,
-                                                  cert_file = CERTIFICATE)
+                                                  API_HOST,
+                                                  API_PORT,
+                                                  key_file = VM_CERTIFICATE,
+                                                  cert_file = VM_CERTIFICATE)
         self.path = path
         self.filesize = os.path.getsize(path)
         self.threshold = threshold
@@ -479,9 +478,9 @@ class Archive():
             data.seek(0,2)
             self.log.info('Sending %s bytes to remote storage' % data.tell())
             data.seek(0)
-        arch_connection.request(info['verb'], 
-                                info['path'], 
-                                data, 
+        arch_connection.request(info['verb'],
+                                info['path'],
+                                data,
                                 info['headers'])
         arch_complete_response = arch_connection.getresponse()
         if arch_complete_response.status == 200:

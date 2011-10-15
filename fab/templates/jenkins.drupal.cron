@@ -22,7 +22,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>/usr/bin/sudo /usr/local/bin/drush ${drush_alias} cron</command>
+      <command>/usr/bin/sudo -u www-data /usr/local/bin/drush ${drush_alias} cron</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>

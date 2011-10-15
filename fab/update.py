@@ -10,6 +10,7 @@ from pantheon import pantheon
 from pantheon import postback
 from pantheon import status
 from pantheon import update
+from pantheon.vars import *
 from optparse import OptionParser
 
 from fabric.api import *
@@ -18,18 +19,18 @@ def main():
     usage = "usage: %prog [options] *environments"
     parser = OptionParser(usage=usage, description="Update pantheon code and " \
                                                    "server configurations.")
-    parser.add_option('-p', '--postback', dest="postback", action="store_true", 
+    parser.add_option('-p', '--postback', dest="postback", action="store_true",
                       default=False, help='Postback to atlas.')
-    parser.add_option('-d', '--debug', dest="debug", action="store_true", 
+    parser.add_option('-d', '--debug', dest="debug", action="store_true",
                       default=False, help='Include debug output.')
-    parser.add_option('-u', '--updatedb', dest="updatedb", action="store_true", 
+    parser.add_option('-u', '--updatedb', dest="updatedb", action="store_true",
                       default=False, help='Run updatedb on an environment.')
-    parser.add_option('-s', '--solr-reindex', dest="solr_reindex", 
-                      action="store_true", default=False, 
+    parser.add_option('-s', '--solr-reindex', dest="solr_reindex",
+                      action="store_true", default=False,
                       help='Run solr-reindex on an environment.')
-    parser.add_option('-c', '--cron', dest="cron", action="store_true", 
+    parser.add_option('-c', '--cron', dest="cron", action="store_true",
                       default=False, help='Run cron on an environment.')
-    parser.add_option('-v', '--varnish', dest="varnish", action="store_true", 
+    parser.add_option('-v', '--varnish', dest="varnish", action="store_true",
                       default=False, help='Restart varnish.')
     (options, args) = parser.parse_args()
     log = logger.logging.getLogger('pantheon.update')
@@ -43,17 +44,17 @@ def main():
             site = update.Updater(env)
             if options.updatedb:
                 log.info('Running updatedb on {0}.'.format(env))
-                site.drupal_updatedb() 
+                site.drupal_updatedb()
             if options.solr_reindex:
                 log.info('Running solr-reindex on {0}.'.format(env))
                 # The server has a 2min delay before re-indexing
-                site.solr_reindex() 
+                site.solr_reindex()
             if options.cron:
                 log.info('Running cron on {0}.'.format(env))
-                site.run_cron() 
+                site.run_cron()
             if options.varnish:
                 log.info('Restarting varnish.')
-                site.restart_varnish() 
+                site.restart_varnish()
         log.info('Update complete.', extra=dict({"job_complete": 1}))
 
 def update_pantheon(postback=True):
@@ -77,7 +78,7 @@ def update_pantheon(postback=True):
         # Ensure the JDK is properly installed.
         local('apt-get install -y default-jdk')
         # Nightly security package updates disabled.
-        
+
         try:
             log.debug('Putting jenkins into quietDown mode.')
             pantheon.jenkins_quiet()
@@ -87,15 +88,12 @@ def update_pantheon(postback=True):
             #local('aptitude update')
             # Update pantheon code.
             log.debug('Checking which branch to use.')
-            branch = 'master'
-            if os.path.exists('/opt/branch.txt'):
-                branch = open('/opt/branch.txt').read().strip() or 'master'
-            log.debug('Using branch %s.' % branch)
+            log.debug('Using branch %s.' % MERCURY_BRANCH)
             log.debug('Updating from repo.')
             with cd('/opt/pantheon'):
                 local('git fetch --prune origin', capture=False)
-                local('git checkout --force %s' % branch, capture=False)
-                local('git reset --hard origin/%s' % branch, capture=False)
+                local('git checkout --force %s' % MERCURY_BRANCH, capture=False)
+                local('git reset --hard origin/%s' % MERCURY_BRANCH, capture=False)
             # Run bcfg2.
             local('/usr/sbin/bcfg2 -vqed', capture=False)
         except:
@@ -176,8 +174,8 @@ def update_site_core(project='pantheon', keep=None, taskid=None):
         log = logger.logging.getLogger('pantheon.update_site_core')
         updater.permissions_update()
         log.error('Upstream merge did not succeed. Review conflicts.')
-        
-        
+
+
 def update_code(project, environment, tag=None, message=None, taskid=None):
     """ Update the working-tree for project/environment.
 
@@ -240,7 +238,7 @@ def upgrade_drush(tag='7.x-4.4',make_tag='6.x-2.2'):
 
     tag: the drush version tag to checkout
 
-    """ 
+    """
     drush_path = '/opt/drush'
     commands_path = os.path.join(drush_path, 'commands')
     alias_path = os.path.join(drush_path, 'aliases')
