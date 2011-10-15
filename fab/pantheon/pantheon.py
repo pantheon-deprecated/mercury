@@ -270,8 +270,9 @@ class PantheonServer:
         if self.distro == 'ubuntu':
             local('/etc/init.d/apache2 restart')
             local('/etc/init.d/memcached restart')
-            local('/bin/bash -x /etc/init.d/tomcat6 stop', capture=False)
-            local('/bin/bash -x /etc/init.d/tomcat6 start', capture=False)
+            with settings(warn_only=True):
+                local('/bin/bash -x /etc/init.d/tomcat6 stop', capture=False)
+                local('/bin/bash -x /etc/init.d/tomcat6 start', capture=False)
             local('/etc/init.d/varnish restart')
             local('/etc/init.d/mysql restart')
         elif self.distro == 'centos':
