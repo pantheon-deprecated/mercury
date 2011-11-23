@@ -264,7 +264,7 @@ class PantheonServer:
             local('yum -y update', capture=False)
         else:
             local('apt-get -y update', capture=False)
-            local('apt-get -y dist-upgrade', capture=False)
+            local('apt-get -y --force-yes dist-upgrade', capture=False)
 
     def restart_services(self):
         if self.distro == 'ubuntu':
