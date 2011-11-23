@@ -55,7 +55,8 @@ def _initialize_package_manager(server):
 
             local('cp apt.openssh.pin /etc/apt/preferences.d/openssh')
             local('apt-key add apt.ppakeys.txt')
-        local('echo \'APT::Install-Recommends "0";\' >>  /etc/apt/apt.conf')
+        	local('echo \'APT::Install-Recommends "0";\' >>  /etc/apt/apt.conf')
+			local('echo \'APT::Cache-Limit "20000000";\' >>  /etc/apt/apt.conf')
 
     elif server.distro == 'centos':
         local('rpm -Uvh http://dl.iuscommunity.org/pub/ius/stable/Redhat/' + \
